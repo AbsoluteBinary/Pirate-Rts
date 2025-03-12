@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: db5043217156edf4590e96dee43424cc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 309175
+  packageName: Modular Strategy Top Down Camera Controller
+  packageVersion: 1.0
+  assetPath: Assets/ModularStrategyTopDownCameraController/Scripts/Interfaces/IStrategyCameraComponent.cs
+  uploadId: 732319

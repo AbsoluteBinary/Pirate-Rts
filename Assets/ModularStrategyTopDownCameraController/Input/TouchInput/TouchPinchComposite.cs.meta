@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c76d7b77638d3854fafea9b7c27bce2f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 309175
+  packageName: Modular Strategy Top Down Camera Controller
+  packageVersion: 1.0
+  assetPath: Assets/ModularStrategyTopDownCameraController/Input/TouchInput/TouchPinchComposite.cs
+  uploadId: 732319

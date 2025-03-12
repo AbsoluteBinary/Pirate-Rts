@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fcef618a235bd1b47b81e6e79e6d18f2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 309175
+  packageName: Modular Strategy Top Down Camera Controller
+  packageVersion: 1.0
+  assetPath: Assets/ModularStrategyTopDownCameraController/Environment/Floor.prefab
+  uploadId: 732319
