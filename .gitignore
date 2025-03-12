@@ -10,6 +10,9 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
+#Ignore large files
+Assets/Packages/
+
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
 
