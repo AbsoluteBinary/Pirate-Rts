@@ -5506,7 +5506,7 @@ namespace TGS {
 
         #region Geometric functions
 
-        Vector3 GetWorldSpacePosition (Vector2 localPosition, float elevation = 0) {
+        public Vector3 GetWorldSpacePosition (Vector2 localPosition, float elevation = 0) {
             if (_terrainWrapper != null) {
                 Vector3 wPos = transform.TransformPoint(localPosition);
                 wPos.y += _terrainWrapper.GetInterpolatedHeight(wPos) * _terrainWrapper.transform.lossyScale.y;
