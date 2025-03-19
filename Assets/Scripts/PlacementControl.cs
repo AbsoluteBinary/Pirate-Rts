@@ -36,9 +36,9 @@ public class PlacementControl : MonoBehaviour
         _tgs = TerrainGridSystem.instance;
         _tgs.OnCellClick += PlaceObject;
         // Button image get set
-          tileAButtonImage = tileAButtonImage.GetComponent<Image>();
-          //tileAButtonImage.color.a = 30f;
-          _tgs.OnCellClick += OnCellClick;
+        tileAButtonImage = tileAButtonImage.GetComponent<Image>();
+        //tileAButtonImage.color.a = 30f;
+        _tgs.OnCellClick += OnCellClick;
     }
     
     void OnCellClick (TerrainGridSystem grid, int cellIndex, int buttonIndex) 
@@ -76,9 +76,8 @@ public class PlacementControl : MonoBehaviour
         }
     }
 
-    public void PlaceObject(TerrainGridSystem _tgs, int _cellIndex, int _buttonIndex)
+    private void PlaceObject(TerrainGridSystem tgs, int cellIndex, int buttonIndex)
     {
-        
         if (isAttached)
         {
             if (_buttonIndex == 1)
@@ -92,9 +91,6 @@ public class PlacementControl : MonoBehaviour
                 
                 _tgs.CellSetTag(_cellIndex, 1);
                 print("Cell Index # " + _cellIndex + "Tag # " + tag);
-                
-                
-                //_tgs.CellGetPosition(_cellIndex).tag = 1;
 
                 if (buildLimtcnt == 0)
                 {
@@ -104,7 +100,7 @@ public class PlacementControl : MonoBehaviour
                     tileAButtonImage.color = tempColor;
                 }
 
-                if (pendingObject = null)
+                if (pendingObject == null)
                     print("None selected");
             }
         }
