@@ -19,14 +19,23 @@ public class ObjectPlacer : MonoBehaviour
     public int placementcnt;
     public int buildLimtcnt = 5;
     
+    // Testing toggles
+    public bool cellIO;
+    //[SerializeField] TerrainGridSystem _tgs;
+    
+    
     private TerrainGridSystem tgs;
     int cellIndex;
     int buttonIndex;
 
     void Start()
     {
+        ValueText.text = buildLimtcnt.ToString();
         tgs = TerrainGridSystem.instance;
         tgs.OnCellClick += PlaceObject;
+        //_tgs.showCells = false;
+        
+        
         
         
         if (buildCamera == null)
@@ -145,7 +154,6 @@ public class ObjectPlacer : MonoBehaviour
             
             if (button == 1)
             {
-                //Debug.LogError("Clicked cell #" + cell);
                 placementcnt += 1;
                 //pendingObject = null;
                 instantiatedObject.transform.position = tgs.CellGetPosition(cell);
@@ -166,6 +174,7 @@ public class ObjectPlacer : MonoBehaviour
                     //tempColor.a = 30f;
                     //tileAButtonImage.color = tempColor;
                 }
+                ValueText.text = buildLimtcnt.ToString(); 
 
                 //if (pendingObject = null)
                     //print("None selected");

@@ -388,6 +388,7 @@ MonoBehaviour:
   tempPlacementcnt: 0
   placementcnt: 0
   buildLimtcnt: 5
+  cellIO: 0
 --- !u!1 &255717580
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +511,7 @@ MonoBehaviour:
   playerCamera: {fileID: 2994700598635489540}
   buildCameraInputContoller: {fileID: 6687760166003687934}
   playerCameraInputContoller: {fileID: 2882241514918868213}
-  tgsGrid: {fileID: 2018615746}
+  _tgs: {fileID: 2018615748}
 --- !u!1 &342567061
 GameObject:
   m_ObjectHideFlags: 0
@@ -1832,7 +1833,7 @@ MonoBehaviour:
   _numCells: 6084
   _showCells: 1
   _cellSize: {x: 1.2820513, y: 1.2820517}
-  _cellBorderColor: {r: 0.48659173, g: 0.49043074, b: 0.5294118, a: 1}
+  _cellBorderColor: {r: 0.002428216, g: 0.09758736, b: 0.001517635, a: 1}
   _cellCustomBorderThickness: 0
   _cellBorderThickness: 1
   _cellFillPadding: 0
@@ -1842,11 +1843,11 @@ MonoBehaviour:
   _cellTileOffset: {x: 0, y: 0}
   _cellAlphaClipping: 0
   _cellHighlightUseCellColor: 0
-  _cellHighlightColor: {r: 0, g: 0, b: 1, a: 0.7}
+  _cellHighlightColor: {r: 1, g: 0, b: 0, a: 0.7}
   _cellHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
-  _cellHighlightBorderSize: 0
-  _cellHighlightBorderColor: {r: 1, g: 1, b: 1, a: 1}
-  _cellHighlightNonVisible: 1
+  _cellHighlightBorderSize: 0.051
+  _cellHighlightBorderColor: {r: 0.031794745, g: 0.34336078, b: 0.021362774, a: 1}
+  _cellHighlightNonVisible: 0
   _cellsFlat: 0
   _gridFlatMask: {fileID: 0}
   _cellsMaxSlope: 1
@@ -1868,7 +1869,7 @@ MonoBehaviour:
   _territoriesHideNeutralCells: 0
   _territoriesInitialCellMethod: 0
   _territoriesInitialCellIndices: 
-  _numTerritories: 0
+  _numTerritories: 1
   _territoriesMaxIterations: 0
   _territoriesAsymmetry: 0
   _territoriesOrganic: 0
@@ -1905,7 +1906,7 @@ MonoBehaviour:
   _transparentBackground: 1
   _useStencilBuffer: 0
   _disableMeshGeneration: 0
-  _useGeometryShaders: 1
+  _useGeometryShaders: 0
   _sortingOrder: 0
   _animationSortingOrder: 0
   _animationSortingLayer: 
@@ -2001,7 +2002,7 @@ MonoBehaviour:
   _circularFadeTarget: {fileID: 0}
   _circularFadeDistance: 500
   _circularFadeFallOff: 50
-  _displayCellDebugInfo: 0
+  _displayCellDebugInfo: 1
   _displayTerritoryDebugInfo: 0
   _enableGridEditor: 0
   cameraMain: {fileID: 603085192}
@@ -2369,7 +2370,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSpeed: 10
-  edgeThresholdFactor: 0.02
+  edgeThresholdFactor: 0
 --- !u!1 &2882241514918868213
 GameObject:
   m_ObjectHideFlags: 0
@@ -2401,7 +2402,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

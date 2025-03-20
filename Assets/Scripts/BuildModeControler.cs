@@ -1,3 +1,4 @@
+using TGS;
 using UnityEngine;
 
 public class BuildModeControler : MonoBehaviour
@@ -9,36 +10,29 @@ public class BuildModeControler : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField] private GameObject buildCameraInputContoller;
     [SerializeField] private GameObject playerCameraInputContoller;
-    
-    public GameObject tgsGrid;
+
+    [SerializeField] TerrainGridSystem _tgs;
     
     // Called when Build mode button clicked
     public void EnterBuildModeIO()
     {
-        // need tgs toggled on
-        // need build button toggled off
-        // need build inventory ui toggle on
-        // need 
         
-        tgsGrid.gameObject.SetActive(true);
         buildMenuInventory.SetActive(true);
         ToggleCameras();
-        //Debug.Log("Toggle camera");
-        // Toggle the PlayerView camera off and toggle on the Build Camera
-
+        _tgs.showCells = true;
+        _tgs.enabled = true;
+        buildButton.SetActive(false);
     }
     // Called when the build inventory ui close button is clicked
     public void ExitBuildModeIO()
     {
-        // need tgs toggled off
-        // need build button toggled on
-        // need build ui toggle off
-        // need to toggle cameras
         //TODO : add check for build saved and no attached tiles or buildings ect on mouse ie "not in still got a object to be placed attached to mouse".
         ToggleCameras();
         buildMenuInventory.SetActive(false);
-        tgsGrid.gameObject.SetActive(false);
+        _tgs.showCells = false;
+        _tgs.enabled = false;
         buildButton.SetActive(true);
+        
         
         
     }
@@ -47,6 +41,9 @@ public class BuildModeControler : MonoBehaviour
     // Called when the scene starts
     void Start()
     {
+        Debug.Log("God is Great");
+        _tgs.showCells = false;
+        _tgs.enabled = false;
         //_objectPlacer._tgs.gameObject.SetActive(false);
         //buildMenuInventory.SetActive(false);
         // Initially activate playercamera and deactivate buildcamera
