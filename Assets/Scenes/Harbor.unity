@@ -1833,20 +1833,20 @@ MonoBehaviour:
   _numCells: 6084
   _showCells: 1
   _cellSize: {x: 1.2820513, y: 1.2820517}
-  _cellBorderColor: {r: 0.002428216, g: 0.09758736, b: 0.001517635, a: 1}
-  _cellCustomBorderThickness: 0
-  _cellBorderThickness: 1
+  _cellBorderColor: {r: 0, g: 0, b: 0, a: 1}
+  _cellCustomBorderThickness: 1
+  _cellBorderThickness: 0.5
   _cellFillPadding: 0
   _cellTileBackgroundMode: 1
   _cellTextureMode: 0
   _cellTileScale: {x: 1, y: 1}
   _cellTileOffset: {x: 0, y: 0}
-  _cellAlphaClipping: 0
+  _cellAlphaClipping: 1
   _cellHighlightUseCellColor: 0
-  _cellHighlightColor: {r: 1, g: 0, b: 0, a: 0.7}
+  _cellHighlightColor: {r: 0.09295409, g: 0.23243533, b: 0.9280361, a: 1}
   _cellHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
-  _cellHighlightBorderSize: 0.051
-  _cellHighlightBorderColor: {r: 0.031794745, g: 0.34336078, b: 0.021362774, a: 1}
+  _cellHighlightBorderSize: 0
+  _cellHighlightBorderColor: {r: 0.031794745, g: 0.34336078, b: 0.021362774, a: 0.5882353}
   _cellHighlightNonVisible: 0
   _cellsFlat: 0
   _gridFlatMask: {fileID: 0}
@@ -1873,7 +1873,7 @@ MonoBehaviour:
   _territoriesMaxIterations: 0
   _territoriesAsymmetry: 0
   _territoriesOrganic: 0
-  _showTerritories: 1
+  _showTerritories: 0
   _showTerritoriesInteriorBorders: 0
   _territoryInteriorBorderOnTop: 0
   _territoryInteriorBorderIncludeEnclaves: 1
@@ -1881,7 +1881,7 @@ MonoBehaviour:
   _territoriesColorScheme: 0
   _territoriesFillColors: []
   _colorizedTerritoriesAlpha: 0.71
-  _territoryHighlightColor: {r: 1, g: 0, b: 0, a: 0.7}
+  _territoryHighlightColor: {r: 0.009721218, g: 0.39157256, b: 0.0060488326, a: 0.7}
   _territoryHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
   _territoryFrontierColor: {r: 0, g: 0, b: 0, a: 1}
   _territoryCustomBorderThickness: 0
@@ -1934,10 +1934,10 @@ MonoBehaviour:
   _highlightMode: 2
   _allowHighlightWhileDragging: 0
   _highlightFadeMin: 0
-  _highlightFadeAmount: 0.5
+  _highlightFadeAmount: 0.4999997
   _highlightScaleMin: 0.75
   _highlightScaleMax: 1.1
-  _highlightFadeSpeed: 1
+  _highlightFadeSpeed: 1.11
   _highlightMinimumTerrainDistance: 1
   _highlightEffect: 0
   _highlightMask: {fileID: 0}
