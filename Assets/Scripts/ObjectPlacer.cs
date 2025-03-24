@@ -61,7 +61,7 @@ public class ObjectPlacer : MonoBehaviour
     void OnCellClick (TerrainGridSystem grid, int cell, int button) 
     {
         if (buttonIndex == 1) {
-            //print("Right clicked on cell #" + cellIndex);
+            print("Right clicked on cell #" + cellIndex);
         }												
     }
 

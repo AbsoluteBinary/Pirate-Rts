@@ -1,22 +1,21 @@
 using TGS;
 using UnityEngine;
 
-public class BuildModeControler : MonoBehaviour
+public class BuildModeController : MonoBehaviour
 {
     [SerializeField] private GameObject buildButton;
     [SerializeField] private GameObject buildMenuInventory;
-    //[SerializeField] private GameObject buildMenuIO;
+    [SerializeField] private GameObject preBuildSaveLoadMenu;
     [SerializeField] private Camera buildCamera;
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private GameObject buildCameraInputContoller;
-    [SerializeField] private GameObject playerCameraInputContoller;
+    [SerializeField] private GameObject buildCameraInputController;
+    [SerializeField] private GameObject playerCameraInputController;
 
-    [SerializeField] TerrainGridSystem _tgs;
+    [SerializeField] private TerrainGridSystem _tgs;
     
     // Called when Build mode button clicked
     public void EnterBuildModeIO()
     {
-        
         buildMenuInventory.SetActive(true);
         ToggleCameras();
         _tgs.showCells = true;
@@ -32,10 +31,9 @@ public class BuildModeControler : MonoBehaviour
         _tgs.showCells = false;
         _tgs.enabled = false;
         buildButton.SetActive(true);
-        
-        
-        
     }
+    
+    
     
 
     // Called when the scene starts
@@ -47,7 +45,7 @@ public class BuildModeControler : MonoBehaviour
         //_objectPlacer._tgs.gameObject.SetActive(false);
         //buildMenuInventory.SetActive(false);
         // Initially activate playercamera and deactivate buildcamera
-        ActivateCamera(playerCamera, buildCamera, playerCameraInputContoller, buildCameraInputContoller);
+        ActivateCamera(playerCamera, buildCamera, playerCameraInputController, buildCameraInputController);
         // buildCameraInputContoller.SetActive(false);
         // playerCameraInputContoller.SetActive(true);
 
@@ -70,12 +68,12 @@ public class BuildModeControler : MonoBehaviour
         if (playerCamera.enabled)
         {
             // If playercamera is active, switch to buildcamera
-            ActivateCamera(buildCamera, playerCamera, buildCameraInputContoller, playerCameraInputContoller);
+            ActivateCamera(buildCamera, playerCamera, buildCameraInputController, playerCameraInputController);
         }
         else
         {
             // If buildcamera is active, switch to playercamera
-            ActivateCamera(playerCamera, buildCamera, playerCameraInputContoller, buildCameraInputContoller);
+            ActivateCamera(playerCamera, buildCamera, playerCameraInputController, buildCameraInputController);
         }
     }
 
