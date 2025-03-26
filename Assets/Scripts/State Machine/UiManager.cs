@@ -28,7 +28,7 @@ namespace State_Machine
         void Start()
         {
             SetState(UIState.Idle); // Ensure we begin in Idle state
-            Debug.Log("To God be the Glory");
+            //Debug.Log("To God be the Glory");
             _tgs.showCells = false;
             _tgs.enabled = false;
             
