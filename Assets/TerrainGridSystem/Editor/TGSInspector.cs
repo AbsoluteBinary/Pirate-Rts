@@ -156,7 +156,7 @@ namespace TGS_Editor {
                 if (tgs.terrain != null) {
                     if (tgs.terrain.supportsMultipleObjects) {
                         EditorGUI.indentLevel++;
-                        tgs.terrainObjectsPrefix = EditorGUILayout.TextField(new GUIContent("Objects Name Prefix", "Use terrain gameobjects which has this prefix in their names (letter case ignored)."), tgs.terrainObjectsPrefix);
+                        tgs.terrainObjectsPrefix = EditorGUILayout.TextField(new GUIContent("Objects UserName Prefix", "Use terrain gameobjects which has this prefix in their names (letter case ignored)."), tgs.terrainObjectsPrefix);
                         tgs.terrainObjectsLayerMask = LayerMaskField(new GUIContent("Objects Layer Mask", "Use terrain gameobjects which match this layer mask."), (int)tgs.terrainObjectsLayerMask);
                         tgs.terrainObjectsSearchGlobal = EditorGUILayout.Toggle(new GUIContent("Search Global", "Include potential objects in the entire scene."), tgs.terrainObjectsSearchGlobal);
                         showObjects = EditorGUILayout.Toggle("Show Included Objects", showObjects);

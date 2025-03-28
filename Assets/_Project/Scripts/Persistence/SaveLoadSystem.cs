@@ -11,7 +11,7 @@ namespace _Project.Scripts.Persistence {
     [Serializable] 
     public class GameData 
     { 
-        public string Name;
+        public string UserName;
         public string CurrentLevelName;
         public PlayerData playerData;
         public InventoryData inventoryData;
@@ -70,10 +70,12 @@ namespace _Project.Scripts.Persistence {
                 entity.Bind(data);
             }
         }
+        
+
 
         public void NewGame() {
             gameData = new GameData {
-                Name = "My Game",
+                UserName = "My Game",
                 CurrentLevelName = "Demo"
             };
             SceneManager.LoadScene(gameData.CurrentLevelName);
@@ -91,7 +93,7 @@ namespace _Project.Scripts.Persistence {
             SceneManager.LoadScene(gameData.CurrentLevelName);
         }
         
-        public void ReloadGame() => LoadGame(gameData.Name);
+        public void ReloadGame() => LoadGame(gameData.UserName);
 
         public void DeleteGame(string gameName) => dataService.Delete(gameName);
     }
