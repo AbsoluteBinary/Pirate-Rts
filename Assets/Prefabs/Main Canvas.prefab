@@ -339,7 +339,6 @@ GameObject:
   - component: {fileID: 1113612694811914776}
   - component: {fileID: 4927652997418380603}
   - component: {fileID: 4187720432279224610}
-  - component: {fileID: 7679144059590640360}
   m_Layer: 5
   m_Name: Start-Exit - Panel
   m_TagString: Untagged
@@ -436,29 +435,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &7679144059590640360
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 390089830791234188}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14b90dff483cea164b34218c08178d11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameNameInputField: {fileID: 4347567582400959661}
-  _playerData:
-    <Id>k__BackingField:
-      Part1: 0
-      Part2: 0
-      Part3: 0
-      Part4: 0
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    playerUserName: 
-  _LevelManager: {fileID: 0}
 --- !u!1 &439541831092249484
 GameObject:
   m_ObjectHideFlags: 0
@@ -2869,9 +2845,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7679144059590640360}
-        m_TargetAssemblyTypeName: Main_Screen.StartGame, Assembly-CSharp
-        m_MethodName: StartNewGame
+      - m_Target: {fileID: 9091543504936298875}
+        m_TargetAssemblyTypeName: Main_Screen.SimpleStartGame, Assembly-CSharp
+        m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5977,6 +5953,7 @@ GameObject:
   - component: {fileID: 2404650575668739879}
   - component: {fileID: 7421920235533132893}
   - component: {fileID: 5727961693414278464}
+  - component: {fileID: 9091543504936298875}
   m_Layer: 5
   m_Name: Main Canvas
   m_TagString: Untagged
@@ -6068,6 +6045,19 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &9091543504936298875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7399731708277121667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4078f67c0a4cda4559e313c7ae8476b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnterExitPanel: {fileID: 390089830791234188}
 --- !u!1 &8043626820352172819
 GameObject:
   m_ObjectHideFlags: 0
