@@ -1,0 +1,34 @@
+{
+    "name": "ToggleAdminAction",
+    "maps": [
+        {
+            "name": "NewUI",
+            "id": "d518275e-04bd-4f17-a07a-5738fea5a143",
+            "actions": [
+                {
+                    "name": "ToggleAdminPanel",
+                    "type": "Button",
+                    "id": "d97ed159-1a7a-4ed7-a47b-770676688c50",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f4d63d6b-8fc0-4cf9-a840-f467e0087a02",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleAdminPanel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

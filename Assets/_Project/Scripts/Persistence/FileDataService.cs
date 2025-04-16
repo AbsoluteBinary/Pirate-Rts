@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using _Project.Scripts.Persistence;
+using Systems.Persistence;
 using UnityEngine;
 
-namespace Systems.Persistence {
+namespace _Project.Scripts.Persistence {
     public class FileDataService : IDataService {
         ISerializer serializer;
         string dataPath;
@@ -21,10 +21,10 @@ namespace Systems.Persistence {
         }
         
         public void Save(GameData data, bool overwrite = true) {
-            string fileLocation = GetPathToFile(data.UserName);
+            string fileLocation = GetPathToFile(data.gameName);
 
             if (!overwrite && File.Exists(fileLocation)) {
-                throw new IOException($"The file '{data.UserName}.{fileExtension}' already exists and cannot be overwritten.");
+                throw new IOException($"The file '{data.gameName}.{fileExtension}' already exists and cannot be overwritten.");
             }
 
             File.WriteAllText(fileLocation, serializer.Serialize(data));

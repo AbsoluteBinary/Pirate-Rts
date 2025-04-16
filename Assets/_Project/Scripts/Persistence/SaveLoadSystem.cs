@@ -11,13 +11,15 @@ namespace _Project.Scripts.Persistence {
     [Serializable] 
     public class GameData 
     { 
-        public string UserName;
-        public string CurrentLevelName;
+        public string gameName;
+        public string LevelName;  
+        
         public PlayerData playerData;
         public InventoryData inventoryData;
     }
         
-    public interface ISaveable  {
+    public interface ISaveable  
+    {
         SerializableGuid Id { get; set; }
     }
     
@@ -25,18 +27,40 @@ namespace _Project.Scripts.Persistence {
         SerializableGuid Id { get; set; }
         void Bind(TData data);
     }
+
+    
     
     public class SaveLoadSystem : PersistentSingleton<SaveLoadSystem> {
         [SerializeField] public GameData gameData;
+        public void SetGameName(string newName)
+        {
+            gameData.gameName = newName;
+        }
+        public string GetGameName()
+        {
+            return gameData.gameName;
+        }
 
+        public string GetLevelName()
+        {
+            return gameData.LevelName;
+        }
+        
         IDataService dataService;
-
         protected override void Awake() {
             base.Awake();
             dataService = new FileDataService(new JsonSerializer());
         }
         
-        void Start() => NewGame();
+        void Start()
+        {
+            NewGame();
+        }
+
+        private void LateUpdate()
+        {
+            //Debug.Log(gameData.playerData.Id.ToGuid().ToString());
+        }
 
         void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
         void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -75,10 +99,10 @@ namespace _Project.Scripts.Persistence {
 
         public void NewGame() {
             gameData = new GameData {
-                UserName = "My Game",
-                CurrentLevelName = "Demo"
+                gameName = "My Game",
+                LevelName = "Demo"
             };
-            SceneManager.LoadScene(gameData.CurrentLevelName);
+            SceneManager.LoadScene(gameData.LevelName);
         }
         
         public void SaveGame() => dataService.Save(gameData);
@@ -86,14 +110,14 @@ namespace _Project.Scripts.Persistence {
         public void LoadGame(string gameName) {
             gameData = dataService.Load(gameName);
 
-            if (String.IsNullOrWhiteSpace(gameData.CurrentLevelName)) {
-                gameData.CurrentLevelName = "Demo";
+            if (String.IsNullOrWhiteSpace(gameData.LevelName)) {
+                gameData.LevelName = "Demo";
             }
 
-            SceneManager.LoadScene(gameData.CurrentLevelName);
+            SceneManager.LoadScene(gameData.LevelName);
         }
         
-        public void ReloadGame() => LoadGame(gameData.UserName);
+        public void ReloadGame() => LoadGame(gameData.gameName);
 
         public void DeleteGame(string gameName) => dataService.Delete(gameName);
     }

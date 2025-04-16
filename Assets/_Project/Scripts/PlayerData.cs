@@ -11,5 +11,10 @@ namespace _Project.Scripts
         [field: SerializeField] public SerializableGuid Id { get; set; }
         public Vector3 position;
         public Quaternion rotation;
+        public String playerUserName;
+
+        
     }
+    
+    
 }
