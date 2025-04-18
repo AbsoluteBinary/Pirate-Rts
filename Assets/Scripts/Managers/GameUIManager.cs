@@ -4,9 +4,9 @@ namespace Managers
 {
     using UnityEngine;
 
-public class GameAdminManager : MonoBehaviour
+public class GameUIManager : MonoBehaviour
 {
-    public static GameAdminManager Instance { get; private set; }
+    public static GameUIManager Instance { get; private set; }
     [SerializeField] private GameObject adminCanvasPrefab; // Reference to the Canvas prefab
     private GameObject adminPanel; // Reference to the Admin panel
 
@@ -17,11 +17,11 @@ public class GameAdminManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("GameAdminManager initialized as singleton.");
+            //Debug.Log("GameUIManager initialized as singleton.");
         }
         else
         {
-            Debug.LogWarning("Duplicate GameAdminManager found, destroying this instance.");
+            Debug.LogWarning("Duplicate GameUIManager found, destroying this instance.");
             Destroy(gameObject);
             return;
         }
@@ -32,13 +32,13 @@ public class GameAdminManager : MonoBehaviour
             GameObject canvasInstance = Instantiate(adminCanvasPrefab);
             canvasInstance.name = "PersistentAdminCanvas";
             DontDestroyOnLoad(canvasInstance);
-            Debug.Log("Canvas instantiated: " + canvasInstance.name);
+            //Debug.Log("Canvas instantiated: " + canvasInstance.name);
             adminPanel = canvasInstance.transform.Find("Admin")?.gameObject;
 
             if (adminPanel != null)
             {
                 adminPanel.SetActive(false);
-                Debug.Log($"Admin panel found, parent: {adminPanel.transform.parent.name}, set to inactive.");
+                //Debug.Log($"Admin panel found, parent: {adminPanel.transform.parent.name}, set to inactive.");
             }
             else
             {

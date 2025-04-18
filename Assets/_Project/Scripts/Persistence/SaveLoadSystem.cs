@@ -100,7 +100,7 @@ namespace _Project.Scripts.Persistence {
         public void NewGame() {
             gameData = new GameData {
                 gameName = "My Game",
-                LevelName = "Demo"
+                LevelName = "BootstrapScene"
             };
             SceneManager.LoadScene(gameData.LevelName);
         }

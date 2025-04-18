@@ -384,7 +384,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 603984410}
-  - component: {fileID: 603984409}
+  - component: {fileID: 603984411}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -392,19 +392,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &603984409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 603984408}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ecdb89fc2296a9c77b79f9916879a3b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  adminCanvasPrefab: {fileID: 7399731708277121667, guid: 85fb9b7b6cfe0f2568ccc8a9acb315c3, type: 3}
 --- !u!4 &603984410
 Transform:
   m_ObjectHideFlags: 0
@@ -420,6 +407,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &603984411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 603984408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6d59e4083e9e758db6838ac2b80e671, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  adminCanvasPrefab: {fileID: 7399731708277121667, guid: 85fb9b7b6cfe0f2568ccc8a9acb315c3, type: 3}
+  sceneUiPrefabs:
+  - {fileID: 2530698017457812401, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
+  - {fileID: 5919165956833579141, guid: efe53927a733c014ebf4a1f9b70d4172, type: 3}
+  - {fileID: 7455967043319173086, guid: 1acb08ffac9beecf2a769a52e14ec825, type: 3}
+  - {fileID: 3482288016415134097, guid: 9b235dd399c092f469b91cd17c6cded3, type: 3}
 --- !u!1 &659799709
 GameObject:
   m_ObjectHideFlags: 0
@@ -693,7 +698,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 973755435}
-  - component: {fileID: 973755434}
   - component: {fileID: 973755436}
   m_Layer: 0
   m_Name: LevelManager
@@ -702,28 +706,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &973755434
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 973755433}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd26ac0d56eda2cea9ecd62ee9208b9a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levels:
-  - scene: {fileID: 102900000, guid: b8ec467426a9510359d8233792f7a71a, type: 3}
-    sceneName: World 0
-    levelNumber: 0
-  - scene: {fileID: 102900000, guid: ebc4155f1dc6761faa5136d42f518815, type: 3}
-    sceneName: World 1
-    levelNumber: 1
-  - scene: {fileID: 102900000, guid: 191de6262cc714a64a9db741f3a8b7fc, type: 3}
-    sceneName: World 2
-    levelNumber: 2
 --- !u!4 &973755435
 Transform:
   m_ObjectHideFlags: 0
@@ -751,7 +733,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecdb89fc2296a9c77b79f9916879a3b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  adminCanvasPrefab: {fileID: 0}
+  adminCanvasPrefab: {fileID: 7399731708277121667, guid: 85fb9b7b6cfe0f2568ccc8a9acb315c3, type: 3}
 --- !u!1001 &1628429727
 PrefabInstance:
   m_ObjectHideFlags: 0
