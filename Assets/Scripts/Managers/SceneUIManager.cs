@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 namespace Managers
 {
@@ -11,98 +12,79 @@ namespace Managers
         private GameObject canvasInstance; // Persistent Canvas
         private GameObject adminPanel; // Admin panel child
         private GameObject currentSceneUi; // Current scene UI instance
+        private static bool isCanvasInstantiated = false; // Track canvas instantiation
 
         private void Awake()
         {
-            // Singleton setup
-            if (Instance == null)
+            // Strengthen singleton pattern
+            if (Instance != null && this != Instance)
             {
-                Instance = this;
-                DontDestroyOnLoad(gameObject);
-                Debug.Log("SceneUIManager initialized as singleton.");
-            }
-            else
-            {
-                Debug.LogWarning("Duplicate SceneUIManager found, destroying this instance.");
+                Debug.LogWarning($"Duplicate SceneUIManager on {gameObject.name}, destroying this instance.");
                 Destroy(gameObject);
                 return;
             }
 
-            // Instantiate the Canvas prefab
-            if (adminCanvasPrefab != null)
+            // Set singleton instance
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            Debug.Log($"SceneUIManager initialized as singleton on {gameObject.name}.");
+
+            // Instantiate the Canvas prefab only once
+            if (adminCanvasPrefab != null && !isCanvasInstantiated)
             {
                 canvasInstance = Instantiate(adminCanvasPrefab);
                 canvasInstance.name = "PersistentAdminCanvas";
                 DontDestroyOnLoad(canvasInstance);
+                isCanvasInstantiated = true; // Prevent further instantiations
                 Canvas canvas = canvasInstance.GetComponent<Canvas>();
                 if (canvas != null)
                 {
                     canvas.sortingOrder = 10; // Ensure UI is on top
-                    Debug.Log("PersistentAdminCanvas sorting order set to 10.");
                 }
 
                 adminPanel = canvasInstance.transform.Find("Admin")?.gameObject;
                 if (adminPanel != null)
                 {
                     adminPanel.SetActive(false);
-                    Debug.Log("Admin panel found and set to inactive.");
                 }
                 else
                 {
                     Debug.LogError("Admin panel not found in Canvas prefab! Check prefab hierarchy.");
-                    foreach (Transform child in canvasInstance.transform)
-                    {
-                        Debug.Log("Child found: " + child.name);
-                    }
                 }
 
                 // Load default UI for initial scene
                 LoadSceneUI(GetUIIndexForScene(SceneManager.GetActiveScene().name));
             }
-            else
+            else if (adminCanvasPrefab == null)
             {
                 Debug.LogError("Admin Canvas prefab is not assigned!");
+            }
+            else
+            {
+                Debug.LogWarning("Canvas already instantiated, skipping instantiation.");
             }
         }
 
         private void OnEnable()
         {
-            // Subscribe to scene changes
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         private void OnDisable()
         {
-            // Unsubscribe
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         private void Update()
         {
-            // Toggle Admin panel with 'I' key
-            if (Input.GetKeyDown(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.I) && adminPanel != null)
             {
-                Debug.Log("I key pressed, toggling Admin panel!");
-                if (adminPanel != null)
-                {
-                    adminPanel.SetActive(!adminPanel.activeSelf);
-                    Debug.Log("Admin panel toggled to: " + adminPanel.activeSelf);
-                }
-                else
-                {
-                    Debug.LogWarning("Admin panel reference is missing!");
-                }
+                adminPanel.SetActive(!adminPanel.activeSelf);
             }
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            // Update CameraManager for scene-specific cameras
-            // Temp comment out
-            // if (CameraManager.Instance != null)
-            // {
-            //     CameraManager.Instance.UpdateCamerasForScene(scene.name);
-            // }
             LoadSceneUI(GetUIIndexForScene(scene.name));
         }
 
@@ -115,7 +97,7 @@ namespace Managers
                 case "HarbourScene":
                     return 1; // FreeRoamSceneUI
                 case "FreeRoamScene":
-                    return 2; // HarbourSceneUI (default)
+                    return 2; // HarbourSceneUI
                 case "CombatScene":
                     return 4; // CombatSceneUI
                 default:
@@ -124,22 +106,17 @@ namespace Managers
             }
         }
 
-        // Load UI prefab by index
         private void LoadSceneUI(int uiIndex)
         {
-            // Destroy current scene UI
             if (currentSceneUi != null)
             {
                 Destroy(currentSceneUi);
-                Debug.Log("Destroyed previous scene UI.");
             }
 
-            // Instantiate new scene UI
             if (uiIndex >= 0 && uiIndex < sceneUiPrefabs.Length && sceneUiPrefabs[uiIndex] != null)
             {
                 currentSceneUi = Instantiate(sceneUiPrefabs[uiIndex], canvasInstance.transform);
                 currentSceneUi.name = sceneUiPrefabs[uiIndex].name;
-                Debug.Log($"Loaded scene UI: {currentSceneUi.name}");
             }
             else
             {
@@ -147,7 +124,6 @@ namespace Managers
             }
         }
 
-        // Public method to switch UI mode (e.g., Harbour build mode)
         public void SetUIMode(string mode)
         {
             int uiIndex = -1;
@@ -168,6 +144,11 @@ namespace Managers
             {
                 LoadSceneUI(uiIndex);
             }
+        }
+        
+        public GameObject GetAdminPanel()
+        {
+            return adminPanel;
         }
     }
 }
