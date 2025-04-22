@@ -733,7 +733,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecdb89fc2296a9c77b79f9916879a3b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  adminCanvasPrefab: {fileID: 7399731708277121667, guid: 85fb9b7b6cfe0f2568ccc8a9acb315c3, type: 3}
 --- !u!1001 &1628429727
 PrefabInstance:
   m_ObjectHideFlags: 0
