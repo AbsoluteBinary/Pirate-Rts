@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Systems.SceneManagement {
+namespace _Project.Scripts.SceneManagement {
     public class SceneLoader : MonoBehaviour { 
         [SerializeField] Image loadingBar;
         [SerializeField] float fillSpeed = 0.5f;

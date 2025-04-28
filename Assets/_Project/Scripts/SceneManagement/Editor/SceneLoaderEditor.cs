@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Systems.SceneManagement.Editor {
+namespace _Project.Scripts.SceneManagement.Editor {
     [CustomEditor(typeof(SceneLoader))]
     public class SceneLoaderEditor : UnityEditor.Editor {
         public override void OnInspectorGUI() {

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using _Project.Scripts.Inventory.Helpers;
+using _Project.Scripts.Utility;
+using Sirenix.OdinInspector;
 using Systems.Inventory;
 using Systems.Persistence;
 using UnityEngine;
@@ -28,8 +30,6 @@ namespace _Project.Scripts.Persistence {
         void Bind(TData data);
     }
 
-    
-    
     public class SaveLoadSystem : PersistentSingleton<SaveLoadSystem> {
         [SerializeField] public GameData gameData;
         public void SetGameName(string newName)
@@ -57,9 +57,16 @@ namespace _Project.Scripts.Persistence {
             NewGame();
         }
 
-        private void LateUpdate()
+        [Button]
+        private void DisplayPlayerID()
         {
-            //Debug.Log(gameData.playerData.Id.ToGuid().ToString());
+            if (gameData == null || gameData.playerData == null)
+            {
+                Debug.LogError("gameData or gameData.playerData is null!");
+                return;
+            }
+            string playerID = gameData.playerData.Id.ToGuid().ToString();
+            Debug.Log($"The Player ID is: {playerID}");
         }
 
         void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
@@ -68,8 +75,14 @@ namespace _Project.Scripts.Persistence {
         void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
             if (scene.name == "Menu") return;
             
+            Debug.Log($"OnSceneLoaded: Binding for scene {scene.name}, playerData.Id = {(gameData.playerData != null ? gameData.playerData.Id.ToGuid().ToString() : "null")}");
             Bind<Hero, PlayerData>(gameData.playerData);
             Bind<Inventory.Inventory, InventoryData>(gameData.inventoryData);
+            Debug.Log($"OnSceneLoaded: After binding, playerData.Id = {(gameData.playerData != null ? gameData.playerData.Id.ToGuid().ToString() : "null")}");
+            
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+            #endif
         }
         
         void Bind<T, TData>(TData data) where T : MonoBehaviour, IBind<TData> where TData : ISaveable, new() {
@@ -79,6 +92,13 @@ namespace _Project.Scripts.Persistence {
                     data = new TData { Id = entity.Id };
                 }
                 entity.Bind(data);
+                if (typeof(TData) == typeof(PlayerData)) {
+                    gameData.playerData = data as PlayerData;
+                    Debug.Log($"Bind: Set gameData.playerData.Id to {gameData.playerData.Id.ToGuid()} (Hero Id: {entity.Id.ToGuid()})");
+                }
+            }
+            else {
+                Debug.LogWarning($"Bind: No {typeof(T).Name} found in scene to bind.");
             }
         }
 
@@ -94,14 +114,15 @@ namespace _Project.Scripts.Persistence {
                 entity.Bind(data);
             }
         }
-        
-
 
         public void NewGame() {
             gameData = new GameData {
                 gameName = "My Game",
-                LevelName = "BootstrapScene"
+                LevelName = "BootstrapScene",
+                playerData = new PlayerData { Id = SerializableGuid.NewGuid() },
+                inventoryData = new InventoryData()
             };
+            Debug.Log($"NewGame: Initialized playerData.Id = {gameData.playerData.Id.ToGuid()}");
             SceneManager.LoadScene(gameData.LevelName);
         }
         
@@ -109,11 +130,10 @@ namespace _Project.Scripts.Persistence {
 
         public void LoadGame(string gameName) {
             gameData = dataService.Load(gameName);
-
+            Debug.Log($"LoadGame: Loaded playerData.Id = {(gameData.playerData != null ? gameData.playerData.Id.ToGuid().ToString() : "null")}");
             if (String.IsNullOrWhiteSpace(gameData.LevelName)) {
                 gameData.LevelName = "Demo";
             }
-
             SceneManager.LoadScene(gameData.LevelName);
         }
         

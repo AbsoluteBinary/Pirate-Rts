@@ -9,7 +9,7 @@ namespace Managers
         void Start()
         {
             // Optional: Verify SceneUIManager exists
-            if (SceneUIManager.Instance == null)
+            //if (SceneUIManager.Instance == null)
             {
                 Debug.LogError("SceneUIManager instance not found! Ensure it’s initialized.");
             }
@@ -21,11 +21,11 @@ namespace Managers
             SceneManager.LoadScene("FreeRoamScene");
 
             // SceneUIManager will automatically load the correct UI via OnSceneLoaded
-            if (SceneUIManager.Instance != null)
+            //if (SceneUIManager.Instance != null)
             {
                 Debug.Log("Loading FreeRoamScene; SceneUIManager will handle UI.");
             }
-            else
+            //else
             {
                 Debug.LogError("Cannot verify UI loading: SceneUIManager not found.");
             }
