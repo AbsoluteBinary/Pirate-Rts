@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Eflatun.SceneReference;
 
-namespace Systems.SceneManagement {
+namespace _Project.Scripts.SceneManagement {
     [Serializable]
     public class SceneGroup {
         public string GroupName = "New Scene Group";

@@ -386,7 +386,7 @@ GameObject:
   - component: {fileID: 603984410}
   - component: {fileID: 603984411}
   m_Layer: 0
-  m_Name: Game Manager
+  m_Name: SaveLoadDebugger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -416,15 +416,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 603984408}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6d59e4083e9e758db6838ac2b80e671, type: 3}
+  m_Script: {fileID: 11500000, guid: 17e5da338713af67fb58ac469415d9e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  adminCanvasPrefab: {fileID: 7399731708277121667, guid: 85fb9b7b6cfe0f2568ccc8a9acb315c3, type: 3}
-  sceneUiPrefabs:
-  - {fileID: 2530698017457812401, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
-  - {fileID: 5919165956833579141, guid: efe53927a733c014ebf4a1f9b70d4172, type: 3}
-  - {fileID: 7455967043319173086, guid: 1acb08ffac9beecf2a769a52e14ec825, type: 3}
-  - {fileID: 3482288016415134097, guid: 9b235dd399c092f469b91cd17c6cded3, type: 3}
+  saveLoadSystem: {fileID: 206243817}
 --- !u!1 &659799709
 GameObject:
   m_ObjectHideFlags: 0
