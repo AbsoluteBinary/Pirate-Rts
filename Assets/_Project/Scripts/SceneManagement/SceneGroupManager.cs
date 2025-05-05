@@ -42,6 +42,9 @@ namespace _Project.Scripts.SceneManagement {
                 if (sceneData.Reference.State == SceneReferenceState.Regular)
                 {
                     var operation = SceneManager.LoadSceneAsync(sceneData.Reference.Path, LoadSceneMode.Additive);
+
+                    await Task.Delay(TimeSpan.FromSeconds(4.5f));
+                    
                     operationGroup.Operations.Add(operation);
                 }
                 else if (sceneData.Reference.State == SceneReferenceState.Addressable)

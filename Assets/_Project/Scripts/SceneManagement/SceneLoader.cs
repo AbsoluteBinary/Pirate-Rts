@@ -57,8 +57,12 @@ namespace _Project.Scripts.SceneManagement {
     
         void EnableLoadingCanvas(bool enable = true) {
             isLoading = enable;
-            loadingCanvas.gameObject.SetActive(enable);
-            loadingCamera.gameObject.SetActive(enable);
+            if (loadingCanvas != null) {
+                loadingCanvas.gameObject.SetActive(enable);
+            }
+            if (loadingCamera != null) {
+                loadingCamera.gameObject.SetActive(enable);
+            }
         }
         
     }

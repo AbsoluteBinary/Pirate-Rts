@@ -1120,7 +1120,7 @@ GameObject:
   - component: {fileID: 8125574221590789215}
   - component: {fileID: 6445188609856668053}
   m_Layer: 5
-  m_Name: BootstrapSceneUI
+  m_Name: LoginScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
