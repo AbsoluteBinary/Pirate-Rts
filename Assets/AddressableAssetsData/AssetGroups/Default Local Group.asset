@@ -14,7 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: Default Local Group
   m_GUID: c41809f003cf3a751ad6395ede18d9e3
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 737abc4e39fd0bccdba696ec8ac0e682
+    m_Address: Assets/Scenes/Level 0/test 2.unity
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef966914ca8839b118dd2f5447fc9c46
+    m_Address: Assets/Prefabs/Object Prefabs/Tile.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: fa6bf3f119265107b8ed5b4a262c38ac, type: 2}
   m_SchemaSet:

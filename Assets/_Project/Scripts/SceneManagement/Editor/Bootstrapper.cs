@@ -3,14 +3,16 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace _Project.Scripts.SceneManagement
+namespace _Project.Scripts.SceneManagement.Editor
 {
-    public class Bootstrapper : PersistentSingleton<Bootstrapper> {
+    public class Bootstrapper : PersistentSingleton<Bootstrapper>
+    {
         // NOTE: This script is intended to be placed in your first scene included in the build settings.
         static readonly int sceneIndex = 0;
-    
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void Init() {
+        static void Init()
+        {
             Debug.Log("Bootstrapper...");
 #if UNITY_EDITOR
             // Set the bootstrapper scene to be the play mode start scene when running in the editor
