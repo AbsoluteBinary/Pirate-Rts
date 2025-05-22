@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using _Project.Scripts._Project.Scripts.Persistence;
 using _Project.Scripts.Inventory.Helpers;
 using _Project.Scripts.Utility;
 using Sirenix.OdinInspector;
@@ -124,7 +125,7 @@ public class SaveLoadSystem : PersistentSingleton<SaveLoadSystem>
         gameData = new GameData 
         {
             gameName = "My Game",
-            LevelName = "BootstrapScene",
+            LevelName = "Boot",
             playerData = new PlayerData { Id = SerializableGuid.NewGuid() },
             inventoryData = new InventoryData()
         };
@@ -140,9 +141,18 @@ public class SaveLoadSystem : PersistentSingleton<SaveLoadSystem>
     public void LoadGame(string gameName) 
     {
         gameData = dataService.Load(gameName);
+        if (gameData == null)
+            gameData = new GameData { playerData = new PlayerData { Id = SerializableGuid.NewGuid() } };
+        if (gameData.playerData == null)
+            gameData.playerData = new PlayerData { Id = SerializableGuid.NewGuid() };
+        // Ensure valid health and mana
+        if (gameData.playerData.Health <= 0)
+            gameData.playerData.Health = 100;
+        if (gameData.playerData.Mana <= 0)
+            gameData.playerData.Mana = 50;
         if (debugEnabled)
         {
-            Debug.Log($"Loaded game: playerData.Id = {(gameData.playerData != null ? gameData.playerData.Id.ToGuid() : "null")}");
+            Debug.Log($"Loaded game: playerData.Id = {gameData.playerData.Id.ToGuid()}, Health = {gameData.playerData.Health}, Mana = {gameData.playerData.Mana}");
         }
         if (string.IsNullOrWhiteSpace(gameData.LevelName)) 
         {

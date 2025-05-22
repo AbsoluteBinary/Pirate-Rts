@@ -16,60 +16,82 @@ namespace _Project.Scripts.SceneManagement {
         public event Action OnSceneGroupLoaded = delegate { };
         
         readonly AsyncOperationHandleGroup handleGroup = new AsyncOperationHandleGroup(10);
+
+        public SceneGroup ActiveSceneGroup;
         
-        SceneGroup ActiveSceneGroup;
-        
-        public async Task LoadScenes(SceneGroup group, IProgress<float> progress, bool reloadDupScenes = false) { 
-            ActiveSceneGroup = group;
-            var loadedScenes = new List<string>();
-
-            await UnloadScenes();
-
-            int sceneCount = SceneManager.sceneCount;
+        public async Task LoadScenes(SceneGroup group, IProgress<float> progress, bool reloadDupScenes = false) {
             
-            for (var i = 0; i < sceneCount; i++) {
-                loadedScenes.Add(SceneManager.GetSceneAt(i).name);
-            }
+        ActiveSceneGroup = group;
+        var loadedScenes = new List<string>();
 
-            var totalScenesToLoad = ActiveSceneGroup.Scenes.Count;
+        await UnloadScenes();
 
-            var operationGroup = new AsyncOperationGroup(totalScenesToLoad);
-
-            for (var i = 0; i < totalScenesToLoad; i++) {
-                var sceneData = group.Scenes[i];
-                if (reloadDupScenes == false && loadedScenes.Contains(sceneData.Name)) continue;
-                
-                if (sceneData.Reference.State == SceneReferenceState.Regular)
-                {
-                    var operation = SceneManager.LoadSceneAsync(sceneData.Reference.Path, LoadSceneMode.Additive);
-
-                    await Task.Delay(TimeSpan.FromSeconds(4.5f));
-                    
-                    operationGroup.Operations.Add(operation);
-                }
-                else if (sceneData.Reference.State == SceneReferenceState.Addressable)
-                {
-                    var sceneHandle = Addressables.LoadSceneAsync(sceneData.Reference.Path, LoadSceneMode.Additive);
-                    handleGroup.Handles.Add(sceneHandle);
-                }
-                
-                OnSceneLoaded.Invoke(sceneData.Name);
-            }
-            
-            // Wait until all AsyncOperations in the group are done
-            while (!operationGroup.IsDone || !handleGroup.IsDone) {
-                progress?.Report((operationGroup.Progress + handleGroup.Progress) / 2);
-                await Task.Delay(100);
-            }
-
-            Scene activeScene = SceneManager.GetSceneByName(ActiveSceneGroup.FindSceneNameByType(SceneType.ActiveScene));
-
-            if (activeScene.IsValid()) {
-                SceneManager.SetActiveScene(activeScene);
-            }
-
-            OnSceneGroupLoaded.Invoke();
+        int sceneCount = SceneManager.sceneCount;
+        for (var i = 0; i < sceneCount; i++)
+        {
+            loadedScenes.Add(SceneManager.GetSceneAt(i).name);
         }
+
+        var totalScenesToLoad = ActiveSceneGroup.Scenes.Count;
+        var operationGroup = new AsyncOperationGroup(totalScenesToLoad);
+        var scenesToProcess = new List<SceneData>();
+
+        // Collect scenes to load
+        for (var i = 0; i < totalScenesToLoad; i++)
+        {
+            var sceneData = group.Scenes[i];
+            if (!reloadDupScenes && loadedScenes.Contains(sceneData.Name)) continue;
+            scenesToProcess.Add(sceneData);
+        }
+
+        if (scenesToProcess.Count == 0)
+        {
+            progress?.Report(1f);
+            OnSceneGroupLoaded.Invoke();
+            return;
+        }
+
+        // Load scenes
+        for (var i = 0; i < scenesToProcess.Count; i++)
+        {
+            var sceneData = scenesToProcess[i];
+            if (sceneData.Reference.State == SceneReferenceState.Regular)
+            {
+                var operation = SceneManager.LoadSceneAsync(sceneData.Reference.Path, LoadSceneMode.Additive);
+                operationGroup.Operations.Add(operation);
+            }
+            else if (sceneData.Reference.State == SceneReferenceState.Addressable)
+            {
+                var sceneHandle = Addressables.LoadSceneAsync(sceneData.Reference.Path, LoadSceneMode.Additive);
+                handleGroup.Handles.Add(sceneHandle);
+            }
+            OnSceneLoaded.Invoke(sceneData.Name);
+        }
+
+        // Report progress until done
+        float lastReportedProgress = 0f;
+        while (!operationGroup.IsDone || !handleGroup.IsDone)
+        {
+            float totalProgress = (operationGroup.Progress + handleGroup.Progress) / 2f;
+            if (Mathf.Abs(totalProgress - lastReportedProgress) > 0.01f) // Report only significant changes
+            {
+                progress?.Report(totalProgress);
+                lastReportedProgress = totalProgress;
+            }
+            await Task.Delay(16); // ~60fps, smoother updates
+        }
+
+        // Ensure final progress is 1
+        progress?.Report(1f);
+
+        Scene activeScene = SceneManager.GetSceneByName(ActiveSceneGroup.FindSceneNameByType(SceneType.ActiveScene));
+        if (activeScene.IsValid())
+        {
+            SceneManager.SetActiveScene(activeScene);
+        }
+
+        OnSceneGroupLoaded.Invoke();
+    }
 
         public async Task UnloadScenes() { 
             var scenes = new List<string>();
