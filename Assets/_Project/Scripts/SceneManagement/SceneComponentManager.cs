@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace _Project.Scripts.SceneManagement
@@ -34,6 +35,9 @@ namespace _Project.Scripts.SceneManagement
 
             // Manage Cameras
             ManageCameras();
+
+            // Manage EventSystems
+            ManageEventSystems();
         }
 
         private void ManageAudioListeners()
@@ -81,6 +85,32 @@ namespace _Project.Scripts.SceneManagement
             }
 
             Debug.Log($"Primary Camera: {primaryCamera.gameObject.name} in scene {primaryCamera.gameObject.scene.name}");
+        }
+
+        private void ManageEventSystems()
+        {
+            // Find all EventSystems in loaded scenes
+            var eventSystems = FindComponentsInLoadedScenes<EventSystem>();
+
+            if (eventSystems.Count == 0)
+            {
+                Debug.LogWarning("No EventSystem found in loaded scenes.");
+                return;
+            }
+
+            // Select primary EventSystem based on scene type priority
+            var primaryEventSystem = SelectPrimaryComponent(eventSystems);
+
+            // Enable primary, disable others
+            foreach (var eventSystem in eventSystems)
+            {
+                bool isPrimary = eventSystem == primaryEventSystem;
+                eventSystem.enabled = isPrimary;
+                if (!isPrimary)
+                    Debug.Log($"Disabled EventSystem on {eventSystem.gameObject.name} in scene {eventSystem.gameObject.scene.name}");
+            }
+
+            Debug.Log($"Primary EventSystem: {primaryEventSystem.gameObject.name} in scene {primaryEventSystem.gameObject.scene.name}");
         }
 
         private List<T> FindComponentsInLoadedScenes<T>() where T : Component
