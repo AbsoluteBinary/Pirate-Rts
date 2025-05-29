@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace _Project.Scripts.SceneManagement
@@ -22,6 +23,41 @@ namespace _Project.Scripts.SceneManagement
         private int currentGroupIndex = 0; // Tracks the current scene group index
 
         public readonly SceneGroupManager manager = new SceneGroupManager();
+        
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name == "Bootstrapper") return;
+
+            var rootObjects = scene.GetRootGameObjects();
+            foreach (var root in rootObjects)
+            {
+                // Disable AudioListeners
+                var audioListeners = root.GetComponentsInChildren<AudioListener>(true);
+                foreach (var listener in audioListeners)
+                {
+                    listener.enabled = false;
+                    Debug.Log($"Disabled AudioListener on {listener.gameObject.name} in scene {scene.name} during load");
+                }
+
+                // Disable EventSystems
+                var eventSystems = root.GetComponentsInChildren<EventSystem>(true);
+                foreach (var eventSystem in eventSystems)
+                {
+                    eventSystem.enabled = false;
+                    Debug.Log($"Disabled EventSystem on {eventSystem.gameObject.name} in scene {scene.name} during load");
+                }
+            }
+        }
 
         private void Awake()
         {
@@ -42,14 +78,14 @@ namespace _Project.Scripts.SceneManagement
             }
         }
 
-        private void Update()
+        void Update()
         {
-            if (!isLoading) return;
+            if (!isLoading || loadingBar == null) return;
 
             float currentFillAmount = loadingBar.fillAmount;
             loadingBar.fillAmount = Mathf.Lerp(currentFillAmount, targetProgress, Time.deltaTime * fillSmoothingSpeed);
             if (progressText != null)
-                progressText.text = $"{Mathf.RoundToInt(targetProgress * 100f)}%"; // Update TextMeshProUGUI text
+                progressText.text = $"{Mathf.RoundToInt(targetProgress * 100f)}%";
             if (targetProgress >= 1f && Mathf.Approximately(loadingBar.fillAmount, 1f))
                 isLoading = false;
         }
@@ -62,8 +98,10 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
 
-            currentGroupIndex = index; // Update current index
-            loadingBar.fillAmount = 0f;
+            if (loadingBar != null)
+            {
+                loadingBar.fillAmount = 0f;
+            }
             targetProgress = 0f;
             isLoading = true;
 
@@ -77,7 +115,6 @@ namespace _Project.Scripts.SceneManagement
             try
             {
                 await manager.LoadScenes(sceneGroups[index], progress);
-                // Wait for minimum loading time
                 await Task.Delay(TimeSpan.FromSeconds(minLoadingTime));
             }
             catch (Exception ex)
@@ -87,7 +124,32 @@ namespace _Project.Scripts.SceneManagement
             finally
             {
                 EnableLoadingCanvas(false);
-                loadingBar.fillAmount = 1f;
+                if (loadingBar != null)
+                {
+                    loadingBar.fillAmount = 1f; // Only set if loadingBar is still valid
+                }
+            }
+        }
+
+        private void DisableAllAudioListenersExceptLoadingCamera()
+        {
+            AudioListener[] allListeners = FindObjectsOfType<AudioListener>();
+            foreach (var listener in allListeners)
+            {
+                // Assuming 'loadingCamera' is a reference to your loading camera GameObject
+                if (listener.gameObject != loadingCamera.gameObject)
+                {
+                    listener.enabled = false;
+                }
+            }
+        }
+        
+        private void DisableAllEventSystems()
+        {
+            EventSystem[] allEventSystems = FindObjectsOfType<EventSystem>();
+            foreach (var eventSystem in allEventSystems)
+            {
+                eventSystem.enabled = false;
             }
         }
 

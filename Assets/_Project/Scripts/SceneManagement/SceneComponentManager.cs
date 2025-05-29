@@ -42,28 +42,59 @@ namespace _Project.Scripts.SceneManagement
 
         private void ManageAudioListeners()
         {
-            // Find all AudioListeners in loaded scenes
+            // Find all AudioListeners in currently loaded scenes
             var audioListeners = FindComponentsInLoadedScenes<AudioListener>();
-
             if (audioListeners.Count == 0)
             {
                 Debug.LogWarning("No AudioListener found in loaded scenes.");
                 return;
             }
 
-            // Select primary AudioListener based on scene type priority
-            var primaryListener = SelectPrimaryComponent(audioListeners);
+            // Get the active scene name from the current scene group
+            string activeSceneName = _sceneGroupManager.ActiveSceneGroup.FindSceneNameByType(SceneType.ActiveScene);
+            AudioListener primaryListener = audioListeners.FirstOrDefault(l => l.gameObject.scene.name == activeSceneName);
 
-            // Enable primary, disable others
+            if (primaryListener == null)
+            {
+                Debug.LogWarning($"No AudioListener found in active scene '{activeSceneName}'. Using fallback.");
+                primaryListener = audioListeners.First(); // Fallback to first found
+            }
+
+            // Enable the primary AudioListener, disable all others
             foreach (var listener in audioListeners)
             {
                 bool isPrimary = listener == primaryListener;
                 listener.enabled = isPrimary;
                 if (!isPrimary)
+                {
                     Debug.Log($"Disabled AudioListener on {listener.gameObject.name} in scene {listener.gameObject.scene.name}");
+                }
+                else
+                {
+                    Debug.Log($"Enabled AudioListener on {listener.gameObject.name} in scene {listener.gameObject.scene.name}");
+                }
             }
+        }
+        
+        
 
-            Debug.Log($"Primary AudioListener: {primaryListener.gameObject.name} in scene {primaryListener.gameObject.scene.name}");
+// Helper method (example implementation)
+        private List<T> FindComponentsInLoadedScenes<T>() where T : Component
+        {
+            List<T> components = new List<T>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded)
+                {
+                    GameObject[] rootObjects = scene.GetRootGameObjects();
+                    foreach (var go in rootObjects)
+                    {
+                        components.AddRange(go.GetComponentsInChildren<T>());
+                    }
+                }
+            }
+            return components;
         }
 
         private void ManageCameras()
@@ -89,45 +120,36 @@ namespace _Project.Scripts.SceneManagement
 
         private void ManageEventSystems()
         {
-            // Find all EventSystems in loaded scenes
             var eventSystems = FindComponentsInLoadedScenes<EventSystem>();
-
             if (eventSystems.Count == 0)
             {
                 Debug.LogWarning("No EventSystem found in loaded scenes.");
                 return;
             }
 
-            // Select primary EventSystem based on scene type priority
             var primaryEventSystem = SelectPrimaryComponent(eventSystems);
+            if (primaryEventSystem == null)
+            {
+                Debug.LogWarning("No EventSystem found in priority scene. Using fallback.");
+                primaryEventSystem = eventSystems.First();
+            }
 
-            // Enable primary, disable others
             foreach (var eventSystem in eventSystems)
             {
                 bool isPrimary = eventSystem == primaryEventSystem;
                 eventSystem.enabled = isPrimary;
-                if (!isPrimary)
-                    Debug.Log($"Disabled EventSystem on {eventSystem.gameObject.name} in scene {eventSystem.gameObject.scene.name}");
-            }
-
-            Debug.Log($"Primary EventSystem: {primaryEventSystem.gameObject.name} in scene {primaryEventSystem.gameObject.scene.name}");
-        }
-
-        private List<T> FindComponentsInLoadedScenes<T>() where T : Component
-        {
-            var components = new List<T>();
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                if (!scene.isLoaded) continue;
-                var rootObjects = scene.GetRootGameObjects();
-                foreach (var root in rootObjects)
+                if (isPrimary)
                 {
-                    components.AddRange(root.GetComponentsInChildren<T>(true));
+                    Debug.Log($"Enabled EventSystem on {eventSystem.gameObject.name} in scene {eventSystem.gameObject.scene.name}");
+                }
+                else
+                {
+                    Debug.Log($"Disabled EventSystem on {eventSystem.gameObject.name} in scene {eventSystem.gameObject.scene.name}");
                 }
             }
-            return components;
         }
+
+        
 
         private T SelectPrimaryComponent<T>(List<T> components) where T : Component
         {
