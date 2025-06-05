@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Main_Screen
 {
-    public class MainMenuController1 : MonoBehaviour
+    public class MainMenuManager : MonoBehaviour
     {
         [SerializeField] Button toggleSceneButton; // Assign in Inspector or find dynamically
         [SerializeField] SceneLoader sceneLoader; // Reference to SceneLoader

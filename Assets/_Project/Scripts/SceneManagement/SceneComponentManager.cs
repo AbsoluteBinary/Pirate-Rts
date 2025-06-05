@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,7 +10,8 @@ namespace _Project.Scripts.SceneManagement
     public class SceneComponentManager
     {
         private readonly SceneGroupManager _sceneGroupManager;
-        
+        private readonly Dictionary<Type, Component[]> componentCache = new Dictionary<Type, Component[]>();
+
         // Priority order for scenes when selecting primary components
         private readonly SceneType[] _sceneTypePriority = {
             SceneType.ActiveScene,
@@ -24,25 +26,27 @@ namespace _Project.Scripts.SceneManagement
         public SceneComponentManager(SceneGroupManager sceneGroupManager)
         {
             _sceneGroupManager = sceneGroupManager;
-            // Subscribe to scene group loaded event
             _sceneGroupManager.OnSceneGroupLoaded += ManageSceneComponents;
+            // Subscribe to scene load/unload events to update cache
+            _sceneGroupManager.OnSceneLoaded += (sceneName) => InvalidateCache();
+            _sceneGroupManager.OnSceneUnloaded += (sceneName) => InvalidateCache();
+        }
+
+        private void InvalidateCache()
+        {
+            componentCache.Clear();
+            Debug.Log("Component cache invalidated due to scene load/unload.");
         }
 
         private void ManageSceneComponents()
         {
-            // Manage AudioListeners
             ManageAudioListeners();
-
-            // Manage Cameras
             ManageCameras();
-
-            // Manage EventSystems
             ManageEventSystems();
         }
 
         private void ManageAudioListeners()
         {
-            // Find all AudioListeners in currently loaded scenes
             var audioListeners = FindComponentsInLoadedScenes<AudioListener>();
             if (audioListeners.Count == 0)
             {
@@ -50,17 +54,15 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
 
-            // Get the active scene name from the current scene group
             string activeSceneName = _sceneGroupManager.ActiveSceneGroup.FindSceneNameByType(SceneType.ActiveScene);
             AudioListener primaryListener = audioListeners.FirstOrDefault(l => l.gameObject.scene.name == activeSceneName);
 
             if (primaryListener == null)
             {
                 Debug.LogWarning($"No AudioListener found in active scene '{activeSceneName}'. Using fallback.");
-                primaryListener = audioListeners.First(); // Fallback to first found
+                primaryListener = audioListeners.First();
             }
 
-            // Enable the primary AudioListener, disable all others
             foreach (var listener in audioListeners)
             {
                 bool isPrimary = listener == primaryListener;
@@ -74,27 +76,6 @@ namespace _Project.Scripts.SceneManagement
                     Debug.Log($"Enabled AudioListener on {listener.gameObject.name} in scene {listener.gameObject.scene.name}");
                 }
             }
-        }
-        
-        
-
-// Helper method (example implementation)
-        private List<T> FindComponentsInLoadedScenes<T>() where T : Component
-        {
-            List<T> components = new List<T>();
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.isLoaded)
-                {
-                    GameObject[] rootObjects = scene.GetRootGameObjects();
-                    foreach (var go in rootObjects)
-                    {
-                        components.AddRange(go.GetComponentsInChildren<T>());
-                    }
-                }
-            }
-            return components;
         }
 
         private void ManageCameras()
@@ -110,7 +91,7 @@ namespace _Project.Scripts.SceneManagement
             foreach (var camera in cameras)
             {
                 bool isPrimary = camera == primaryCamera;
-                camera.enabled = isPrimary || camera.gameObject.activeInHierarchy; // Keep active cameras enabled if needed
+                camera.enabled = isPrimary || camera.gameObject.activeInHierarchy;
                 if (!isPrimary && camera.enabled)
                     Debug.Log($"Disabled Camera on {camera.gameObject.name} in scene {camera.gameObject.scene.name}");
             }
@@ -149,31 +130,53 @@ namespace _Project.Scripts.SceneManagement
             }
         }
 
-        
+        private List<T> FindComponentsInLoadedScenes<T>() where T : Component
+        {
+            Type componentType = typeof(T);
+            if (componentCache.TryGetValue(componentType, out var cachedComponents))
+            {
+                Debug.Log($"Using cached {componentType.Name} components.");
+                return cachedComponents.Cast<T>().Where(c => c != null).ToList();
+            }
+
+            var components = new List<T>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded)
+                {
+                    GameObject[] rootObjects = scene.GetRootGameObjects();
+                    foreach (var go in rootObjects)
+                    {
+                        components.AddRange(go.GetComponentsInChildren<T>());
+                    }
+                }
+            }
+
+            componentCache[componentType] = components.ToArray();
+            Debug.Log($"Cached {components.Count} {componentType.Name} components.");
+            return components;
+        }
 
         private T SelectPrimaryComponent<T>(List<T> components) where T : Component
         {
             if (components.Count == 0) return null;
 
-            // Group components by scene
             var sceneComponents = components
                 .GroupBy(c => c.gameObject.scene)
                 .Select(g => new { Scene = g.Key, Components = g.ToList() })
                 .ToList();
 
-            // Find the scene with highest priority SceneType
             foreach (var priorityType in _sceneTypePriority)
             {
                 var matchingScene = sceneComponents.FirstOrDefault(sc =>
                     _sceneGroupManager.ActiveSceneGroup?.Scenes.Any(s => s.Name == sc.Scene.name && s.SceneType == priorityType) == true);
                 if (matchingScene != null)
                 {
-                    // Return the first component from the highest-priority scene
                     return matchingScene.Components.First();
                 }
             }
 
-            // Fallback: Return first component from any scene
             return components.First();
         }
     }

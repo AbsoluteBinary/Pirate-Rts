@@ -2,92 +2,62 @@ using System;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace _Project.Scripts.SceneManagement
 {
     public class SceneLoader : MonoBehaviour
     {
-        [SerializeField] private Image loadingBar;
-        [SerializeField] private float fillSmoothingSpeed = 5f; // Controls smoothing speed (higher = faster, lower = smoother)
-        [SerializeField] private Canvas loadingCanvas;
-        [SerializeField] private Camera loadingCamera;
+        [SerializeField] private float fillSmoothingSpeed = 5f;
         [SerializeField] private SceneGroup[] sceneGroups;
-        [SerializeField] private TextMeshProUGUI progressText;
-        [SerializeField] private float minLoadingTime = 3f; // Seconds to keep loading UI visible
+        [SerializeField] private float minLoadingTime = 3f;
+        
+        // UI Component References
+        [SerializeField] private Image backgroundImage;          // Background image shown during loading
+        [SerializeField] private Image loadingBarBorder;        // Static border of the loading bar
+        [SerializeField] private Image loadingBarFill;          // Fill image that progresses
+        [SerializeField] private TextMeshProUGUI loadingText;   // Text displaying "Loading..." or progress
+        [SerializeField] private CanvasGroup loadingUICanvasGroup; // Group containing loading UI elements
+        [SerializeField] private Canvas loginUICanvas;          // Login UI canvas (will be found if in another scene)
+        [SerializeField] private Camera loadingCamera;          // Camera for rendering loading screen
 
         private float targetProgress;
         private bool isLoading;
-        private int currentGroupIndex = 0; // Tracks the current scene group index
+        private int currentGroupIndex = 0;
+        private CanvasGroup loginUICanvasGroup; // Cached reference to login UI CanvasGroup
 
         public readonly SceneGroupManager manager = new SceneGroupManager();
-        
-        private void OnEnable()
-        {
-            SceneManager.sceneLoaded += OnSceneLoaded;
-        }
-
-        private void OnDisable()
-        {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-        }
-
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            if (scene.name == "Bootstrapper") return;
-
-            var rootObjects = scene.GetRootGameObjects();
-            foreach (var root in rootObjects)
-            {
-                // Disable AudioListeners
-                var audioListeners = root.GetComponentsInChildren<AudioListener>(true);
-                foreach (var listener in audioListeners)
-                {
-                    listener.enabled = false;
-                    Debug.Log($"Disabled AudioListener on {listener.gameObject.name} in scene {scene.name} during load");
-                }
-
-                // Disable EventSystems
-                var eventSystems = root.GetComponentsInChildren<EventSystem>(true);
-                foreach (var eventSystem in eventSystems)
-                {
-                    eventSystem.enabled = false;
-                    Debug.Log($"Disabled EventSystem on {eventSystem.gameObject.name} in scene {scene.name} during load");
-                }
-            }
-        }
 
         private void Awake()
         {
+            DOTween.Init(); // Initialize DOTween
             manager.OnSceneLoaded += sceneName => Debug.Log("Loaded: " + sceneName);
             manager.OnSceneUnloaded += sceneName => Debug.Log("Unloaded: " + sceneName);
-            manager.OnSceneGroupLoaded += () =>
+            manager.OnSceneGroupLoaded += () => Debug.Log("Scene group loaded.");
+
+            // Set initial state
+            if (backgroundImage != null)
             {
-                Debug.Log("Scene group loaded.");
-                ManageComponents();
-            };
+                backgroundImage.gameObject.SetActive(true);
+                backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 1f); // Start transparent
+                backgroundImage.DOFade(1.0f, 1.0f); // Fade in to opaque
+            }
+            if (loadingUICanvasGroup != null)
+            {
+                loadingUICanvasGroup.gameObject.SetActive(true);
+                loadingUICanvasGroup.alpha = 1f;
+            }
+            if (loadingBarFill != null) loadingBarFill.fillAmount = 0f;
+            if (loadingText != null) loadingText.text = "Loading...";
         }
 
         private async void Start()
         {
-            if (manager.ActiveSceneGroup == null) // Avoid reloading if already set
+            if (manager.ActiveSceneGroup == null)
             {
                 await LoadSceneGroup(0);
             }
-        }
-
-        void Update()
-        {
-            if (!isLoading || loadingBar == null) return;
-
-            float currentFillAmount = loadingBar.fillAmount;
-            loadingBar.fillAmount = Mathf.Lerp(currentFillAmount, targetProgress, Time.deltaTime * fillSmoothingSpeed);
-            if (progressText != null)
-                progressText.text = $"{Mathf.RoundToInt(targetProgress * 100f)}%";
-            if (targetProgress >= 1f && Mathf.Approximately(loadingBar.fillAmount, 1f))
-                isLoading = false;
         }
 
         public async Task LoadSceneGroup(int index)
@@ -98,23 +68,19 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
 
-            if (loadingBar != null)
-            {
-                loadingBar.fillAmount = 0f;
-            }
-            targetProgress = 0f;
+            currentGroupIndex = index;
             isLoading = true;
 
             LoadingProgress progress = new LoadingProgress();
-            progress.Progressed += target =>
-            {
-                targetProgress = Mathf.Clamp01(target);
-            };
+            progress.Progressed += target => targetProgress = Mathf.Clamp01(target);
 
-            EnableLoadingCanvas();
+            ShowLoadingUI();
+
             try
             {
-                await manager.LoadScenes(sceneGroups[index], progress);
+                Task loadTask = manager.LoadScenes(sceneGroups[index], progress);
+                await loadTask;
+                await Task.Yield(); // Wait for the next frame
                 await Task.Delay(TimeSpan.FromSeconds(minLoadingTime));
             }
             catch (Exception ex)
@@ -123,57 +89,101 @@ namespace _Project.Scripts.SceneManagement
             }
             finally
             {
-                EnableLoadingCanvas(false);
-                if (loadingBar != null)
+                HideLoadingUI();
+                ShowLoginUI();
+            }
+        }
+
+        private void ShowLoadingUI()
+        {
+            if (loadingCamera != null) loadingCamera.gameObject.SetActive(true);
+            if (loadingUICanvasGroup != null)
+            {
+                loadingUICanvasGroup.DOFade(1f, 0.5f);
+            }
+        }
+
+        private void HideLoadingUI()
+        {
+            Sequence seq = DOTween.Sequence();
+            if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
+            if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
+            seq.OnComplete(() =>
+            {
+                if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
+                if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
+                if (loadingCamera != null) loadingCamera.gameObject.SetActive(false);
+            });
+        }
+
+        private void ShowLoginUI()
+        {
+            // If loginUICanvas is in the Boot scene, use the serialized reference
+            if (loginUICanvas != null)
+            {
+                loginUICanvasGroup = loginUICanvas.GetComponent<CanvasGroup>();
+                if (loginUICanvasGroup != null)
                 {
-                    loadingBar.fillAmount = 1f; // Only set if loadingBar is still valid
+                    loginUICanvasGroup.alpha = 0f;
+                    loginUICanvas.gameObject.SetActive(true);
+                    loginUICanvasGroup.DOFade(1f, 0.5f);
+                }
+                else
+                {
+                    loginUICanvas.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                // Otherwise, find it in the loaded scene (e.g., MainMenu)
+                var loginCanvasObj = GameObject.Find("LoginMenuCanvas");
+                if (loginCanvasObj != null)
+                {
+                    loginUICanvasGroup = loginCanvasObj.GetComponent<CanvasGroup>();
+                    if (loginUICanvasGroup != null)
+                    {
+                        loginUICanvasGroup.alpha = 0f;
+                        loginCanvasObj.SetActive(true);
+                        loginUICanvasGroup.DOFade(1f, 0.5f);
+                    }
+                    else
+                    {
+                        loginCanvasObj.SetActive(true);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("LoginMenuCanvas not found.");
                 }
             }
         }
 
-        private void DisableAllAudioListenersExceptLoadingCamera()
+        private void Update()
         {
-            AudioListener[] allListeners = FindObjectsOfType<AudioListener>();
-            foreach (var listener in allListeners)
+            if (!isLoading || loadingBarFill == null) return;
+
+            float currentFillAmount = loadingBarFill.fillAmount;
+            loadingBarFill.fillAmount = Mathf.Lerp(currentFillAmount, targetProgress, Time.deltaTime * fillSmoothingSpeed);
+            if (loadingText != null)
+                loadingText.text = $"Loading... {Mathf.RoundToInt(targetProgress * 100f)}%";
+
+            // Fade in 3D background objects at 90% progress
+            if (targetProgress >= 0.9f && !DOTween.IsTweening("FadeInBackgroundObjects"))
             {
-                // Assuming 'loadingCamera' is a reference to your loading camera GameObject
-                if (listener.gameObject != loadingCamera.gameObject)
-                {
-                    listener.enabled = false;
-                }
-            }
-        }
-        
-        private void DisableAllEventSystems()
-        {
-            EventSystem[] allEventSystems = FindObjectsOfType<EventSystem>();
-            foreach (var eventSystem in allEventSystems)
-            {
-                eventSystem.enabled = false;
+                FadeInBackgroundObjects();
             }
         }
 
-        private void EnableLoadingCanvas(bool enable = true)
+        private void FadeInBackgroundObjects()
         {
-            isLoading = enable;
-            if (loadingCanvas != null)
+            // Assuming 3D objects have a script to handle fading
+            var backgroundObjects = FindObjectsOfType<BackgroundObject>();
+            foreach (var obj in backgroundObjects)
             {
-                loadingCanvas.gameObject.SetActive(enable);
-            }
-            if (loadingCamera != null)
-            {
-                loadingCamera.gameObject.SetActive(enable);
-            }
-            // Ensure MainMenuCanvas is visible after loading
-            if (!enable)
-            {
-                var mainMenuCanvas = GameObject.Find("MainMenuCanvas")?.GetComponent<Canvas>();
-                if (mainMenuCanvas != null)
-                    mainMenuCanvas.enabled = true;
+                obj.FadeIn();
             }
         }
 
-        // Toggles to the next scene group in the array
         public void ToggleNextSceneGroup()
         {
             if (sceneGroups == null || sceneGroups.Length == 0)
@@ -182,77 +192,8 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
 
-            currentGroupIndex = (currentGroupIndex + 1) % sceneGroups.Length; // Cycle to next index
+            currentGroupIndex = (currentGroupIndex + 1) % sceneGroups.Length;
             LoadSceneGroup(currentGroupIndex);
-        }
-
-        // Manages components like EventSystem, Camera, AudioListener
-        private void ManageComponents()
-        {
-            // Define component priorities based on SceneType
-            var componentPriorities = new[]
-            {
-                (typeof(EventSystem), SceneType.UserInterface),
-                (typeof(Camera), SceneType.ActiveScene),
-                (typeof(AudioListener), SceneType.ActiveScene)
-            };
-
-            foreach (var (componentType, preferredSceneType) in componentPriorities)
-            {
-                ManageComponent(componentType, preferredSceneType);
-            }
-        }
-
-        // Generic method to manage a specific component type
-        private void ManageComponent(Type componentType, SceneType preferredSceneType)
-        {
-            // Find the preferred scene for this component
-            string preferredSceneName = manager.ActiveSceneGroup?.FindSceneNameByType(preferredSceneType);
-            if (string.IsNullOrEmpty(preferredSceneName))
-            {
-                Debug.LogWarning($"No scene found for {preferredSceneType} to manage {componentType.Name}.");
-                return;
-            }
-
-            // Find all components of this type
-            var components = UnityEngine.Object.FindObjectsOfType(componentType) as Component[];
-            if (components == null || components.Length == 0)
-            {
-                Debug.LogWarning($"No {componentType.Name} found in loaded scenes.");
-                return;
-            }
-
-            // Enable the component from the preferred scene, disable others
-            Component primaryComponent = null;
-            foreach (var component in components)
-            {
-                bool isPrimary = component.gameObject.scene.name == preferredSceneName;
-                if (component is Behaviour behaviour) // Check if component is a Behaviour
-                {
-                    behaviour.enabled = isPrimary;
-                    if (isPrimary)
-                    {
-                        primaryComponent = component;
-                    }
-                    else
-                    {
-                        Debug.Log($"Disabled {componentType.Name} on {component.gameObject.name} in scene {component.gameObject.scene.name}");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"Component {componentType.Name} on {component.gameObject.name} is not a Behaviour and cannot be enabled/disabled.");
-                }
-            }
-
-            if (primaryComponent != null)
-            {
-                Debug.Log($"Primary {componentType.Name}: {primaryComponent.gameObject.name} in scene {primaryComponent.gameObject.scene.name}");
-            }
-            else
-            {
-                Debug.LogWarning($"No {componentType.Name} found in preferred scene {preferredSceneName}.");
-            }
         }
     }
 
@@ -265,6 +206,30 @@ namespace _Project.Scripts.SceneManagement
         {
             float normalizedValue = Mathf.Clamp01(value / ratio);
             Progressed?.Invoke(normalizedValue);
+        }
+    }
+
+    // Example script for 3D background objects (create separately if needed)
+    public class BackgroundObject : MonoBehaviour
+    {
+        private Renderer rend;
+
+        private void Awake()
+        {
+            rend = GetComponent<Renderer>();
+            if (rend != null)
+            {
+                Color color = rend.material.color;
+                rend.material.color = new Color(color.r, color.g, color.b, 0f);
+            }
+        }
+
+        public void FadeIn()
+        {
+            if (rend != null)
+            {
+                rend.material.DOFade(1f, 1f).SetId("FadeInBackgroundObjects");
+            }
         }
     }
 }
