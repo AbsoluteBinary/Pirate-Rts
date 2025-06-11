@@ -101,6 +101,8 @@ namespace StylizedWater3
         private void OnDisable()
         {
             RenderPipelineManager.beginContextRendering -= OnBeginFrame;
+
+            ResetTime();
         }
     }
     

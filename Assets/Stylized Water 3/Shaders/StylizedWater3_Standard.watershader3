@@ -60,7 +60,8 @@
 		[Toggle] _EnableDirectionalCaustics("Directional Caustics", Float) = 0
 		
 		_UnderwaterSurfaceSmoothness("Underwater Surface Smoothness", Range(0, 1)) = 0.8
-		_UnderwaterRefractionOffset("Underwater Refraction Offset", Range(0, 1)) = 0.2
+		_UnderwaterRefractionOffset("Underwater Refraction Offset", Range(-1, 1)) = 0.2
+		_UnderwaterReflectionStrength("Underwater Reflection Strength", Range(0, 1)) = 0.5
 		
 		_RefractionStrength("Refraction Strength", Range(0, 1)) = 0.1
         _RefractionChromaticAberration("Refraction Chromatic Aberration)", Range(0, 1)) = 1
@@ -207,6 +208,7 @@
 		HLSLINCLUDE		
 		//Custom directives:
 		%custom_directives%
+		%global_defines%
 
 		//Curved World 2020 directives:
         //#pragma shader_feature_local CURVEDWORLD_BEND_TYPE_CLASSICRUNNER_X_POSITIVE CURVEDWORLD_BEND_TYPE_LITTLEPLANET_Y
@@ -215,6 +217,293 @@
         //#pragma shader_feature_local CURVEDWORLD_NORMAL_TRANSFORMATION_ON
 
 		ENDHLSL
+
+        Pass
+		{	
+			Name "ForwardLit"
+			Tags { "LightMode"="UniversalForwardOnly" }
+			
+			Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+			ZWrite [_ZWrite]
+			Cull [_Cull]
+			ZTest LEqual
+			ZClip [_ZClip]
+
+            Stencil { Ref %stencilID% Comp Always Pass Replace }
+
+			HLSLPROGRAM
+            %pragma_target%
+            %pragma_renderers%
+
+			#pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
+			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define SHADERPASS_FORWARD
+			//#define _FLOWMAP 1
+            %defines%
+			
+			// Material Keywords
+			#pragma shader_feature_local _NORMALMAP
+			#pragma shader_feature_local _WAVES
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
+			#pragma shader_feature_local _RIVER
+			#pragma shader_feature_local _REFRACTION
+			#pragma shader_feature_local_fragment _DISABLE_DEPTH_TEX
+			#pragma shader_feature_local_fragment _ADVANCED_SHADING
+			#pragma shader_feature_local_fragment _UNLIT
+			#pragma shader_feature_local_fragment _CAUSTICS
+			#pragma shader_feature_local_fragment _DISTANCE_NORMALS
+			#pragma shader_feature_local_fragment _SURFACE_FOAM_SINGLE
+			#pragma shader_feature_local_fragment _SURFACE_FOAM_DUAL
+			#pragma shader_feature_local_fragment _TRANSLUCENCY
+			#pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
+			#pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
+			#pragma shader_feature_local_fragment _INTERSECTION_FOAM
+			#pragma shader_feature_local_fragment _FLAT_SHADING
+
+            //Multi-compile variants for installed extensions
+			%multi_compile underwater rendering%
+			%multi_compile dynamic effects%
+
+            #if UNDERWATER_ENABLED && _RIVER
+            #define UNDERWATER_ENABLED 0
+            #endif
+
+            #include_library "Libraries/URP.hlsl"
+            //#include "Assets/Amazing Assets/Curved World/Shaders/Core/CurvedWorldTransform.cginc"
+
+            #if _SURFACE_FOAM_SINGLE || _SURFACE_FOAM_DUAL
+            #define _SURFACE_FOAM 1
+            #endif
+
+            //Tying specific features and operations to advanced shading
+            #if _ADVANCED_SHADING
+                #define RESAMPLE_REFRACTION_DEPTH 1
+                #define PHYSICAL_REFRACTION 1
+				#if _CAUSTICS
+				#define RECONSTRUCT_WORLD_NORMAL
+				#endif
+                //#define HQ_CAUSTICS 1
+
+                #if _REFRACTION //Requires opaque texture
+                #define COLOR_ABSORPTION 1
+                #endif
+
+                //Mask caustics by shadows cast on scene geometry. Doubles the shadow sampling cost
+                //Note: needs depth texture to reconstruct the world position from depth
+                #if _CAUSTICS && defined(MAIN_LIGHT_CALCULATE_SHADOWS) && !_DISABLE_DEPTH_TEX
+                #define SCENE_SHADOWMASK 1
+                #endif
+
+                #if !_DISABLE_DEPTH_TEX && _CAUSTICS || UNDERWATER_ENABLED
+                //Compose a mask for pixels against the skybox
+                #define DEPTH_MASK 1
+                #endif
+            #endif
+
+            #if _NORMALMAP || _WAVES
+            #define REQUIRES_TANGENT_TO_WORLD 1
+            #endif
+			
+			//Universal Pipeline keywords
+			%multi_compile_light_cookies%
+			
+			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+			#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+			#pragma multi_compile_fragment _ _SHADOWS_SOFT
+			#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS //URP 11+		
+	
+			//URP 12+ only (2021.2+)
+			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
+			#pragma multi_compile_fragment _ DEBUG_DISPLAY
+			#pragma multi_compile _ _LIGHT_LAYERS
+
+			//Unity 6.0
+			#if (UNITY_VERSION >= 60000023) && (UNITY_VERSION < 60010000)
+                #pragma multi_compile _ _CLUSTERED_RENDERING
+	            #pragma multi_compile _ _FORWARD_PLUS
+            #endif
+
+            //Unity 6.1+
+            #if (UNITY_VERSION >= 60010000)
+	            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+                #pragma multi_compile_fragment _ _REFLECTION_PROBE_ATLAS
+            #endif
+
+            //URP 15+ (2023.1+)
+            #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
+
+            //Unity defined keywords
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+
+#if (UNITY_VERSION >= 60010000)
+            #pragma multi_compile_fragment _ LIGHTMAP_BICUBIC_SAMPLING
+            #pragma multi_compile _ USE_LEGACY_LIGHTMAPS
+#endif
+
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ProbeVolumeVariants.hlsl"
+
+            %tessellation_directives%
+			
+    		#include_library "Libraries/Input.hlsl"
+			#include_library "Libraries/Common.hlsl"
+			
+			//Fog rendering (integration)
+            %define_fog_integration%
+            %include_fog_integration_library%
+            
+			#include_library "Libraries/Fog.hlsl"
+			#include_library "Libraries/Terrain.hlsl"
+			
+			#include_library "Libraries/Waves.hlsl"
+            //Not needed, but registers it as a dependency
+			#include_library "Libraries/Gerstner.hlsl"
+			#include_library "Libraries/Lighting.hlsl"
+			#include_library "Libraries/Reflections.hlsl"
+			#include_library "Libraries/Refraction.hlsl"
+
+			#ifdef DYNAMIC_EFFECTS_ENABLED
+			#include_library "DynamicEffects/DynamicEffects.hlsl"
+			#endif
+
+			#ifdef UNDERWATER_ENABLED
+			#include_library "Underwater/UnderwaterFog.hlsl"
+			#include_library "Underwater/UnderwaterShading.hlsl"
+			#include_library "Underwater/UnderwaterMask.hlsl"
+			#include_library "Underwater/UnderwaterLighting.hlsl"
+			#endif
+
+			#include_library "Libraries/Normals.hlsl"
+			#include_library "Libraries/Foam.hlsl"
+			#include_library "Libraries/Caustics.hlsl"
+			
+			#include_library "Libraries/Vertex.hlsl"
+
+            #if defined(TESSELLATION_ON)
+			#include_library "Libraries/Tesselation.hlsl"
+            #define VertexOutput VertexControl
+            #else
+            #define VertexOutput Varyings
+            #endif
+
+			#pragma vertex Vertex
+			VertexOutput Vertex(Attributes v)
+			{
+				#if defined(TESSELLATION_ON)
+                return VertexTessellation(v);
+                #else
+                return LitPassVertex(v);
+                #endif
+			}
+
+			#pragma fragment ForwardPassFragment
+			#include_library "Passes/ForwardPass.hlsl"
+
+			//#include "UnityCG.cginc" //Test
+			#if defined(UNITY_SHADER_VARIABLES_INCLUDED) || defined(UNITY_CG_INCLUDED)
+			#error "Fatal error: a shader library from the Built-in Render Pipeline was compiled into the shader. This is most likely caused by the fog integration, make absolutely sure it is URP-compatible!"
+			#endif
+
+			ENDHLSL
+		}
+
+        //Currently not used, but may be used by custom transparency-depth passes
+        Pass
+        {
+            Name "Depth"
+            Tags { "LightMode" = "DepthOnly" }
+            
+            ZWrite On
+            //ColorMask R
+            Cull Off
+
+            HLSLPROGRAM
+            %pragma_target%
+            %pragma_renderers%
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+
+            #include_library "Libraries/URP.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            //#include "Assets/Amazing Assets/Curved World/Shaders/Core/CurvedWorldTransform.cginc"
+
+            #pragma shader_feature_local _WAVES
+
+            #define SHADERPASS_DEPTHONLY
+
+            #include_library "Libraries/Input.hlsl"
+            #include_library "Libraries/Common.hlsl"
+            #include_library "Libraries/Waves.hlsl"
+
+            %multi_compile dynamic effects%
+            #ifdef DYNAMIC_EFFECTS_ENABLED
+            #include_library "DynamicEffects/DynamicEffects.hlsl"
+            #endif
+            
+            #include_library "Passes/HeightPrePass.hlsl"
+
+            #pragma vertex HeightPassVertex
+
+            #pragma fragment DepthOnlyFragment
+            float4 DepthOnlyFragment(HeightPassVaryings input) : SV_TARGET
+            {
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+                return float4(input.positionCS.z, 0, 0, 1);
+            }
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "Height"
+            Tags { "LightMode" = "WaterHeight" }
+            
+            ZWrite On
+            //ColorMask RG
+            Cull Off
+
+            HLSLPROGRAM
+            %pragma_target%
+            %pragma_renderers%
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+
+            #include_library "Libraries/URP.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            //#include "Assets/Amazing Assets/Curved World/Shaders/Core/CurvedWorldTransform.cginc"
+
+            #pragma shader_feature_local _WAVES
+            %multi_compile dynamic effects%
+            #pragma multi_compile _ WATER_HEIGHT_PASS
+
+            //If set, the displacement effects are not calculated in the vertex shader, which would be a waste.
+            #define SHADERPASS_HEIGHT
+
+            #include_library "Libraries/Input.hlsl"
+            #include_library "Libraries/Common.hlsl"
+            #include_library "Libraries/Waves.hlsl"
+            #ifdef DYNAMIC_EFFECTS_ENABLED
+            #include_library "DynamicEffects/DynamicEffects.hlsl"
+            #endif
+            
+            #pragma vertex HeightPassVertex
+            #pragma fragment HeightFragment
+
+            #include_library "Passes/HeightPrePass.hlsl"
+            ENDHLSL
+        }
 
         %passes%
 	}

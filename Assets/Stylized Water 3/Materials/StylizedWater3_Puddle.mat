@@ -12,7 +12,6 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _NORMALMAP
   - _REFRACTION
   m_InvalidKeywords:
   - ADVANCED_LIGHTING
@@ -217,7 +216,7 @@ Material:
     - _Metallicness: 0.1
     - _NORMALMAPOn: 1
     - _NormalMap: 1
-    - _NormalMapOn: 1
+    - _NormalMapOn: 0
     - _NormalSpeed: 0
     - _NormalStrength: 0.253
     - _NormalSubSpeed: 0
@@ -240,7 +239,7 @@ Material:
     - _ReflectionFresnel: 1
     - _ReflectionFresnelMode: 0
     - _ReflectionLighting: 0
-    - _ReflectionStrength: 0.692
+    - _ReflectionStrength: 1
     - _Reflectivity: 1
     - _RefractionAmount: 0.05
     - _RefractionChromaticAberration: 1
@@ -286,6 +285,7 @@ Material:
     - _TranslucencyReflectionMask: 0
     - _TranslucencyStrength: 1
     - _TranslucencyStrengthDirect: 0.05
+    - _UnderwaterReflectionStrength: 0.5
     - _UnderwaterRefractionOffset: 0.2
     - _UnderwaterSurfaceSmoothness: 0.8
     - _VertexColorFoam: 0

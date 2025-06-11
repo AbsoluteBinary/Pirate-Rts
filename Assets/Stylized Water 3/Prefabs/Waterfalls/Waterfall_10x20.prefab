@@ -106,6 +106,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1892308107652459844, guid: ff7c56331a536ce4880bd8915c4ea87e, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892308107652459844, guid: ff7c56331a536ce4880bd8915c4ea87e, type: 3}
       propertyPath: m_FreeformStretching
       value: 1
       objectReference: {fileID: 0}

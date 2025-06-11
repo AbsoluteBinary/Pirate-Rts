@@ -9,6 +9,8 @@
 #define MAX_AMPLITUDE 5.0
 #define GRAVITY 9.8f
 
+float3 _GlobalWaveOriginOffset;
+
 #if !defined(UNITY_CORE_SAMPLERS_INCLUDED)
 //Do not want linear interpolation between texels, forcing the usage of a point sampler
 SamplerState sampler_PointClamp;
@@ -38,7 +40,7 @@ void SampleWaveParameters(inout WaveParameters data, uint index, Texture2D tex, 
 	data.enabled = row0.w;
 
 	const float4 row1 = SAMPLE_TEXTURE2D_LOD(tex, sampler_PointClamp, lutUV + float2(0, 0.5), 0);
-	data.origin = row1.xy;
+	data.origin = row1.xy + _GlobalWaveOriginOffset.xz;
 	data.mode = row1.z;
 	data.steepness  = row1.w;
 }
@@ -78,9 +80,7 @@ void CalculateGerstnerWaves_float(in Texture2D<float4> lutTex, in uint layerCoun
 			//Radial mode		
 			if(layer.mode == 1)
 			{
-				position -= layer.origin;
-
-				direction += (position - layer.origin);
+				direction = (position - layer.origin);
 				direction = normalize(direction);
 			}
 			

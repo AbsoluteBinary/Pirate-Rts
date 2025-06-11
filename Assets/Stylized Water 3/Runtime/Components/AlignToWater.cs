@@ -84,7 +84,7 @@ namespace StylizedWater3
         private void OnEnable()
         {
 #if UNITY_EDITOR
-            if(Application.isPlaying == false) UnityEditor.EditorApplication.update += FixedUpdate;
+            if(Application.isPlaying == false) UnityEditor.SceneView.duringSceneGui += DuringSceneViewUpdate;
 #endif
 
             //Sampler uses 4 sampling points, one for each corner of the rectangle/plane
@@ -122,6 +122,13 @@ namespace StylizedWater3
             }
         }
 
+        #if UNITY_EDITOR
+        void DuringSceneViewUpdate(UnityEditor.SceneView sceneView)
+        {
+            FixedUpdate();
+        }
+        #endif
+
         private void OnHeightRequestComplete()
         {
             //Debug.Log("Height request returned");
@@ -132,27 +139,42 @@ namespace StylizedWater3
             float zNeg = heightSampler.heightValues[2];
             float zPos = heightSampler.heightValues[3];
 
+            float newHeight = 0f;
+            
             if (heightValue == HeightValue.Average)
             {
-                height = xNeg + xPos + zNeg + zPos;
-                height /= 4f;
+                newHeight = xNeg + xPos + zNeg + zPos;
+                newHeight /= 4f;
             }
             if (heightValue == HeightValue.Maximum)
             {
-                height = Mathf.Max(Mathf.Max(xNeg, xPos), Mathf.Max(zNeg, zPos));
+                newHeight = Mathf.Max(Mathf.Max(xNeg, xPos), Mathf.Max(zNeg, zPos));
             }
             
-            height += heightOffset;         
+            newHeight += heightOffset;         
             
-            if (float.IsNaN(height))
+            if (float.IsNaN(newHeight))
             {
 				#if SWS_DEV
                 Debug.LogError("Height is NaN");
 				#endif
 				
                 //May occur during the first run
-                height = 0f;
+                newHeight = 0f;
             }
+
+            if (heightInterface.method == HeightQuerySystem.Interface.Method.GPU)
+            {
+                //If all the samples were taking at a point where no water was visible, the height values would be -1000f.
+                //Avoid setting an invalid height to prevent objects from sinking way down, instead keep them at the last valid height
+                if (HeightQuerySystem.EqualsVoid(newHeight))
+                {
+                    UpdateSamplePositions();
+                    return;
+                }
+            }
+
+            height = newHeight;
             
             //Using 4 samples in a plus-shape pattern, a normal can be derived from the height differences
             normal = HeightQuerySystem.DeriveNormal(
@@ -184,7 +206,7 @@ namespace StylizedWater3
         private void OnDisable()
         {
 #if UNITY_EDITOR
-            if(Application.isPlaying == false) UnityEditor.EditorApplication.update -= FixedUpdate;
+            if(Application.isPlaying == false) UnityEditor.SceneView.duringSceneGui -= DuringSceneViewUpdate;
 #endif
             
             if (heightRequest != null)

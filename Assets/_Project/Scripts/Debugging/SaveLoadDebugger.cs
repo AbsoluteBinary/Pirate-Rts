@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using _Project.Scripts.Persistence;
@@ -10,6 +11,7 @@ namespace _Project.Scripts.Debugging
         [SerializeField] private SaveLoadSystem saveLoadSystem;
 
         [Button("Debug Player ID & Refresh"), ShowInInspector]
+        [Obsolete("Obsolete")]
         private void DebugPlayerIdAndRefresh()
         {
             if (saveLoadSystem == null)

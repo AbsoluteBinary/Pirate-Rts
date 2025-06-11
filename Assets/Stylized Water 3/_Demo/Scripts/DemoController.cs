@@ -64,7 +64,8 @@ namespace StylizedWater3.Demo
         private void OnEnable()
         {
             #if UNITY_EDITOR
-            string sceneName = this.gameObject.scene.name;
+            Scene scene = this.gameObject.scene;
+            string sceneName = scene.name;
             
             string setupMessage = $"Not all functionality in the scene \"{sceneName}\" will work as intended, due to incorrect or missing project settings:\n\n";
             bool requiresSetup = false;
@@ -159,22 +160,29 @@ namespace StylizedWater3.Demo
             #endif
             
             SceneManager.sceneLoaded += OnSceneLoaded;
-            
-            OpenScenes();
-        }
 
+            if (Application.isPlaying == false)
+            {
+                OpenScenes();       
+            }
+            else
+            {
+                StartCoroutine(OpenScenesRoutine());
+            }
+        }
+        
         private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
             if (isMainScene)
             {
-                SetMainScene();
+                SceneManager.SetActiveScene(this.gameObject.scene);
             }
         }
 
-        private void SetMainScene()
+        private IEnumerator OpenScenesRoutine()
         {
-            Scene thisScene = this.gameObject.scene;
-            SceneManager.SetActiveScene(thisScene);
+            yield return new WaitForEndOfFrame();
+            OpenScenes();
         }
         
         void OpenScenes()
@@ -194,8 +202,8 @@ namespace StylizedWater3.Demo
                         
                         if (Application.isPlaying)
                         {
-                            SceneManager.LoadScene(path, LoadSceneMode.Additive);
-                            //StartCoroutine(LoadScene(path));
+                            //SceneManager.LoadScene(path, LoadSceneMode.Additive);
+                            StartCoroutine(LoadScene(path));
                         }
                         else
                         {
@@ -219,7 +227,7 @@ namespace StylizedWater3.Demo
                 yield return null;
             }
         }
-
+        
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;

@@ -50,17 +50,27 @@ float2 GetCausticsProjection(in float4 positionCS, in float3 lightDir, float3 po
 
 float3 SampleCaustics(float2 uv, float2 time, float tiling, float chromance)
 {
-	//return SAMPLE_TEXTURE2D(_CausticsTex, sampler_CausticsTex, uv * tiling).rgb;
+	float3 caustics = 0;
+
+	float2 coords = uv * tiling;
+	float2 uv1 = coords + (time.xy);
 	
-	float3 caustics1 = SAMPLE_TEXTURE2D_LOD(_CausticsTex, sampler_CausticsTex, uv * tiling + (time.xy), 0).rgb;
-	float3 caustics2 = SAMPLE_TEXTURE2D_LOD(_CausticsTex, sampler_CausticsTex, (uv * tiling * 0.8) - (time.xy), 0).rgb;
+	#if defined(CAUSTICS_SINGLE_LAYER)
+	caustics = SAMPLE_TEXTURE2D(_CausticsTex, sampler_CausticsTex, uv1).rgb;
+	#else
+
+	float2 uv2 = coords * 0.6 - time.xy;
+	
+	float3 caustics1 = SAMPLE_TEXTURE2D_LOD(_CausticsTex, sampler_CausticsTex, uv1, 0).rgb;
+	float3 caustics2 = SAMPLE_TEXTURE2D_LOD(_CausticsTex, sampler_CausticsTex, uv2, 0).rgb;
 	
 	#if UNITY_COLORSPACE_GAMMA
-	caustics1 = SRGBToLinear(caustics1);
-	caustics2 = SRGBToLinear(caustics2);
+		caustics1 = SRGBToLinear(caustics1);
+		caustics2 = SRGBToLinear(caustics2);
 	#endif
 
-	float3 caustics = min(caustics1, caustics2) * 2.0;
+	caustics = min(caustics1, caustics2) * 2.0;
+	#endif
 	
 	return lerp(caustics.rrr, caustics.rgb, chromance);
 }

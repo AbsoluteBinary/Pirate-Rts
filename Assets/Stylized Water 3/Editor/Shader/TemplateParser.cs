@@ -4,14 +4,24 @@
 //    • Uploading this file to a public repository will subject it to an automated DMCA takedown request.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
+using Object = UnityEngine.Object;
 
 namespace StylizedWater3
 {
     public static class TemplateParser
     {
+        public const int SHADER_GENERATOR_VERSION_MAJOR = 5;
+        public const int SHADER_GENERATOR_MINOR = 1;
+        public const int SHADER_GENERATOR_PATCH = 2;
+        
+        //Stencil mask used by water shader. Currently used for underwater rendering
+        //Values 1-32 are used by deferred rendering
+        public const int STENCIL_REF = 33;
+        
         //Converts relative include paths such as (../../Libraries/File.hlsl) to an absolute path
         //Supports the source file being part of a package
         public static string RelativeToAbsoluteIncludePath(string filePath, string relativePath)
@@ -59,11 +69,24 @@ namespace StylizedWater3
                 //Inject additional passes into template
                 if (line.Contains("%passes%"))
                 {
-                    for (int j = 0; j < importer.settings.passes.Length; j++)
+                    List<Object> passes = new List<Object>(importer.settings.additionalPasses);
+                    
+                    if (StylizedWaterEditor.UnderwaterRenderingInstalled())
                     {
-                        if (importer.settings.passes[j] != null)
+                        string maskPassGUID = "46c22cecd601401a875ca4554695986f";
+                        string maskPassPath = AssetDatabase.GUIDToAssetPath(maskPassGUID);;
+                        
+                        Object underwaterMaskPass = AssetDatabase.LoadAssetAtPath<Object>(maskPassPath);
+                        
+                        passes.Add(underwaterMaskPass);
+                    }
+                    
+                    int passCount = passes.Count;
+                    for (int j = 0; j < passCount; j++)
+                    {
+                        if (passes[j] != null)
                         {
-                            string filePath = AssetDatabase.GetAssetPath(importer.settings.passes[j]);
+                            string filePath = AssetDatabase.GetAssetPath(passes[j]);
 
                             importer.RegisterDependency(filePath);
                             
@@ -142,7 +165,7 @@ namespace StylizedWater3
 
                 if (Matches("%compiler_version%"))
                 {
-                    AddLine($"//Shader generator version: {new Version(AssetInfo.SHADER_GENERATOR_VERSION_MAJOR, AssetInfo.SHADER_GENERATOR_MINOR, AssetInfo.SHADER_GENERATOR_PATCH)}");
+                    AddLine($"//Shader generator version: {new Version(SHADER_GENERATOR_VERSION_MAJOR, SHADER_GENERATOR_MINOR, SHADER_GENERATOR_PATCH)}");
                     continue;
                 }
                 
@@ -184,6 +207,16 @@ namespace StylizedWater3
 
                         if (directive.value != string.Empty) AddLine($"{directivePrefix}{directive.value}");
                     }
+                    continue;
+                }
+                
+                if (Matches("%global_defines%"))
+                {
+                    if (importer.settings.singleCausticsLayer)
+                    {
+                        AddLine("#define CAUSTICS_SINGLE_LAYER");
+                    }
+                    
                     continue;
                 }
 
@@ -253,13 +286,24 @@ namespace StylizedWater3
 
                     continue;
                 }
+
+                if (line.Contains("%stencilID%"))
+                {
+                    int stencilID = STENCIL_REF;
+                    
+                    if (importer.settings.fogIntegration == FogIntegration.Assets.COZY)
+                    {
+                        
+                    }
+                    
+                    line = line.Replace("%stencilID%", stencilID.ToString());
+                    AddLine(line);
+
+                    continue;
+                }
                 
                 if (Matches("%stencil%"))
                 {
-                    if (importer.settings.fogIntegration == FogIntegration.Assets.COZY)
-                    {
-                        AddLine("Stencil { Ref 221 Comp Always Pass Replace }");
-                    }
 
                     continue;
                 }
@@ -280,8 +324,8 @@ namespace StylizedWater3
 
                     switch (fogIntegration.asset)
                     {
-                        case FogIntegration.Assets.COZY: offset = 2;
-                            break;
+                        //case FogIntegration.Assets.COZY: offset = 2;
+                            //break;
                         //case Fog.Assets.AtmosphericHeightFog : offset = 2; //Should actually render after the fog sphere, but asset inherently relies on double fog shading it seems?
                         //break;
                         default: offset = 0;
@@ -315,6 +359,18 @@ namespace StylizedWater3
                         importer.configurationState.underwaterRendering = true;
                         
                         AddLine($"#pragma multi_compile_fragment _ {ShaderParams.Keywords.UnderwaterRendering}");
+                    }
+
+                    continue;
+                }
+                
+                if (Matches("%multi_compile_vertex dynamic effects%"))
+                {
+                    if (dynamicEffectsInstalled)
+                    {
+                        importer.configurationState.dynamicEffects = true;
+                        
+                        AddLine($"#pragma multi_compile_vertex _ {ShaderParams.Keywords.DynamicEffects}");
                     }
 
                     continue;

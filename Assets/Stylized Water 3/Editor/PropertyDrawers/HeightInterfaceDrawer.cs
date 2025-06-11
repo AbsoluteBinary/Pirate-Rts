@@ -121,12 +121,17 @@ namespace StylizedWater3
             else
             {
                 #if UNITY_WEBGL
-                UI.DrawNotification("This technique is not supported on the Web-GL platform." +
+                UI.DrawNotification("This technique is not supported on the WebGL/WebGPU platform." +
                                     "\n\n" +
-                                    "It does not support compute shaders, which this functionality relies on.", MessageType.Error);
+                                    "It does not support asynchronous compute shaders, which this functionality relies on.", MessageType.Error);
                 #endif
                 
                 UI.DrawRenderFeatureSetupError(ref renderFeatureSetup);
+
+                if (Application.isPlaying == false && HeightQuerySystem.DISABLE_IN_EDIT_MODE)
+                {
+                    UI.DrawNotification("GPU height queries have been disabled while in edit mode. You'll find this option on the render feature", MessageType.Warning);
+                }
                 
                 using (new EditorGUILayout.HorizontalScope())
                 {

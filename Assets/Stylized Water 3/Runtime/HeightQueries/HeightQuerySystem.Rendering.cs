@@ -95,6 +95,10 @@ namespace StylizedWater3
             
             private void ExecuteSampling(PassData data, ComputeGraphContext context)
             {
+                #if UNITY_EDITOR
+                if (HeightQuerySystem.DISABLE_IN_EDIT_MODE && Application.isPlaying == false) return;
+                #endif
+                
                 var cmd = context.cmd;
                 using (new ProfilingScope(cmd, computeProfilerSampler))
                 {
@@ -108,6 +112,10 @@ namespace StylizedWater3
             //Pass using "cmd.RequestAsyncReadbackIntoNativeArray"
             private void ExecuteReadback(PassData data, UnsafeGraphContext context)
             {
+                #if UNITY_EDITOR
+                if (HeightQuerySystem.DISABLE_IN_EDIT_MODE && Application.isPlaying == false) return;
+                #endif
+                
                 var cmd = context.cmd;
                 
                 using (new ProfilingScope(cmd, readbackAsyncProfilerSampler))

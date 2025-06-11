@@ -864,6 +864,8 @@ namespace TGS {
         /// <param name="isCanvasTexture">If true, the texture is assumed to fill the entire grid or canvas so only a portion of the texture would be visible in the cell</param>
         public GameObject CellToggleRegionSurface (int cellIndex, bool visible, Color color, bool refreshGeometry, Texture2D texture, Vector2 textureScale, Vector2 textureOffset, float textureRotation, bool overlay, bool localSpace, bool isCanvasTexture) {
 
+            if (_disableMeshGeneration) return null;
+
             FlushCellChanges();
 
             if (cellIndex < 0 || cells == null || cellIndex >= cells.Count || cells[cellIndex] == null)

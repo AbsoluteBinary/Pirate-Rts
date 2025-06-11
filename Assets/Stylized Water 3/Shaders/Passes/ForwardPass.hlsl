@@ -110,14 +110,9 @@ void PopulateSceneData(inout SceneData scene, Varyings input, WaterSurface water
 	
 	#endif
 
-	#if _REFRACTION || UNDERWATER_ENABLED
+	#if _REFRACTION
 	float dispersion = _RefractionChromaticAberration * lerp(1.0, 2.0,  unity_OrthoParams.w);
-
-	#if UNDERWATER_ENABLED
-	//Behaviour, pre v1.4.1
-	//dispersion *= water.vFace;
-	#endif
-
+	
 	scene.color = SampleOpaqueTexture(scene.positionSS, water.refractionOffset.xy, dispersion);
 	#endif
 
@@ -181,10 +176,9 @@ float3 GetWaterColor(SceneData scene, float3 scatterColor, float density, float 
 	accumulation = scene.viewDepthRefracted;
 	#endif
 	
-	//Color of light ray passing through the water, hitting the sea floor (extinction)
-	float3 underwaterColor = saturate(scene.color * exp(-density * (depth + accumulation)));
+	float3 underwaterColor = saturate(scene.color * LightExtinction(depth, accumulation, density));
 	//Energy loss of ray, as it travels deeper and scatters (absorption)
-	float scatterAmount = saturate(exp(-absorption * accumulation));
+	float scatterAmount = LightAbsorption(absorption, accumulation);
 
 	//If the depth is near infinite (ie. hitting the skybox) consider the water completely shallow
 	//if(accumulation > _ProjectionParams.z-0.1) scatterAmount = 1;
@@ -275,6 +269,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 
 	//Returns mesh or world-space UV
 	float2 uv = GetSourceUV(input.uv.xy, positionWS.xz, _WorldSpaceUV);
+	//return float4(frac(uv), 0, 1);
 	#endif
 
 	
@@ -411,7 +406,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 #endif
 	#endif
 	
-	#if _REFRACTION || UNDERWATER_ENABLED
+	#if _REFRACTION
 	float3 refractionViewDir = water.viewDir;
 
 	#if !_RIVER
@@ -444,8 +439,10 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	//return float4(frac(scene.positionWS.xyz), 1.0);
 	//return float4(frac(water.refractionOffset.xy), 0, 1.0);
 	//return float4(scene.refractionMask.xxx, 1.0);
-	
+
 	#if UNDERWATER_ENABLED
+	//const float underwaterMask = SampleUnderwaterMask(scene.positionSS.xy / scene.positionSS.w);
+	//return float4(underwaterMask.xxx, 1.0);
 	ClipSurface(scene.positionSS.xyzw, positionWS, input.positionCS.xyz, water.vFace);
 	#endif
 
@@ -699,6 +696,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	//return float4(specular, 1.0);
 
 	//Reflection probe/planar
+	float3 renderedReflections = 0;
 #ifndef _ENVIRONMENTREFLECTIONS_OFF
 
 	//Blend between smooth surface normal and normal map to control the reflection perturbation (probes only!)
@@ -731,8 +729,10 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	#endif
 	
 	float2 reflectionPixelOffset = (reflectionOffsetVector.xz * scene.positionSS.w * SCREENSPACE_REFLECTION_DISTORTION_MULTIPLIER).xy;
+
+	//SSR + Planar
 	
-	water.reflections = SampleReflections(reflectionVector, _ReflectionBlur, scene.positionSS.xyzw, positionWS, refWorldNormal, water.viewDir, reflectionPixelOffset, _PlanarReflectionsEnabled, _ScreenSpaceReflectionsEnabled);
+	water.reflections = SampleReflections(reflectionVector, _ReflectionBlur, scene.positionSS.xyzw, positionWS, refWorldNormal, water.viewDir, reflectionPixelOffset, _PlanarReflectionsEnabled, _ScreenSpaceReflectionsEnabled, renderedReflections);
 	//return float4(water.reflections, 1.0);
 	
 	float reflectionFresnel = ReflectionFresnel(refWorldNormal, water.viewDir * faceSign, _ReflectionFresnel);
@@ -832,6 +832,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	#if UNDERWATER_ENABLED
 	//Override the strength of the effect for the backfaces, to match the underwater shading post effect
 	translucencyData.strength *= lerp(_UnderwaterFogBrightness * _UnderwaterSubsurfaceStrength, 1, water.vFace);
+	translucencyData.exponent = lerp(_UnderwaterSubsurfaceExponent, _TranslucencyExp, water.vFace);
 	#endif
 	#endif
 
@@ -959,13 +960,19 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	ApplyFog(finalColor.rgb, inputData.fogCoord, scene.positionSS, positionWS, fogMask);
 
 	#if UNDERWATER_ENABLED
-	float3 underwaterColor = ShadeUnderwaterSurface(surfaceData.albedo.rgb, surfaceData.emission.rgb, surfaceData.specular.rgb, scene.color.rgb, scene.skyMask,
+	float4 underwaterColor = ShadeUnderwaterSurface(surfaceData.albedo.rgb, surfaceData.emission.rgb, surfaceData.specular.rgb, renderedReflections * _UnderwaterReflectionStrength, scene.color.rgb, scene.skyMask,
 		backfaceShadows, inputData.positionWS, inputData.normalWS, water.tangentWorldNormal, water.viewDir, scene.positionSS.xy,
-		_ShallowColor.rgb, _BaseColor.rgb, water.vFace, _UnderwaterSurfaceSmoothness, _UnderwaterRefractionOffset);
-	
-	finalColor.rgb = lerp(underwaterColor, finalColor.rgb, water.vFace);
-	water.alpha = lerp(1.0, water.alpha, water.vFace);
+		_ShallowColor, _BaseColor, water.vFace, _UnderwaterSurfaceSmoothness, _UnderwaterRefractionOffset);
+
+	#if _REFRACTION
+	underwaterColor.a = 1.0;
 	#endif
+	
+	finalColor.rgb = lerp(underwaterColor.rgb, finalColor.rgb, water.vFace);
+	water.alpha = lerp(underwaterColor.a, water.alpha, water.vFace);
+	#endif
+	
+	//return float4(water.alpha.xxx, 1.0);
 	
 	finalColor.a = water.alpha;
 

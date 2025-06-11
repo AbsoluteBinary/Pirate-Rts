@@ -30,7 +30,26 @@ float AttenuateSSR(float2 uv)
 	return pow(result, 0.5);
 }
 
-void RaymarchSSR(float3 origin, float3 direction, uint samples, half stepSize, half thickness, out half2 sampleUV, out half valid, out half outOfBounds)
+
+float4 _WaterSSRParams;
+//X: Enabled bool
+//Y: Accept skybox hits
+
+#define ALLOW_SSR _WaterSSRParams.x > 0.5
+#define SSR_REFLECT_SKY _WaterSSRParams.y > 0.5
+
+float4 _WaterSSRSettings;
+//X: Steps
+//Y: Step size
+//Z: Max distance
+//W: Thickness
+
+#define SSR_SAMPLES _WaterSSRSettings.x
+#define SSR_STEPSIZE _WaterSSRSettings.y
+#define SSR_MAX_DISTANCE _WaterSSRSettings.z
+#define SSR_THICKNESS _WaterSSRSettings.w
+
+void RaymarchSSR(float3 positionVS, float3 direction, uint samples, half stepSize, half thickness, out half2 sampleUV, out half valid, out half outOfBounds)
 {
 	sampleUV = 0;
 	valid = 0;
@@ -40,15 +59,15 @@ void RaymarchSSR(float3 origin, float3 direction, uint samples, half stepSize, h
 	const half rcpStepCount = rcp(samples);
  
 	UNITY_LOOP
-	for(uint i = 0; i <= samples; i++)
+	for(uint i = 0; i < samples; i++)
 	{
-		origin += direction;
+		positionVS += direction;
 		direction *= 1+stepSize;
-
+		
 		//View-space to screen-space UV
-		sampleUV = ComputeNormalizedDeviceCoordinates(origin, GetViewToHClipMatrix());
+		sampleUV = ComputeNormalizedDeviceCoordinates(positionVS, GetViewToHClipMatrix());
 
-		if (any(sampleUV.xy < 0) || any(sampleUV.xy > 1))
+		if (any(sampleUV < 0) || any(sampleUV > 1))
 		{
 			outOfBounds = 1;
 			valid = 0;
@@ -59,14 +78,22 @@ void RaymarchSSR(float3 origin, float3 direction, uint samples, half stepSize, h
 
 		//Sample Mip0, gradient sampling cannot work with loops
 		float deviceDepth = SAMPLE_TEXTURE2D_X_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, sampleUV, 0).r;
+
+		//Depth is near-infinity. May want to reflect the skybox, if no reflection probes are present
+		if(SSR_REFLECT_SKY && deviceDepth <= 0.00001)
+		{
+			valid = 1;
+			continue;
+		}
 		
 		//Calculate view-space position from UV and depth
 		//Not using the ComputeViewSpacePosition function, since this negates the Z-component
 		float3 samplePos = ComputeWorldSpacePosition(sampleUV, deviceDepth, UNITY_MATRIX_I_P);
-
-		if(distance(samplePos.z, origin.z) > length(direction) * thickness) continue;
 		
-		if(samplePos.z > origin.z)
+		//Depth mismatch check. Geometry behind the water is invalid. If the difference in depth is large enough, consider it a miss.
+		if (abs(samplePos.z - positionVS.z) > length(direction) * thickness) continue;
+		
+		if(samplePos.z > positionVS.z)
 		{
 			valid = 1;
 			return;
@@ -86,18 +113,7 @@ float3 SampleReflectionProbes(float3 reflectionVector, float3 positionWS, float 
 	return probes;
 }
 
-bool _WaterSSRAllowed;
-float4 _WaterSSRParams;
-//X: Steps
-//Y: Step size
-//Z: Thickness
-
-#define SSR_SAMPLES 12
-#define SSR_STEPSIZE 0.75
-#define SSR_MAX_DISTANCE 100
-#define SSR_THICKNESS 1.0
-
-float3 SampleReflections(float3 reflectionVector, float smoothness, float4 screenPos, float3 positionWS, float3 normalWS, float3 viewDir, float2 pixelOffset, bool planarReflectionsEnabled, bool ssrEnabled)
+float3 SampleReflections(float3 reflectionVector, float smoothness, float4 screenPos, float3 positionWS, float3 normalWS, float3 viewDir, float2 pixelOffset, bool planarReflectionsEnabled, bool ssrEnabled, out float3 renderedReflections)
 {
 	screenPos.xy += pixelOffset.xy * lerp(1.0, 0.1, unity_OrthoParams.w);
 	screenPos /= screenPos.w;
@@ -106,8 +122,11 @@ float3 SampleReflections(float3 reflectionVector, float smoothness, float4 scree
 	
 	float3 reflections = probes;
 
+	//Output separately, for underwater rendering
+	renderedReflections = 0;
+	
 	#if !_DISABLE_DEPTH_TEX
-	if(ssrEnabled && _WaterSSRAllowed)
+	if(ssrEnabled && ALLOW_SSR)
 	{
 		const float3 positionVS = TransformWorldToView(positionWS);
 		const float3 direction = TransformWorldToViewDir(reflectionVector);
@@ -117,9 +136,12 @@ float3 SampleReflections(float3 reflectionVector, float smoothness, float4 scree
 
 		RaymarchSSR(positionVS, direction, SSR_SAMPLES, SSR_STEPSIZE, SSR_THICKNESS, ssrUV, ssrRayMask, ssrEdgeMask);
 
+		half ssrMask = ssrRayMask * ssrEdgeMask;
 		const float3 reflectionSS = SampleSceneColor(ssrUV);
-	
-		reflections = lerp(reflections, reflectionSS, ssrRayMask * ssrEdgeMask);
+
+		reflections = lerp(reflections, reflectionSS, ssrMask);
+
+		renderedReflections += reflectionSS * ssrMask;
 	}
 	#endif
 		
@@ -131,6 +153,8 @@ float3 SampleReflections(float3 reflectionVector, float smoothness, float4 scree
 		planarReflections.a = saturate(planarReflections.a);
 	
 		reflections = lerp(reflections, planarReflections.rgb, planarReflections.a);
+
+		renderedReflections = lerp(renderedReflections, planarReflections.rgb, planarReflections.a);
 	}
 	#endif
 	

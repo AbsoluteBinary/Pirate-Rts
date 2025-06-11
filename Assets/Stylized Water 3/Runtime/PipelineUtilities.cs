@@ -677,6 +677,33 @@ namespace StylizedWater3
             return state;
         }
 
+        public static bool IsOpaqueDownSampled()
+        {
+            return UniversalRenderPipeline.asset.opaqueDownsampling != Downsampling.None;
+        }
+        
+        public static bool IsOpaqueDownSampled(out List<UniversalRenderPipelineAsset> renderers)
+        {
+            bool state = false;
+            renderers = new List<UniversalRenderPipelineAsset>();
+            
+            for (int i = 0; i < GraphicsSettings.allConfiguredRenderPipelines.Length; i++)
+            {
+                if(GraphicsSettings.allConfiguredRenderPipelines[i].GetType() != typeof(UniversalRenderPipelineAsset)) continue;
+                
+                UniversalRenderPipelineAsset pipeline = (UniversalRenderPipelineAsset)GraphicsSettings.allConfiguredRenderPipelines[i];
+
+                state |= (pipeline.opaqueDownsampling != Downsampling.None);
+                
+                if (pipeline.opaqueDownsampling != Downsampling.None)
+                {
+                    renderers.Add(pipeline);
+                }
+            }
+
+            return state;
+        }
+
         public static void SetOpaqueTextureOnAllAssets(bool state)
         {
             for (int i = 0; i < GraphicsSettings.allConfiguredRenderPipelines.Length; i++)
@@ -690,6 +717,32 @@ namespace StylizedWater3
                 #endif
                 
                 pipeline.supportsCameraOpaqueTexture = state;
+            }
+        }
+        
+        public static void DisableOpaqueDownsampling(List<UniversalRenderPipelineAsset> renderers = null)
+        {
+            if (renderers == null) IsOpaqueDownSampled(out renderers);
+            
+            for (int i = 0; i < renderers.Count; i++)
+            {
+                if(renderers[i].GetType() != typeof(UniversalRenderPipelineAsset)) continue;
+                
+                UniversalRenderPipelineAsset pipeline = renderers[i];
+
+                #if UNITY_EDITOR
+                if(pipeline.opaqueDownsampling != Downsampling.None) EditorUtility.SetDirty(pipeline);
+                #endif
+
+                FieldInfo field = typeof(UniversalRenderPipelineAsset).GetField("m_OpaqueDownsampling", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (field != null)
+                {
+                    field.SetValue(pipeline, Downsampling.None);
+                }
+                else
+                {
+                    Debug.LogWarning("Could not find field 'm_OpaqueDownsampling' via reflection.");
+                }
             }
         }
         

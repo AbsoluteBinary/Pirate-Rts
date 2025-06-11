@@ -91,18 +91,17 @@ namespace StylizedWater3
                 unityVersion.state = MessageType.None;
                 unityVersion.description = $"Likely compatible and supported Unity version";
                 
-                string unsupportedVersionText = $"This version of Unity is not compatible and is not subject to support. Update to at least <b>{AssetInfo.MIN_UNITY_VERSION}</b>. Errors and issues need to be resolved locally";
                 
                 //Too old
                 if (AssetInfo.VersionChecking.compatibleVersion == false || AssetInfo.VersionChecking.supportedPatchVersion == false)
                 {
                     unityVersion.state = MessageType.Error;
-                    unityVersion.description = unsupportedVersionText;
+                    unityVersion.description = $"This version of Unity is not compatible and is not subject to support. Update to at least <b>{AssetInfo.VersionChecking.MinRequiredUnityVersion}</b>. Errors and issues need to be resolved locally";
                 }
                 else
                 {
                     //Too broken
-                    if (AssetInfo.VersionChecking.alphaVersion)
+                    if (AssetInfo.VersionChecking.unityVersionType != AssetInfo.VersionChecking.UnityVersionType.Release)
                     {
                         unityVersion.state = MessageType.Warning;
                         unityVersion.description = "Alpha/preview versions of Unity are not supported. Shader/script errors or warnings may occur depending on which weekly-version you are using." +
@@ -152,6 +151,22 @@ namespace StylizedWater3
                 graphicsAPI.description = $"Compatible";
             }
             AddItem(graphicsAPI);
+            
+            
+            SetupItem colorSpace = new SetupItem($"Color space ({PlayerSettings.colorSpace.ToString()})");
+            {
+                if (PlayerSettings.colorSpace == ColorSpace.Linear)
+                {
+                    colorSpace.state = MessageType.None;
+                    colorSpace.description = $"Linear";
+                }
+                else
+                {
+                    colorSpace.state = MessageType.Warning;
+                    colorSpace.description = $"All content is authored for the Linear color space, water colors will not look as advertised.";
+                }
+            }
+            AddItem(colorSpace);
 
             /*
             //Also counts non-script related errors!
@@ -432,6 +447,34 @@ namespace StylizedWater3
                 else
                 {
                     opaqueTexture.description = "Opaque texture option is enabled on all renderers";
+
+                    SetupItem opaqueDownsampled = new SetupItem("Opaque texture resolution");
+                    {
+                        opaqueDownsampled.state = PipelineUtilities.IsOpaqueDownSampled(out var downsampledRenderers) ? MessageType.Warning : MessageType.None;
+
+                        if (opaqueDownsampled.state == MessageType.Warning)
+                        {
+                            opaqueDownsampled.description = "Opaque texture resolution is halved on these renderers:\n";
+                            for (int i = 0; i < downsampledRenderers.Count; i++)
+                            {
+                                opaqueDownsampled.description += "• " + downsampledRenderers[i].name + "\n";
+                            } 
+                            opaqueDownsampled.description += "\nThis will cause water materials with Refraction enabled to appear blurry!";
+                            opaqueDownsampled.description += "\n\nUnderwater rendering will also appear blurred with visible outlines around geometry!";
+
+                            opaqueDownsampled.actionName = "Switch to full resolution";
+                            opaqueDownsampled.action = () =>
+                            {
+                                PipelineUtilities.DisableOpaqueDownsampling(downsampledRenderers);
+                            };
+                        }
+                        else
+                        {
+                            opaqueDownsampled.description = "Opaque texture is rendering at full resolution";
+                        }
+                        
+                        AddItem(opaqueDownsampled);
+                    }
                 }
                 AddItem(opaqueTexture);
             }

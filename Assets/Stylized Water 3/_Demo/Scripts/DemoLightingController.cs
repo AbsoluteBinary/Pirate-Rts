@@ -2,12 +2,19 @@
 // COPYRIGHT PROTECTED UNDER THE UNITY ASSET STORE EULA (https://unity.com/legal/as-terms)
 //    • Copying or referencing source code for the production of new asset store, or public, content is strictly prohibited!
 //    • Uploading this file to a public repository will subject it to an automated DMCA takedown request.
+#if (ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_INSTALLED)
+#define USE_INPUT_SYSTEM
+#endif
+
 
 using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
 using UnityEditor;
+#endif
+#if USE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
 #endif
 
 namespace StylizedWater3.Demo
@@ -40,6 +47,8 @@ namespace StylizedWater3.Demo
             public float fogDensity = 0.002f;
         }
 
+        public static bool ShowGUI = true;
+
         [Min(0)]
         public int activeIndex = 0;
         public Preset[] presets = Array.Empty<Preset>();
@@ -52,6 +61,10 @@ namespace StylizedWater3.Demo
         
         [SerializeField]
         private bool realtimeReflectionProbesDisabled;
+        
+        #if USE_INPUT_SYSTEM
+        private InputAction[] numberKeyActions;
+        #endif  
         
         private void OnEnable()
         {
@@ -68,6 +81,23 @@ namespace StylizedWater3.Demo
             #if UNITY_EDITOR
             UnityEditor.SceneView.duringSceneGui += OnSceneGUI;
             #endif
+
+            SetupInput();
+        }
+        
+        private void SetupInput()
+        {
+            #if USE_INPUT_SYSTEM
+            numberKeyActions = new InputAction[9];
+
+            for (int i = 0; i < 9; i++)
+            {
+                int presetIndex = i;
+                numberKeyActions[i] = new InputAction($"Preset{presetIndex + 1}", binding: $"<Keyboard>/{presetIndex + 1}");
+                numberKeyActions[i].performed += ctx => OnNumberKeyPressed(presetIndex);
+                numberKeyActions[i].Enable();
+            }
+            #endif
         }
 
         private void OnDisable()
@@ -80,6 +110,17 @@ namespace StylizedWater3.Demo
             
             //Do not meddle with project settings, restore changes
             if (realtimeReflectionProbesDisabled == false && QualitySettings.realtimeReflectionProbes == true) QualitySettings.realtimeReflectionProbes = false;
+            
+            #if USE_INPUT_SYSTEM
+            if (numberKeyActions != null)
+            {
+                foreach (var action in numberKeyActions)
+                {
+                    action.Disable();
+                    action.Dispose();
+                }
+            }
+            #endif
         }
         
         private readonly int SkyboxTexID = Shader.PropertyToID("_Tex");
@@ -91,6 +132,8 @@ namespace StylizedWater3.Demo
             if (this.gameObject.activeInHierarchy == false) return;
             if (index > presets.Length) return;
 
+            activeIndex = index;
+            
             Preset preset = presets[index];
 
             Light[] lights = FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -106,8 +149,7 @@ namespace StylizedWater3.Demo
             
             sun.intensity = preset.intensity;
             sun.color = preset.tint;
-
-        
+            
             m_skybox.CopyPropertiesFromMaterial(preset.skybox);
             m_skybox.SetTexture(SkyboxTexID, preset.skybox.GetTexture(SkyboxTexID));
             
@@ -138,6 +180,14 @@ namespace StylizedWater3.Demo
             m_skybox.name = "Temp skybox";
         }
         
+        private void OnNumberKeyPressed(int index)
+        {
+            if (index < presets.Length)
+            {
+                ApplyPreset(index);
+            }
+        }
+        
         #if UNITY_EDITOR
         private void OnSceneGUI(SceneView sceneView)
         {
@@ -149,17 +199,22 @@ namespace StylizedWater3.Demo
 
         private void OnGUI()
         {
-            using (new GUILayout.HorizontalScope(GUILayout.Width(200f)))
+            if (!ShowGUI) return;
+            
+            using (new GUILayout.HorizontalScope(GUILayout.Width(300f)))
             {
-                GUILayout.Label("Lighting", GUI.skin.label);
+                GUILayout.Label("  Lighting Presets:", GUI.skin.label);
 
                 for (int i = 0; i < presets.Length; i++)
                 {
+                    GUI.enabled = (activeIndex != i);
                     if (GUILayout.Button(presets[i].name))
                     {
                         ApplyPreset(i);
                     }
                 }
+                
+                GUI.enabled = true;
             }
         }
     }
@@ -188,6 +243,7 @@ namespace StylizedWater3.Demo
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.PropertyField(reflectionProbe);
+            DemoLightingController.ShowGUI = EditorGUILayout.Toggle("Show GUI", DemoLightingController.ShowGUI);
             
             EditorGUILayout.Space();
             
@@ -199,6 +255,8 @@ namespace StylizedWater3.Demo
                 {
                     component.activeIndex = i;
                     component.ApplyPreset(i);
+                    
+                    EditorUtility.SetDirty(component);
                 }
 
                 using (new EditorGUI.DisabledGroupScope(component.activeIndex != i))

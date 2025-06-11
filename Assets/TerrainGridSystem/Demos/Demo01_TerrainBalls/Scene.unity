@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 10
+  serializedVersion: 9
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -38,12 +38,13 @@ RenderSettings:
   m_ReflectionIntensity: 0.037
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 13
-  m_BakeOnSceneLoad: 0
+  serializedVersion: 12
+  m_GIWorkflowMode: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -66,6 +67,9 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
+    m_FinalGather: 0
+    m_FinalGatherFiltering: 1
+    m_FinalGatherRayCount: 1024
     m_ReflectionCompression: 2
     m_MixedBakeMode: 1
     m_BakeBackend: 0
@@ -94,13 +98,14 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: b6afc8dbd77364b3f976cdc5e8249b00, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: b6afc8dbd77364b3f976cdc5e8249b00,
+    type: 2}
 --- !u!196 &5
 NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 3
+    serializedVersion: 2
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -113,7 +118,7 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualTileSize: 0
     tileSize: 256
-    buildHeightMesh: 0
+    accuratePlacement: 0
     maxJobWorkers: 0
     preserveTilesOutsideBounds: 0
     debug:
@@ -155,13 +160,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 30692540}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 260.7685, y: 39.439827, z: -35.05236}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &119610530
 GameObject:
@@ -212,17 +216,9 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
+  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -256,13 +252,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 119610530}
-  serializedVersion: 2
   m_LocalRotation: {x: 0.17153691, y: -0.03516598, z: 0.0061269766, w: 0.98453087}
   m_LocalPosition: {x: 263.4328, y: 81.2659, z: 24.19342}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &386158630
 GameObject:
@@ -287,34 +282,34 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 386158630}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 697431664}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &697431664
 Transform:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 435982, guid: 173577d6e48eb4eafbdb6deda795acd9,
+    type: 2}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788676617}
-  serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 250, y: 0.11, z: 250}
   m_LocalScale: {x: 500, y: 500, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 386158631}
   m_Father: {fileID: 2097169269}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &788676617
 GameObject:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 184244, guid: 173577d6e48eb4eafbdb6deda795acd9,
+    type: 2}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
@@ -333,7 +328,8 @@ GameObject:
 --- !u!114 &788676618
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 11484406, guid: 173577d6e48eb4eafbdb6deda795acd9,
+    type: 2}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788676617}
@@ -346,7 +342,6 @@ MonoBehaviour:
   _isDirty: 0
   mouseIsOver: 0
   newInHierarchy: 0
-  territoryThicknessSettingMigrated: 1
   _numCells: 500
   _showCells: 1
   _cellSize: {x: 7.8125, y: 7.812502}
@@ -354,11 +349,6 @@ MonoBehaviour:
   _cellCustomBorderThickness: 0
   _cellBorderThickness: 1
   _cellFillPadding: 0
-  _cellTileBackgroundMode: 1
-  _cellTextureMode: 0
-  _cellTileScale: {x: 1, y: 1}
-  _cellTileOffset: {x: 0, y: 0}
-  _cellAlphaClipping: 0
   _cellHighlightUseCellColor: 0
   _cellHighlightColor: {r: 0, g: 0, b: 1, a: 0.7}
   _cellHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
@@ -384,32 +374,24 @@ MonoBehaviour:
   territoriesTexture: {fileID: 0}
   territoriesTextureNeutralColor: {r: 0, g: 0, b: 0, a: 0}
   _territoriesHideNeutralCells: 0
-  _territoriesInitialCellMethod: 0
-  _territoriesInitialCellIndices: 
   _numTerritories: 8
   _territoriesMaxIterations: 0
   _territoriesAsymmetry: 0
   _territoriesOrganic: 0
   _showTerritories: 1
   _showTerritoriesInteriorBorders: 0
-  _territoryInteriorBorderOnTop: 0
-  _territoryInteriorBorderIncludeEnclaves: 1
   _colorizeTerritories: 0
-  _territoriesColorScheme: 0
-  _territoriesFillColors: []
   _colorizedTerritoriesAlpha: 0.71
   _territoryHighlightColor: {r: 1, g: 0, b: 0, a: 0.7}
   _territoryHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
   _territoryFrontierColor: {r: 0, g: 0, b: 0, a: 1}
-  _territoryCustomBorderThickness: 1
-  _territoryFrontiersThickness: 2.7000003
+  _territoryFrontiersThickness: 1.07
   _territoryInteriorBorderThickness: 3
   _territoryInteriorBorderPadding: -0.6
   _territoryDisputedFrontierColor: {r: 0, g: 0, b: 0, a: 1}
   _showTerritoriesOuterBorder: 1
   _allowTerritoriesInsideTerritories: 0
   _territoriesIgnoreHiddenCells: 0
-  _territoriesColorSeed: 1
   _terrain: {fileID: 0}
   _terrainObject: {fileID: 2097169267}
   _multiTerrain: 0
@@ -422,11 +404,8 @@ MonoBehaviour:
   canvasTexture: {fileID: 0}
   _transparentBackground: 0
   _useStencilBuffer: 1
-  _disableMeshGeneration: 0
   _useGeometryShaders: 1
   _sortingOrder: 0
-  _animationSortingOrder: 0
-  _animationSortingLayer: 
   _heightmapWidth: 513
   _heightmapHeight: 513
   _gridMask: {fileID: 0}
@@ -439,13 +418,6 @@ MonoBehaviour:
   _regularHexagons: 0
   _hexSize: 0.01
   _regularHexagonsWidth: 5.12
-  _adjustCanvasSize: 0
-  _canvasRect:
-    serializedVersion: 2
-    x: -0.5
-    y: -0.5
-    width: 1
-    height: 1
   _gridRelaxation: 1
   _gridCurvature: 0
   _highlightMode: 2
@@ -519,14 +491,14 @@ MonoBehaviour:
   _circularFadeTarget: {fileID: 0}
   _circularFadeDistance: 500
   _circularFadeFallOff: 50
-  _displayCellDebugInfo: 0
-  _displayTerritoryDebugInfo: 0
+  _showCellIndices: 0
   _enableGridEditor: 0
   cameraMain: {fileID: 119610534}
 --- !u!23 &788676619
 MeshRenderer:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 2363212, guid: 173577d6e48eb4eafbdb6deda795acd9,
+    type: 2}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788676617}
@@ -534,15 +506,11 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -571,7 +539,8 @@ MeshRenderer:
 --- !u!33 &788676620
 MeshFilter:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 3317836, guid: 173577d6e48eb4eafbdb6deda795acd9,
+    type: 2}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788676617}
@@ -601,8 +570,9 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 908120549}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 10
   m_Type: 1
+  m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
@@ -652,12 +622,8 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
-  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_LightUnit: 1
-  m_LuxAtDistance: 1
-  m_EnableSpotReflector: 1
 --- !u!4 &908120551
 Transform:
   m_ObjectHideFlags: 0
@@ -665,13 +631,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 908120549}
-  serializedVersion: 2
   m_LocalRotation: {x: 0.55838424, y: 0.014477211, z: -0.0097466335, w: 0.8293989}
   m_LocalPosition: {x: 0, y: 1000, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1287768314
 GameObject:
@@ -703,7 +668,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
@@ -733,13 +697,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1287768314}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2097169267
 GameObject:
@@ -777,28 +740,21 @@ Terrain:
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 5
   m_SplatMapDistance: 1000
-  m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 0
   m_DrawTreesAndFoliage: 1
-  m_StaticShadowCaster: 0
-  m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
+  m_MaterialTemplate: {fileID: 10652, guid: 0000000000000000f000000000000000, type: 0}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 0
-  m_ReceiveGI: 1
   m_ScaleInLightmap: 0.0512
   m_LightmapParameters: {fileID: 15203, guid: 0000000000000000f000000000000000, type: 0}
   m_GroupingID: 0
   m_RenderingLayerMask: 1
   m_AllowAutoConnect: 0
-  m_EnableHeightmapRayTracing: 1
-  m_EnableTreesAndDetailsRayTracing: 0
-  m_TreeMotionVectorModeOverride: 3
 --- !u!4 &2097169269
 Transform:
   m_ObjectHideFlags: 0
@@ -806,14 +762,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2097169267}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 697431664}
   m_Father: {fileID: 0}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!154 &2097169270
 TerrainCollider:
@@ -823,24 +778,6 @@ TerrainCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2097169267}
   m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
   m_TerrainData: {fileID: 15600000, guid: 5fc53b38d87ad435faf0f9c65a94b362, type: 2}
   m_EnableTreeColliders: 1
---- !u!1660057539 &9223372036854775807
-SceneRoots:
-  m_ObjectHideFlags: 0
-  m_Roots:
-  - {fileID: 119610535}
-  - {fileID: 908120551}
-  - {fileID: 2097169269}
-  - {fileID: 30692542}
-  - {fileID: 1287768317}

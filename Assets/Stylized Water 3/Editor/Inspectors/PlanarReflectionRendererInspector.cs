@@ -28,7 +28,6 @@ namespace StylizedWater3
         
         //Quality
         private SerializedProperty renderShadows;
-        private SerializedProperty renderRange;
         private SerializedProperty renderScale;
         private SerializedProperty maximumLODLevel;
         
@@ -60,7 +59,6 @@ namespace StylizedWater3
             enableFog = serializedObject.FindProperty("enableFog");
             enableInSceneView = serializedObject.FindProperty("enableInSceneView");
             renderShadows = serializedObject.FindProperty("renderShadows");
-            renderRange = serializedObject.FindProperty("renderRange");
             renderScale = serializedObject.FindProperty("renderScale");
             maximumLODLevel = serializedObject.FindProperty("maximumLODLevel");
             waterObjects = serializedObject.FindProperty("waterObjects");
@@ -167,6 +165,7 @@ namespace StylizedWater3
             
             EditorGUILayout.PropertyField(includeSkybox);
             EditorGUILayout.PropertyField(enableFog);
+			if(enableFog.boolValue) EditorGUILayout.HelpBox("Unity's built-in fog does not support oblique projections. Expect incorrect fog shading on tall objects or large triangles", MessageType.Warning);
             EditorGUILayout.PropertyField(enableInSceneView);
             
             EditorGUILayout.Space();
@@ -183,7 +182,6 @@ namespace StylizedWater3
             {
                 renderer.ToggleShadows(renderShadows.boolValue);
             }
-            EditorGUILayout.PropertyField(renderRange);
             EditorGUILayout.PropertyField(renderScale);
             EditorGUILayout.PropertyField(maximumLODLevel);
             

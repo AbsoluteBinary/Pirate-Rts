@@ -68,6 +68,7 @@ namespace StylizedWater3
 
         private MaterialProperty _UnderwaterSurfaceSmoothness;
         private MaterialProperty _UnderwaterRefractionOffset;
+        private MaterialProperty _UnderwaterReflectionStrength;
 
         private MaterialProperty _IntersectionFoamOn;
         private MaterialProperty _IntersectionSource;
@@ -268,6 +269,7 @@ namespace StylizedWater3
             
             _UnderwaterSurfaceSmoothness = FindProperty("_UnderwaterSurfaceSmoothness", props);
             _UnderwaterRefractionOffset = FindProperty("_UnderwaterRefractionOffset", props);
+            _UnderwaterReflectionStrength = FindProperty("_UnderwaterReflectionStrength", props);
             
             _IntersectionSource = FindProperty("_IntersectionSource", props);
             _IntersectionSharp = FindProperty("_IntersectionSharp", props);
@@ -1189,14 +1191,14 @@ namespace StylizedWater3
                     if (_ShadingMode.floatValue == 1f || _ShadingMode.hasMixedValue)
                     {
                         DrawShaderProperty(_RefractionChromaticAberration, new GUIContent("Chromatic Aberration (Max)", 
-                            "Creates a prims-like rainbow effect where the refraction is the strongest. Controls the maximum offset, and is based on refraction strength (both the parameter and the context)\n\nCan create some discrepancies in the underwater fog!"));
+                            "Creates a prism-like rainbow effect where the refraction is the strongest. Controls the maximum offset, and is based on refraction strength (both the parameter and the context)\n\nCan create some discrepancies in the underwater fog!"));
                     }
                 }
                 else
                 {
-                    if (underwaterRenderingInstalled)
+                    if (underwaterRenderingInstalled && _ShadingMode.floatValue > 0.5)
                     {
-                        UI.DrawNotification("[Underwater Rendering] It's recommended to keep refraction enabled.\n\n It is performed anyway for the underwater surface", MessageType.Warning);
+                        UI.DrawNotification("[Underwater Rendering] It's recommended to keep Refraction enabled for correct shading of geometry above the water surface.", MessageType.Warning);
                     }
                 }
                 
@@ -1207,6 +1209,7 @@ namespace StylizedWater3
                     EditorGUILayout.LabelField("Underwater Surface Rendering", EditorStyles.boldLabel);
                     DrawShaderProperty(_UnderwaterSurfaceSmoothness, new GUIContent("Surface Smoothness", "Controls how distorted everything above the water appears from below"));
                     DrawShaderProperty(_UnderwaterRefractionOffset, new GUIContent("Refraction offset", "Creates a wide \"circle\" of visible air above the camera. Pushes it further away from the camera"));
+                    DrawShaderProperty(_UnderwaterReflectionStrength, new GUIContent("Reflection Strength", "Visibility of the rendered reflections"));
                 }
 
                 EditorGUILayout.Space();

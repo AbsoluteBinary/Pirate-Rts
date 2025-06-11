@@ -18,7 +18,8 @@ namespace StylizedWater3
         
         private static readonly int _CausticsProjectionAvailable = Shader.PropertyToID("_CausticsProjectionAvailable");
         private static readonly int CausticsProjection = Shader.PropertyToID("CausticsProjection");
-        private static readonly int _WaterSSRAllowed = Shader.PropertyToID("_WaterSSRAllowed");
+        private static readonly int _WaterSSRParams = Shader.PropertyToID("_WaterSSRParams");
+        private static readonly int _WaterSSRSettings = Shader.PropertyToID("_WaterSSRSettings");
 
         private static VisibleLight mainLight;
         private Matrix4x4 causticsProjection;
@@ -47,10 +48,13 @@ namespace StylizedWater3
         
         private class PassData
         {
+            public UniversalCameraData cameraData;
+            
             public bool directionalCaustics;
             public Matrix4x4 causticsProjection;
+            
             public bool ssr;
-            public UniversalCameraData cameraData;
+            public bool ssrSkybox;
         }
 
         public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
@@ -65,6 +69,7 @@ namespace StylizedWater3
             using (var builder = renderGraph.AddRasterRenderPass<PassData>("Water Constants", out var passData, m_ProfilingSampler))
             {
                 passData.ssr = settings.screenSpaceReflectionSettings.allow;
+                passData.ssrSkybox = settings.screenSpaceReflectionSettings.reflectEverything;
                 passData.directionalCaustics = settings.allowDirectionalCaustics;
             
                 if (passData.directionalCaustics)
@@ -105,9 +110,12 @@ namespace StylizedWater3
         
         static void Execute(RasterCommandBuffer cmd, PassData data)
         {
-            cmd.SetGlobalInt(_WaterSSRAllowed, data.ssr ? 1 : 0);
+            cmd.SetGlobalVector(_WaterSSRParams, new Vector4(data.ssr ? 1 : 0, data.ssrSkybox ? 1 : 0, 0));
+            
+            //Exposed settings not ready yet, would like to refactor the raymarching to use a step-distance, rather than a fixed number of steps.
+            cmd.SetGlobalVector(_WaterSSRSettings, new Vector4(12, 0.75f, 100f, 1.0f));
+            
             cmd.SetGlobalInt(_CausticsProjectionAvailable, data.directionalCaustics ? 1 : 0);
-
             if (data.directionalCaustics)
             {
                 cmd.SetGlobalMatrix(CausticsProjection, data.causticsProjection);
@@ -121,7 +129,7 @@ namespace StylizedWater3
         {
             //Important to disable these features, as the next camera rendering may be using a different renderer altogether
             cmd.SetGlobalInt(_CausticsProjectionAvailable, 0);
-            cmd.SetGlobalInt(_WaterSSRAllowed, 0);
+            cmd.SetGlobalVector(_WaterSSRParams, Vector4.zero);
         }
 
         public void Dispose()

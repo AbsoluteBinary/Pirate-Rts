@@ -77,6 +77,12 @@ namespace StylizedWater3
             EditorGUILayout.Space();
             
             EditorGUILayout.PropertyField(screenSpaceReflectionSettings);
+
+            if (renderFeature.screenSpaceReflectionSettings.reflectEverything && screenSpaceReflectionSettings.isExpanded)
+            {
+                UI.DrawNotification("Enabling this option bypasses failed reflection ray filtering." +
+                                    "\n\nReflection artefacts are to be expected!", MessageType.Warning);
+            }
             
             EditorGUILayout.Space();
             
@@ -102,15 +108,21 @@ namespace StylizedWater3
                 {
                     EditorGUILayout.HelpBox("Height Pre-pass is forcible enabled at the moment, because there are height queries being issued from script.", MessageType.Info);
                     
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.LabelField("");
+                    
+                }
+            }
+            
+            EditorGUILayout.Space();
 
-                        if (GUILayout.Button(new GUIContent(" Inspect Queries", EditorGUIUtility.FindTexture("_Help"))))
-                        {
-                            HeightQuerySystemEditor.HeightQueryInspector.Open();
-                        }
-                    }
+            EditorGUILayout.LabelField("GPU Height Queries", EditorStyles.boldLabel);
+            HeightQuerySystem.DISABLE_IN_EDIT_MODE = EditorGUILayout.Toggle("Forced Disable In Edit-mode", HeightQuerySystem.DISABLE_IN_EDIT_MODE);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("");
+
+                if (GUILayout.Button(new GUIContent(" Inspect Queries", EditorGUIUtility.FindTexture("_Help"))))
+                {
+                    HeightQuerySystemEditor.HeightQueryInspector.Open();
                 }
             }
             

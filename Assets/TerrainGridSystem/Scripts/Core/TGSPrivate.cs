@@ -340,14 +340,16 @@ namespace TGS {
             VRCheck.Init();
             if (VRCheck.isActive) _useGeometryShaders = false;
 
-            if (input == null) {
+            if (!_disableMeshGeneration) {
+                if (input == null) {
 #if ENABLE_INPUT_SYSTEM
                 input = new NewInputSystem();
 #else
-                input = new DefaultInputSystem();
+                    input = new DefaultInputSystem();
 #endif
+                }
+                input.Init();
             }
-            input.Init();
 
             // Use heuristic to determine if TGS should be reparented to this object automatically. Do it if we detect the object mesh is different to the basic quad TGS includes
             if (newInHierarchy) {
@@ -399,48 +401,60 @@ namespace TGS {
                 }
             }
 
-            if (cameraMain == null) {
-                cameraMain = Camera.main;
-                int gameObjectLayerMask = 1 << gameObject.layer;
-                if (cameraMain == null || (cameraMain.cullingMask & gameObjectLayerMask) == 0) {
+            if (!_disableMeshGeneration) {
+
+                if (cameraMain == null) {
+                    cameraMain = Camera.main;
+                    int gameObjectLayerMask = 1 << gameObject.layer;
+                    if (cameraMain == null || (cameraMain.cullingMask & gameObjectLayerMask) == 0) {
 #if UNITY_2023_1_OR_NEWER
                     Camera[] cams = FindObjectsByType<Camera>(FindObjectsSortMode.None);
 #else
-                    Camera[] cams = FindObjectsOfType<Camera>();
+                        Camera[] cams = FindObjectsOfType<Camera>();
 #endif
-                    for (int k = 0; k < cams.Length; k++) {
-                        Camera cam = cams[k];
-                        if (cam.isActiveAndEnabled && (cam.cullingMask & gameObjectLayerMask) != 0) {
-                            cameraMain = cam;
-                            break;
+                        for (int k = 0; k < cams.Length; k++) {
+                            Camera cam = cams[k];
+                            if (cam.isActiveAndEnabled && (cam.cullingMask & gameObjectLayerMask) != 0) {
+                                cameraMain = cam;
+                                break;
+                            }
                         }
                     }
                 }
             }
+
             if (!initialized) {
                 Init();
             }
-            if (hudMatTerritoryOverlay != null && hudMatTerritoryOverlay.color != _territoryHighlightColor) {
-                hudMatTerritoryOverlay.color = _territoryHighlightColor;
+            if (hudMatTerritoryOverlay != null) {
+                if (hudMatTerritoryOverlay.color != _territoryHighlightColor) {
+                    hudMatTerritoryOverlay.color = _territoryHighlightColor;
+                }
+                hudMatTerritoryOverlay.SetColor(ShaderParams.Color2, _territoryHighlightColor2);
             }
-            hudMatTerritoryOverlay.SetColor(ShaderParams.Color2, _territoryHighlightColor2);
 
-            if (hudMatTerritoryGround != null && hudMatTerritoryGround.color != _territoryHighlightColor) {
-                hudMatTerritoryGround.color = _territoryHighlightColor;
+            if (hudMatTerritoryGround != null) {
+                if (hudMatTerritoryGround.color != _territoryHighlightColor) {
+                    hudMatTerritoryGround.color = _territoryHighlightColor;
+                }
+                hudMatTerritoryGround.SetColor(ShaderParams.Color2, _territoryHighlightColor2);
             }
-            hudMatTerritoryGround.SetColor(ShaderParams.Color2, _territoryHighlightColor2);
 
-            if (hudMatCellOverlay != null && hudMatCellOverlay.color != _cellHighlightColor) {
-                hudMatCellOverlay.color = _cellHighlightColor;
-                UpdateMaterialHighlightBorder(hudMatCellOverlay);
+            if (hudMatCellOverlay != null) {
+                if (hudMatCellOverlay.color != _cellHighlightColor) {
+                    hudMatCellOverlay.color = _cellHighlightColor;
+                    UpdateMaterialHighlightBorder(hudMatCellOverlay);
+                }
+                hudMatCellOverlay.SetColor(ShaderParams.Color2, _cellHighlightColor2);
             }
-            hudMatCellOverlay.SetColor(ShaderParams.Color2, _cellHighlightColor2);
 
-            if (hudMatCellGround != null && hudMatCellGround.color != _cellHighlightColor) {
-                hudMatCellGround.color = _cellHighlightColor;
-                UpdateMaterialHighlightBorder(hudMatCellGround);
+            if (hudMatCellGround != null) {
+                if (hudMatCellGround.color != _cellHighlightColor) {
+                    hudMatCellGround.color = _cellHighlightColor;
+                    UpdateMaterialHighlightBorder(hudMatCellGround);
+                }
+                hudMatCellGround.SetColor(ShaderParams.Color2, _cellHighlightColor2);
             }
-            hudMatCellGround.SetColor(ShaderParams.Color2, _cellHighlightColor2);
 
             if (territoriesThinMat != null && territoriesThinMat.color != _territoryFrontierColor) {
                 territoriesThinMat.color = _territoryFrontierColor;
@@ -620,93 +634,95 @@ namespace TGS {
             tempUVs = new List<Vector4>();
             tempIndices = new List<int>();
 
-            LoadGeometryShaders();
+            if (!_disableMeshGeneration) {
+                LoadGeometryShaders();
 
-            if (territoriesThinMat == null) {
-                territoriesThinMat = Instantiate(Resources.Load<Material>("Materials/Territory")) as Material;
-                disposalManager.MarkForDisposal(territoriesThinMat);
+                if (territoriesThinMat == null) {
+                    territoriesThinMat = Instantiate(Resources.Load<Material>("Materials/Territory")) as Material;
+                    disposalManager.MarkForDisposal(territoriesThinMat);
+                }
+                if (territoriesDisputedThinMat == null) {
+                    territoriesDisputedThinMat = Instantiate(territoriesThinMat) as Material;
+                    disposalManager.MarkForDisposal(territoriesDisputedThinMat);
+                    territoriesDisputedThinMat.color = _territoryDisputedFrontierColor;
+                }
+                if (cellsThinMat == null) {
+                    cellsThinMat = Instantiate(Resources.Load<Material>("Materials/Cell"));
+                    disposalManager.MarkForDisposal(cellsThinMat);
+                }
+                if (hudMatTerritoryOverlay == null) {
+                    hudMatTerritoryOverlay = new Material(Shader.Find("Terrain Grid System/Unlit Highlight Ground Texture"));
+                    hudMatTerritoryOverlay.SetInt(ShaderParams.Cull, (int)UnityEngine.Rendering.CullMode.Off);
+                    hudMatTerritoryOverlay.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
+                    disposalManager.MarkForDisposal(hudMatTerritoryOverlay);
+                }
+                if (hudMatTerritoryGround == null) {
+                    hudMatTerritoryGround = Instantiate(hudMatTerritoryOverlay) as Material;
+                    SetOverlayMode(hudMatTerritoryGround, false);
+                    disposalManager.MarkForDisposal(hudMatTerritoryGround);
+                }
+                if (hudMatCellOverlay == null) {
+                    hudMatCellOverlay = Instantiate(hudMatTerritoryOverlay) as Material;
+                    SetOverlayMode(hudMatCellOverlay, true);
+                    disposalManager.MarkForDisposal(hudMatCellOverlay);
+                }
+                if (hudMatCellGround == null) {
+                    hudMatCellGround = Instantiate(hudMatTerritoryOverlay) as Material;
+                    hudMatCellGround.SetInt(ShaderParams.Cull, (int)UnityEngine.Rendering.CullMode.Back);
+                    hudMatCellGround.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.LessEqual);
+                    disposalManager.MarkForDisposal(hudMatCellGround);
+                }
+                // Materials for cells
+                const int cellsQueueOffset = 25;
+                if (coloredMatGroundCell == null) {
+                    coloredMatGroundCell = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionGround")) as Material;
+                    coloredMatGroundCell.renderQueue += cellsQueueOffset;
+                    disposalManager.MarkForDisposal(coloredMatGroundCell);
+                }
+                if (coloredMatOverlayCell == null) {
+                    coloredMatOverlayCell = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionOverlay")) as Material;
+                    coloredMatOverlayCell.renderQueue += cellsQueueOffset;
+                    disposalManager.MarkForDisposal(coloredMatOverlayCell);
+                }
+                if (texturizedMatGroundCell == null) {
+                    texturizedMatGroundCell = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionGround"));
+                    texturizedMatGroundCell.renderQueue += cellsQueueOffset;
+                    disposalManager.MarkForDisposal(texturizedMatGroundCell);
+                }
+                if (texturizedMatOverlayCell == null) {
+                    texturizedMatOverlayCell = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionOverlay"));
+                    texturizedMatOverlayCell.renderQueue += cellsQueueOffset;
+                    disposalManager.MarkForDisposal(texturizedMatOverlayCell);
+                }
+                // Materials for territories
+                if (coloredMatGroundTerritory == null) {
+                    coloredMatGroundTerritory = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionGround")) as Material;
+                    disposalManager.MarkForDisposal(coloredMatGroundTerritory);
+                }
+                if (coloredMatOverlayTerritory == null) {
+                    coloredMatOverlayTerritory = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionOverlay")) as Material;
+                    disposalManager.MarkForDisposal(coloredMatOverlayTerritory);
+                }
+                if (texturizedMatGroundTerritory == null) {
+                    texturizedMatGroundTerritory = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionGround"));
+                    disposalManager.MarkForDisposal(texturizedMatGroundTerritory);
+                }
+                if (texturizedMatOverlayTerritory == null) {
+                    texturizedMatOverlayTerritory = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionOverlay"));
+                    disposalManager.MarkForDisposal(texturizedMatOverlayTerritory);
+                }
+                if (fadeMatGround == null) {
+                    fadeMatGround = Instantiate(Resources.Load<Material>("Materials/Fade"));
+                    fadeMatGround.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.LessEqual);
+                    disposalManager.MarkForDisposal(fadeMat);
+                }
+                if (fadeMatOverlay == null) {
+                    fadeMatOverlay = Instantiate(Resources.Load<Material>("Materials/Fade"));
+                    fadeMatOverlay.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
+                    disposalManager.MarkForDisposal(fadeMat);
+                }
+                UpdatePreventOverdrawSettings();
             }
-            if (territoriesDisputedThinMat == null) {
-                territoriesDisputedThinMat = Instantiate(territoriesThinMat) as Material;
-                disposalManager.MarkForDisposal(territoriesDisputedThinMat);
-                territoriesDisputedThinMat.color = _territoryDisputedFrontierColor;
-            }
-            if (cellsThinMat == null) {
-                cellsThinMat = Instantiate(Resources.Load<Material>("Materials/Cell"));
-                disposalManager.MarkForDisposal(cellsThinMat);
-            }
-            if (hudMatTerritoryOverlay == null) {
-                hudMatTerritoryOverlay = new Material(Shader.Find("Terrain Grid System/Unlit Highlight Ground Texture"));
-                hudMatTerritoryOverlay.SetInt(ShaderParams.Cull, (int)UnityEngine.Rendering.CullMode.Off);
-                hudMatTerritoryOverlay.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
-                disposalManager.MarkForDisposal(hudMatTerritoryOverlay);
-            }
-            if (hudMatTerritoryGround == null) {
-                hudMatTerritoryGround = Instantiate(hudMatTerritoryOverlay) as Material;
-                SetOverlayMode(hudMatTerritoryGround, false);
-                disposalManager.MarkForDisposal(hudMatTerritoryGround);
-            }
-            if (hudMatCellOverlay == null) {
-                hudMatCellOverlay = Instantiate(hudMatTerritoryOverlay) as Material;
-                SetOverlayMode(hudMatCellOverlay, true);
-                disposalManager.MarkForDisposal(hudMatCellOverlay);
-            }
-            if (hudMatCellGround == null) {
-                hudMatCellGround = Instantiate(hudMatTerritoryOverlay) as Material;
-                hudMatCellGround.SetInt(ShaderParams.Cull, (int)UnityEngine.Rendering.CullMode.Back);
-                hudMatCellGround.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.LessEqual);
-                disposalManager.MarkForDisposal(hudMatCellGround);
-            }
-            // Materials for cells
-            const int cellsQueueOffset = 25;
-            if (coloredMatGroundCell == null) {
-                coloredMatGroundCell = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionGround")) as Material;
-                coloredMatGroundCell.renderQueue += cellsQueueOffset;
-                disposalManager.MarkForDisposal(coloredMatGroundCell);
-            }
-            if (coloredMatOverlayCell == null) {
-                coloredMatOverlayCell = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionOverlay")) as Material;
-                coloredMatOverlayCell.renderQueue += cellsQueueOffset;
-                disposalManager.MarkForDisposal(coloredMatOverlayCell);
-            }
-            if (texturizedMatGroundCell == null) {
-                texturizedMatGroundCell = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionGround"));
-                texturizedMatGroundCell.renderQueue += cellsQueueOffset;
-                disposalManager.MarkForDisposal(texturizedMatGroundCell);
-            }
-            if (texturizedMatOverlayCell == null) {
-                texturizedMatOverlayCell = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionOverlay"));
-                texturizedMatOverlayCell.renderQueue += cellsQueueOffset;
-                disposalManager.MarkForDisposal(texturizedMatOverlayCell);
-            }
-            // Materials for territories
-            if (coloredMatGroundTerritory == null) {
-                coloredMatGroundTerritory = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionGround")) as Material;
-                disposalManager.MarkForDisposal(coloredMatGroundTerritory);
-            }
-            if (coloredMatOverlayTerritory == null) {
-                coloredMatOverlayTerritory = Instantiate(Resources.Load<Material>("Materials/ColorizedRegionOverlay")) as Material;
-                disposalManager.MarkForDisposal(coloredMatOverlayTerritory);
-            }
-            if (texturizedMatGroundTerritory == null) {
-                texturizedMatGroundTerritory = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionGround"));
-                disposalManager.MarkForDisposal(texturizedMatGroundTerritory);
-            }
-            if (texturizedMatOverlayTerritory == null) {
-                texturizedMatOverlayTerritory = Instantiate(Resources.Load<Material>("Materials/TexturizedRegionOverlay"));
-                disposalManager.MarkForDisposal(texturizedMatOverlayTerritory);
-            }
-            if (fadeMatGround == null) {
-                fadeMatGround = Instantiate(Resources.Load<Material>("Materials/Fade"));
-                fadeMatGround.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.LessEqual);
-                disposalManager.MarkForDisposal(fadeMat);
-            }
-            if (fadeMatOverlay == null) {
-                fadeMatOverlay = Instantiate(Resources.Load<Material>("Materials/Fade"));
-                fadeMatOverlay.SetInt(ShaderParams.ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
-                disposalManager.MarkForDisposal(fadeMat);
-            }
-            UpdatePreventOverdrawSettings();
 
             coloredMatCacheGroundCell = new Dictionary<int, Material>();
             coloredMatCacheOverlayCell = new Dictionary<int, Material>();
@@ -2832,9 +2848,9 @@ namespace TGS {
                 }
                 Camera cam = cameraMain;
                 if (cam != null) {
-                    lastCamPos = cameraMain.transform.position - Vector3.up; // just to force update on first frame
+                    lastCamPos = cam.transform.position - Vector3.up; // just to force update on first frame
                     FitToTerrain();
-                    lastCamPos = cameraMain.transform.position - Vector3.up; // just to force update on first update as well
+                    lastCamPos = cam.transform.position - Vector3.up; // just to force update on first update as well
                 }
                 if (CalculateTerrainRoughness(reuseTerrainData)) {
                     refreshCellMesh = true;
@@ -3840,21 +3856,23 @@ namespace TGS {
 
             refreshTerritoriesMesh = true;
             CheckTerritories();
-            if (_showTerritories) {
-                DrawTerritoryFrontiers();
+            if (!_disableMeshGeneration) {
+                if (_showTerritories) {
+                    DrawTerritoryFrontiers();
+                }
+                if (_showTerritoriesInteriorBorders) {
+                    DrawInteriorTerritoryFrontiers();
+                }
+                if (_colorizeTerritories) {
+                    DrawColorizedTerritories();
+                }
+                UpdateMaterialDepthOffset();
+                UpdateMaterialNearClipFade();
+                UpdateMaterialFarFade();
+                UpdateMaterialThickness();
+                UpdateHighlightEffect();
+                AdjustCanvasSize();
             }
-            if (_showTerritoriesInteriorBorders) {
-                DrawInteriorTerritoryFrontiers();
-            }
-            if (_colorizeTerritories) {
-                DrawColorizedTerritories();
-            }
-            UpdateMaterialDepthOffset();
-            UpdateMaterialNearClipFade();
-            UpdateMaterialFarFade();
-            UpdateMaterialThickness();
-            UpdateHighlightEffect();
-            AdjustCanvasSize();
 
             if (issueRedraw == RedrawType.IncrementalTerritories) {
                 int territoryCount = territories.Count;

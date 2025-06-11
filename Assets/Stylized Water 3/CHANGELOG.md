@@ -1,4 +1,32 @@
-3.0.5
+3.1.1 (June 3rd 2025)
+
+Fixed:
+- Underwater Rendering not rendering correctly when Deferred rendering was in use
+- Demo scene loading in some scenes twice in Unity 6.1 when entering play mode
+
+Changed:
+- Render feature SSR settings, the "Reflect Skybox" parameter was renamed to "Reflect Everything" for clarity
+
+3.1.0 (May 30th 2025)
+This update includes some core changes, to add support for the Underwater Rendering extension, but has no functional impact on existing projects.
+
+Added:
+- Demo scene, night-time lighting scenario
+- Global Wave Origin Offset component, add a Transform's position to any wave layers set to the "Radial" mode
+- Screen-Space Reflections, added option to also accept skybox reflections
+- Option on render feature to disable GPU Height Queries in edit-mode (avoids the scene-view always redrawing)
+
+Changed:
+- Planar Reflections Renderer, reflection will now flip if the camera goes below the plane (support for underwater rendering).
+
+Fixed:
+- Reflection probes not affecting the water surface in Unity 6.1 (requires 6000.1.3f+)
+- Potential situations where the Ocean surface may be incorrectly culled.
+
+Removed:
+- Planar Reflections Renderer, "Render Range" parameter. The functionality behind this was deprecated in Unity 6.0.
+
+3.0.5 (February 17th 2025)
 
 Fixed:
 - Camera projection being overriden in minimal rendering setups when using Dynamic Effects

@@ -3,6 +3,9 @@
 //    • Copying or referencing source code for the production of new asset store, or public, content is strictly prohibited!
 //    • Uploading this file to a public repository will subject it to an automated DMCA takedown request.
 
+#ifndef WATER_LIGHTING_INCLUDED
+#define WATER_LIGHTING_INCLUDED
+
 #include "Common.hlsl"
 #include "Reflections.hlsl"
 
@@ -91,7 +94,7 @@ void ApplyTranslucency(float3 subsurfaceColor, float3 lightDir, float3 lightColo
 	const half curvature = saturate(lerp(1.0, dot(normal, -lightDir), offset));
 	transmittance *= curvature;
 
-	const float lightIntensity = GetLightIntensity(lightColor);
+	const float lightIntensity = saturate(GetLightIntensity(lightColor));
 
 	half attenuation = (transmittance + incident) * occlusion * lightIntensity;
 
@@ -262,8 +265,7 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 	
 	#ifndef _ENVIRONMENTREFLECTIONS_OFF
 	//Reflections blend in on top of everything
-	color = lerp(color, water.reflections.rgb, water.reflectionMask * water.reflectionLighting);
-	sceneColor = lerp(sceneColor, water.reflections.rgb, water.reflectionMask * water.reflectionLighting);
+	color = lerp(color, water.reflections.rgb, water.reflectionMask * water.reflectionLighting * vFace);
 	#endif
 
 	#if _REFRACTION
@@ -277,3 +279,18 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 	
 	return color;
 }
+
+//Color of light ray passing through the water, hitting the sea floor (extinction)
+//This applies to the scene color
+float LightExtinction(float verticalDepth, float viewDepth, float density)
+{
+	return exp(-density * (verticalDepth + viewDepth));
+}
+
+//Energy loss of ray, as it travels deeper and scatters (absorption)
+//This applies to the color of the underwater fog
+float LightAbsorption(float absorption, float viewDepth)
+{
+	return saturate(exp(-absorption * viewDepth));
+}
+#endif

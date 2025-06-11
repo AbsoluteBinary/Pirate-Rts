@@ -91,8 +91,14 @@ namespace StylizedWater3
             
             if(Application.isPlaying == false) EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         }
+
+        [MenuItem("Window/Stylized Water 3/Set up render feature", true, 3000)]
+        public static bool SetupRenderFeatureValidate()
+        {
+            return IsRenderFeatureSetup() == false;
+        }
         
-        [MenuItem("Window/Stylized Water 3/Set up render feature", false, 2000)]
+        [MenuItem("Window/Stylized Water 3/Set up render feature", false, 3000)]
         public static void SetupRenderFeature()
         {
             List<ScriptableRendererData> renderers = PipelineUtilities.SetupRenderFeature<StylizedWaterRenderFeature>("Stylized Water 3");
@@ -221,8 +227,8 @@ namespace StylizedWater3
         
         public static bool UnderwaterRenderingInstalled()
         {
-            //Checking for UnderwaterRenderer.cs meta file
-            string path = AssetDatabase.GUIDToAssetPath("57d885066d673c04b850d787a2614e48");
+            //Checking for Extension.UnderwaterRenderer.cs meta file
+            string path = AssetDatabase.GUIDToAssetPath("f8689f15308f4e6da4c0bb17b8b3af04");
             return AssetDatabase.LoadMainAssetAtPath(path);
         }
         

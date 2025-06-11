@@ -3,6 +3,9 @@
 //    • Copying or referencing source code for the production of new asset store, or public, content is strictly prohibited!
 //    • Uploading this file to a public repository will subject it to an automated DMCA takedown request.
 
+#ifndef WATER_INPUT_INCLUDED
+#define WATER_INPUT_INCLUDED
+
 CBUFFER_START(UnityPerMaterial)
 	float4 _ShallowColor;
 	float4 _BaseColor;
@@ -118,6 +121,7 @@ CBUFFER_START(UnityPerMaterial)
 
 	half _UnderwaterSurfaceSmoothness;
 	half _UnderwaterRefractionOffset;
+	half _UnderwaterReflectionStrength;
 
 	half _VertexColorTransparency;
 	half _VertexColorWaveFlattening;
@@ -135,3 +139,5 @@ CBUFFER_START(UnityPerMaterial)
 	float _TessMax;
 //#endif
 CBUFFER_END
+
+#endif

@@ -38,6 +38,11 @@ namespace StylizedWater3
             [Tooltip("Allow SSR to be rendered in water materials that have it enabled." +
                      "\n\nDisable as a global performance scaling measure")]
             public bool allow = true;
+            
+            [FormerlySerializedAs("reflectSkybox")]
+            [Tooltip("Only enable when Reflection Probes cannot be used in a realtime lighting setup. If enabled, SSR will also reflects the skybox color and geometry in front of the water." +
+                     "\n\nIdeally disabled, so that Reflection Probes can be relied on for a 1:1 accurate skybox reflection.")]
+            public bool reflectEverything = false;
         }
         public ScreenSpaceReflectionSettings screenSpaceReflectionSettings = new ScreenSpaceReflectionSettings();
         
@@ -293,6 +298,9 @@ namespace StylizedWater3
                         height = destinationDesc.height,
                         //If you're seeing an error here you are not using a compatible Unity version!
                         graphicsFormat = destinationDesc.colorFormat,
+                        #if UNITY_6000_1_OR_NEWER
+                        colorFormat = RenderTextureFormat.Default,
+                        #endif
                         volumeDepth = 1,
                         dimension = destinationDesc.dimension,
                         useMipMap = destinationDesc.useMipMap,
@@ -301,11 +309,18 @@ namespace StylizedWater3
 
                     TextureDesc textureDesc = debugData.currentHandle.GetDescriptor(renderGraph);
                     RenderingUtils.ReAllocateHandleIfNeeded(ref RenderTargetDebugger.CurrentRT, rtDsc, textureDesc.filterMode, textureDesc.wrapMode, textureDesc.anisoLevel, textureDesc.mipMapBias, textureDesc.name);
-
+                    
                     TextureHandle destination = renderGraph.ImportTexture(RenderTargetDebugger.CurrentRT);
 
-                    //Copy TextureHandle into persistent RT
-                    renderGraph.AddCopyPass(debugData.currentHandle, destination, passName: "Water Debug");
+                    if (destination.IsValid() == false)
+                    {
+                        throw new Exception("Failed to generate debugger texture");
+                    }
+                    else
+                    {
+                        //Copy TextureHandle into persistent RT
+                        renderGraph.AddCopyPass(debugData.currentHandle, destination, passName: "Water Debug");
+                    }
                 }
                 else
                 {
@@ -320,26 +335,6 @@ namespace StylizedWater3
 #pragma warning restore CS0618
         }
         #endif //DEBUG_AVAILABLE
-
-        public static void VerifySetup(string requesterName = null)
-        {
-            #if UNITY_EDITOR && URP
-            if (Application.isPlaying == false)
-            {
-                if (PipelineUtilities.RenderFeatureAdded<StylizedWaterRenderFeature>() == false)
-                {
-                    string requesterString = requesterName != null ? $" by \"{requesterName}\" " : " ";
-                    
-                    if (UnityEditor.EditorUtility.DisplayDialog("Stylized Water 3", $"The Stylized Water 3 render feature hasn't been added to the default renderer" +
-                                                                                    $"\n\n" +
-                                                                                    $"This is required{requesterString}for certain rendering to take effect.", "Setup", "Ignore for now"))
-                    {
-                        PipelineUtilities.SetupRenderFeature<StylizedWaterRenderFeature>(name:"Stylized Water 3");
-                    }
-                }
-            }
-            #endif
-        }
     }
 }
 #endif

@@ -394,24 +394,37 @@ namespace StylizedWater3
         {
             using (new EditorGUILayout.VerticalScope())
             {
-                UI.DrawExtension("Dynamic Effects",
-                    "Enables advanced effects to be projected onto the water surface. Such as boat wakes, ripples and shoreline waves.", dynamicEffectsInstalled,
-                    "https://assetstore.unity.com/packages/slug/299321?aid=1011l7Uk8&pubref=sw3editor", UI.DynamicEffectsAssetIcon);
-                
-                /*
-                EditorGUILayout.Separator();
+                EditorGUILayout.LabelField("Installed", EditorStyles.boldLabel);
+                for (int i = 0; i < Extension.installed.Length; i++)
+                {
+                    Extension extension = Extension.installed[i];
+                    
+                    //EditorGUILayout.LabelField(extension.name);
+                    UI.DrawExtension(extension.name, extension.description, dynamicEffectsInstalled, extension.assetStoreID, extension.icon);
+                }
 
-                UI.DrawExtension("Underwater Rendering",
-                    "Extends the Stylized Water 3 shader asset with underwater rendering, by seamlessly blending the water with post processing effects.", underwaterExtensionInstalled,
-                    "https://assetstore.unity.com/packages/slug/185030?aid=1011l7Uk8&pubref=sw3editor", UI.UnderwaterAssetIcon);
-                    */
+                if (Extension.available.Length > 0)
+                {
+                    EditorGUILayout.Space();
+                    
+                    EditorGUILayout.LabelField("Available for purchase", EditorStyles.boldLabel);
+                    
+                    for (int i = 0; i < Extension.available.Length; i++)
+                    {
+                        Extension extension = Extension.available[i];
+
+                        //EditorGUILayout.LabelField(extension.name);
+                        UI.DrawExtension(extension.name, extension.description, false, extension.assetStoreID, extension.icon);
+                        
+                        EditorGUILayout.Separator();
+                    }
+                }
             }
-
         }
         
         void DrawSupport()
         {
-            UI.DrawNotification(AssetInfo.VersionChecking.alphaVersion, "You are using an beta/alpha version of Unity. You may run into issues at own risk.", MessageType.Warning);
+            UI.DrawNotification(AssetInfo.VersionChecking.unityVersionType != AssetInfo.VersionChecking.UnityVersionType.Release, $"You are using a {AssetInfo.VersionChecking.unityVersionType} version of Unity. You may run into issues at own risk.", MessageType.Warning);
 
             using (new EditorGUILayout.VerticalScope())
             {
@@ -619,6 +632,7 @@ namespace StylizedWater3
                 
                 changelogStyle = new GUIStyle(GUI.skin.label);
                 changelogStyle.fontSize = 12;
+                changelogStyle.alignment = TextAnchor.UpperLeft;
                 changelogStyle.richText = true;
                 changelogStyle.wordWrap = true;
             }

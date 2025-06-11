@@ -14,6 +14,8 @@ namespace StylizedWater3
     [AddComponentMenu("")] //Hide, only to be used with the prefab
     public class OceanFollowBehaviour : MonoBehaviour
     {
+        public static OceanFollowBehaviour Instance;
+        
         const int LODCount = 7;
         private static readonly float[] gridSizes = new[]
         {
@@ -27,7 +29,7 @@ namespace StylizedWater3
             32f      //LOD7
         };
 
-        private const float EXPECTED_WAVE_HEIGHT = 15f;
+        private const float EXPECTED_MAX_WAVE_HEIGHT = 15f;
         
         public Material material;
         
@@ -50,7 +52,7 @@ namespace StylizedWater3
             public float gridSize = 1f;
         }
         [SerializeField] 
-        [HideInInspector]
+        //[HideInInspector]
         private LOD[] lods;
         
         //To ensure that each LOD renders behind the one before it, move each one down a tiny bit
@@ -109,10 +111,14 @@ namespace StylizedWater3
                 for (int j = 0; j < lods[i].gameObjects.Count; j++)
                 {
                     targetPosition = WaterGrid.SnapToGrid(target.position, this.transform.lossyScale.x * lods[i].gridSize);
-                    //targetPosition = target.position;
+                    //targetPosition = target.position; //No snapping
                     
                     //Progressively lower the height of each LOD a small amount, this helps ensure transparency sorting will be correct.
                     targetPosition.y = height - (heightOffset * i);
+                    
+                    #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    if (lods[i].gameObjects[j] == false) throw new Exception("[Ocean] A child GameObject was deleted, these should not be touched!");
+                    #endif
                     
                     lods[i].gameObjects[j].transform.position = targetPosition;
                 }
@@ -130,16 +136,45 @@ namespace StylizedWater3
                     if (r)
                     {
                         r.sharedMaterial = material;
-
-                        //Pad the bounds so that meshes don't get unintentionally culled when using high waves
-                        r.localBounds = new Bounds(r.localBounds.center, new Vector3(r.localBounds.size.x, EXPECTED_WAVE_HEIGHT, r.localBounds.size.z));
+                        PadBounds(r);
                     }
                 }
             }
         }
+		
+		//Pad the bounds so that meshes don't get unintentionally culled when using high waves
+		private void PadBounds()
+		{
+			for (int i = 0; i < lods.Length; i++)
+            {
+                foreach (var lod in lods[i].gameObjects)
+                {
+                    MeshRenderer r = lod.GetComponent<MeshRenderer>();
+
+                    if (r)
+                    {
+                        r.sharedMaterial = material;
+
+                        PadBounds(r);
+                    }
+                }
+            }
+		}
+		
+		private void PadBounds(MeshRenderer m_renderer)
+		{
+			Bounds bounds = m_renderer.localBounds;
+			bounds.Expand(Vector3.up * (EXPECTED_MAX_WAVE_HEIGHT * 0.5f));
+			
+            m_renderer.localBounds = bounds;
+		}
 
         private void OnEnable()
         {
+            Instance = this;
+			
+			PadBounds();
+            
             #if URP
             RenderPipelineManager.beginCameraRendering += OnCameraRender;
             #endif
@@ -147,7 +182,7 @@ namespace StylizedWater3
 
         private void LateUpdate()
         {
-            if (followTarget != null)
+            if (followTarget)
             {
                 SetPosition(followTarget);
             }
@@ -172,6 +207,8 @@ namespace StylizedWater3
 
         private void OnDisable()
         {
+            Instance = null;
+
             #if URP
             RenderPipelineManager.beginCameraRendering -= OnCameraRender;
             #endif
@@ -189,6 +226,32 @@ namespace StylizedWater3
                 Gizmos.matrix = meshes[i].transform.localToWorldMatrix;
                 Gizmos.DrawWireMesh(meshes[i].sharedMesh);
             }
+			
+			Gizmos.color = new Color(1,1,0,0.25f);
+            Gizmos.matrix = Matrix4x4.identity;
+			for (int i = 0; i < lods.Length; i++)
+            {
+                foreach (var lod in lods[i].gameObjects)
+                {
+                    MeshRenderer r = lod.GetComponent<MeshRenderer>();
+					Gizmos.DrawWireCube(r.bounds.center, r.bounds.size);
+				}
+			}
+        }
+
+        public bool InvalidSetup()
+        {
+            if(lods == null) return true;
+            if(lods.Length == 0) return true;
+
+            for (int i = 0; i < lods.Length; i++)
+            {
+                foreach (var lod in lods[i].gameObjects)
+                {
+                    if(!lod.gameObject) return true;
+                }
+            }
+            return false;
         }
     }
 }

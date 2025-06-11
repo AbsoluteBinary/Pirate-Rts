@@ -100,7 +100,7 @@ namespace TGS {
         /// <summary>
         /// Sets the terrain gameobject. This is equivalent to use the terrainObject property.
         /// </summary>
-        public void SetTerrain(GameObject terrain) {
+        public void SetTerrain (GameObject terrain) {
             terrainObject = terrain;
         }
 
@@ -246,6 +246,9 @@ namespace TGS {
                 if (_disableMeshGeneration != value) {
                     _disableMeshGeneration = value;
                     isDirty = true;
+                    if (_disableMeshGeneration) {
+                        OnEnable();
+                    }
                     Redraw();
                 }
             }
@@ -350,7 +353,7 @@ namespace TGS {
                     Redraw(true);
                 }
             }
-        }        
+        }
 
 
         [UnityEngine.Serialization.FormerlySerializedAs("_heightMapSize")]
@@ -455,6 +458,10 @@ namespace TGS {
                     _gridTopology = value;
                     needGenerateMap = true;
                     isDirty = true;
+                    if (_gridTopology != GridTopology.Hexagonal) {
+                        CheckGridChanges();
+                        gridScale = Misc.Vector2one;
+                    }
                 }
             }
         }
@@ -485,7 +492,8 @@ namespace TGS {
             get {
                 if (_gridTopology == GridTopology.Irregular) {
                     return _numCells;
-                } else {
+                }
+                else {
                     return _cellRowCount * _cellColumnCount;
                 }
             }
@@ -534,6 +542,9 @@ namespace TGS {
                 if (value != _regularHexagons) {
                     _regularHexagons = value;
                     isDirty = true;
+                    if (!_regularHexagons) {
+                        gridScale = Misc.Vector2one;
+                    }
                     CellsUpdateBounds();
                     UpdateTerritoriesBoundary();
                     Redraw();
@@ -1045,7 +1056,7 @@ namespace TGS {
         /// <param name="rows">Rows.</param>
         /// <param name="columns">Columns.</param>
         /// <param name="keepCellSize">Ensures the individual cell size is preserved</param>
-        public void SetDimensions(int rows, int columns, bool keepCellSize = false) {
+        public void SetDimensions (int rows, int columns, bool keepCellSize = false) {
             SetDimensionsAndType(rows, columns, _gridTopology, keepCellSize);
         }
 
@@ -1056,7 +1067,7 @@ namespace TGS {
         /// <param name="columns">Columns.</param>
         /// <param name="gridTopology">Grid topology.</param>
         /// <param name="keepCellSize">Ensures the individual cell size is preserved</param>
-        public void SetDimensionsAndType(int rows, int columns, GridTopology gridTopology, bool keepCellSize = false) {
+        public void SetDimensionsAndType (int rows, int columns, GridTopology gridTopology, bool keepCellSize = false) {
             if (!initialized) Init();
             _gridTopology = gridTopology;
             _cellRowCount = Mathf.Clamp(rows, 2, MAX_ROWS_OR_COLUMNS);
@@ -1067,7 +1078,7 @@ namespace TGS {
             isDirty = true;
             needGenerateMap = true;
             CheckGridChanges();
-        }        
+        }
 
 
         public Texture2D[] textures;
@@ -1337,7 +1348,8 @@ namespace TGS {
 #endif
                     if (_instance == null) {
                         Debug.LogWarning("TerrainGridSystem gameobject not found in the scene!");
-                    } else {
+                    }
+                    else {
                         if (_instance.cells == null) {
                             _instance.OnEnable();
                         }
@@ -1362,7 +1374,7 @@ namespace TGS {
         /// <summary>
         /// Used to cancel highlighting on a given gameobject. This call is ignored if go is not currently highlighted.
         /// </summary>
-        public void HideHighlightedObject(GameObject go) {
+        public void HideHighlightedObject (GameObject go) {
             if (go != _highlightedObj)
                 return;
             _cellHighlightedIndex = -1;
@@ -1381,13 +1393,14 @@ namespace TGS {
         /// Updates grid center position
         /// </summary>
         /// <param name="snapToGrid">Snaps new grid center according to cell size</param>
-        public void SetGridCenterWorldPosition(Vector3 position, bool snapToGrid) {
+        public void SetGridCenterWorldPosition (Vector3 position, bool snapToGrid) {
             if (snapToGrid) {
                 position = SnapToCell(position, true, false);
             }
             if (_terrainWrapper != null) {
                 gridCenter = _terrainWrapper.GetLocalPoint(_terrainObject, position);
-            } else {
+            }
+            else {
                 transform.position = position;
             }
         }
@@ -1396,7 +1409,7 @@ namespace TGS {
         /// <summary>
         /// Snaps a position to the grid
         /// </summary>
-        public Vector3 SnapToCell(Vector3 position, bool worldSpace = true, bool snapToCenter = true) {
+        public Vector3 SnapToCell (Vector3 position, bool worldSpace = true, bool snapToCenter = true) {
 
             if (worldSpace) {
                 position = transform.InverseTransformPoint(position);
@@ -1408,7 +1421,8 @@ namespace TGS {
                 position.x -= _gridCenter.x;
                 if (snapToCenter && _cellColumnCount % 2 == 0) {
                     position.x = (Mathf.FloorToInt(position.x / stepX) + 0.5f) * stepX;
-                } else {
+                }
+                else {
                     position.x = (Mathf.FloorToInt(position.x / stepX + 0.5f)) * stepX;
                 }
                 position.x += _gridCenter.x;
@@ -1416,18 +1430,21 @@ namespace TGS {
                 position.y -= _gridCenter.y;
                 if (snapToCenter && _cellRowCount % 2 == 0) {
                     position.y = (Mathf.FloorToInt(position.y / stepY) + 0.5f) * stepY;
-                } else {
+                }
+                else {
                     position.y = (Mathf.FloorToInt(position.y / stepY + 0.5f)) * stepY;
                 }
                 position.y += _gridCenter.y;
-            } else if (_gridTopology == GridTopology.Hexagonal) {
+            }
+            else if (_gridTopology == GridTopology.Hexagonal) {
 
                 if (snapToCenter) {
                     Cell cell = GetCellAtPoint(position, false);
                     if (cell != null) {
                         position = cell.scaledCenter;
                     }
-                } else {
+                }
+                else {
                     float qx = 1f + (_cellColumnCount - 1f) * 3f / 4f;
                     float qy = _cellRowCount + 0.5f;
 
@@ -1448,7 +1465,8 @@ namespace TGS {
                     position.y += offsetY;
                 }
 
-            } else {
+            }
+            else {
                 // try to get cell under position and returns its center
                 Cell c = GetCellAtPoint(position, false);
                 if (c != null) {
@@ -1465,7 +1483,7 @@ namespace TGS {
         /// Returns the rectangle area where cells are drawn in local coordinates.
         /// </summary>
         /// <returns>The rect.</returns>
-        public Rect GetRect() {
+        public Rect GetRect () {
             Rect rect = new Rect();
             Vector3 min = GetScaledVector(new Vector3(-0.5f, -0.5f, 0));
             Vector3 max = GetScaledVector(new Vector3(0.5f, 0.5f, 0));
@@ -1479,7 +1497,7 @@ namespace TGS {
         /// Returns the bounds of the grid in world space coordinates.
         /// </summary>
         /// <returns>The rect.</returns>
-        public Bounds GetBounds() {
+        public Bounds GetBounds () {
             Vector3 min = GetScaledVector(new Vector3(-0.5f, -0.5f, 0));
             Vector3 max = GetScaledVector(new Vector3(0.5f, 0.5f, 0));
             min = transform.TransformPoint(min);
@@ -1491,7 +1509,7 @@ namespace TGS {
         /// Returns the size of the grid in world space coordinates.
         /// </summary>
         /// <returns></returns>
-        public Vector2 GetSize() {
+        public Vector2 GetSize () {
             Vector3 scale = transform.lossyScale;
             return new Vector2(scale.x * _gridScale.x, scale.y * _gridScale.y);
         }
@@ -1500,7 +1518,7 @@ namespace TGS {
         /// Sets the size of the grid in world space coordinates.
         /// </summary>
         /// <param name="size"></param>
-        public void SetSize(Vector2 size) {
+        public void SetSize (Vector2 size) {
             if (_terrainWrapper == null) {
                 gridScale = Misc.Vector3one;
                 transform.localScale = new Vector3(size.x, size.y, 1f);
@@ -1519,7 +1537,7 @@ namespace TGS {
         /// Returns the top/left corner of the grid in world space
         /// </summary>
         /// <returns></returns>
-        public Vector3 GetBottomLeftCornerPosition() {
+        public Vector3 GetBottomLeftCornerPosition () {
             Vector3 coord = GetScaledVector(new Vector3(-0.5f, -0.5f, 0));
             return transform.TransformPoint(coord);
         }
@@ -1527,7 +1545,7 @@ namespace TGS {
         /// <summary>
         /// Sets the top/left position of the grid in world space
         /// </summary>
-        public void SetBottomLeftCornerPosition(Vector3 position) {
+        public void SetBottomLeftCornerPosition (Vector3 position) {
             Bounds bounds = GetBounds();
             position += bounds.size * 0.5f;
             SetGridCenterWorldPosition(position, false);
@@ -1536,13 +1554,13 @@ namespace TGS {
         /// <summary>
         /// Hides current highlighting effect
         /// </summary>
-        public void HideHighlightedRegions() {
+        public void HideHighlightedRegions () {
             HideTerritoryRegionHighlight();
             HideCellHighlight();
         }
 
 
-        public void ReloadGridMask() {
+        public void ReloadGridMask () {
             ReadMaskContents();
             CellsApplyVisibilityFilters();
             recreateTerritories = true;
@@ -1552,7 +1570,7 @@ namespace TGS {
             }
         }
 
-        public void ReloadFlatMask() {
+        public void ReloadFlatMask () {
             ReadFlatMaskContents();
             CellsApplyVisibilityFilters();
             recreateTerritories = true;
@@ -1566,7 +1584,7 @@ namespace TGS {
         /// <param name="surf">Surf.</param>
         /// <param name="center">Center.</param>
         /// <param name="scale">Scale.</param>
-        public void ScaleSurface(GameObject surf, Vector2 center, float scale) {
+        public void ScaleSurface (GameObject surf, Vector2 center, float scale) {
             if (surf == null)
                 return;
             Transform t = surf.transform;
@@ -1599,7 +1617,7 @@ namespace TGS {
         /// Returns true if a given position lies within this grid on the X/Z plane
         /// </summary>
         /// <returns></returns>
-        public bool Contains(Vector3 position) {
+        public bool Contains (Vector3 position) {
             Bounds bb = bounds;
             return position.x >= bb.min.x && position.x <= bb.max.x && position.z >= bb.min.z && position.z <= bb.max.z;
         }

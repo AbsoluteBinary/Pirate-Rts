@@ -31,9 +31,10 @@ namespace StylizedWater3
         private SerializedProperty lightCookies;
         private SerializedProperty additionalLightCaustics;
         private SerializedProperty additionalLightTranslucency;
+        private SerializedProperty singleCausticsLayers;
 
         private SerializedProperty customIncludeDirectives;
-        private SerializedProperty passes;
+        private SerializedProperty additionalPasses;
         
         private SerializedProperty configurationState;
 
@@ -44,6 +45,8 @@ namespace StylizedWater3
 
         private bool showDependencies;
 
+        private ShaderData shaderData;
+        
         public override void OnEnable()
         {
             base.OnEnable();
@@ -67,14 +70,21 @@ namespace StylizedWater3
             lightCookies = settings.FindPropertyRelative("lightCookies");
             additionalLightCaustics = settings.FindPropertyRelative("additionalLightCaustics");
             additionalLightTranslucency = settings.FindPropertyRelative("additionalLightTranslucency");
+            singleCausticsLayers = settings.FindPropertyRelative("singleCausticsLayer");
 
             autoIntegration = settings.FindPropertyRelative("autoIntegration");
             fogIntegration = settings.FindPropertyRelative("fogIntegration");
 
             customIncludeDirectives = settings.FindPropertyRelative("customIncludeDirectives");
-            passes = settings.FindPropertyRelative("passes");
+            additionalPasses = settings.FindPropertyRelative("additionalPasses");
             
             configurationState = serializedObject.FindProperty("configurationState");
+
+            Shader shader = importer.GetShader();
+            if (shader != null)
+            {
+                shaderData = ShaderUtil.GetShaderData(shader);
+            }
         }
 
         public override bool HasPreviewGUI()
@@ -206,6 +216,7 @@ namespace StylizedWater3
                 EditorGUILayout.PropertyField(lightCookies);
                 EditorGUILayout.PropertyField(additionalLightCaustics);
                 EditorGUILayout.PropertyField(additionalLightTranslucency);
+                EditorGUILayout.PropertyField(singleCausticsLayers);
             }
 
             EditorGUILayout.Space();
@@ -262,7 +273,20 @@ namespace StylizedWater3
                 EditorGUILayout.HelpBox("These are defined in a HLSLINCLUDE block and apply to all passes" +
                                         "\nMay be used to insert custom code.", MessageType.Info);
             }
-            EditorGUILayout.PropertyField(passes);
+            EditorGUILayout.PropertyField(additionalPasses);
+            if (additionalPasses.isExpanded)
+            {
+                EditorGUILayout.LabelField("Compiled passes:", EditorStyles.miniBoldLabel);
+                if (shaderData != null)
+                {
+                    ShaderData.Subshader subShader = shaderData.GetSubshader(0);
+                    int passCount = subShader.PassCount;
+                    for (int i = 0; i < passCount; i++)
+                    {
+                        EditorGUILayout.LabelField($"{i}: {subShader.GetPass(i).Name}", EditorStyles.miniLabel);
+                    }
+                }
+            }
 
             if (EditorGUI.EndChangeCheck())
             {

@@ -110,7 +110,7 @@ namespace StylizedWater3
             //Null at the very first frame
             if (RenderTargetDebugger.CurrentRT.rt == null) return;
             
-            EditorGUILayout.LabelField($"\"{renderTarget.textureName}\" {RenderTargetDebugger.CurrentRT.rt.graphicsFormat} {RenderTargetDebugger.CurrentRT.rt.width}x{RenderTargetDebugger.CurrentRT.rt.height}px @ {(UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(RenderTargetDebugger.CurrentRT) / 1024f / 1024f).ToString("F2")}mb", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"\"{renderTarget.textureName}\" {RenderTargetDebugger.CurrentRT.rt.descriptor.graphicsFormat} {RenderTargetDebugger.CurrentRT.rt.width}x{RenderTargetDebugger.CurrentRT.rt.height}px @ {(UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(RenderTargetDebugger.CurrentRT) / 1024f / 1024f).ToString("F2")}mb", EditorStyles.boldLabel);
             if (renderTarget.description != string.Empty) EditorGUILayout.HelpBox(renderTarget.description, MessageType.Info);
             
             Rect rect = EditorGUILayout.GetControlRect();

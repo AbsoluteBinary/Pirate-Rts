@@ -9,14 +9,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace StylizedWater3
 {
-    [ScriptedImporter(AssetInfo.SHADER_GENERATOR_VERSION_MAJOR + AssetInfo.SHADER_GENERATOR_MINOR + AssetInfo.SHADER_GENERATOR_PATCH, TARGET_FILE_EXTENSION, 0)]
+    [ScriptedImporter(TemplateParser.SHADER_GENERATOR_VERSION_MAJOR + TemplateParser.SHADER_GENERATOR_MINOR + TemplateParser.SHADER_GENERATOR_PATCH, TARGET_FILE_EXTENSION, 0)]
     public class WaterShaderImporter : ScriptedImporter
     {
         private const string TARGET_FILE_EXTENSION = "watershader3";
@@ -70,12 +73,6 @@ namespace StylizedWater3
             Shader shader = AssetDatabase.LoadAssetAtPath<Shader>(context.assetPath);
             //if (shader != null) ShaderUtil.ClearShaderMessages(shader);
 
-            if (settings.passes == null || settings.passes.Length == 0)
-            {
-                Debug.LogError($"Failed to compile water shader at {context.assetPath}. It contains no passes. " +
-                               $"This may happen if the shader was imported while one or more script compile errors were present, or moving the Stylized Water 3 folder, or the meta-file was deleted. Resulting in all configurations getting wiped. To resolve this, re-import the file from the Package Manager.");
-                return;
-            }
             string templatePath = GetTemplatePath();
 
             if (templatePath == string.Empty)
@@ -104,6 +101,19 @@ namespace StylizedWater3
             string shaderLab = TemplateParser.CreateShaderCode(context.assetPath, ref lines, this, false);
             
             Shader shaderAsset = ShaderUtil.CreateShaderAsset(shaderLab, true);
+            
+            int passCount = shaderAsset.passCount;
+
+            ShaderInfo shaderInfo = ShaderUtil.GetShaderInfo(shaderAsset);
+            ShaderData shaderData = ShaderUtil.GetShaderData(shaderAsset);
+            
+            //Unity will always create 3 base passes: Unnamed, DepthNormalsOnly & DepthOnly
+            if (shaderInfo.hasErrors && shaderData.GetSubshader(0).GetPass(0).Name.Contains("Unnamed"))
+            {
+                Debug.LogError($"Failed to compile water shader at {context.assetPath}. It contains no passes. " +
+                               $"This may happen if the shader file was imported while one or more script compile errors were present, or moving the Stylized Water 3 folder, or the meta-file was deleted. Resulting in all configurations getting wiped. To resolve this, re-import the file from the Package Manager.");
+                return;
+            }
             ShaderUtil.RegisterShader(shaderAsset);
             
             Texture2D thumbnail = Resources.Load<Texture2D>(ICON_NAME);
@@ -244,6 +254,11 @@ namespace StylizedWater3
             return AssetImporter.GetAtPath(AssetDatabase.GetAssetOrScenePath(shader)) as WaterShaderImporter;
         }
 
+        public Shader GetShader()
+        {
+            return AssetDatabase.LoadAssetAtPath<Shader>(assetPath);
+        }
+
         [Serializable]
         public class Directive
         {
@@ -278,7 +293,7 @@ namespace StylizedWater3
             FileInfo[] fileInfos = directoryInfo.GetFiles("*." + TARGET_FILE_EXTENSION, SearchOption.AllDirectories);
             
             #if SWS_DEV
-            Debug.Log($"{fileInfos.Length} .{TARGET_FILE_EXTENSION} assets found");
+            //Debug.Log($"{fileInfos.Length} .{TARGET_FILE_EXTENSION} assets found");
             #endif
 
             string[] filePaths = new string[fileInfos.Length];
@@ -300,7 +315,7 @@ namespace StylizedWater3
             foreach (var filePath in filePaths)
             {
                 #if SWS_DEV
-                Debug.Log($"Reimporting: {filePath}");
+                //Debug.Log($"Reimporting: {filePath}");
                 #endif
                 AssetDatabase.ImportAsset(filePath);
             }
@@ -334,10 +349,13 @@ namespace StylizedWater3
             [Tooltip("Point and spot lights add caustics")]
             public bool additionalLightCaustics = false;
             public bool additionalLightTranslucency = true;
+            [Tooltip("When disabled, two caustics textures are cross-animated. Disable this when using a flipbook caustics texture!")]
+            public bool singleCausticsLayer;
             
             public List<Directive> customIncludeDirectives = new List<Directive>();
+            [FormerlySerializedAs("passes")]
             [Tooltip("Pass blocks that are to be added to the shader template")]
-            public Object[] passes = new Object[0];
+            public Object[] additionalPasses = new Object[0];
         }
     }
 }

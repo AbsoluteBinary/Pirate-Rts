@@ -45,8 +45,14 @@ Of course, all updates of Terrain Grid System will be eventually available on th
 Version history
 ---------------
 
+Version 19.3
+- Use "Disable Mesh Generation" option for server only mode
+- Changing topology now reverts scale to default if needed
+- API: added ToggleTerritories(bool visible): show/hide territories and frontiers
+
 Version 19.2
 - Added "Animation Sorting Order/Layer" properties under Rendering Options section
+- API: added GetWorldSpacePosition(localPosition, elevation)
 
 Version 19.1
 - Grid Editor now works when gizmos are disabled

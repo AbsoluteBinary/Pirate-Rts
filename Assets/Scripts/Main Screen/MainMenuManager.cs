@@ -1,3 +1,4 @@
+using System;
 using _Project.Scripts.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ namespace Main_Screen
         [SerializeField] Button toggleSceneButton; // Assign in Inspector or find dynamically
         [SerializeField] SceneLoader sceneLoader; // Reference to SceneLoader
 
+        [Obsolete("Obsolete")]
         void Start()
         {
             // Find button dynamically if not assigned

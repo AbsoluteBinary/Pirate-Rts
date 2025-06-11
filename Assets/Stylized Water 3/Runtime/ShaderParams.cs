@@ -27,6 +27,7 @@ namespace StylizedWater3
             public const string Translucency = "_TRANSLUCENCY";
             public const string Caustics = "_CAUSTICS";
             public const string Refraction = "_REFRACTION";
+            public const string River = "_RIVER";
             
             public const string UnderwaterRendering = "UNDERWATER_ENABLED";
             public const string DynamicEffects = "DYNAMIC_EFFECTS_ENABLED";

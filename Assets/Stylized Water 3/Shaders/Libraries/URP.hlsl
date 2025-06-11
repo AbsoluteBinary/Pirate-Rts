@@ -16,7 +16,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #endif
 
-#if _REFRACTION || UNDERWATER_ENABLED
+#if _REFRACTION
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
 #endif
 

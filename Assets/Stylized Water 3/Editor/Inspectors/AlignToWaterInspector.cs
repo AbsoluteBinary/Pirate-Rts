@@ -124,7 +124,7 @@ namespace StylizedWater3
                 if (script.waterObject.material != script.waterObject.meshRenderer.sharedMaterial) script.waterObject.material = script.waterObject.meshRenderer.sharedMaterial;
                 
                 wavesEnabled = WaveParameters.WavesEnabled(script.waterObject.material);
-                isRiver = script.waterObject.material.IsKeywordEnabled("_RIVER");
+                isRiver = script.waterObject.material.IsKeywordEnabled(ShaderParams.Keywords.River);
             }
             */
         }
