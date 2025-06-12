@@ -110,8 +110,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -0.00082779, y: 0}
+  m_SizeDelta: {x: 406.76, y: 50}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &7744724513872953071
 CanvasRenderer:
@@ -177,7 +177,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -570,6 +570,20 @@ MonoBehaviour:
         asset: {fileID: 102900000, guid: 30d51546b049ca4c1bdfcc07a91eab4f, type: 3}
         guid: 30d51546b049ca4c1bdfcc07a91eab4f
       SceneType: 0
+  - GroupName: GamePlay
+    Scenes:
+    - Reference:
+        asset: {fileID: 102900000, guid: 7bd3d6e4aba1ab765be074b0962c163e, type: 3}
+        guid: 7bd3d6e4aba1ab765be074b0962c163e
+      SceneType: 0
+    - Reference:
+        asset: {fileID: 102900000, guid: 2008358e1ba80398e802a4e5c9c8d0df, type: 3}
+        guid: 2008358e1ba80398e802a4e5c9c8d0df
+      SceneType: 5
+    - Reference:
+        asset: {fileID: 102900000, guid: eb55454ee47808e4c81b746fff9e7469, type: 3}
+        guid: eb55454ee47808e4c81b746fff9e7469
+      SceneType: 6
   minLoadingTime: 6
   backgroundImage: {fileID: 8967924995770154218}
   loadingBarBorder: {fileID: 5915613320822050504}
@@ -578,3 +592,5 @@ MonoBehaviour:
   loadingUICanvasGroup: {fileID: 4385153264709212702}
   loginUICanvas: {fileID: 0}
   loadingCamera: {fileID: 0}
+  backgroundObjects:
+  - {fileID: 0}
