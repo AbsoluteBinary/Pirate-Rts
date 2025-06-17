@@ -23,7 +23,7 @@ namespace _Project.Scripts.SceneManagement
         [SerializeField] private TextMeshProUGUI loadingText;   // Text displaying "Loading..." or progress
         [SerializeField] private CanvasGroup loadingUICanvasGroup; // Group containing loading UI elements
         [SerializeField] private Canvas loginUICanvas;          // Login UI canvas (will be found if in another scene)
-        [SerializeField] private Camera loadingCamera;          // Camera for rendering loading screen
+        //[SerializeField] private Camera loadingCamera;          // Camera for rendering loading screen
         // Reference to a single background object assigned in the Inspector
         [SerializeField] private GameObject backgroundObject; // Reference to background object for activation
 
@@ -120,7 +120,7 @@ namespace _Project.Scripts.SceneManagement
         // Activates the loading UI elements
         private void ShowLoadingUI()
         {
-            if (loadingCamera != null) loadingCamera.gameObject.SetActive(true);
+            //if (loadingCamera != null) loadingCamera.gameObject.SetActive(true);
             if (loadingUICanvasGroup != null)
             {
                 // Fade in loading UI
@@ -230,7 +230,6 @@ namespace _Project.Scripts.SceneManagement
                 Debug.LogWarning("No scene groups assigned to SceneLoader.");
                 return;
             }
-
             // Cycle to the next scene group
             currentGroupIndex = (currentGroupIndex + 1) % sceneGroups.Length;
             LoadSceneGroup(currentGroupIndex);
