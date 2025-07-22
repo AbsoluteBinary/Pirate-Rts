@@ -36,6 +36,9 @@ namespace _Project.Scripts.SceneManagement
         // Cached reference to login UI CanvasGroup
         private CanvasGroup loginUICanvasGroup;
 
+        // Solution 3: Flag to indicate if preparing for a new group (prevents enabling)
+        private bool isPreparingNewGroup;
+
         // Manages scene loading and unloading
         public readonly SceneGroupManager manager = new SceneGroupManager();
 
@@ -135,7 +138,8 @@ namespace _Project.Scripts.SceneManagement
             Sequence seq = DOTween.Sequence();
             if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
             if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
-            if (backgroundObject != null) backgroundObject.SetActive(true);
+            if (backgroundObject != null && !isPreparingNewGroup) // Solution 3: Check flag before enabling
+                backgroundObject.SetActive(true);
             
             seq.OnComplete(() =>
             {
@@ -143,12 +147,15 @@ namespace _Project.Scripts.SceneManagement
                 if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
                 if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 //if (loadingCamera != null) loadingCamera.gameObject.SetActive(false);
+                isPreparingNewGroup = false; // Solution 3: Reset flag after transition
             });
         }
 
         // Displays the login UI, either from serialized reference or by finding it
         private void ShowLoginUI()
         {
+            if (isPreparingNewGroup) return; // Solution 3: Skip if preparing new group
+
             // Check if login canvas is serialized (e.g., in Boot scene)
             if (loginUICanvas != null)
             {
@@ -188,7 +195,7 @@ namespace _Project.Scripts.SceneManagement
                 }
                 else
                 {
-                    Debug.LogWarning("LoginMenuCanvas not found.");
+                    //Debug.LogWarning("LoginMenuCanvas not found.");
                 }
             }
         }
@@ -214,11 +221,16 @@ namespace _Project.Scripts.SceneManagement
         // Loads the next scene group, suitable for button OnClick events
         public void LoadNextSceneGroupForButton()
         {
+            // Disable sooner: On button press, before triggering toggle/load
+            if (backgroundObject != null) backgroundObject.SetActive(false);
+            if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
+            
             if (isLoading)
             {
                 Debug.LogWarning("Cannot load next scene group while loading is in progress.");
                 return;
             }
+
             ToggleNextSceneGroup();
         }
 
@@ -239,9 +251,9 @@ namespace _Project.Scripts.SceneManagement
         
         private void NewGroupPrep()
         {
-            //Toggle assets off not needed in next SceneGroup
-            if (backgroundObject != null) backgroundObject.SetActive(false);
-            if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
+            // Solution 3: Set flag to prevent enabling during prep
+            isPreparingNewGroup = true;
+            // No need for disabling here; handled earlier in LoadNextSceneGroupForButton
         }
     }
 

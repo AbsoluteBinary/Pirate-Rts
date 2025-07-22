@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using _Project.Scripts.Inventory;
 using _Project.Scripts.Inventory.Helpers;
 using UnityEngine;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     public static class ItemDatabase {
         static Dictionary<SerializableGuid, ItemDetails> itemDetailsDictionary;
 

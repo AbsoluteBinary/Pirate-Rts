@@ -18,7 +18,7 @@ namespace _Project.Scripts.SceneManagement {
     public class SceneData {
         public SceneReference Reference;
         public string Name => Reference.Name;
-        public SceneType SceneType;
+        public SceneType SceneType; 
     }
     
     public enum SceneType { ActiveScene, MainMenu, UserInterface, HUD, Cinematic, Environment, Tooling }

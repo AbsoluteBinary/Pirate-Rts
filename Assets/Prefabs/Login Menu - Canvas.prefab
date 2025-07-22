@@ -150,6 +150,14 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5485109411583448284, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: LoadNextSceneGroupForButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 5485109411583448284, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: _Project.Scripts.SceneManagement.SceneLoader, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 7811188001666356437, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

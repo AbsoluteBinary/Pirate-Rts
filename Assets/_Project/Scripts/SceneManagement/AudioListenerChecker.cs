@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -5,6 +6,7 @@ namespace _Project.Scripts.SceneManagement
 {
     public class AudioListenerChecker : MonoBehaviour
     {
+        [Obsolete("Obsolete")]
         void Update()
         {
             var activeListeners = FindObjectsOfType<AudioListener>().Where(l => l.enabled).ToArray();

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace _Project.Scripts.SceneManagement
         // Reference to SceneGroupManager to track scene groups
         [SerializeField] private SceneGroupManager sceneGroupManager;
 
+        [Obsolete("Obsolete")]
         private void Awake()
         {
             // Ensure the main camera persists across scenes

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -6,6 +7,7 @@ namespace _Project.Scripts.SceneManagement
 {
     public class EventSystemChecker : MonoBehaviour
     {
+        [Obsolete("Obsolete")]
         void Update()
         {
             var activeEventSystems = FindObjectsOfType<EventSystem>().Where(es => es.enabled).ToArray();
