@@ -37,8 +37,13 @@ float3 SampleNormals(float2 uv, float2 tiling, float subTiling, float3 wPos, flo
 	float fadeFactor = DistanceFadeMask(wPos, _DistanceNormalsFadeDist.x, _DistanceNormalsFadeDist.y, vFace);
 
 	float3 largeBlendedNormals;
+
+	half distanceSubSpeed = -0.9;
+	#if _RIVER
+	distanceSubSpeed = 0.9;
+	#endif
 	
-	uvs = PackedUV(uv, _DistanceNormalsTiling.xx, time, speed * 2.0, 2.0, -0.9);
+	uvs = PackedUV(uv, _DistanceNormalsTiling.xx, time, speed * 2.0, 2.0, distanceSubSpeed);
 	float3 n1b = UnpackNormal(SAMPLE_TEXTURE2D(_BumpMapLarge, sampler_BumpMap, uvs.xy));
 	
 	#if _ADVANCED_SHADING //Use 2nd texture sample

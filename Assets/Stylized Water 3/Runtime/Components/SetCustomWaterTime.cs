@@ -24,6 +24,8 @@ namespace StylizedWater3
             Time,
             EditorTime,
             Speed,
+            [InspectorName("System Time (UTC)")]
+            SystemTime,
             Custom
         }
 
@@ -37,10 +39,13 @@ namespace StylizedWater3
         public float customTime = 0f;
         
         private float elapsedTime;
+        private DateTime _startTime;
         
         private void OnEnable()
         {
             RenderPipelineManager.beginContextRendering += OnBeginFrame;
+            
+            _startTime = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0);
         }
 
         private void OnBeginFrame(ScriptableRenderContext context, List<Camera> cams)
@@ -50,12 +55,20 @@ namespace StylizedWater3
 
         private void SetTime()
         {
+			#if UNITY_EDITOR
+            if (mode == Mode.EditorTime)
+            {
+                WaterObject.CustomTime = (float)UnityEditor.EditorApplication.timeSinceStartup;
+                return;
+            }
+			#endif
+            
             if (mode == Mode.None)
             {
                 ResetTime();
                 return;
             }
-
+            
             if (mode == Mode.Interval)
             {
                 elapsedTime += Time.deltaTime;
@@ -67,26 +80,20 @@ namespace StylizedWater3
                     WaterObject.CustomTime = Time.time;
                 }
             }
-
-            if (mode == Mode.Time)
+            else if (mode == Mode.Time)
             {
                 WaterObject.CustomTime = Time.time;
             }
-			
-			#if UNITY_EDITOR
-            if (mode == Mode.EditorTime)
-            {
-                WaterObject.CustomTime = (float)UnityEditor.EditorApplication.timeSinceStartup;
-            }
-			#endif
-
-            if (mode == Mode.Speed)
+            else if (mode == Mode.Speed)
             {
                 elapsedTime += Time.deltaTime * speed;
                 WaterObject.CustomTime = elapsedTime;
             }
-
-            if (mode == Mode.Custom)
+            else if (mode == Mode.SystemTime)
+            {
+                WaterObject.CustomTime = (float)(DateTime.UtcNow - _startTime).TotalMilliseconds * 0.001f;
+            }
+            else if (mode == Mode.Custom)
             {
                 WaterObject.CustomTime = customTime;
             }
@@ -94,6 +101,7 @@ namespace StylizedWater3
 
         private void ResetTime()
         {
+            elapsedTime = 0f;
             //Revert to using normal time
             WaterObject.CustomTime = -1;
         }
@@ -144,6 +152,8 @@ namespace StylizedWater3
             {
                 EditorGUILayout.PropertyField(customTime);
             }
+            
+            if(WaterObject.CustomTime > 0 && mode.intValue != (int)SetCustomWaterTime.Mode.Custom) EditorGUILayout.HelpBox($"Time: {WaterObject.CustomTime}", MessageType.None);
 
             if (EditorGUI.EndChangeCheck())
             {

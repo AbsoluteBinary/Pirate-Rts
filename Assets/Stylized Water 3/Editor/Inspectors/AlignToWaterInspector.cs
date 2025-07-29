@@ -21,6 +21,8 @@ namespace StylizedWater3
         AlignToWater script;
 
         SerializedProperty heightInterface;
+        
+        SerializedProperty followTarget;
 
         SerializedProperty surfaceSize;
         
@@ -41,6 +43,8 @@ namespace StylizedWater3
 
             heightInterface = serializedObject.FindProperty("heightInterface");
 
+            followTarget = serializedObject.FindProperty("followTarget");
+            
             surfaceSize = serializedObject.FindProperty("surfaceSize");
             
             heightOffset = serializedObject.FindProperty("heightOffset");
@@ -96,6 +100,7 @@ namespace StylizedWater3
             
             EditorGUILayout.Space();
             
+            EditorGUILayout.PropertyField(followTarget);
             EditorGUILayout.PropertyField(heightOffset);
             EditorGUILayout.PropertyField(rollAmount);
             
@@ -104,7 +109,7 @@ namespace StylizedWater3
             EditorGUILayout.PropertyField(rotation);
             EditorGUILayout.PropertyField(smoothing);
 
-            UI.DrawNotification(smoothing.boolValue == false && script.rigidbody, "Smoothing is required to mitigate jittering of the RigidBody", MessageType.Warning);
+            UI.DrawNotification(smoothing.floatValue == 0f && script.rigidbody, "Smoothing is required to mitigate jittering of the RigidBody", MessageType.Warning);
 
             if (EditorGUI.EndChangeCheck())
             {

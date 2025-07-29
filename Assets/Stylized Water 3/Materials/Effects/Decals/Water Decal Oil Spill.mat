@@ -87,6 +87,7 @@ Material:
     - _Smoothness: 0.285
     - _SrcBlend: 5
     - _Surface: 1
+    - _Use_Vertex_Color_Alpha: 0
     - _WorkflowMode: 0
     - _ZTest: 4
     - _ZWrite: 0

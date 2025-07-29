@@ -21,11 +21,11 @@ namespace StylizedWater3
         //Because there two completely different methods of sampling the water's height, this Interface class provides a way to specify which is to be used.
         //In the case of the CPU-method, it contains everything else needed for such a query (eg. water level and material)
         public HeightQuerySystem.Interface heightInterface = new HeightQuerySystem.Interface();
-
-        [Space]
         
         public Vector2 surfaceSize = new Vector2(0.5f, 0.5f);
-        
+
+        [Tooltip("Assign an optional transform to follow on the XZ axis.\n\nThis may be used if you want to use this component to read the water height at another transform's position.")]
+        public Transform followTarget;
         public float heightOffset;
         [Range(0f, 8f)]
         [Tooltip("Controls how strongly the transform should rotate to align with the wave curvature")]
@@ -35,7 +35,8 @@ namespace StylizedWater3
         public float rotation = 0f;
 
         [Tooltip("Smoothly blend towards the newly calculated position and rotation. May be used to combat jittering")]
-        public bool smoothing;
+        [Min(0f)]
+        public float smoothing = 0.1f;
         
         private Vector3 normal;
         private float height;
@@ -283,12 +284,12 @@ namespace StylizedWater3
         private void ApplyTransform()
         {
             //Smooth transition to new normal of this frame, particularly reduces jittering on rigid bodies
-            if (smoothing)
+            if (smoothing > 0)
             {
-                m_targetHeight = Mathf.Lerp(prevHeight, height, Time.deltaTime);
+                m_targetHeight = Mathf.Lerp(prevHeight, height, Time.deltaTime / smoothing);
                 prevHeight = m_targetHeight;
                 
-                m_targetNormal = Vector3.Lerp(prevNormal, normal, Time.smoothDeltaTime);
+                m_targetNormal = Vector3.Lerp(prevNormal, normal, Time.smoothDeltaTime / smoothing);
                 prevNormal = m_targetNormal;
             }
             else
@@ -299,8 +300,14 @@ namespace StylizedWater3
                 m_targetHeight = height;
                 m_targetNormal = normal;
             }
-            
+
             var position = this.transform.position;
+            if (followTarget)
+            {
+                position.x = followTarget.position.x;
+                position.z = followTarget.position.z;
+            }
+            
             position.y = m_targetHeight;
             
             //Setting the normal of a transform directly overrides any and all external rotations

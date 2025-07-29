@@ -40,9 +40,14 @@ CBUFFER_START(UnityPerMaterial)
 	half _SunReflectionDistortion;
 	half _SunReflectionSize;
 	float _SunReflectionStrength;
+	bool _SunReflectionSharp;
+
 	float _PointSpotLightReflectionStrength;
 	half _PointSpotLightReflectionSize;
 	half _PointSpotLightReflectionDistortion;
+	bool _PointSpotLightReflectionSharp;
+
+
 	float _ReflectionDistortion;
 	float _ReflectionBlur;
 	float _ReflectionFresnel;
@@ -80,6 +85,7 @@ CBUFFER_START(UnityPerMaterial)
 	float _FoamSubTilingDynamic;
 	float _FoamSpeedDynamic;
 	float _FoamSubSpeedDynamic;
+	half _FoamClippingDynamic;
 
 	//Intersection
 	half _IntersectionSource;
@@ -128,7 +134,7 @@ CBUFFER_START(UnityPerMaterial)
 	half _VertexColorFoam;
 
 	bool _ReceiveDynamicEffectsHeight;
-	bool _ReceiveDynamicEffectsFoam;
+	half _ReceiveDynamicEffectsFoam;
 	bool _ReceiveDynamicEffectsNormal;
 
 	half _WaveTint;

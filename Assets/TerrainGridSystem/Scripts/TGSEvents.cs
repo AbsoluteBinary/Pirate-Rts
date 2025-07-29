@@ -20,6 +20,7 @@ namespace TGS {
     public delegate void RectangleSelectionEvent(TerrainGridSystem tgs, Vector2 localStartPos, Vector2 localEndPos);
 
     public delegate void ClickEvent(TerrainGridSystem tgs, Vector3 worldPosition);
+    public delegate void GridEvent(TerrainGridSystem tgs);
 
 
     public partial class TerrainGridSystem : MonoBehaviour {
@@ -132,11 +133,14 @@ namespace TGS {
 
         #endregion
 
-        #region Click events
+        #region Grid events
 
         public event ClickEvent OnMouseDown;
-        public event ClickEvent OnMouseClick;
+        public event ClickEvent OnClick;
         public event ClickEvent OnMouseUp;
+
+        public event GridEvent OnEnter;
+        public event GridEvent OnExit;
 
         #endregion
 

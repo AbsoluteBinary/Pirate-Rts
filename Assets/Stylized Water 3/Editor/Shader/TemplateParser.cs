@@ -16,11 +16,11 @@ namespace StylizedWater3
     {
         public const int SHADER_GENERATOR_VERSION_MAJOR = 5;
         public const int SHADER_GENERATOR_MINOR = 1;
-        public const int SHADER_GENERATOR_PATCH = 2;
+        public const int SHADER_GENERATOR_PATCH = 3;
         
         //Stencil mask used by water shader. Currently used for underwater rendering
-        //Values 1-32 are used by deferred rendering
-        public const int STENCIL_REF = 33;
+        //Values 1-65 are used by deferred rendering
+        public const int STENCIL_REF = 65;
         
         //Converts relative include paths such as (../../Libraries/File.hlsl) to an absolute path
         //Supports the source file being part of a package

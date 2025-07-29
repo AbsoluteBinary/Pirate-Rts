@@ -14,6 +14,7 @@
 #endif
 
 #define SPECULAR_POWER_RCP 0.01562 // 1.0/32
+#define SPECULAR_STEP_THRESHOLD 0.2
 
 //Reusable for every light
 struct TranslucencyData
@@ -127,7 +128,7 @@ void AdjustShadowStrength(inout Light light, float strength, float vFace)
 }
 
 //Specular Blinn-phong reflection in world-space
-float3 SpecularReflection(Light light, float3 viewDirectionWS, float3 geometryNormalWS, float3 normalWS, float perturbation, float exponent, float intensity)
+float3 SpecularReflection(Light light, float3 viewDirectionWS, float3 geometryNormalWS, float3 normalWS, float perturbation, float exponent, float intensity, bool sharp)
 {
 	//Blend between geometry/wave normals and normals from normal map (aka distortion)
 	normalWS = lerp(geometryNormalWS, normalWS, perturbation);
@@ -136,6 +137,12 @@ float3 SpecularReflection(Light light, float3 viewDirectionWS, float3 geometryNo
 	half NdotH = saturate(dot(geometryNormalWS, halfVec));
 
 	float specular = pow(NdotH, exponent);
+	
+	if(sharp)
+	{
+		specular = step(SPECULAR_STEP_THRESHOLD, specular);
+		intensity *= 0.5;
+	}
 	
 	//Attenuation includes shadows, if available
 	const float3 attenuatedLightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
@@ -158,9 +165,9 @@ float3 SpecularReflection(Light light, float3 viewDirectionWS, float3 geometryNo
 }
 
 //Based on UniversalFragmentBlinnPhong (no BRDF)
-float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Light mainLight, InputData inputData, WaterSurface water, TranslucencyData translucencyData, float shadowStrength, float vFace)
+float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Light mainLight, InputData inputData, WaterSurface water, TranslucencyData translucencyData, float shadowStrength, float vFace, bool isMatchingLightLayer)
 {
-	ApplyTranslucency(translucencyData, surfaceData.emission.rgb);
+	if(isMatchingLightLayer) ApplyTranslucency(translucencyData, surfaceData.emission.rgb);
 
 	#if _CAUSTICS
 	float causticsAttentuation = 1.0;
@@ -168,14 +175,12 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 	
 #ifdef LIT
 	#if _CAUSTICS && !defined(LIGHTMAP_ON)
-	causticsAttentuation = GetLightIntensity(mainLight) * (mainLight.distanceAttenuation * mainLight.shadowAttenuation);
+	if(isMatchingLightLayer)
+	{
+		causticsAttentuation = GetLightIntensity(mainLight) * (mainLight.distanceAttenuation * mainLight.shadowAttenuation);
+	}
 	#endif
 	
-	//Allow shadow strength to be overridden.
-	AdjustShadowStrength(mainLight, shadowStrength, vFace);
-	
-	half3 attenuatedLightColor = mainLight.color * (mainLight.distanceAttenuation * mainLight.shadowAttenuation);
-
 	MixRealtimeAndBakedGI(mainLight, water.diffuseNormal, inputData.bakedGI, shadowStrength.xxxx);
 
 	/*
@@ -187,7 +192,16 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 	diffuseColor += LightingPhysicallyBased(brdfData, mainLight, water.diffuseNormal, inputData.viewDirectionWS);
 	*/
 
-	half3 diffuseColor = inputData.bakedGI + LightingLambert(attenuatedLightColor, mainLight.direction, water.diffuseNormal);
+	half3 directLight = 0;
+	if(isMatchingLightLayer)
+	{
+		//Allow shadow strength to be overridden.
+		AdjustShadowStrength(mainLight, shadowStrength, vFace);
+		
+		half3 attenuatedLightColor = mainLight.color * (mainLight.distanceAttenuation * mainLight.shadowAttenuation);
+		directLight = LightingLambert(attenuatedLightColor, mainLight.direction, water.diffuseNormal);
+	}
+	half3 diffuseColor = inputData.bakedGI + directLight;
 	
 #if _ADDITIONAL_LIGHTS //Per pixel lights
 	#ifndef _SPECULARHIGHLIGHTS_OFF
@@ -243,7 +257,7 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 
 			#ifndef _SPECULARHIGHLIGHTS_OFF
 			//Note: View direction fetched again using the function that takes orthographic projection into account
-			surfaceData.specular += SpecularReflection(light, normalize(GetWorldSpaceViewDir(inputData.positionWS)), water.waveNormal, water.tangentWorldNormal, _PointSpotLightReflectionDistortion, lerp(4096, 64, _PointSpotLightReflectionSize), specularPower);
+			surfaceData.specular += SpecularReflection(light, normalize(GetWorldSpaceViewDir(inputData.positionWS)), water.waveNormal, water.tangentWorldNormal, _PointSpotLightReflectionDistortion, lerp(4096, 64, _PointSpotLightReflectionSize), specularPower, _PointSpotLightReflectionSharp);
 		#endif
 	}
 	LIGHT_LOOP_END
@@ -275,7 +289,6 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 	
 	//Debug
 	//return float4(surfaceData.emission.rgb, 1.0);	
-
 	
 	return color;
 }

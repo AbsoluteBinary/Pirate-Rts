@@ -1,3 +1,33 @@
+3.2.1 (July 7th 2025)
+
+Added:
+- Align Transform To Water component, "Follow Target" transform field. Has the transform follow another on the XZ plane
+- Set Custom Water Time component, added an option to use Coordinated Universal Time
+- Render feature settings, added option to disable Height pre-pass for the scene view when playing.
+
+Changed:
+- Align Transform To Water, 'smoothing' is now a scalable float value, rather than a toggle
+
+Fixed:
+- GPU height queries not always firing a callback if the water didn't happen to render in the very first frame
+
+3.2.0 (June 12th 2025)
+
+Added:
+- Support for Rendering Layers (aka Light Layers)
+- Surface Foam clipping parameter, for dynamic effects foam
+- Light reflections now have a "Sharp" option
+- Water Decal shader, option to enable vertex color alpha fading (eg. particle effects)
+- Nintendo Style + Arcade Ocean materials
+
+Changed:
+- The "Receive Dynamic Effects Foam" toggle is now a float value. Allows to scale up the foam per-material.
+- Material UI, separated reflections into Light and Environment sections
+
+Fixed:
+- GPU Height Queries returning incorrect Wave animation heights if the Scene-view tab was open during Play mode
+- Distance Normals flowing backwards for rivers when Advanced Shading was used
+
 3.1.1 (June 3rd 2025)
 
 Fixed:

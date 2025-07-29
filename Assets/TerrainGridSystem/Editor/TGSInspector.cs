@@ -789,6 +789,15 @@ namespace TGS_Editor {
                                 needsRedraw = true;
                             }
 
+                            bool visibleAlways = selectedCell.visibleAlways;
+                            selectedCell.visibleAlways = EditorGUILayout.Toggle(new GUIContent("   Visible Always", "This cell will ignore visibility rules and remain visible."), visibleAlways);
+                            if (selectedCell.visibleAlways != visibleAlways) {
+                                for (int k = 0; k < selectedCount; k++) {
+                                    tgs.cells[cellSelectedIndices[k]].visibleAlways = selectedCell.visibleAlways;
+                                }
+                                needsRedraw = true;
+                            }
+
                             bool canCross = selectedCell.canCross;
                             selectedCell.canCross = EditorGUILayout.Toggle(new GUIContent("   Can Cross", "This cell can be crossed when calculating a route using path finding."), canCross);
                             if (selectedCell.canCross != canCross) {

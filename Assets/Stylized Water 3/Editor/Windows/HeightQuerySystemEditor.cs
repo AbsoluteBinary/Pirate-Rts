@@ -183,7 +183,15 @@ namespace StylizedWater3
                                         indicesString += $"{request.Value.indices[i].ToString()}, ";
                                     }
                                     indicesString += " }";
-                                    EditorGUILayout.LabelField($"<b>Indices:</b> {indicesString}", selected ? labelStyleSelected : labelStyle);
+                                    EditorGUILayout.LabelField($"<b>Indices:</b> {indicesString}", selected ? labelStyleSelected : labelStyle, GUILayout.MaxWidth(250f));
+                                    
+                                    string heightsString = "{ ";
+                                    for (int i = 0; i < request.Value.sampler.heightValues.Length; i++)
+                                    {
+                                        heightsString += $"{Math.Round(request.Value.sampler.heightValues[i], 3)}, ";
+                                    }
+                                    heightsString += " }";
+                                    EditorGUILayout.LabelField($"<b>Heights:</b> {heightsString}", selected ? labelStyleSelected : labelStyle);
                                 }
                                 
                                 /*

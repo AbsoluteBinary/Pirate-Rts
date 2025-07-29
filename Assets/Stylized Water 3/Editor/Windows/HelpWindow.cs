@@ -522,18 +522,16 @@ namespace StylizedWater3
             stringBuilder.AppendLine($"OS: {SystemInfo.operatingSystem}");
             stringBuilder.AppendLine($"Platform: {EditorUserBuildSettings.activeBuildTarget}");
             
-            string scriptingBackend = string.Empty;
-            #if UNITY_2023_1_OR_NEWER
             NamedBuildTarget buildTargetName = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
-            scriptingBackend = PlayerSettings.GetDefaultScriptingBackend(buildTargetName).ToString();
-            #else
-            scriptingBackend = PlayerSettings.GetDefaultScriptingBackend(buildTargetGroup).ToString();
-            #endif
+            string scriptingBackend = PlayerSettings.GetDefaultScriptingBackend(buildTargetName).ToString();
             stringBuilder.AppendLine($"Scripting backend: {scriptingBackend}");
 
             stringBuilder.AppendLine($"Color space: {PlayerSettings.colorSpace}");
             stringBuilder.AppendLine($"Graphics API(s): (Auto:{PlayerSettings.GetUseDefaultGraphicsAPIs(EditorUserBuildSettings.activeBuildTarget)}) {String.Join(" -> ", PlayerSettings.GetGraphicsAPIs(EditorUserBuildSettings.activeBuildTarget))}");
             stringBuilder.AppendLine($"Tessellation support: {SystemInfo.supportsTessellationShaders}");
+            stringBuilder.AppendLine($"Compute shader support: {SystemInfo.supportsComputeShaders}");
+            stringBuilder.AppendLine($"Async GPU readback support: {SystemInfo.supportsAsyncGPUReadback}");
+            stringBuilder.AppendLine($"Async compute support: {SystemInfo.supportsAsyncCompute}");
 
             #if UNITY_6000_0_OR_NEWER && URP
             stringBuilder.AppendLine($"GPU Resident Drawer: {UniversalRenderPipeline.asset.gpuResidentDrawerMode != GPUResidentDrawerMode.Disabled}");

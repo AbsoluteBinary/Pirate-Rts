@@ -17,6 +17,8 @@ namespace TGS {
         Transparent
     }
 
+    public delegate bool CellFilterDelegate(int cellIndex);
+
     public partial class TerrainGridSystem : MonoBehaviour {
 
         /// <summary>
@@ -1611,24 +1613,24 @@ namespace TGS {
         /// <summary>
         /// Get a list of cells which are nearer than a given distance in cell count
         /// </summary>
-        public List<int> CellGetNeighbours (Cell cell, int maxSteps = -1, int cellGroupMask = -1, float maxSearchCost = 0, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, int maxResultsCount = int.MaxValue, bool cellGroupMaskExactComparison = false) {
+        public List<int> CellGetNeighbours (Cell cell, int maxSteps = -1, int cellGroupMask = -1, float maxSearchCost = 0, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, int maxResultsCount = int.MaxValue, bool cellGroupMaskExactComparison = false, CellFilterDelegate filter = null) {
             int cellIndex = CellGetIndex(cell);
-            return CellGetNeighbours(cellIndex, maxSteps, cellGroupMask, maxSearchCost, canCrossCheckType, maxResultsCount, cellGroupMaskExactComparison);
+            return CellGetNeighbours(cellIndex, maxSteps, cellGroupMask, maxSearchCost, canCrossCheckType, maxResultsCount, cellGroupMaskExactComparison, filter);
         }
 
         /// <summary>
         /// Get a list of cells which are nearer than a given distance in cell count
         /// </summary>
-        public List<int> CellGetNeighbours (int cellIndex, int maxSteps = -1, int cellGroupMask = -1, float maxSearchCost = 0, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, int maxResultsCount = int.MaxValue, bool cellGroupMaskExactComparison = false) {
+        public List<int> CellGetNeighbours (int cellIndex, int maxSteps = -1, int cellGroupMask = -1, float maxSearchCost = 0, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, int maxResultsCount = int.MaxValue, bool cellGroupMaskExactComparison = false, CellFilterDelegate filter = null) {
             List<int> results = new List<int>();
-            CellGetNeighbours(cellIndex, maxSteps, results, cellGroupMask, maxSearchCost, canCrossCheckType, maxResultsCount, cellGroupMaskExactComparison);
+            CellGetNeighbours(cellIndex, maxSteps, results, cellGroupMask, maxSearchCost, canCrossCheckType, maxResultsCount, cellGroupMaskExactComparison, filter: filter);
             return results;
         }
 
         /// <summary>
         /// Get a list of cells which are nearer than a given distance in cell count
         /// </summary>
-        public int CellGetNeighbours (int cellIndex, int maxSteps, List<int> cellIndices, int cellGroupMask = -1, float maxSearchCost = 0, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, int maxResultsCount = int.MaxValue, bool ignoreCellCosts = false, bool includeInvisibleCells = true, bool cellGroupMaskExactComparison = false) {
+        public int CellGetNeighbours (int cellIndex, int maxSteps, List<int> cellIndices, int cellGroupMask = -1, float maxSearchCost = 0, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, int maxResultsCount = int.MaxValue, bool ignoreCellCosts = false, bool includeInvisibleCells = true, bool cellGroupMaskExactComparison = false, CellFilterDelegate filter = null) {
             if (cellIndex < 0 || cellIndex >= cells.Count || cellIndices == null)
                 return 0;
             Cell cell = cells[cellIndex];
@@ -1661,6 +1663,7 @@ namespace TGS {
                         count++;
                     }
                     else {
+                        if (filter != null && !filter(ci)) continue;
                         if (distanceFunction(cellIndex, ci) <= maxSteps) {
                             int stepsCount = FindPath(cellIndex, ci, tempListCells, out _, maxSearchCost, maxSteps, cellGroupMask, canCrossCheckType, ignoreCellCosts, includeInvisibleCells, cellGroupMaskExactComparison: cellGroupMaskExactComparison);
                             if (stepsCount > 0) {
@@ -1689,7 +1692,7 @@ namespace TGS {
         /// <summary>
         /// Get a list of cells which are nearer than a given distance in cell count
         /// </summary>
-        public List<int> CellGetNeighboursWithinRange (int cellIndex, int minSteps, int maxSteps, int cellGroupMask = -1, float maxCost = -1, bool includeInvisibleCells = true, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, bool ignoreCellCosts = false, bool cellGroupMaskExactComparison = false) {
+        public List<int> CellGetNeighboursWithinRange (int cellIndex, int minSteps, int maxSteps, int cellGroupMask = -1, float maxCost = -1, bool includeInvisibleCells = true, CanCrossCheckType canCrossCheckType = CanCrossCheckType.Default, bool ignoreCellCosts = false, bool cellGroupMaskExactComparison = false, CellFilterDelegate filter = null) {
             if (cellIndex < 0 || cellIndex >= cells.Count)
                 return null;
             minSteps = Mathf.Max(1, minSteps);
@@ -1712,6 +1715,7 @@ namespace TGS {
                         continue;
                     int ci = CellGetIndex(y, x);
                     if (!includeInvisibleCells && !CellIsVisible(ci)) continue;
+                    if (filter != null && !filter(ci)) continue;
                     if (distanceFunction(cellIndex, ci) <= maxSteps) {
                         List<int> steps = FindPath(cellIndex, ci, maxCost, maxSteps, cellGroupMask, canCrossCheckType, ignoreCellCosts, includeInvisibleCells, cellGroupMaskExactComparison: cellGroupMaskExactComparison);
                         if (steps != null) {
@@ -3074,8 +3078,7 @@ namespace TGS {
         /// </summary>
         /// <returns>The get settings.</returns>
         public TGSConfigEntry[] CellGetSettings () {
-            if (cells == null)
-                return null;
+            if (cells == null) return null;
             int cellCount = cells.Count;
             TGSConfigEntry[] cellSettings = new TGSConfigEntry[cellCount];
             for (int k = 0; k < cellCount; k++) {
@@ -3084,6 +3087,7 @@ namespace TGS {
                     continue;
                 cellSettings[k].territoryIndex = cell.territoryIndex;
                 cellSettings[k].visible = cell.visibleSelf;
+                cellSettings[k].visibleAlways = cell.visibleAlways;
                 cellSettings[k].color = CellGetColor(k);
                 cellSettings[k].textureIndex = CellGetTextureIndex(k);
                 cellSettings[k].tag = cell.tag;
@@ -3196,6 +3200,7 @@ namespace TGS {
                 Cell cell = cells[k];
                 cell.territoryIndex = (short)territoryIndex;
                 cell.visible = cellSettings[k].visible;
+                cell.visibleAlways = cellSettings[k].visibleAlways;
                 Color color = cellSettings[k].color;
                 int textureIndex = cellSettings[k].textureIndex;
                 if (color.a > 0 || textureIndex >= 1) {

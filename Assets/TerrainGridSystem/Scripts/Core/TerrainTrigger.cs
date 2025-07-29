@@ -16,7 +16,7 @@ namespace TGS {
         void OnMouseEnter() {
             foreach (TerrainGridSystem grid in grids) {
                 if (grid != null) {
-                    grid.mouseIsOver = true;
+                    grid.NotifyPointerEnters();
                 }
             }
         }
@@ -34,7 +34,7 @@ namespace TGS {
                             continue;
                     }
                 }
-                grid.mouseIsOver = false;
+                grid.NotifyPointerExits();
             }
         }
 

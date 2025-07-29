@@ -194,18 +194,16 @@ namespace StylizedWater3
         partial void AddFlowMapPass(ScriptableRenderer renderer, ref RenderingData renderingData);
         partial void DisposeFlowMapPass();
 
-        private bool IsInvalidContext(ref RenderingData renderingData)
+        private bool IsInvalidContext(CameraType cameraType, CameraRenderType cameraRenderType)
         {
-            var currentCam = renderingData.cameraData.camera;
-
             //Skip for any special use camera's (except scene view camera)
-            if (currentCam.cameraType != CameraType.SceneView && (currentCam.cameraType == CameraType.Reflection || currentCam.cameraType == CameraType.Preview || currentCam.hideFlags != HideFlags.None))
+            if (cameraType != CameraType.SceneView && (cameraType == CameraType.Preview || hideFlags != HideFlags.None))
             {
                 return true;
             }
 
             //Skip overlay cameras
-            if (renderingData.cameraData.renderType == CameraRenderType.Overlay)
+            if (cameraRenderType == CameraRenderType.Overlay)
             {
                 return true;
             }
@@ -221,7 +219,9 @@ namespace StylizedWater3
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            if(IsInvalidContext(ref renderingData)) return;
+            var currentCam = renderingData.cameraData.camera;
+            
+            if(IsInvalidContext(currentCam.cameraType, renderingData.cameraData.renderType)) return;
      
             constantsSetup.Setup(this);
             renderer.EnqueuePass(constantsSetup);
@@ -238,30 +238,40 @@ namespace StylizedWater3
                 renderer.EnqueuePass(transparentTexturePass);
             }
             #endif
-            
-            AddFlowMapPass(renderer, ref renderingData);
-            AddDynamicEffectsPasses(renderer, ref renderingData);
-            
-            if (WillExecuteHeightPrePass)
-            {
-                heightPrePass.Setup(heightPrePassSettings);
-                renderer.EnqueuePass(heightPrePass);
 
-                if (HeightQuerySystem.QueryCount > 0)
+            //Do not execute for reflection probe captures
+            if (currentCam.cameraType != CameraType.Reflection)
+            {
+                AddFlowMapPass(renderer, ref renderingData);
+                AddDynamicEffectsPasses(renderer, ref renderingData);
+
+                //Do not execute for the scene-view camera in play-mode. Even if the tab is not active, it would render around it instead of the main camera
+                var skipHeightPrePass = Application.isPlaying && heightPrePassSettings.disableInSceneView && currentCam.cameraType == CameraType.SceneView;
+  
+                if (WillExecuteHeightPrePass && skipHeightPrePass == false)
                 {
-                    heightQueryPass.Setup(this, heightReadbackCS);
-                    renderer.EnqueuePass(heightQueryPass);
+                    heightPrePass.Setup(heightPrePassSettings);
+                    renderer.EnqueuePass(heightPrePass);
+
+                    if (HeightQuerySystem.QueryCount > 0)
+                    {
+                        heightQueryPass.Setup(this, heightReadbackCS);
+                        renderer.EnqueuePass(heightQueryPass);
+                    }
+                }
+                else
+                {
+                    Shader.SetGlobalInt(HeightPrePass._WaterHeightPrePassAvailable, 0);
                 }
             }
-            else
-            {
-                Shader.SetGlobalInt(HeightPrePass._WaterHeightPrePassAvailable, 0);
-            }
-            
+
             AddUnderwaterRenderingPasses(renderer, ref renderingData);
             
             #if DEBUG_AVAILABLE
-            if (RenderTargetDebugger.InspectedProperty > 0) renderer.EnqueuePass(debugInspectorPass);
+            if (RenderTargetDebugger.InspectedProperty > 0)
+            {
+                renderer.EnqueuePass(debugInspectorPass);
+            }
             #endif
         }
 
@@ -318,6 +328,9 @@ namespace StylizedWater3
                     }
                     else
                     {
+                        var cameraData = frameData.Get<UniversalCameraData>();
+                        RenderTargetDebugger.CurrentCameraName = cameraData.camera.name;
+                        
                         //Copy TextureHandle into persistent RT
                         renderGraph.AddCopyPass(debugData.currentHandle, destination, passName: "Water Debug");
                     }
@@ -325,6 +338,7 @@ namespace StylizedWater3
                 else
                 {
                     RenderTargetDebugger.CurrentRT = null;
+                    RenderTargetDebugger.CurrentCameraName = string.Empty;
                 }
             }
 

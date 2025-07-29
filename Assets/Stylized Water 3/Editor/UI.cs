@@ -511,7 +511,7 @@ namespace StylizedWater3
                 backgroundRect.xMin -= 15f;
 
                 var labelRect = backgroundRect;
-                labelRect.xMin += 8f;
+                labelRect.xMin += 10f;
                 labelRect.xMax -= 20f + 16 + 5;
 
                 var foldoutRect = backgroundRect;

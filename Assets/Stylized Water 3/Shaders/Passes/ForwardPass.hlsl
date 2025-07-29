@@ -197,11 +197,10 @@ float3 GetWaterColor(SceneData scene, float3 scatterColor, float density, float 
 #define FRONT_FACE_TYPE_REAL FRONT_FACE_TYPE
 #endif
 
-float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRONT_FACE_SEMANTIC_REAL) : SV_Target
+float4 ForwardPass(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRONT_FACE_SEMANTIC_REAL)
 {
 	UNITY_SETUP_INSTANCE_ID(input);
 	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-	
 	
 	//Initialize with null values. Anything that isn't assigned, shouldn't be used either
 	WaterSurface water = (WaterSurface)0;
@@ -314,12 +313,12 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	#if DYNAMIC_EFFECTS_ENABLED
 	float4 dynamicEffectsData = 0;
 	half dynamicEffectsTopMask = 0;
-	if(_ReceiveDynamicEffectsHeight || _ReceiveDynamicEffectsFoam || _ReceiveDynamicEffectsNormal)
+	if(_ReceiveDynamicEffectsHeight || _ReceiveDynamicEffectsFoam > 0 || _ReceiveDynamicEffectsNormal)
 	{
 		dynamicEffectsData = SampleDynamicEffectsData(positionWS.xyz);
 		dynamicEffectsTopMask = saturate(dot(water.vertexNormal, UP_VECTOR));
 		dynamicEffectsData[DE_HEIGHT_CHANNEL] *= dynamicEffectsTopMask;
-		dynamicEffectsData[DE_FOAM_CHANNEL] *= dynamicEffectsTopMask;
+		dynamicEffectsData[DE_FOAM_CHANNEL] *= dynamicEffectsTopMask * _ReceiveDynamicEffectsFoam;
 		//return float4(dynamicEffectsData.bbb, 1.0);
 		//return float4(DynamicEffectsBoundsEdgeMask(positionWS).xxx, 1.0);
 	}
@@ -340,12 +339,13 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	
 	half4 shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
 	Light mainLight = GetMainLight(shadowCoords, water.positionWS, shadowMask);
-
+	bool isMatchingLightLayer = true;
 	//return float4(shadowMask.xyz, 1.0);
 
 	#if _LIGHT_LAYERS
 	uint meshRenderingLayers = GetMeshRenderingLayer();
-	if (IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers))
+	isMatchingLightLayer = IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers);
+	if (isMatchingLightLayer)
 	#endif
 	{
 		water.shadowMask = mainLight.shadowAttenuation;
@@ -586,7 +586,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	
 	//Dynamic foam (separately sampled)
 	#if DYNAMIC_EFFECTS_ENABLED
-	if(_ReceiveDynamicEffectsFoam)
+	if(_ReceiveDynamicEffectsFoam > 0)
 	{
 		foamDistortion = _FoamDistortion * dynamicEffectsData[DE_HEIGHT_CHANNEL].xx;
 	
@@ -596,9 +596,9 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 		#endif
 		
 		//return float4(dynamicFoamTex.rg, 0, 1);
-		
-		//foamGradient = (foamGradient + dynamicEffectsData[DE_FOAM_CHANNEL]);
+
 		water.foam += CalculateFoamWeight(dynamicEffectsData[DE_FOAM_CHANNEL], dynamicFoamTex.r);
+		if(_FoamClippingDynamic > 0) water.foam = smoothstep(_FoamClippingDynamic, 1.0, water.foam);
 
 		//Add foam weight, as this is used for bubbles
 		foamGradient += dynamicEffectsData[DE_FOAM_CHANNEL];
@@ -636,8 +636,9 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	#endif
 	
 	float causticsMask = saturate((1-water.fog) - water.intersection - water.foam - scene.skyMask) * water.vFace;
-	
-	float2 causticsProjection = GetCausticsProjection(input.positionCS, mainLight.direction, causticsCoords, scene.normalWS, _EnableDirectionalCaustics, causticsMask);
+
+	bool directional = _EnableDirectionalCaustics && isMatchingLightLayer;
+	float2 causticsProjection = GetCausticsProjection(input.positionCS, mainLight.direction, causticsCoords, scene.normalWS, directional, causticsMask);
 
 	//Refraction creates discrepancy
 	//causticsProjection = CalculateTriPlanarProjection(scene.positionWS, ReconstructWorldNormal(input.positionCS));
@@ -685,12 +686,16 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	lightReflectionNormal = water.waveNormal;
 	#endif
 
-	half specularMask = saturate((1-water.foam) * (1-water.intersection) * water.shadowMask);
+	half specularMask = 1-saturate(water.foam + water.intersection * (1-water.shadowMask));
 	//return float4(specularMask.xxx, 1.0);
 
-	float3 sunSpecular = SpecularReflection(mainLight, water.viewDir, water.waveNormal, lightReflectionNormal, _SunReflectionDistortion, lerp(8196, 64, _SunReflectionSize), _SunReflectionStrength * specularMask);
-	
-	water.specular += sunSpecular;
+	float3 sunSpecular = 0;
+
+	if(isMatchingLightLayer)
+	{
+		sunSpecular = SpecularReflection(mainLight, water.viewDir, water.waveNormal, lightReflectionNormal, _SunReflectionDistortion, lerp(8196, 64, _SunReflectionSize), _SunReflectionStrength * specularMask, _SunReflectionSharp);
+		water.specular += sunSpecular;
+	}
 	//return float4(water.specular, 1.0);
 #endif
 	//return float4(specular, 1.0);
@@ -819,21 +824,24 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	=========== */
 	TranslucencyData translucencyData = (TranslucencyData)0;
 	#if _TRANSLUCENCY
-	float scatteringMask = 1.0;
-	scatteringMask = saturate((water.fog + water.edgeFade) - (water.reflectionMask * water.vFace)) * water.shadowMask;
-	scatteringMask -= water.foam;
+	if(isMatchingLightLayer)
+	{
+		float scatteringMask = 1.0;
+		scatteringMask = saturate((water.fog + water.edgeFade) - (water.reflectionMask * water.vFace)) * water.shadowMask;
+		scatteringMask -= water.foam;
 
-	scatteringMask = saturate(scatteringMask);
-	
-	//return float4(scatteringMask.xxx, 1);
+		scatteringMask = saturate(scatteringMask);
+		
+		//return float4(scatteringMask.xxx, 1);
 
-	translucencyData = PopulateTranslucencyData(_ShallowColor.rgb, mainLight.direction, mainLight.color, water.viewDir, water.waveNormal, water.tangentWorldNormal, scatteringMask, _TranslucencyStrength, _TranslucencyStrengthDirect * water.vFace, _TranslucencyExp, _TranslucencyCurvatureMask * water.vFace, true);
+		translucencyData = PopulateTranslucencyData(_ShallowColor.rgb, mainLight.direction, mainLight.color, water.viewDir, water.waveNormal, water.tangentWorldNormal, scatteringMask, _TranslucencyStrength, _TranslucencyStrengthDirect * water.vFace, _TranslucencyExp, _TranslucencyCurvatureMask * water.vFace, true);
 	
-	#if UNDERWATER_ENABLED
-	//Override the strength of the effect for the backfaces, to match the underwater shading post effect
-	translucencyData.strength *= lerp(_UnderwaterFogBrightness * _UnderwaterSubsurfaceStrength, 1, water.vFace);
-	translucencyData.exponent = lerp(_UnderwaterSubsurfaceExponent, _TranslucencyExp, water.vFace);
-	#endif
+		#if UNDERWATER_ENABLED
+		//Override the strength of the effect for the backfaces, to match the underwater shading post effect
+		translucencyData.strength *= lerp(_UnderwaterFogBrightness * _UnderwaterSubsurfaceStrength, 1, water.vFace);
+		translucencyData.exponent = lerp(_UnderwaterSubsurfaceExponent, _TranslucencyExp, water.vFace);
+		#endif
+	}
 	#endif
 
 	/* ========
@@ -930,6 +938,11 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	{
 		return float4(water.reflections * (_DebugLightingMode == DEBUGLIGHTINGMODE_REFLECTIONS_WITH_SMOOTHNESS ? water.reflectionMask : 1), 1.0);
 	}
+
+	if (_DebugLightingMode == DEBUGMATERIALMODE_RENDERING_LAYER_MASKS)
+	{
+		//return float4(GetRenderingLayerMasksDebugColor(inputData.positionCS, inputData.normalWS).xyz, 1.0);
+	}
 	
 	if (CanDebugOverrideOutputColor(inputData, surfaceData, debugColor))
 	{
@@ -943,7 +956,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	float reflectionCoefficient = UnderwaterReflectionFactor(inputData.normalWS, water.tangentWorldNormal, water.viewDir, _UnderwaterSurfaceSmoothness, _UnderwaterRefractionOffset);
 	#endif
 	
-	float4 finalColor = float4(ApplyLighting(surfaceData, scene.color, mainLight, inputData, water, translucencyData, _ShadowStrength, water.vFace), water.alpha);
+	float4 finalColor = float4(ApplyLighting(surfaceData, scene.color, mainLight, inputData, water, translucencyData, _ShadowStrength, water.vFace, isMatchingLightLayer), water.alpha);
 	
 	#if _REFRACTION
 	finalColor.rgb = lerp(scene.color.rgb, finalColor.rgb, saturate(water.fog + water.intersection + water.foam));
@@ -980,4 +993,21 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	if(_VertexColorTransparency > 0.5) finalColor.a = water.alpha * saturate(water.alpha - vertexColor.g);
 
 	return finalColor;
+}
+
+
+void ForwardPassFragment(
+	Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRONT_FACE_SEMANTIC_REAL
+	, out half4 outColor : SV_Target0
+#ifdef _WRITE_RENDERING_LAYERS
+	, out float4 outRenderingLayers : SV_Target1
+#endif
+)
+{
+	outColor = ForwardPass(input, vertexFace);
+
+	#ifdef _WRITE_RENDERING_LAYERS
+	uint renderingLayers = GetMeshRenderingLayer();
+	outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
+	#endif
 }

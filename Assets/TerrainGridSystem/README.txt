@@ -45,6 +45,11 @@ Of course, all updates of Terrain Grid System will be eventually available on th
 Version history
 ---------------
 
+Version 20.0
+- API: added two new events: OnEnter, OnExit
+- API: added cell.visibleAlways which overrides the visibility based on visibleByRules (defaults to false)
+- API: added "filter" delegate parameter to CellGetNighbours() which will invoke your method before using the cell
+
 Version 19.3
 - Use "Disable Mesh Generation" option for server only mode
 - Changing topology now reverts scale to default if needed

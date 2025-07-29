@@ -6,6 +6,9 @@ using UnityEditor;
 
 namespace StylizedWater3
 {
+    /// <summary>
+    /// Emulates the particle system "Rate over Distance" emission behaviour, but with accurate support for RigidBody's
+    /// </summary>
     [ExecuteInEditMode]
     [AddComponentMenu("Effects/Particle Trail Emitter")]
     public class ParticleTrailEmitter : MonoBehaviour
@@ -13,6 +16,7 @@ namespace StylizedWater3
 #pragma warning disable 108,114 //New keyword
         [Tooltip("The Emission module on this particle system should have its Rate Over Distance value set 0.")]
         public ParticleSystem particleSystem;
+        private ParticleSystem.EmissionModule emissionModule;
 #pragma warning restore 108,114
 
         [Tooltip("If this particle system is parented under a RigidBody, then assign it here for correct positional tracking")]
@@ -24,17 +28,21 @@ namespace StylizedWater3
 
         private float distanceAccumulation = 0f;
         private Vector3 previousPosition;
-
+        
         void Reset()
         {
             particleSystem = GetComponent<ParticleSystem>();
 
             if (particleSystem)
             {
-                ParticleSystem.EmissionModule emissionModule = particleSystem.emission;
+                emissionModule = particleSystem.emission;
 
                 if (emissionModule.rateOverDistance.constant > 0f)
                 {
+                    ParticleSystem.MinMaxCurve rateOverDistance = emissionModule.rateOverDistance;
+                    rateOverDistance.constant = 0f;
+                    emissionModule.rateOverDistance = rateOverDistance;
+                    
                     Debug.LogWarning($"The Rate Over Distance has been set to 0 on the particle system \"{particleSystem.name}\". This is because the Particle Trail Emitter component will be responsible for emission");
                 }
             }
@@ -44,6 +52,12 @@ namespace StylizedWater3
         private void Start()
         {
             previousPosition = this.transform.position;
+
+            if (particleSystem)
+            {
+                ParticleSystem.MainModule main = particleSystem.main;
+                main.playOnAwake = false;
+            }
         }
 
         private float GetDistance()
@@ -68,6 +82,9 @@ namespace StylizedWater3
         public void FixedUpdate()
         {
             if (!particleSystem) return;
+
+            emissionModule = particleSystem.emission;
+            if (emissionModule.enabled == false) return;
             
             distanceAccumulation += GetDistance();
 

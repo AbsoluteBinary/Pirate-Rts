@@ -284,6 +284,8 @@ namespace StylizedWater3
         /// <returns></returns>
         public static ScriptableRendererFeature GetRenderFeature<T>()
         {
+            if (!UniversalRenderPipeline.asset) return null;
+            
             ScriptableRendererData[] rendererDataList = GetRenderDataList(UniversalRenderPipeline.asset);
 
             for (int i = 0; i < rendererDataList.Length; i++)

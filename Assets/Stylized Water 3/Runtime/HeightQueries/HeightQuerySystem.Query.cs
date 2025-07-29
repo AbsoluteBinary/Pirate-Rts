@@ -195,7 +195,7 @@ namespace StylizedWater3
                     AsyncRequest request = m_request.Value;
                     
                     int queryLength = request.indices.Count;
-
+                    
                     for (int i = 0; i < queryLength; i++)
                     {
                         //List of indices this request occupies in the query
@@ -206,15 +206,15 @@ namespace StylizedWater3
                         //Height value equals a void do not assign it
                         if (request.invalidateMisses && EqualsVoid(waterHeight))
                         {
+                            //Debug.Log($"Height request for {request.label} at index {index} was invalidated (value={waterHeight}).");
                             continue;
                         }
                         
                         request.sampler.heightValues[i] = waterHeight;
-
-                        //Issue a callback event for the external scripts that issued the request
-                        request.InvokeCallback();
                     }
                     
+                    //Issue a callback event for the external scripts that issued the request
+                    request.InvokeCallback();
                 }
                 outputOffsets.Dispose();
 

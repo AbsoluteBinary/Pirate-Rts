@@ -5117,7 +5117,7 @@ namespace TGS {
                         GameObject hitGO = hits[k].collider.gameObject;
                         if (hitGO == gameObject || (terrain != null && terrain.includesGameObject(hitGO))) {
                             if (!mouseIsOver) {
-                                PointerEnters();
+                                NotifyPointerEnters();
                             }
                             return;
                         }
@@ -5125,13 +5125,13 @@ namespace TGS {
                 }
             }
             if (mouseIsOver) {
-                PointerExits();
+                NotifyPointerExits();
             }
         }
 
         // Old input system support (OnMouseEnter/OnMouseExit)
         void OnMouseEnter () {
-            PointerEnters();
+            NotifyPointerEnters();
         }
 
         void OnMouseExit () {
@@ -5145,17 +5145,19 @@ namespace TGS {
                         return;
                 }
             }
-            PointerExits();
+            NotifyPointerExits();
         }
 
-        void PointerEnters () {
+        public void NotifyPointerEnters () {
             mouseIsOver = true;
             ClearLastOver();
+            OnEnter?.Invoke(this); 
         }
 
-        void PointerExits () {
+        public void NotifyPointerExits () {
             mouseIsOver = false;
             ClearLastOver();
+            OnExit?.Invoke(this);
         }
 
         public void ClearHighlights () {
@@ -5493,8 +5495,8 @@ namespace TGS {
                     if (OnCellDragEnd != null) OnCellDragEnd(this, _cellLastClickedIndex, _cellLastOverIndex);
                     dragging = DragStatus.Idle;
                 }
-                if (_cellLastOverIndex == _cellLastClickedIndex && OnMouseClick != null) {
-                    OnMouseClick(this, worldCursorPos);
+                if (_cellLastOverIndex == _cellLastClickedIndex && OnClick != null) {
+                    OnClick(this, worldCursorPos);
                 }
                 if (OnMouseUp != null) {
                     OnMouseUp(this, worldCursorPos);

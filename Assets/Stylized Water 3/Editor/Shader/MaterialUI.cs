@@ -108,6 +108,7 @@ namespace StylizedWater3
         private MaterialProperty _FoamSubSpeedDynamic;
         private MaterialProperty _FoamTilingDynamic;
         private MaterialProperty _FoamSubTilingDynamic;
+        private MaterialProperty _FoamClippingDynamic;
 
         private MaterialProperty _BumpMap;
         private MaterialProperty _BumpMapSlope;
@@ -125,9 +126,12 @@ namespace StylizedWater3
         private MaterialProperty _SunReflectionSize;
         private MaterialProperty _SunReflectionStrength;
         private MaterialProperty _SunReflectionDistortion;
+        private MaterialProperty _SunReflectionSharp;
+        
         private MaterialProperty _PointSpotLightReflectionStrength;
         private MaterialProperty _PointSpotLightReflectionSize;
         private MaterialProperty _PointSpotLightReflectionDistortion;
+        private MaterialProperty _PointSpotLightReflectionSharp;
         
         private MaterialProperty _ReflectionStrength;
         private MaterialProperty _ReflectionDistortion;
@@ -158,7 +162,8 @@ namespace StylizedWater3
         private UI.Material.Section colorSection;
         private UI.Material.Section underwaterSection;
         private UI.Material.Section normalsSection;
-        private UI.Material.Section reflectionSection;
+        private UI.Material.Section lightReflectionSection;
+        private UI.Material.Section environmentReflectionSection;
         private UI.Material.Section intersectionSection;
         private UI.Material.Section foamSection;
         private UI.Material.Section wavesSection;
@@ -309,6 +314,7 @@ namespace StylizedWater3
             _FoamSubSpeedDynamic = FindProperty("_FoamSubSpeedDynamic", props);
             _FoamTilingDynamic = FindProperty("_FoamTilingDynamic", props);
             _FoamSubTilingDynamic = FindProperty("_FoamSubTilingDynamic", props);
+            _FoamClippingDynamic = FindProperty("_FoamClippingDynamic", props);
 
             _BumpMap = FindProperty("_BumpMap", props);
             _BumpMapSlope = FindProperty("_BumpMapSlope", props);
@@ -328,9 +334,12 @@ namespace StylizedWater3
             _SunReflectionSize = FindProperty("_SunReflectionSize", props);
             _SunReflectionStrength = FindProperty("_SunReflectionStrength", props);
             _SunReflectionDistortion = FindProperty("_SunReflectionDistortion", props);
+            _SunReflectionSharp = FindProperty("_SunReflectionSharp", props);
+            
             _PointSpotLightReflectionStrength = FindProperty("_PointSpotLightReflectionStrength", props);
             _PointSpotLightReflectionSize = FindProperty("_PointSpotLightReflectionSize", props);
             _PointSpotLightReflectionDistortion = FindProperty("_PointSpotLightReflectionDistortion", props);
+            _PointSpotLightReflectionSharp = FindProperty("_PointSpotLightReflectionSharp", props);
             
             _ReflectionStrength = FindProperty("_ReflectionStrength", props);
             _ReflectionDistortion = FindProperty("_ReflectionDistortion", props);
@@ -398,7 +407,8 @@ namespace StylizedWater3
             sections.Add(colorSection = new UI.Material.Section(materialEditorIn,"COLOR", new GUIContent("Color", "Controls for the base color of the water and transparency")));
             sections.Add(underwaterSection = new UI.Material.Section(materialEditorIn,"UNDERWATER", new GUIContent("Underwater", "Pertains the appearance of anything seen under the water surface. Not related to any actual underwater rendering")));
             sections.Add(normalsSection = new UI.Material.Section(materialEditorIn,"NORMALS", new GUIContent("Normals", "Normal maps represent the small-scale curvature of the water surface. This is used for lighting and reflections")));
-            sections.Add(reflectionSection = new UI.Material.Section(materialEditorIn,"REFLECTIONS", new GUIContent("Reflections", "Sun specular reflection, and environment reflections (reflection probes and planar reflections)")));
+            sections.Add(lightReflectionSection = new UI.Material.Section(materialEditorIn,"LIGHT_REFLECTIONS", new GUIContent("Light Reflections", "Realtime specular reflection highlight from directional, point and spot lights. ")));
+            sections.Add(environmentReflectionSection = new UI.Material.Section(materialEditorIn,"ENVIRONMENT_REFLECTIONS", new GUIContent("Environment Reflections", "Reflections from reflection probes, planar- and screen-space reflections.")));
             sections.Add(foamSection = new UI.Material.Section(materialEditorIn,"FOAM", new GUIContent("Surface Foam")));
             sections.Add(intersectionSection = new UI.Material.Section(materialEditorIn,"INTERSECTION", new GUIContent("Intersection Foam", "Draws a foam effects on opaque objects that are touching the water")));
             sections.Add(wavesSection = new UI.Material.Section(materialEditorIn,"WAVES", new GUIContent("Waves", "Parametric gerstner waves, which modify the surface curvature and animate the mesh's vertices")));
@@ -507,7 +517,8 @@ namespace StylizedWater3
             DrawUnderwater();
             DrawFoam();
             DrawIntersection();
-            DrawReflections();
+            DrawLightReflections();
+            DrawEnvironmentReflections();
             DrawWaves();
 
             EditorGUILayout.Space();
@@ -1290,7 +1301,10 @@ namespace StylizedWater3
                         EditorGUILayout.LabelField("Dynamic Effects", EditorStyles.boldLabel);
                         
                         DrawTextureSelector(_FoamTexDynamic, ref foamTextures);
+                        DrawShaderProperty(_FoamClippingDynamic, new GUIContent("Clipping", "Gradually cuts off the texture, based on its gradient"));
 
+                        EditorGUILayout.Separator();
+                        
                         UI.Material.DrawFloatTicker(_FoamTilingDynamic, tooltip:"Determines how often the texture repeats over the UV coordinates. Smaller values result in the texture being stretched larger, higher numbers means it becomes smaller");
                         EditorGUI.indentLevel++;
                         UI.Material.DrawFloatTicker(_FoamSubTilingDynamic, "Sub-layer (multiplier)", "The effect uses a 2nd texture sample, for variety. This value controls the speed of this layer");
@@ -1379,20 +1393,18 @@ namespace StylizedWater3
             EditorGUILayout.EndFadeGroup();
         }
 
-        private void DrawReflections()
+        private void DrawLightReflections()
         {
-            reflectionSection.DrawHeader(() => SwitchSection(reflectionSection));
+            lightReflectionSection.DrawHeader(() => SwitchSection(lightReflectionSection));
 
-            if (EditorGUILayout.BeginFadeGroup(reflectionSection.anim.faded))
+            if (EditorGUILayout.BeginFadeGroup(lightReflectionSection.anim.faded))
             {
                 EditorGUILayout.Space();
 
-                EditorGUILayout.LabelField("Light reflections", EditorStyles.boldLabel);
                 DrawShaderProperty(_SpecularReflectionsOn, new GUIContent("Enable", 
                     "Creates a specular reflection based on the relationship between the light-, camera and water surface angle." +
                     "\n\nA combination between the Size and Distortion parameter can achieve different visual styles"));
-
-                EditorGUI.indentLevel++;
+                
                 if (_SpecularReflectionsOn.floatValue > 0f || _SpecularReflectionsOn.hasMixedValue)
                 {
                     EditorGUILayout.Space();
@@ -1407,6 +1419,7 @@ namespace StylizedWater3
                     if(!_SunReflectionStrength.hasMixedValue) _SunReflectionStrength.floatValue = Mathf.Max(0, _SunReflectionStrength.floatValue);
                     
                     DrawShaderProperty(_SunReflectionSize, new GUIContent("Size", "Determines how wide the reflection appears"));
+                    DrawShaderProperty(_SunReflectionSharp, new GUIContent("Sharp", "Tightens the reflection towards a hard edge"));
                     DrawShaderProperty(_SunReflectionDistortion, new GUIContent("Distortion", "Distortion is largely influenced by the strength of the normal map texture and wave curvature"));
 
                     if (_LightingOn.floatValue > 0f || _LightingOn.hasMixedValue)
@@ -1423,14 +1436,23 @@ namespace StylizedWater3
                         if(!_PointSpotLightReflectionStrength.hasMixedValue) _PointSpotLightReflectionStrength.floatValue = Mathf.Max(0, _PointSpotLightReflectionStrength.floatValue);
                         
                         DrawShaderProperty(_PointSpotLightReflectionSize, new GUIContent("Size", "Specular reflection size for point/spot lights"));
+                        DrawShaderProperty(_PointSpotLightReflectionSharp, new GUIContent("Sharp", "Tightens the reflection towards a hard edge"));
                         DrawShaderProperty(_PointSpotLightReflectionDistortion, new GUIContent("Distortion", "Distortion is largely influenced by the strength of the normal map texture and wave curvature"));
                     }
                 }
-                EditorGUI.indentLevel--;
 
                 EditorGUILayout.Space();
+            }
+            EditorGUILayout.EndFadeGroup();
+        }
+        
+        private void DrawEnvironmentReflections()
+        {
+            environmentReflectionSection.DrawHeader(() => SwitchSection(environmentReflectionSection));
 
-                EditorGUILayout.LabelField("Environment Reflections", EditorStyles.boldLabel);
+            if (EditorGUILayout.BeginFadeGroup(environmentReflectionSection.anim.faded))
+            {
+                EditorGUILayout.Space();
 
                 DrawShaderProperty(_EnvironmentReflectionsOn, new GUIContent("Enable", "Enable reflections from the skybox, reflection probes, screen-space- and planar -reflections."));
                 
@@ -1456,13 +1478,13 @@ namespace StylizedWater3
                     {
                         DrawShaderProperty(_ReflectionLighting, new GUIContent(_ReflectionLighting.displayName, "Technically, lighting shouldn't be applied to the reflected image. If reflections aren't updated in realtime, but lighting is, this is still beneficial.\n\nThis controls how much lighting affects the reflection"));
                     }
-                    
+
                     EditorGUILayout.Space();
 
                     DrawShaderProperty(_ReflectionFresnel, new GUIContent(_ReflectionFresnel.displayName, "Masks the reflection by the viewing angle in relationship to the surface (including wave curvature), which is more true to nature (known as fresnel)"));
                     DrawShaderProperty(_ReflectionDistortion, new GUIContent(_ReflectionDistortion.displayName, "Distorts the reflection by the wave normals and normal map"));
                     DrawShaderProperty(_ReflectionBlur, new GUIContent(_ReflectionBlur.displayName, "Blurs the reflection probe, this can be used for a more general reflection of colors"));
-                    
+
                     EditorGUILayout.Space();
 
                     DrawShaderProperty(_ScreenSpaceReflectionsEnabled, new GUIContent(_ScreenSpaceReflectionsEnabled.displayName, "This technique simulates reflections based on what's already visible on the screen. " +
@@ -1471,7 +1493,7 @@ namespace StylizedWater3
                                                                                                                                   "While it improves visual quality with minimal performance impact compared to full reflections, SSR can produce artifacts or incomplete reflections for objects not visible on the screen," +
                                                                                                                                   "\nas it only has information from the camera’s current viewpoint available." +
                                                                                                                                   "\n\nWhere SSR fails to calculate a reflection it falls back on the reflection probe"));
-                    
+
                     UI.DrawNotification(
                         UniversalRenderPipeline.asset.supportsCameraOpaqueTexture == false && (_ScreenSpaceReflectionsEnabled.floatValue > 0),
                         "Opaque texture is disabled, which is required this effect",
@@ -1487,7 +1509,7 @@ namespace StylizedWater3
                     {
                         UI.DrawNotification(_ScreenSpaceReflectionsEnabled.floatValue > 0.5, "Render feature hasn't been set up on the default renderer. SSR will have no effect.", MessageType.Warning);
                     }
-                    
+
                     EditorGUILayout.Space();
 
                     EditorGUILayout.LabelField($"Planar Reflections renderers in scene: {PlanarReflectionRenderer.Instances.Count}", EditorStyles.miniLabel);
@@ -1508,7 +1530,7 @@ namespace StylizedWater3
                             }
                         }
                     }
-                    
+
                     EditorGUILayout.Space();
                 }
             }

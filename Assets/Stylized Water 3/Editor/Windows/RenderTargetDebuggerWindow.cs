@@ -68,6 +68,7 @@ namespace StylizedWater3
                 renderTargetIndex = EditorGUILayout.Popup($"Render target ({RenderTargetDebugger.renderTargets.Count})", renderTargetIndex, RenderTargetDebugger.renderTargetNames);
             }
             
+            EditorGUILayout.LabelField($"Active camera: {RenderTargetDebugger.CurrentCameraName}", EditorStyles.miniLabel);
             width = (Mathf.Min(this.position.height, this.position.width) * 1f) - 15f;
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 

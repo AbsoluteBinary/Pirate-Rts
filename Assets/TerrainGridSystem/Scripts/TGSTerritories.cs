@@ -1004,6 +1004,8 @@ namespace TGS {
         /// <param name="includeGridEdges">If a cell is located in the edge of the grid, include it in the results</param>
         public int TerritoryGetFrontierCells (int territoryIndex, int otherTerritoryIndex, List<int> cellIndices, int regionIndex = -1, bool includeGridEdges = false) {
 
+            CheckGridChanges();
+
             if (territoryIndex < 0 || territoryIndex >= territories.Count || territories[territoryIndex].cells == null || cells == null)
                 return 0;
 
@@ -1055,6 +1057,8 @@ namespace TGS {
         /// Similar to TerritoryGetFrontierCells but returns the cells of the adjacent territory
         /// </summary>
         public int TerritoryGetAdjacentCells (int territoryIndex, List<int> cellIndices, int regionIndex = -1, int otherTerritoryIndex = -1) {
+
+            CheckGridChanges();
 
             if (territoryIndex < 0 || territoryIndex >= territories.Count || territories[territoryIndex].cells == null || cells == null)
                 return 0;
@@ -1264,8 +1268,8 @@ namespace TGS {
         public void TerritoryHideInteriorBorder (int territoryIndex, int regionIndex = -1) {
             if (!ValidTerritoryIndex(territoryIndex)) return;
             Territory territory = territories[territoryIndex];
-            if (regionIndex >= 0) {
-                if (!ValidTerritoryIndex(territoryIndex, regionIndex)) return;
+            if (regionIndex < 0) {
+                if (territory.regions == null) return;
                 foreach (Region region in territory.regions) {
                     if (region.interiorBorderGameObject != null) {
                         DestroyImmediate(region.interiorBorderGameObject);
@@ -1275,13 +1279,13 @@ namespace TGS {
             }
 
             {
+                if (!ValidTerritoryIndex(territoryIndex, regionIndex)) return;
                 Region region = territory.regions[regionIndex];
                 if (region.interiorBorderGameObject != null) {
                     DestroyImmediate(region.interiorBorderGameObject);
                 }
             }
         }
-
 
         /// <summary>
         /// Creates a gameobject with the interior border for the given territory with optional padding and thickness.

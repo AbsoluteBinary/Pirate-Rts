@@ -227,6 +227,7 @@ namespace StylizedWater3
                 Gizmos.DrawWireMesh(meshes[i].sharedMesh);
             }
 			
+            /*
 			Gizmos.color = new Color(1,1,0,0.25f);
             Gizmos.matrix = Matrix4x4.identity;
 			for (int i = 0; i < lods.Length; i++)
@@ -237,6 +238,7 @@ namespace StylizedWater3
 					Gizmos.DrawWireCube(r.bounds.center, r.bounds.size);
 				}
 			}
+			*/
         }
 
         public bool InvalidSetup()

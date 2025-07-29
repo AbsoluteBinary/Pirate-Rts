@@ -38,6 +38,9 @@ namespace StylizedWater3
 
             public int maxResolution = 4096;
 
+            [Tooltip("[When in Play mode] Skips processing the height prepass for the scene-view camera. This helps keep the rendering centered around the main camera when in Play mode.")]
+            public bool disableInSceneView = true;
+            
             /// <summary>
             /// Returns the enabled state, either from the settings or if forced because it is required by other functionality
             /// </summary>
@@ -173,6 +176,8 @@ namespace StylizedWater3
             }
         }
 
+        private readonly int _WorldSpaceCameraPos = Shader.PropertyToID("_WorldSpaceCameraPos");
+        
         private void Execute(RasterGraphContext context, PassData data)
         {
             var cmd = context.cmd;
@@ -191,6 +196,11 @@ namespace StylizedWater3
                 //cmd.SetGlobalMatrix("UNITY_MATRIX_V", data.view);
 
                 cmd.SetGlobalVector(_WaterHeightCoords, data.rendererCoords);
+                
+                //Bug? During this pass the camera position sent to shaderland is that of the scene-view camera (if the tab is open)
+                //Possibly the value from the previous frame/camera. This breaks distance-based effects such as waves.
+                //Force an updated value
+                cmd.SetGlobalVector(_WorldSpaceCameraPos, data.planarProjection.center);
 
                 cmd.DrawRendererList(data.rendererListHandle);
                 

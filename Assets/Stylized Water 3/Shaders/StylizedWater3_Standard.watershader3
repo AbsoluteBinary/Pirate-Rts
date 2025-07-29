@@ -105,11 +105,12 @@
         _FoamDistortion("Distortion", Range(0, 3)) = 0
 		[Toggle] _VertexColorFoam("Vertex color (A) foam", Float) = 0
 
-		[NoScaleOffset][SingleLineTexture] _FoamTexDynamic("Foam (Dynamic)", 2D) = "black" {}
+		[NoScaleOffset][SingleLineTexture] _FoamTexDynamic("Foam (Dynamic)", 2D) = "white" {}
         _FoamTilingDynamic("Tiling (Dynamic)", float) = 0.1
         _FoamSubTilingDynamic("Tiling (sub-layer)", float) = 2
         _FoamSpeedDynamic("Speed multiplier", float) = 0.1
 		_FoamSubSpeedDynamic("Speed multiplier (sub-layer)", float) = -0.1
+		_FoamClippingDynamic("SClipping", Range(0 , 0.999)) = 0
 
 		//Normals
 		[NoScaleOffset][Normal][SingleLineTexture]_BumpMap("Normals", 2D) = "bump" {}
@@ -131,9 +132,12 @@
 		[PowerSlider(0.1)] _SunReflectionSize("Sun Size", Range(0 , 1)) = 0.5
 		_SunReflectionStrength("Sun Strength", Float) = 10
 		_SunReflectionDistortion("Sun Distortion", Range(0 ,2)) = 0.49
+		[Toggle] _SunReflectionSharp("Sun Sharpness", Float) = 0
+
 		_PointSpotLightReflectionStrength("Point/spot light strength", Float) = 10
 		[PowerSlider(0.1)] _PointSpotLightReflectionSize("Point/spot light size", Range(0 , 1)) = 0
 		_PointSpotLightReflectionDistortion("Point/spot light distortion", Range(0, 1)) = 0.5
+		[Toggle] _PointSpotLightReflectionSharp("Point/spot light Sharp", Float) = 0
 
 		//World Reflections
 		_ReflectionStrength("Strength", Range(0, 1)) = 1
@@ -150,7 +154,7 @@
 
 		_WaveSpeed("Speed", Float) = 2
 		_WaveFrequency("Frequency", Float) = 1
-		_WaveHeight("Height Scale", Range(0 , 1)) = 0.15
+		_WaveHeight("Height Scale", Range(0 , 2)) = 0.15
 		[Toggle] _VertexColorWaveFlattening("Vertex color (B) wave flattening", Float) = 0
 
 		_WaveNormalStr("Normal Strength", Range(0 , 32)) = 0.1
@@ -179,7 +183,7 @@
 		[Toggle(_DISABLE_DEPTH_TEX)] _DisableDepthTexture("Disable depth texture", Float) = 0
 		[Toggle(_WAVES)] _WavesOn("Waves", Float) = 0
 		[Toggle] _ReceiveDynamicEffectsHeight("Receive Dynamic Effects Height", Float) = 1
-		[Toggle] _ReceiveDynamicEffectsFoam("Receive Dynamic Effects Foam", Float) = 1
+		_ReceiveDynamicEffectsFoam("Receive Dynamic Effects Foam", Float) = 1
 		[Toggle] _ReceiveDynamicEffectsNormal("Receive Dynamic Effects Normals", Float) = 1
 
         %tessellation_properties%

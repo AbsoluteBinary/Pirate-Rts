@@ -211,6 +211,10 @@ namespace StylizedWater3.Demo
                     if (GUILayout.Button(presets[i].name))
                     {
                         ApplyPreset(i);
+                        
+                        #if UNITY_EDITOR
+                        UnityEditor.EditorUtility.SetDirty(this);
+                        #endif
                     }
                 }
                 

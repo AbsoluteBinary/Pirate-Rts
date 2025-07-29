@@ -30,6 +30,7 @@ namespace StylizedWater3
 
         public static int InspectedProperty = -1;
         public static RTHandle CurrentRT;
+        public static string CurrentCameraName;
 
         public static void Initialize()
         {
@@ -67,6 +68,7 @@ namespace StylizedWater3
         {
             InspectedProperty = -1;
             CurrentRT?.Release();
+            CurrentCameraName = string.Empty;
         }
     }
 }

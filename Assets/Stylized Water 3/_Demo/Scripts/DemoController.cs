@@ -149,8 +149,8 @@ namespace StylizedWater3.Demo
             }
 
             setupMessage += "\nIf you're unsure what this means, please consult the \"Getting Started\" documentation section for instructions.";
-
-            if (Application.isPlaying == false && UnityEditor.BuildPipeline.isBuildingPlayer == false)
+            
+            if (Application.isPlaying == false && UnityEditor.BuildPipeline.isBuildingPlayer == false && Application.isBatchMode == false)
             {
                 if (requiresSetup)
                 {
@@ -192,28 +192,27 @@ namespace StylizedWater3.Demo
                 string path = scenePaths[i];
                 
                 //Scene not found, possibly an extension not currently installed or a dev-only scene
-                if (path != string.Empty)
-                {
-                    Scene scene = SceneManager.GetSceneByPath(path);
+                if (path == string.Empty) continue;
+                
+                Scene scene = SceneManager.GetSceneByPath(path);
 
-                    if (scene.isLoaded == false)
+                if (scene.isLoaded == false)
+                {
+                    //Debug.Log($"scene {path} being loaded");
+                    
+                    if (Application.isPlaying)
                     {
-                        //Debug.Log($"scene {path} being loaded");
-                        
-                        if (Application.isPlaying)
-                        {
-                            //SceneManager.LoadScene(path, LoadSceneMode.Additive);
-                            StartCoroutine(LoadScene(path));
-                        }
-                        else
-                        {
-                            #if UNITY_EDITOR
-                            EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
-                            #endif
-                        }
-                        
-                        //Debug.Log($"{path} loaded");
+                        //SceneManager.LoadScene(path, LoadSceneMode.Additive);
+                        StartCoroutine(LoadScene(path));
                     }
+                    else
+                    {
+                        #if UNITY_EDITOR
+                        EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+                        #endif
+                    }
+                    
+                    //Debug.Log($"{path} loaded");
                 }
             }
         }
