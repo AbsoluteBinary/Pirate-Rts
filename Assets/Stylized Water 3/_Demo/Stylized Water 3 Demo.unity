@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 1349891981}
+  m_SkyboxMaterial: {fileID: 868441050}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -9980,6 +9980,7 @@ MonoBehaviour:
     waterLevelTransform: {fileID: 0}
     waterLevel: 0
   surfaceSize: {x: 1, y: 1}
+  followTarget: {fileID: 0}
   heightOffset: 0
   rollAmount: 2
   rotation: 0
@@ -33302,11 +33303,11 @@ MonoBehaviour:
   - {fileID: 102900000, guid: f42876d1a1508434b9928c38bd840d07, type: 3}
   - {fileID: 102900000, guid: b76336e5f8049c7488e15cb19a9354e7, type: 3}
   sceneGUIDS:
-  - 854079bcd01cbd745935b9d92e9b4f9e
-  - 0e07f683666aad94782bd261ace7a7ca
-  - 67cd0576986bf6149b660932fc8d285a
-  - f42876d1a1508434b9928c38bd840d07
-  - b76336e5f8049c7488e15cb19a9354e7
+  - 
+  - 
+  - 
+  - 
+  - 
 --- !u!4 &819674166
 Transform:
   m_ObjectHideFlags: 0
@@ -35737,6 +35738,94 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2167352349699831016, guid: bdd2a5c95ae34574f9e6a41cc59cbf91, type: 3}
   m_PrefabInstance: {fileID: 867552871}
   m_PrefabAsset: {fileID: 0}
+--- !u!21 &868441050
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Temp skybox
+  m_Shader: {fileID: 103, guid: 0000000000000000f000000000000000, type: 0}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Tex:
+        m_Texture: {fileID: 8900000, guid: c99377239265e3147b7b1c38f6a490f6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaClip: 0
+    - _Blend: 0
+    - _BumpScale: 1
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _DstBlend: 0
+    - _EnvironmentReflections: 1
+    - _Exposure: 1
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _Metallic: 0
+    - _OcclusionStrength: 1
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _Rotation: -59.000008
+    - _Smoothness: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _Surface: 0
+    - _WorkflowMode: 1
+    - _ZWrite: 1
+    m_Colors:
+    - _BaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &869064277
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52020,6 +52109,7 @@ MonoBehaviour:
     waterLevelTransform: {fileID: 0}
     waterLevel: 0
   surfaceSize: {x: 1, y: 1}
+  followTarget: {fileID: 0}
   heightOffset: 0
   rollAmount: 2
   rotation: 0
@@ -56460,94 +56550,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5503200975212792886, guid: 30def6b99b2f31d4a8af41a74a4fe260, type: 3}
   m_PrefabInstance: {fileID: 1344089506}
   m_PrefabAsset: {fileID: 0}
---- !u!21 &1349891981
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Temp skybox
-  m_Shader: {fileID: 103, guid: 0000000000000000f000000000000000, type: 0}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _EmissionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MetallicGlossMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _OcclusionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _SpecGlossMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Tex:
-        m_Texture: {fileID: 8900000, guid: c99377239265e3147b7b1c38f6a490f6, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _AlphaClip: 0
-    - _Blend: 0
-    - _BumpScale: 1
-    - _Cull: 2
-    - _Cutoff: 0.5
-    - _DstBlend: 0
-    - _EnvironmentReflections: 1
-    - _Exposure: 1
-    - _GlossMapScale: 0
-    - _Glossiness: 0
-    - _GlossyReflections: 0
-    - _Metallic: 0
-    - _OcclusionStrength: 1
-    - _QueueOffset: 0
-    - _ReceiveShadows: 1
-    - _Rotation: -59.000008
-    - _Smoothness: 0.5
-    - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 1
-    - _SrcBlend: 1
-    - _Surface: 0
-    - _WorkflowMode: 1
-    - _ZWrite: 1
-    m_Colors:
-    - _BaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
-    - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1001 &1351649449
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57822,6 +57824,7 @@ MonoBehaviour:
     waterLevelTransform: {fileID: 0}
     waterLevel: 0
   surfaceSize: {x: 1, y: 1}
+  followTarget: {fileID: 0}
   heightOffset: 0
   rollAmount: 2
   rotation: 0
@@ -59223,6 +59226,7 @@ MonoBehaviour:
     waterLevelTransform: {fileID: 0}
     waterLevel: 0
   surfaceSize: {x: 1, y: 1}
+  followTarget: {fileID: 0}
   heightOffset: 0
   rollAmount: 2
   rotation: 0
@@ -67414,7 +67418,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializedBakingSet: {fileID: 0}
-  sceneGUID: 6e430d16a81e3454196f128266ecda34
+  sceneGUID: 2477c7e727bfe2f4bba7e621f08fd50b
   obsoleteAsset: {fileID: 0}
   obsoleteCellSharedDataAsset: {fileID: 0}
   obsoleteCellSupportDataAsset: {fileID: 0}
@@ -87079,6 +87083,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cded085d155cde949b60f67a11dbc3bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  version: 2
+  globalVolume: 0
   mode: 2
   size: {x: 560.2615, y: 57.112576, z: 394.08832}
   overrideRendererFilters: 1
@@ -87109,8 +87115,6 @@ MonoBehaviour:
     e33: 1
   cachedHashCode: -1356719778
   fillEmptySpaces: 1
-  version: 2
-  globalVolume: 0
 --- !u!4 &2091158614
 Transform:
   m_ObjectHideFlags: 0
@@ -88588,6 +88592,7 @@ MonoBehaviour:
     waterLevelTransform: {fileID: 0}
     waterLevel: 0
   surfaceSize: {x: 1, y: 1}
+  followTarget: {fileID: 0}
   heightOffset: 0
   rollAmount: 0.2
   rotation: 0

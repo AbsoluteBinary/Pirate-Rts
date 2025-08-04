@@ -591,6 +591,5 @@ MonoBehaviour:
   loadingText: {fileID: 1433492831285112335}
   loadingUICanvasGroup: {fileID: 4385153264709212702}
   loginUICanvas: {fileID: 0}
-  loadingCamera: {fileID: 0}
-  backgroundObjects:
-  - {fileID: 0}
+  backgroundObject: {fileID: 0}
+  bootUIContainer: {fileID: 0}

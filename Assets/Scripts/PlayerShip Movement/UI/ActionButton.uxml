@@ -1,3 +1,5 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:Button text="Button" name="ActivateButton" style="background-color: rgb(210, 105, 30);" />
+    <ui:VisualElement name="BackGround" style="flex-grow: 1;">
+        <ui:Button text="Button" style="position: absolute; height: 74px; width: 343px; flex-basis: 0; top: -2px; left: -2px; background-color: rgb(233, 107, 43); transform-origin: center; overflow: visible; opacity: 1;" />
+    </ui:VisualElement>
 </ui:UXML>
