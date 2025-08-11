@@ -32,11 +32,17 @@ namespace StylizedWater3
         [UnityEditor.Callbacks.OnOpenAsset]
         public static bool OnOpenAsset(int instanceID, int line)
         {
+            #if UNITY_6000_3_OR_NEWER
+            Object target = EditorUtility.EntityIdToObject(instanceID);
+            EntityId id = (EntityId)instanceID;
+            #else
             Object target = EditorUtility.InstanceIDToObject(instanceID);
+            int id = instanceID;
+            #endif
 
             if (target is Mesh)
             {
-                var path = AssetDatabase.GetAssetPath(instanceID);
+                var path = AssetDatabase.GetAssetPath(id);
                 
                 if (Path.GetExtension(path) != "." + FILE_EXTENSION) return false;
 

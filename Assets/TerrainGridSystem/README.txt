@@ -45,7 +45,10 @@ Of course, all updates of Terrain Grid System will be eventually available on th
 Version history
 ---------------
 
-Version 20.0
+Version 19.5
+- Improved handling of territories texture and exported grid configurations
+
+Version 19.4
 - API: added two new events: OnEnter, OnExit
 - API: added cell.visibleAlways which overrides the visibility based on visibleByRules (defaults to false)
 - API: added "filter" delegate parameter to CellGetNighbours() which will invoke your method before using the cell

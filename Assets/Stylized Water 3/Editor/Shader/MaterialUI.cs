@@ -585,8 +585,7 @@ namespace StylizedWater3
             #if URP
             UI.DrawNotification(PipelineUtilities.RenderGraphEnabled() == false, "Render Graph is disabled in your project, some rendering functionality will not be available.", "Enable", () =>
             {
-                RenderGraphSettings settings = GraphicsSettings.GetRenderPipelineSettings<RenderGraphSettings>();
-                settings.enableRenderCompatibilityMode = false;
+                PipelineUtilities.SetRenderGraphCompatibilityMode(false);
             }, MessageType.Error);
             #endif
             

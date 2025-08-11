@@ -17,6 +17,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 244921
   packageName: Terrain Grid System 2
-  packageVersion: 19.4
+  packageVersion: 19.5
   assetPath: Assets/TerrainGridSystem/Scripts/Core/SurfaceFader.cs
-  uploadId: 768784
+  uploadId: 775791

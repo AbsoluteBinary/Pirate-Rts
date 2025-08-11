@@ -250,7 +250,7 @@ namespace TGS_Editor {
                             tgs.territoriesHideNeutralCells = EditorGUILayout.Toggle(new GUIContent("Hide Neutral Cells", "Cells belonging to neutral territories will be invisible."), tgs.territoriesHideNeutralCells);
                             EditorGUILayout.Space();
                             if (GUILayout.Button("Generate Territories", GUILayout.Width(140))) {
-                                tgs.CreateTerritories(tgs.territoriesTexture, tgs.territoriesTextureNeutralColor, tgs.territoriesHideNeutralCells);
+                                tgs.GenerateMap(true, true);
                             }
                             EditorGUILayout.EndHorizontal();
                             EditorGUI.indentLevel--;
@@ -1185,6 +1185,7 @@ namespace TGS_Editor {
         }
 
         void RefreshGrid () {
+            tgs.needUpdateTerritories = true;
             tgs.Redraw();
             HideEditorMesh();
             EditorUtility.SetDirty(target);

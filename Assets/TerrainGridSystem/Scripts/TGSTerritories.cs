@@ -1026,13 +1026,13 @@ namespace TGS {
                     continue;
                 Cell cell1 = (Cell)frontier.region1.entity;
                 Cell cell2 = (Cell)frontier.region2.entity;
-                if (cell1.territoryIndex == territoryIndex && (otherTerritoryIndex < 0 || cell2.territoryIndex == otherTerritoryIndex)) {
+                if (cell1.visible && cell1.territoryIndex == territoryIndex && (otherTerritoryIndex < 0 || cell2.territoryIndex == otherTerritoryIndex)) {
                     if (cell1.usedFlag != cellUsedFlag && (regionIndex < 0 || cell1.usedFlag2 == cellUsedFlag)) {
                         cell1.usedFlag = cellUsedFlag;
                         cellIndices.Add(cell1.index);
                     }
                 }
-                else if (cell2.territoryIndex == territoryIndex && (otherTerritoryIndex < 0 || cell1.territoryIndex == otherTerritoryIndex)) {
+                else if (cell2.visible && cell2.territoryIndex == territoryIndex && (otherTerritoryIndex < 0 || cell1.territoryIndex == otherTerritoryIndex)) {
                     if (cell2.usedFlag != cellUsedFlag && (regionIndex < 0 || cell2.usedFlag2 == cellUsedFlag)) {
                         cell2.usedFlag = cellUsedFlag;
                         cellIndices.Add(cell2.index);
@@ -1420,7 +1420,7 @@ namespace TGS {
         /// </summary>
         /// <param name="centroidType">The accuracy of the algorithm. Defaults to betterCentroId which is slower but more accurate.</param>
         public Vector3 TerritoryGetPosition (int territoryIndex, CentroidType centroidType = CentroidType.BetterCentroid, bool worldSpace = true, int regionIndex = 0) {
-            if (!ValidTerritoryIndex(territoryIndex)) return Misc.Vector3zero;
+            if (!ValidTerritoryIndex(territoryIndex, regionIndex)) return Misc.Vector3zero;
             Vector3 territoryCenter;
             if (centroidType == CentroidType.BetterCentroid) {
                 territoryCenter = territories[territoryIndex].GetBetterCentroid(regionIndex);
@@ -1502,20 +1502,28 @@ namespace TGS {
 
 
 
+        readonly List<Color> dsColors = new List<Color>();
+        readonly Dictionary<Color, int> dsColorDict = new Dictionary<Color, int>();
+
+        void ClearDsColors () {
+            dsColors.Clear();
+            dsColorDict.Clear();
+        }
+
         /// <summary>
         /// Automatically generates territories based on the different colors included in the texture.
         /// </summary>
         /// <param name="neutral">This color won't generate any texture.</param>
-        public void CreateTerritories (Texture2D texture, Color neutral, bool hideNeutralCells = false) {
+        void CreateTerritories (Texture2D texture, Color neutral, bool hideNeutralCells = false) {
 
             if (texture == null || cells == null)
                 return;
 
-            List<Color> dsColors = new List<Color>();
-            Dictionary<Color, int> dsColorDict = new Dictionary<Color, int>();
+            ClearDsColors();
 
             int cellCount = cells.Count;
             Color[] colors;
+
             try {
                 colors = texture.GetPixels();
             }
@@ -1527,8 +1535,6 @@ namespace TGS {
                 Cell cell = cells[k];
                 if (cell == null) continue;
                 cell.territoryIndex = -1;
-                if (!cell.visible)
-                    continue;
                 Vector2 uv = cell.center;
                 uv.x += 0.5f;
                 uv.y += 0.5f;
@@ -1539,8 +1545,8 @@ namespace TGS {
                 if (pos < 0 || pos >= colors.Length)
                     continue;
                 Color pixelColor = colors[pos];
-                int territoryIndex;
-                if (!dsColorDict.TryGetValue(pixelColor, out territoryIndex)) {
+                if (!dsColorDict.TryGetValue(pixelColor, out int territoryIndex))
+                {
                     dsColors.Add(pixelColor);
                     territoryIndex = dsColors.Count - 1;
                     dsColorDict[pixelColor] = territoryIndex;
@@ -1584,11 +1590,10 @@ namespace TGS {
                     }
                     territories.Add(territory);
                 }
-
-                isDirty = true;
-                issueRedraw = RedrawType.Full;
-                Redraw();
             }
+
+            FindTerritoriesFrontiers();
+            UpdateTerritoriesBoundary();
         }
 
 

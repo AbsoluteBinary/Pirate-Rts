@@ -400,7 +400,7 @@ namespace StylizedWater3
                     Extension extension = Extension.installed[i];
                     
                     //EditorGUILayout.LabelField(extension.name);
-                    UI.DrawExtension(extension.name, extension.description, dynamicEffectsInstalled, extension.assetStoreID, extension.icon);
+                    UI.DrawExtension(extension.name, extension.description, true, extension.assetStoreID, extension.icon);
                 }
 
                 if (Extension.available.Length > 0)

@@ -1,3 +1,12 @@
+3.2.2 (July 30th 2025)
+
+Changed:
+- Height Pre-Pass is now strictly executed for the Main Camera when in play mode.
+
+Fixed:
+- GPU Height Queries did not appear to work when more than one Base camera was present.
+- Shadow Strength parameter not affecting the underwater surface.
+
 3.2.1 (July 7th 2025)
 
 Added:

@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace TGS {
 
 	[ExecuteInEditMode]
+	[DefaultExecutionOrder(100)]
 	public class TGSConfig : MonoBehaviour {
 
 		[Tooltip ("User-defined name for this configuration")]
@@ -74,8 +74,9 @@ namespace TGS {
 		}
 
 		void OnEnable () {
-			if (!Application.isPlaying)
+			if (!Application.isPlaying) {
 				LoadConfiguration ();
+			}
 		}
 
 		void Start () {

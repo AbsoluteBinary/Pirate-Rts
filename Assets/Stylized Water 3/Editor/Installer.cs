@@ -351,8 +351,7 @@ namespace StylizedWater3
                             renderGraph.actionName = "Enable";
                             renderGraph.action = () =>
                             {
-                                RenderGraphSettings settings = GraphicsSettings.GetRenderPipelineSettings<RenderGraphSettings>();
-                                settings.enableRenderCompatibilityMode = false;
+                                PipelineUtilities.SetRenderGraphCompatibilityMode(false);
                             };
                         }
                         else

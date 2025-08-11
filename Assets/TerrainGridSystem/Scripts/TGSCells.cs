@@ -1843,6 +1843,17 @@ namespace TGS {
         }
 
         /// <summary>
+        /// Sets cells' fill color.
+        /// </summary>
+        public void CellSetColor (List<Cell> cellIndices, Color color) {
+            if (cellIndices == null) return;
+            int cellCount = cellIndices.Count;
+            for (int k = 0; k < cellCount; k++) {
+                CellToggleRegionSurface(cellIndices[k], color.a > 0, color, false, null, Misc.Vector2one, Misc.Vector2zero, 0, false, false, isCanvasTexture: false);
+            }
+        }        
+
+        /// <summary>
         /// Sets current cell's fill texture. Use CellToggleRegionSurface for more options
         /// </summary>
         /// <param name="isCanvasTexture">If true, the texture is assumed to fill the entire grid or canvas so only a portion of the texture would be visible in the cell</param>
@@ -2506,8 +2517,8 @@ namespace TGS {
                 if (cell.territoryIndex >= 0) {
                     cell.territoryIndex = -1;
                 }
-                needUpdateTerritories = true;
             }
+            needUpdateTerritories = true;
             issueRedraw = RedrawType.Full;
         }
 
@@ -3187,19 +3198,26 @@ namespace TGS {
             }
             // Get territory count
             int maxTerritoryIndex = 0;
-            for (int k = 0; k < cellSettings.Length; k++) {
+            int cellSettingsCount = cellSettings.Length;
+            for (int k = 0; k < cellSettingsCount; k++) {
                 if (cellSettings[k].territoryIndex > maxTerritoryIndex) {
                     maxTerritoryIndex = cellSettings[k].territoryIndex;
                 }
             }
-            _numTerritories = maxTerritoryIndex + 1;
-            for (int k = 0; k < cellSettings.Length && k < cells.Count; k++) {
+            bool assignTerritories = territoriesTexture == null;
+            if (!assignTerritories) {
+                _numTerritories = Mathf.Max(_numTerritories, maxTerritoryIndex + 1);
+            }
+            int minCount = Mathf.Min(cellSettingsCount, cells.Count);
+            for (int k = 0; k < minCount; k++) {
                 int territoryIndex = cellSettings[k].territoryIndex;
                 if (filterTerritories != null && !filterTerritories.Contains(territoryIndex))
                     continue;
                 Cell cell = cells[k];
-                cell.territoryIndex = (short)territoryIndex;
                 cell.visible = cellSettings[k].visible;
+                if (assignTerritories) {
+                    cell.territoryIndex = territoryIndex < _numTerritories ? (short)territoryIndex : (short)-1;
+                }
                 cell.visibleAlways = cellSettings[k].visibleAlways;
                 Color color = cellSettings[k].color;
                 int textureIndex = cellSettings[k].textureIndex;
