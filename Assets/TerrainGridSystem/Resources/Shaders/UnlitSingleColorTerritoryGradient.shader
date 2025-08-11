@@ -12,6 +12,7 @@ Properties {
     _CircularFadeDistance ("Circular Fade Distance", Float) = 250000
     _CircularFadeFallOff ("Circular Fade FallOff", Float) = 50.0
     _Thickness ("Thickness", Float) = 0.05
+    _ZTest("ZTest", Int) = 4
     _ZWrite("ZWrite", Int) = 0
     _SrcBlend("Src Blend", Int) = 5
     _DstBlend("Dst Blend", Int) = 10
@@ -28,6 +29,7 @@ SubShader {
       "DisableBatching"="True"
     }
     Blend [_SrcBlend] [_DstBlend]
+  	ZTest [_ZTest]
   	ZWrite [_ZWrite]
   	Cull Off
     Stencil {

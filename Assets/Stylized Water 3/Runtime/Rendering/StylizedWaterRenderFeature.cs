@@ -247,9 +247,14 @@ namespace StylizedWater3
 
                 //Do not execute for the scene-view camera in play-mode. Even if the tab is not active, it would render around it instead of the main camera
                 var skipHeightPrePass = Application.isPlaying && heightPrePassSettings.disableInSceneView && currentCam.cameraType == CameraType.SceneView;
-  
+
+                //In play-mode, strictly execute for the main camera
+                skipHeightPrePass |= Application.isPlaying && !currentCam.CompareTag("MainCamera");
+                
                 if (WillExecuteHeightPrePass && skipHeightPrePass == false)
                 {
+                    //Debug.Log($"Executing height pre-pass for {currentCam.name}");
+                    
                     heightPrePass.Setup(heightPrePassSettings);
                     renderer.EnqueuePass(heightPrePass);
 
@@ -318,7 +323,27 @@ namespace StylizedWater3
                     };
 
                     TextureDesc textureDesc = debugData.currentHandle.GetDescriptor(renderGraph);
-                    RenderingUtils.ReAllocateHandleIfNeeded(ref RenderTargetDebugger.CurrentRT, rtDsc, textureDesc.filterMode, textureDesc.wrapMode, textureDesc.anisoLevel, textureDesc.mipMapBias, textureDesc.name);
+                    var allocate = RenderTargetDebugger.CurrentRT == null || RenderTargetDebugger.CurrentRT.rt == null;
+
+                    if (allocate == false)
+                    {
+                        allocate |= RenderTargetDebugger.CurrentRT.rt.name != textureDesc.name;
+                        allocate |= RenderTargetDebugger.CurrentRT.rt.graphicsFormat != textureDesc.format;
+                        allocate |= RenderTargetDebugger.CurrentRT.rt.width != textureDesc.width;
+                        allocate |= RenderTargetDebugger.CurrentRT.rt.height != textureDesc.height;
+                    }
+
+                    if (allocate)
+                    {
+                        textureDesc.name += " (Debug)";
+                        //Debug.Log($"Reallocating debug RT ({textureDesc.name})");
+                        
+                        RenderTargetDebugger.CurrentRT?.Release();
+                        RenderTargetDebugger.CurrentRT = RTHandles.Alloc(rtDsc, name: textureDesc.name);
+                    }
+                    
+                    //Idiotic function keeps causing memory leaks since Unity 2021
+                    //RenderingUtils.ReAllocateHandleIfNeeded(ref RenderTargetDebugger.CurrentRT, rtDsc, textureDesc.filterMode, textureDesc.wrapMode, textureDesc.anisoLevel, textureDesc.mipMapBias, textureDesc.name);
                     
                     TextureHandle destination = renderGraph.ImportTexture(RenderTargetDebugger.CurrentRT);
 

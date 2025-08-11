@@ -132,7 +132,7 @@ namespace StylizedWater3
             {
                 //Render target
                 RenderTextureDescriptor renderTargetDescriptor = new RenderTextureDescriptor(resolution, resolution, GraphicsFormat.R16G16_SFloat, 0);
-                passData.renderTarget = UniversalRenderer.CreateRenderGraphTexture(renderGraph, renderTargetDescriptor, BufferName, true, FilterMode.Bilinear, TextureWrapMode.Clamp);
+                passData.renderTarget = UniversalRenderer.CreateRenderGraphTexture(renderGraph, renderTargetDescriptor, BufferName + cameraData.camera.name, true, FilterMode.Bilinear, TextureWrapMode.Clamp);
                 //Store render target in RG, so it can be retrieved in other passes
                 FrameData frameData = frameContext.GetOrCreate<FrameData>();
                 frameData._WaterHeightBuffer = passData.renderTarget;

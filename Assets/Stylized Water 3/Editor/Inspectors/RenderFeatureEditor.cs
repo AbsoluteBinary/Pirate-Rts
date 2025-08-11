@@ -60,8 +60,7 @@ namespace StylizedWater3
             
             UI.DrawNotification(PipelineUtilities.RenderGraphEnabled() == false, "Render Graph is disabled, functionality on this render feature will not be functional", "Enable", () =>
             {
-                UnityEngine.Rendering.Universal.RenderGraphSettings settings = UnityEngine.Rendering.GraphicsSettings.GetRenderPipelineSettings<UnityEngine.Rendering.Universal.RenderGraphSettings>();
-                settings.enableRenderCompatibilityMode = false;
+                PipelineUtilities.SetRenderGraphCompatibilityMode(false);
             }, MessageType.Error);
 
             serializedObject.Update();

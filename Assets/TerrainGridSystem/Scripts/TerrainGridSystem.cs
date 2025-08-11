@@ -1565,9 +1565,6 @@ namespace TGS {
             CellsApplyVisibilityFilters();
             recreateTerritories = true;
             Redraw();
-            if (territoriesTexture != null) {
-                CreateTerritories(territoriesTexture, territoriesTextureNeutralColor, territoriesHideNeutralCells);
-            }
         }
 
         public void ReloadFlatMask () {

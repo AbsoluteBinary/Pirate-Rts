@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ADVANCED_SHADING
+  - _CAUSTICS
   - _DISTANCE_NORMALS
   - _INTERSECTION_FOAM
   - _NORMALMAP
@@ -156,7 +157,7 @@ Material:
     - _CausticsBrightness: 2
     - _CausticsChromance: 1
     - _CausticsDistortion: 0.23
-    - _CausticsOn: 0
+    - _CausticsOn: 1
     - _CausticsSpeed: 0.1
     - _CausticsTiling: 0.17000014
     - _ColorAbsorption: 0

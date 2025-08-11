@@ -175,7 +175,7 @@ Material:
     - _DistanceNormalsOn: 1
     - _DistanceNormalsTiling: 0.020000007
     - _DstBlend: 0
-    - _EdgeFade: 32
+    - _EdgeFade: 27.2
     - _EnableDirectionalCaustics: 1
     - _EnvironmentReflections: 1
     - _EnvironmentReflectionsOn: 1
@@ -302,7 +302,7 @@ Material:
     - _TranslucencyReflectionMask: 0
     - _TranslucencyStrength: 1
     - _TranslucencyStrengthDirect: 0.04
-    - _UnderwaterReflectionStrength: 0.5
+    - _UnderwaterReflectionStrength: 0.152
     - _UnderwaterRefractionOffset: 0.027
     - _UnderwaterSurfaceSmoothness: 0.783
     - _VertexColorFoam: 0

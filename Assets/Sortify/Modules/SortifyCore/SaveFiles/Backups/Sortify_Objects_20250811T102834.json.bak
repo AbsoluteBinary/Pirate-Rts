@@ -1,0 +1,34 @@
+{
+    "objectsData": [
+        {
+            "colors": [
+                {
+                    "objID": "FreeRoamScene_Directional Light_0",
+                    "colorValue": "4CB5FFFF"
+                },
+                {
+                    "objID": "FreeRoamScene_Water Object_3",
+                    "colorValue": "4040BFFF"
+                }
+            ],
+            "styles": [
+                {
+                    "objID": "FreeRoamScene_Directional Light_0",
+                    "styleType": 0
+                },
+                {
+                    "objID": "FreeRoamScene_Water Object_3",
+                    "styleType": 1
+                }
+            ],
+            "showComponents": [],
+            "sceneName": "FreeRoamScene"
+        },
+        {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": "Boot"
+        }
+    ]
+}

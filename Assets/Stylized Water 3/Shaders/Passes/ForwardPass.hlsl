@@ -356,7 +356,7 @@ float4 ForwardPass(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRONT_FACE_
 	
 	#if UNDERWATER_ENABLED
 	//Separate so shadows applied by Unity's lighting do not appear on backfaces
-	backfaceShadows = water.shadowMask;
+	backfaceShadows = lerp(1.0, water.shadowMask, _ShadowStrength);
 	water.shadowMask = lerp(1.0, water.shadowMask, water.vFace);
 	#endif
 	#endif
@@ -977,6 +977,7 @@ float4 ForwardPass(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRONT_FACE_
 		backfaceShadows, inputData.positionWS, inputData.normalWS, water.tangentWorldNormal, water.viewDir, scene.positionSS.xy,
 		_ShallowColor, _BaseColor, water.vFace, _UnderwaterSurfaceSmoothness, _UnderwaterRefractionOffset);
 
+	//return float4(underwaterColor.aaa, 1.0);
 	#if _REFRACTION
 	underwaterColor.a = 1.0;
 	#endif
