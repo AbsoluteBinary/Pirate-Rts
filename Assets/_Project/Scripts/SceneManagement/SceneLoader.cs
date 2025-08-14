@@ -4,11 +4,19 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using _Project.Scripts.EventBus; // For EventBus
+using System.Linq; // For FirstOrDefault
 
 namespace _Project.Scripts.SceneManagement
 {
     public class SceneLoader : MonoBehaviour
     {
+        // Singleton Instance
+        public static SceneLoader Instance { get; private set; }
+
+        // Event binding for LoadSceneGroupEvent
+        private EventBinding<LoadSceneGroupEvent> loadSceneGroupBinding;
+
         // Configuration for loading bar animation speed
         [SerializeField] private float fillSmoothingSpeed = 5f;
         // Array of scene groups to load
@@ -24,7 +32,7 @@ namespace _Project.Scripts.SceneManagement
         [SerializeField] private CanvasGroup loadingUICanvasGroup; // Group containing loading UI elements
         [SerializeField] private Canvas loginUICanvas;          // Login UI canvas (will be found if in another scene)
         // Reference to a single background object assigned in the Inspector
-        [SerializeField] private GameObject backgroundObject; // Reference to background object for activation
+        //[SerializeField] private GameObject backgroundObject; // Reference to background object for activation
 
         // New: Container for Boot's UI/Camera objects (assign in Inspector)
         [SerializeField] private GameObject bootUIContainer; // Parent holding Boot's UI, Camera, etc.
@@ -32,7 +40,7 @@ namespace _Project.Scripts.SceneManagement
         // Tracks the target progress of the loading bar
         private float targetProgress;
         // Flag to indicate if a scene group is currently loading
-        private bool isLoading;
+        public bool isLoading;
         // Index of the current scene group
         private int currentGroupIndex = 0;
         // Cached reference to login UI CanvasGroup
@@ -46,12 +54,30 @@ namespace _Project.Scripts.SceneManagement
 
         private void Awake()
         {
+            // if (loadingCamera != null)
+            // {
+            //     loadingCamera.clearFlags = CameraClearFlags.Skybox; // Use skybox instead of solid color
+            //     loadingCamera.backgroundColor = Color.black; // Fallback color if no skybox
+            // }
+            // Singleton setup: Ensure only one instance
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Persist across scenes
+            
             // Initialize DOTween for animations
             DOTween.Init();
             // Subscribe to scene manager events for logging
             manager.OnSceneLoaded += sceneName => Debug.Log("Loaded: " + sceneName);
             manager.OnSceneUnloaded += sceneName => Debug.Log("Unloaded: " + sceneName);
             manager.OnSceneGroupLoaded += () => Debug.Log("Scene group loaded.");
+
+            // Register event listener for LoadSceneGroupEvent
+            loadSceneGroupBinding = new EventBinding<LoadSceneGroupEvent>(OnLoadSceneGroupEvent);
+            EventBus<LoadSceneGroupEvent>.Register(loadSceneGroupBinding);
 
             // Set initial UI state
             if (backgroundImage != null)
@@ -70,6 +96,17 @@ namespace _Project.Scripts.SceneManagement
 
             // New: Ensure Boot container starts enabled (for initial load)
             if (bootUIContainer != null) bootUIContainer.SetActive(true);
+        }
+
+        private void OnDestroy()
+        {
+            // Deregister event to prevent memory leaks
+            EventBus<LoadSceneGroupEvent>.Deregister(loadSceneGroupBinding);
+        }
+
+        private void OnLoadSceneGroupEvent(LoadSceneGroupEvent e)
+        {
+            LoadSpecificSceneGroup(e.groupIndex);
         }
 
         private async void Start()
@@ -110,7 +147,6 @@ namespace _Project.Scripts.SceneManagement
             finally
             {
                 HideLoadingUI();
-                ShowLoginUI();
             }
         }
 
@@ -127,21 +163,23 @@ namespace _Project.Scripts.SceneManagement
             Sequence seq = DOTween.Sequence();
             if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
             if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
-            if (backgroundObject != null && !isPreparingNewGroup)
-                backgroundObject.SetActive(true);
+            // if (backgroundObject != null && !isPreparingNewGroup)
+            //     backgroundObject.SetActive(true);
             
             seq.OnComplete(() =>
             {
                 if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
                 if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 isPreparingNewGroup = false;
+                ShowLoginObjects(); // Call here to ensure timing after fade and flag reset
             });
         }
 
-        private void ShowLoginUI()
+        private void ShowLoginObjects()
         {
             if (isPreparingNewGroup) return;
 
+            // Handle login UI
             if (loginUICanvas != null)
             {
                 loginUICanvasGroup = loginUICanvas.GetComponent<CanvasGroup>();
@@ -158,14 +196,19 @@ namespace _Project.Scripts.SceneManagement
             }
             else
             {
-                var loginCanvasObj = GameObject.Find("LoginMenuCanvas");
-                if (loginCanvasObj != null)
+                // Search for inactive objects
+                var allObjects = FindObjectsOfType<GameObject>(true);
+                var loginCanvasObj = allObjects.FirstOrDefault(go => go.name == "LoginMenuCanvas");
+                var loginbackgroundObj = allObjects.FirstOrDefault(go => go.name == "loginbackground");
+
+                if (loginCanvasObj != null && loginbackgroundObj != null)
                 {
                     loginUICanvasGroup = loginCanvasObj.GetComponent<CanvasGroup>();
                     if (loginUICanvasGroup != null)
                     {
                         loginUICanvasGroup.alpha = 0f;
                         loginCanvasObj.SetActive(true);
+                        loginbackgroundObj.SetActive(true);
                         loginUICanvasGroup.DOFade(1f, 0.5f);
                     }
                     else
@@ -174,6 +217,22 @@ namespace _Project.Scripts.SceneManagement
                     }
                 }
             }
+
+            // // Handle 3D background (similar logic to login UI, search if not assigned)
+            // if (backgroundObject != null)
+            // {
+            //     backgroundObject.SetActive(true);
+            // }
+            // else
+            // {
+            //     // Search for the BackgroundObject component (including inactive)
+            //     var bgComp = FindObjectOfType<BackgroundObject>(true);
+            //     if (bgComp != null)
+            //     {
+            //         backgroundObject = bgComp.gameObject;
+            //         backgroundObject.SetActive(true);
+            //     }
+            // }
         }
 
         private void Update()
@@ -188,7 +247,7 @@ namespace _Project.Scripts.SceneManagement
 
         public void LoadNextSceneGroupForButton()
         {
-            if (backgroundObject != null) backgroundObject.SetActive(false);
+            //if (backgroundObject != null) backgroundObject.SetActive(false);
             if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
             
             if (isLoading)
@@ -199,6 +258,33 @@ namespace _Project.Scripts.SceneManagement
 
             ToggleNextSceneGroup();
         }
+
+        // New method: Load a specific scene group by index (for external calls)
+        public async Task LoadSpecificSceneGroup(int index)
+        {
+            if (index < 0 || index >= sceneGroups.Length)
+            {
+                Debug.LogError("Invalid scene group index: " + index);
+                return;
+            }
+
+            // Optional: Hide current UI/elements before loading (similar to LoadNextSceneGroupForButton)
+            //if (backgroundObject != null) backgroundObject.SetActive(false);
+            if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
+
+            // Toggle Boot container if needed
+            if (bootUIContainer != null)
+            {
+                bootUIContainer.SetActive(index == 0); // Enable only for Boot (index 0)
+            }
+
+            currentGroupIndex = index;
+            NewGroupPrep(); // Prepare flag
+
+            // Reuse existing loading logic
+            await LoadSceneGroup(index);
+        }
+        
 
         public void ToggleNextSceneGroup()
         {
@@ -237,26 +323,22 @@ namespace _Project.Scripts.SceneManagement
         }
     }
 
-    public class BackgroundObject : MonoBehaviour
-    {
-        private Renderer rend;
-
-        private void Awake()
-        {
-            rend = GetComponent<Renderer>();
-            if (rend != null)
-            {
-                Color color = rend.material.color;
-                rend.material.color = new Color(color.r, color.g, color.b, 0f);
-            }
-        }
-
-        public void FadeIn()
-        {
-            if (rend != null)
-            {
-                rend.material.DOFade(1f, 1f).SetId("FadeInBackgroundObjects");
-            }
-        }
-    }
+    // public class BackgroundObject : MonoBehaviour
+    // {
+    //     private Renderer rend;
+    //
+    //     private void Awake()
+    //     {
+    //         rend = GetComponent<Renderer>();
+    //         // Removed setting alpha to 0 to allow immediate visibility on activation
+    //     }
+    //
+    //     public void FadeIn()
+    //     {
+    //         if (rend != null)
+    //         {
+    //             rend.material.DOFade(1f, 1f).SetId("FadeInBackgroundObjects");
+    //         }
+    //     }
+    // }
 }

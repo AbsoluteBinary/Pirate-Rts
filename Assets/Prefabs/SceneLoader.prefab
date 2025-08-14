@@ -593,3 +593,4 @@ MonoBehaviour:
   loginUICanvas: {fileID: 0}
   backgroundObject: {fileID: 0}
   bootUIContainer: {fileID: 0}
+  isLoading: 0

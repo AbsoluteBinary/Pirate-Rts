@@ -94,7 +94,7 @@ public class UIManager : MonoBehaviour
         }
 
         ToggleCameras();
-        Debug.Log($"UIManager: State changed to {currentState}");
+        Debug.Log($"MainMenuDataIOManager: State changed to {currentState}");
     }
 
     #region Public Methods

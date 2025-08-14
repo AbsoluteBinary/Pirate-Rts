@@ -8,4 +8,9 @@ namespace _Project.Scripts.EventBus
         public int health;
         public int mana;
     }
+    // New event for scene group loading
+    public struct LoadSceneGroupEvent : IEvent
+    {
+        public int groupIndex;
+    }
 }
