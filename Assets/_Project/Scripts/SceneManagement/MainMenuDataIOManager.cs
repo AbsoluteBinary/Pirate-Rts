@@ -19,6 +19,8 @@ namespace _Project.Scripts.SceneManagement
 
     public class MainMenuDataIOManager : SerializedMonoBehaviour
     {
+        public static MainMenuDataIOManager Instance { get; private set; } // Singleton access
+
         [SerializeField] private Canvas loginUiCanvas;
         [SerializeField] private GameObject backgroundDisplay;
         [OdinSerialize, ShowInInspector] private MainMenuIOData mainMenuIOData = new MainMenuIOData { isCanvasEnabled = false, isBackgroundEnabled = false };
@@ -27,6 +29,16 @@ namespace _Project.Scripts.SceneManagement
 
         void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this; // Set singleton
+            }
+            else
+            {
+                Destroy(gameObject); // Prevent duplicates
+                return;
+            }
+
             savePath = Application.persistentDataPath + "/uiState.dat";
             LoadUIState();
         }

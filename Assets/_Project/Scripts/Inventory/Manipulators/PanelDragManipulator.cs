@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory.Manipulators {
     public class PanelDragManipulator : PointerManipulator {
         bool isDragging;
         Vector2 offset;
@@ -10,12 +11,14 @@ namespace Systems.Inventory {
             activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
         }
         
+        [Obsolete("Obsolete")]
         protected override void RegisterCallbacksOnTarget() {
             target.RegisterCallback<PointerDownEvent>(OnPointerDown);
             target.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             target.RegisterCallback<PointerUpEvent>(OnPointerUp);
         }
 
+        [Obsolete("Obsolete")]
         protected override void UnregisterCallbacksFromTarget() {
             target.UnregisterCallback<PointerDownEvent>(OnPointerDown);
             target.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
@@ -32,6 +35,7 @@ namespace Systems.Inventory {
             evt.StopPropagation();
         }
 
+        [Obsolete("Obsolete")]
         void OnPointerMove(PointerMoveEvent evt) {
             if (!isDragging || !target.HasPointerCapture(evt.pointerId)) return;
 

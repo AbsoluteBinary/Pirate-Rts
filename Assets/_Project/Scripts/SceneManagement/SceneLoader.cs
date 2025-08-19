@@ -30,7 +30,7 @@ namespace _Project.Scripts.SceneManagement
         [SerializeField] private Image loadingBarFill;          // Fill image that progresses
         [SerializeField] private TextMeshProUGUI loadingText;   // Text displaying "Loading..." or progress
         [SerializeField] private CanvasGroup loadingUICanvasGroup; // Group containing loading UI elements
-        [SerializeField] private Canvas loginUICanvas;          // Login UI canvas (will be found if in another scene)
+        //[SerializeField] private Canvas loginUICanvas;          // Login UI canvas (will be found if in another scene)
         // Reference to a single background object assigned in the Inspector
         //[SerializeField] private GameObject backgroundObject; // Reference to background object for activation
 
@@ -106,7 +106,7 @@ namespace _Project.Scripts.SceneManagement
 
         private void OnLoadSceneGroupEvent(LoadSceneGroupEvent e)
         {
-            LoadSpecificSceneGroup(e.groupIndex);
+            _ = LoadSpecificSceneGroup(e.groupIndex);
         }
 
         private async void Start()
@@ -171,68 +171,25 @@ namespace _Project.Scripts.SceneManagement
                 if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
                 if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 isPreparingNewGroup = false;
-                ShowLoginObjects(); // Call here to ensure timing after fade and flag reset
+                ShowLoginUI();
+                // ShowLoginObjects(); // Call here to ensure timing after fade and flag reset
             });
         }
 
-        private void ShowLoginObjects()
+    
+        private void ShowLoginUI()
         {
-            if (isPreparingNewGroup) return;
-
-            // Handle login UI
-            if (loginUICanvas != null)
+            var mainMenuManager = MainMenuDataIOManager.Instance;
+            if (mainMenuManager != null)
             {
-                loginUICanvasGroup = loginUICanvas.GetComponent<CanvasGroup>();
-                if (loginUICanvasGroup != null)
-                {
-                    loginUICanvasGroup.alpha = 0f;
-                    loginUICanvas.gameObject.SetActive(true);
-                    loginUICanvasGroup.DOFade(1f, 0.5f);
-                }
-                else
-                {
-                    loginUICanvas.gameObject.SetActive(true);
-                }
+                // Access methods robustly
+                mainMenuManager.ToggleCanvasOn(); // Or ToggleBackgroundOn(), etc.
+                // Example: mainMenuManager.SaveUIState(); if needed
             }
             else
             {
-                // Search for inactive objects
-                var allObjects = FindObjectsOfType<GameObject>(true);
-                var loginCanvasObj = allObjects.FirstOrDefault(go => go.name == "LoginMenuCanvas");
-                var loginbackgroundObj = allObjects.FirstOrDefault(go => go.name == "loginbackground");
-
-                if (loginCanvasObj != null && loginbackgroundObj != null)
-                {
-                    loginUICanvasGroup = loginCanvasObj.GetComponent<CanvasGroup>();
-                    if (loginUICanvasGroup != null)
-                    {
-                        loginUICanvasGroup.alpha = 0f;
-                        loginCanvasObj.SetActive(true);
-                        loginbackgroundObj.SetActive(true);
-                        loginUICanvasGroup.DOFade(1f, 0.5f);
-                    }
-                    else
-                    {
-                        loginCanvasObj.SetActive(true);
-                    }
-                }
+                Debug.LogWarning("MainMenuDataIOManager instance not found.");
             }
-
-            // // Handle 3D background (similar logic to login UI, search if not assigned)
-            // if (backgroundObject != null)
-            // {
-            //     backgroundObject.SetActive(true);
-            // }
-            // else
-            // {
-            //     // Search for the BackgroundObject component (including inactive)
-            //     var bgComp = FindObjectOfType<BackgroundObject>(true);
-            //     if (bgComp != null)
-            //     {
-            //         backgroundObject = bgComp.gameObject;
-            //         backgroundObject.SetActive(true);
-            //     }
-            // }
         }
 
         private void Update()
@@ -248,7 +205,7 @@ namespace _Project.Scripts.SceneManagement
         public void LoadNextSceneGroupForButton()
         {
             //if (backgroundObject != null) backgroundObject.SetActive(false);
-            if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
+            //if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
             
             if (isLoading)
             {
@@ -270,7 +227,7 @@ namespace _Project.Scripts.SceneManagement
 
             // Optional: Hide current UI/elements before loading (similar to LoadNextSceneGroupForButton)
             //if (backgroundObject != null) backgroundObject.SetActive(false);
-            if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
+            //if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
 
             // Toggle Boot container if needed
             if (bootUIContainer != null)

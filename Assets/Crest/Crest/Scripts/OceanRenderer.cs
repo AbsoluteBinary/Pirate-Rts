@@ -1416,7 +1416,11 @@ namespace Crest
 
                 // Transmittance is for Physically Based Sky.
                 var hdCamera = HDCamera.GetOrCreate(ViewCamera);
+#if UNITY_6000_0_OR_NEWER
+                if (hdCamera == null || VolumeManager.instance == null || !VolumeManager.instance.isInitialized || hdCamera.volumeStack == null)
+#else
                 if (hdCamera == null || hdCamera.volumeStack == null)
+#endif
                 {
                     Shader.SetGlobalVector(sp_primaryLightDirection, lightDirection);
                     Shader.SetGlobalVector(sp_primaryLightIntensity, lightIntensity);

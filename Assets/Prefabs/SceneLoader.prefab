@@ -576,21 +576,18 @@ MonoBehaviour:
         asset: {fileID: 102900000, guid: 7bd3d6e4aba1ab765be074b0962c163e, type: 3}
         guid: 7bd3d6e4aba1ab765be074b0962c163e
       SceneType: 0
-    - Reference:
-        asset: {fileID: 102900000, guid: 2008358e1ba80398e802a4e5c9c8d0df, type: 3}
-        guid: 2008358e1ba80398e802a4e5c9c8d0df
-      SceneType: 5
+  - GroupName: Harbour
+    Scenes:
     - Reference:
         asset: {fileID: 102900000, guid: eb55454ee47808e4c81b746fff9e7469, type: 3}
         guid: eb55454ee47808e4c81b746fff9e7469
-      SceneType: 6
-  minLoadingTime: 6
+      SceneType: 0
+  minLoadingTime: 3
   backgroundImage: {fileID: 8967924995770154218}
   loadingBarBorder: {fileID: 5915613320822050504}
   loadingBarFill: {fileID: 8007914723836393267}
   loadingText: {fileID: 1433492831285112335}
   loadingUICanvasGroup: {fileID: 4385153264709212702}
   loginUICanvas: {fileID: 0}
-  backgroundObject: {fileID: 0}
   bootUIContainer: {fileID: 0}
   isLoading: 0

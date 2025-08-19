@@ -43,6 +43,8 @@ Shader "Hidden/Crest/Underwater/Underwater Effect URP"
 
 	SubShader
 	{
+		Blend One Zero, One One
+		BlendOp Add
 		ZWrite Off
 
 		Pass

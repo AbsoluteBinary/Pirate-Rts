@@ -316,7 +316,7 @@ Shader "Crest/Ocean URP"
 				float4 positionCS : SV_POSITION;
 				float4 lodAlpha_worldXZUndisplaced_oceanDepth : TEXCOORD0;
 				real4 n_shadow : TEXCOORD1;
-				real4 screenPos : TEXCOORD2;
+				float4 screenPos : TEXCOORD2;
 				float4 positionWS_fogFactor : TEXCOORD3;
 				#if _FLOW_ON
 				real2 flow : TEXCOORD4;
@@ -502,8 +502,8 @@ Shader "Crest/Ocean URP"
 				const float wt_smallerLod = (1.0 - lodAlpha) * cascadeData0._weight;
 				const float wt_biggerLod = (1.0 - wt_smallerLod) * cascadeData1._weight;
 
-				real3 screenPos = input.screenPos.xyw;
-				real2 uvDepth = screenPos.xy / screenPos.z;
+				const float3 screenPos = input.screenPos.xyw;
+				const float2 uvDepth = screenPos.xy / screenPos.z;
 
 				real3 view = normalize(GetCameraPositionWS() - input.positionWS_fogFactor.xyz);
 
