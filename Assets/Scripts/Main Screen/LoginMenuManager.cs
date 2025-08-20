@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Main_Screen
 {
-    public class MainMenuManager : MonoBehaviour
+    public class LoginMenuManager : MonoBehaviour
     {
         [SerializeField] Button toggleSceneButton; // Assign in Inspector or find dynamically
         [SerializeField] SceneLoader sceneLoader; // Reference to SceneLoader
@@ -49,7 +49,8 @@ namespace Main_Screen
         {
             if (sceneLoader != null)
             {
-                sceneLoader.ToggleNextSceneGroup(); // Call the new toggle method
+                sceneLoader.ToggleNextSceneGroup();
+                // Call the new toggle method
             }
             else
             {

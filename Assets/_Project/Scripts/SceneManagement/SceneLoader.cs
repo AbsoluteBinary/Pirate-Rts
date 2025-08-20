@@ -5,7 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus; // For EventBus
-using System.Linq; // For FirstOrDefault
+using System.Linq;
+using _Project.Scripts.MainMenu_Controls; // For FirstOrDefault
 
 namespace _Project.Scripts.SceneManagement
 {
@@ -13,6 +14,8 @@ namespace _Project.Scripts.SceneManagement
     {
         // Singleton Instance
         public static SceneLoader Instance { get; private set; }
+        
+        private BootUiControl _bootUiControl;
 
         // Event binding for LoadSceneGroupEvent
         private EventBinding<LoadSceneGroupEvent> loadSceneGroupBinding;
@@ -33,10 +36,7 @@ namespace _Project.Scripts.SceneManagement
         //[SerializeField] private Canvas loginUICanvas;          // Login UI canvas (will be found if in another scene)
         // Reference to a single background object assigned in the Inspector
         //[SerializeField] private GameObject backgroundObject; // Reference to background object for activation
-
-        // New: Container for Boot's UI/Camera objects (assign in Inspector)
-        [SerializeField] private GameObject bootUIContainer; // Parent holding Boot's UI, Camera, etc.
-
+        
         // Tracks the target progress of the loading bar
         private float targetProgress;
         // Flag to indicate if a scene group is currently loading
@@ -51,6 +51,12 @@ namespace _Project.Scripts.SceneManagement
 
         // Manages scene loading and unloading
         public readonly SceneGroupManager manager = new SceneGroupManager();
+        
+        private void OnApplicationQuit()
+        {
+            Debug.Log("Application quitting or exiting play mode detected.");
+            ResetUi(); // Call your function here
+        }
 
         private void Awake()
         {
@@ -95,7 +101,7 @@ namespace _Project.Scripts.SceneManagement
             if (loadingText != null) loadingText.text = "Loading...";
 
             // New: Ensure Boot container starts enabled (for initial load)
-            if (bootUIContainer != null) bootUIContainer.SetActive(true);
+            //if (_bootUiControl != null) _bootUiControl.gameObject.SetActive(true);
         }
 
         private void OnDestroy()
@@ -119,6 +125,7 @@ namespace _Project.Scripts.SceneManagement
 
         public async Task LoadSceneGroup(int index)
         {
+            Debug.Log("Loading scene group...");
             if (index < 0 || index >= sceneGroups.Length)
             {
                 Debug.LogError("Invalid scene group index: " + index);
@@ -172,7 +179,6 @@ namespace _Project.Scripts.SceneManagement
                 if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 isPreparingNewGroup = false;
                 ShowLoginUI();
-                // ShowLoginObjects(); // Call here to ensure timing after fade and flag reset
             });
         }
 
@@ -180,15 +186,43 @@ namespace _Project.Scripts.SceneManagement
         private void ShowLoginUI()
         {
             var mainMenuManager = MainMenuDataIOManager.Instance;
+            if (mainMenuManager != null && currentGroupIndex == 0) // Example: Only for Boot group (index 0)
+            {
+                mainMenuManager.ToggleCanvasOn();
+                mainMenuManager.ToggleBackgroundOn();
+            }
+            else
+            {
+                Debug.Log("Skipping UI toggle for non-Boot group.");
+            }
+        }
+        
+        private void HideLoginUIBootOut()
+        {
+            var mainMenuManager = MainMenuDataIOManager.Instance;
             if (mainMenuManager != null)
             {
                 // Access methods robustly
-                mainMenuManager.ToggleCanvasOn(); // Or ToggleBackgroundOn(), etc.
+                mainMenuManager.ToggleBackgroundOff();
+                mainMenuManager.ToggleCanvasOff();
+                //mainMenuManager.
+                // Or ToggleBackgroundOn(), etc.
                 // Example: mainMenuManager.SaveUIState(); if needed
             }
             else
             {
                 Debug.LogWarning("MainMenuDataIOManager instance not found.");
+            }
+        }
+
+        private void ResetUi()
+        {
+            var mainMenuManager = MainMenuDataIOManager.Instance;
+            if (mainMenuManager != null)
+            {
+                // When Boot is finished and game is loaded in
+                // Set 3D background Off and Login Ui off 
+                mainMenuManager.SaveUIState();
             }
         }
 
@@ -204,6 +238,7 @@ namespace _Project.Scripts.SceneManagement
 
         public void LoadNextSceneGroupForButton()
         {
+            Debug.Log("Load next Scene Group");
             //if (backgroundObject != null) backgroundObject.SetActive(false);
             //if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
             
@@ -230,9 +265,9 @@ namespace _Project.Scripts.SceneManagement
             //if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
 
             // Toggle Boot container if needed
-            if (bootUIContainer != null)
+            if (_bootUiControl != null)
             {
-                bootUIContainer.SetActive(index == 0); // Enable only for Boot (index 0)
+                _bootUiControl.gameObject.SetActive(index == 0); // Enable only for Boot (index 0)
             }
 
             currentGroupIndex = index;
@@ -245,6 +280,8 @@ namespace _Project.Scripts.SceneManagement
 
         public void ToggleNextSceneGroup()
         {
+            HideLoginUIBootOut();
+            BootUiControl.Instance.gameObject.SetActive(false);
             if (sceneGroups == null || sceneGroups.Length == 0)
             {
                 Debug.LogWarning("No scene groups assigned to SceneLoader.");
@@ -253,10 +290,10 @@ namespace _Project.Scripts.SceneManagement
             currentGroupIndex = (currentGroupIndex + 1) % sceneGroups.Length;
             
             // New: Toggle Boot container before loading (disable if not Boot group)
-            if (bootUIContainer != null)
-            {
-                bootUIContainer.SetActive(currentGroupIndex == 0); // Enable only for Boot (index 0), disable otherwise
-            }
+            // if (_bootUiControl != null)
+            // {
+            //     _bootUiControl.gameObject.SetActive(currentGroupIndex == 0); // Enable only for Boot (index 0), disable otherwise
+            // }
 
             LoadSceneGroup(currentGroupIndex);
             NewGroupPrep();

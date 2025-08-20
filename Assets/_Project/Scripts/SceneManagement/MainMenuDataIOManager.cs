@@ -98,7 +98,7 @@ namespace _Project.Scripts.SceneManagement
             SaveUIState();
         }
 
-        [Button] private void SaveUIState()
+        [Button] public void SaveUIState()
         {
             byte[] bytes = SerializationUtility.SerializeValue(mainMenuIOData, DataFormat.Binary);
             File.WriteAllBytes(savePath, bytes);

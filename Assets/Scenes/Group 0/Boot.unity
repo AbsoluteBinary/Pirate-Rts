@@ -496,14 +496,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2203702056505367181, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
-      propertyPath: sceneLoader
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3149307729060083780, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1100,7 +1092,7 @@ Transform:
   m_GameObject: {fileID: 1372256217}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -606.68494, y: -318.88318, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1132,7 +1124,7 @@ Transform:
   m_GameObject: {fileID: 1452094961}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 606.68494, y: 318.88318, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1149,32 +1141,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1452094961}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d427ae3decd743979a7bb2e37dd7a1e2, type: 3}
+  m_Script: {fileID: 11500000, guid: e23341c3a97730332a7e3e6db727a9a0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects: []
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes:
-    - Name: mainMenuIOData
-      Entry: 7
-      Data: 0|_Project.Scripts.SceneManagement.MainMenuIOData, Assembly-CSharp
-    - Name: isCanvasEnabled
-      Entry: 5
-      Data: false
-    - Name: isBackgroundEnabled
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-  loginUiCanvas: {fileID: 1998043134}
-  backgroundDisplay: {fileID: 1094431580}
+  m_EditorClassIdentifier: Assembly-CSharp::BootUiControl
 --- !u!1 &1472641555
 GameObject:
   m_ObjectHideFlags: 0
@@ -1348,6 +1317,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SceneLoader
       objectReference: {fileID: 0}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: bootUIContainer
+      value: 
+      objectReference: {fileID: 1452094961}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
