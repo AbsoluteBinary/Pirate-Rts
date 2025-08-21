@@ -170,15 +170,25 @@ namespace _Project.Scripts.SceneManagement
             Sequence seq = DOTween.Sequence();
             if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
             if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
-            // if (backgroundObject != null && !isPreparingNewGroup)
-            //     backgroundObject.SetActive(true);
-            
+    
+            // Insert callback at end of fade (almost faded out) to show login UI if Boot group
+            seq.AppendCallback(() =>
+            {
+                if (currentGroupIndex == 0)
+                {
+                    ShowLoginUI();
+                }
+                else
+                {
+                    Debug.Log("Skipping ShowLoginUI() for non-Boot group: " + currentGroupIndex);
+                }
+            });
+
             seq.OnComplete(() =>
             {
                 if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
                 if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 isPreparingNewGroup = false;
-                ShowLoginUI();
             });
         }
 
@@ -260,10 +270,6 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
 
-            // Optional: Hide current UI/elements before loading (similar to LoadNextSceneGroupForButton)
-            //if (backgroundObject != null) backgroundObject.SetActive(false);
-            //if (loginUICanvas != null) loginUICanvas.gameObject.SetActive(false);
-
             // Toggle Boot container if needed
             if (_bootUiControl != null)
             {
@@ -316,23 +322,4 @@ namespace _Project.Scripts.SceneManagement
             Progressed?.Invoke(normalizedValue);
         }
     }
-
-    // public class BackgroundObject : MonoBehaviour
-    // {
-    //     private Renderer rend;
-    //
-    //     private void Awake()
-    //     {
-    //         rend = GetComponent<Renderer>();
-    //         // Removed setting alpha to 0 to allow immediate visibility on activation
-    //     }
-    //
-    //     public void FadeIn()
-    //     {
-    //         if (rend != null)
-    //         {
-    //             rend.material.DOFade(1f, 1f).SetId("FadeInBackgroundObjects");
-    //         }
-    //     }
-    // }
 }

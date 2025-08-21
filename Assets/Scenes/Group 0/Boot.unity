@@ -501,6 +501,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+--- !u!225 &450604303 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 2659960018791699439, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+  m_PrefabInstance: {fileID: 450604302}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &506161230
 GameObject:
   m_ObjectHideFlags: 0
@@ -1377,6 +1382,7 @@ MonoBehaviour:
       Entry: 8
       Data: 
   loginUiCanvas: {fileID: 1998043134}
+  loginCanvasGroup: {fileID: 450604303}
   backgroundDisplay: {fileID: 1094431580}
 --- !u!4 &1680937136
 Transform:

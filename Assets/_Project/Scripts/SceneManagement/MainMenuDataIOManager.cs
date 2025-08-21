@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using System.IO;
 using SerializationUtility = Sirenix.Serialization.SerializationUtility;
+using DG.Tweening; // Ensure DOTween is imported
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -22,6 +23,7 @@ namespace _Project.Scripts.SceneManagement
         public static MainMenuDataIOManager Instance { get; private set; } // Singleton access
 
         [SerializeField] private Canvas loginUiCanvas;
+        [SerializeField] private CanvasGroup loginCanvasGroup; // New: Assign CanvasGroup on canvas GO in Inspector
         [SerializeField] private GameObject backgroundDisplay;
         [OdinSerialize, ShowInInspector] private MainMenuIOData mainMenuIOData = new MainMenuIOData { isCanvasEnabled = false, isBackgroundEnabled = false };
 
@@ -63,13 +65,39 @@ namespace _Project.Scripts.SceneManagement
 
         private void SetCanvasEnabled(bool enable)
         {
+            if (loginUiCanvas == null || loginCanvasGroup == null) return; // Safety check
+
+            // Kill any ongoing tweens to prevent conflicts
+            DOTween.Kill(loginCanvasGroup);
+
+            if (enable)
+            {
+                // Fade in: Activate, set alpha 0, fade to 1, then enable
+                loginUiCanvas.gameObject.SetActive(true);
+                loginCanvasGroup.alpha = 0f;
+                loginCanvasGroup.DOFade(1f, 0.5f).OnComplete(() =>
+                {
+                    loginUiCanvas.enabled = true;
+#if UNITY_EDITOR
+                    if (!Application.isPlaying) EditorUtility.SetDirty(loginUiCanvas);
+#endif
+                });
+            }
+            else
+            {
+                // Fade out: Fade to 0, then deactivate and disable
+                loginCanvasGroup.DOFade(0f, 0.5f).OnComplete(() =>
+                {
+                    loginUiCanvas.gameObject.SetActive(false);
+                    loginUiCanvas.enabled = false;
+#if UNITY_EDITOR
+                    if (!Application.isPlaying) EditorUtility.SetDirty(loginUiCanvas);
+#endif
+                });
+            }
+
 #if UNITY_EDITOR
             if (!Application.isPlaying) Undo.RecordObject(loginUiCanvas, "Set Canvas Enabled");
-#endif
-            loginUiCanvas.gameObject.SetActive(enable);
-            loginUiCanvas.enabled = enable;
-#if UNITY_EDITOR
-            if (!Application.isPlaying) EditorUtility.SetDirty(loginUiCanvas);
 #endif
         }
 
