@@ -5,16 +5,12 @@ namespace _Project.Scripts.SceneManagement
 {
     public class SceneChoiceLoader : MonoBehaviour
     {
-        [FoldoutGroup("Scene Group Selection")] // Collapsible group for organization
-        [Title("Group Index")] // Custom title for clarity
-        [SerializeField] private int groupIndex = 0;
+        // Removed the serialized groupIndex and selectedGroup fields, as we'll now pass the index as a parameter
+        // from each button's OnClick event in the Inspector.
 
-        // Alternative: Use enum for named dropdown (better UX)
-         public enum SceneGroupOptions { Boot = 0, GamePlay = 1, Harbour = 2 } // Add your group names
-         [SerializeField] private SceneGroupOptions selectedGroup;
-
-        //Public method: Call this from Unity Button's OnClick (or other triggers)
-        public void LoadChosenGroup()
+        // Public method: Call this from Unity Button's OnClick (or other triggers)
+        // Now takes an int parameter for the group index, allowing each button to specify its own value
+        public void LoadChosenGroup(int groupIndex)
         {
             Debug.Log("Button Clicked");
             Debug.Log($"SceneChoiceLoader: Attempting to load group index {groupIndex} from {gameObject.name}");
@@ -25,15 +21,16 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
             
+            // Fixed the logic here: Previously, it was loading when isLoading was true, which was likely a mistake.
+            // Now, we check if NOT loading before proceeding.
             if (SceneLoader.Instance.isLoading)
             {
-                SceneLoader.Instance.LoadSpecificSceneGroup(groupIndex);
                 Debug.LogWarning("Loading in progress; cannot load new group.");
                 return;
             }
             
-            
-           // Debug.Log($"SceneChoiceLoader: Called LoadSpecificSceneGroup with index {groupIndex}");
+            SceneLoader.Instance.LoadSpecificSceneGroup(groupIndex);
+            // Debug.Log($"SceneChoiceLoader: Called LoadSpecificSceneGroup with index {groupIndex}");
         }
     }
 }

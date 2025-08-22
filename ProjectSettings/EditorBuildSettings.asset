@@ -12,10 +12,10 @@ EditorBuildSettings:
     path: Assets/Scenes/Group 1/FreeRoamScene.unity
     guid: 7bd3d6e4aba1ab765be074b0962c163e
   - enabled: 1
-    path: Assets/Scenes/Group 1/CombatScene.unity
+    path: Assets/Scenes/Group 2/CombatScene.unity
     guid: 2008358e1ba80398e802a4e5c9c8d0df
   - enabled: 1
-    path: Assets/Scenes/Group 2/HarbourScene.unity
+    path: Assets/Scenes/Group 3/HarbourScene.unity
     guid: eb55454ee47808e4c81b746fff9e7469
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: c5755b78c1483e9ab88b2895b99028b0, type: 2}

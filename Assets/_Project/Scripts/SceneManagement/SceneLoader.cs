@@ -144,7 +144,7 @@ namespace _Project.Scripts.SceneManagement
             {
                 Task loadTask = manager.LoadScenes(sceneGroups[index], progress);
                 await loadTask;
-                await Task.Yield();
+                await Task.Yield(); // Wait for the next frame
                 await Task.Delay(TimeSpan.FromSeconds(minLoadingTime));
             }
             catch (Exception ex)
@@ -154,6 +154,7 @@ namespace _Project.Scripts.SceneManagement
             finally
             {
                 HideLoadingUI();
+                isLoading = false; // Reset flag here to allow future loads
             }
         }
 
@@ -196,14 +197,16 @@ namespace _Project.Scripts.SceneManagement
         private void ShowLoginUI()
         {
             var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null && currentGroupIndex == 0) // Example: Only for Boot group (index 0)
+            if (mainMenuManager != null)
             {
+                // Access methods robustly
                 mainMenuManager.ToggleCanvasOn();
-                mainMenuManager.ToggleBackgroundOn();
+                mainMenuManager.ToggleBackgroundOn();// Or ToggleBackgroundOn(), etc.
+                // Example: mainMenuManager.SaveUIState(); if needed
             }
             else
             {
-                Debug.Log("Skipping UI toggle for non-Boot group.");
+                Debug.LogWarning("MainMenuDataIOManager instance not found.");
             }
         }
         
@@ -270,6 +273,9 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
 
+            // Cache old group for unloading after new load
+            SceneGroup oldGroup = manager.ActiveSceneGroup;
+
             // Toggle Boot container if needed
             if (_bootUiControl != null)
             {
@@ -279,12 +285,18 @@ namespace _Project.Scripts.SceneManagement
             currentGroupIndex = index;
             NewGroupPrep(); // Prepare flag
 
-            // Reuse existing loading logic
+            // Load new group first
             await LoadSceneGroup(index);
-        }
-        
 
-        public void ToggleNextSceneGroup()
+            // Then unload old if exists and different
+            if (oldGroup != null && oldGroup != sceneGroups[index])
+            {
+                Debug.Log("Testing unload: Unloading previous scene group...");
+                await manager.UnloadScenes();
+            }
+        }
+
+        public async Task ToggleNextSceneGroup() // Already async
         {
             HideLoginUIBootOut();
             BootUiControl.Instance.gameObject.SetActive(false);
@@ -294,15 +306,20 @@ namespace _Project.Scripts.SceneManagement
                 return;
             }
             currentGroupIndex = (currentGroupIndex + 1) % sceneGroups.Length;
-            
-            // New: Toggle Boot container before loading (disable if not Boot group)
-            // if (_bootUiControl != null)
-            // {
-            //     _bootUiControl.gameObject.SetActive(currentGroupIndex == 0); // Enable only for Boot (index 0), disable otherwise
-            // }
+    
+            // Cache old group
+            SceneGroup oldGroup = manager.ActiveSceneGroup;
 
-            LoadSceneGroup(currentGroupIndex);
+            // Load new group
+            await LoadSceneGroup(currentGroupIndex);
             NewGroupPrep();
+
+            // Unload old
+            if (oldGroup != null && oldGroup != sceneGroups[currentGroupIndex])
+            {
+                Debug.Log("Testing unload: Unloading previous scene group...");
+                await manager.UnloadScenes();
+            }
         }
         
         private void NewGroupPrep()

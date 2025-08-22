@@ -412,9 +412,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 850469329706956877, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850469329706956877, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850469329706956877, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850469329706956877, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1582300547802979113, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
       propertyPath: m_Name
       value: Login Menu Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 1582300547802979113, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1782800113698180037, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
       propertyPath: m_Pivot.x
@@ -494,6 +514,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1782800113698180037, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2612782545531921064, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2612782545531921064, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2612782545531921064, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2612782545531921064, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2751864085399705511, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2751864085399705511, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2751864085399705511, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2751864085399705511, guid: 2cfdca5c8fb6760e5aeb74b5c75697b0, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1326,6 +1378,26 @@ PrefabInstance:
       propertyPath: bootUIContainer
       value: 
       objectReference: {fileID: 1452094961}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: sceneGroups.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: sceneGroups.Array.data[3].GroupName
+      value: Battle Scene
+      objectReference: {fileID: 0}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: sceneGroups.Array.data[3].Scenes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: sceneGroups.Array.data[3].Scenes.Array.data[0].Reference.guid
+      value: 2008358e1ba80398e802a4e5c9c8d0df
+      objectReference: {fileID: 0}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: sceneGroups.Array.data[3].Scenes.Array.data[0].Reference.asset
+      value: 
+      objectReference: {fileID: 102900000, guid: 2008358e1ba80398e802a4e5c9c8d0df, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

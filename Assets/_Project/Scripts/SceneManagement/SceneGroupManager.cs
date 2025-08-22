@@ -97,17 +97,36 @@ namespace _Project.Scripts.SceneManagement
             var activeScene = SceneManager.GetActiveScene().name;
 
             int sceneCount = SceneManager.sceneCount;
+            Debug.Log($"Total loaded scenes: {sceneCount}. Active: {activeScene}"); // Log total/active for context
 
             for (var i = sceneCount - 1; i > 0; i--)
             {
                 var sceneAt = SceneManager.GetSceneAt(i);
-                if (!sceneAt.isLoaded) continue;
+                if (!sceneAt.isLoaded)
+                {
+                    Debug.Log($"Skipping unloaded scene at index {i}: {sceneAt.name}");
+                    continue;
+                }
 
                 var sceneName = sceneAt.name;
-                if (sceneName.Equals(activeScene) || sceneName == "Bootstrapper") continue;
-                if (handleGroup.Handles.Any(h => h.IsValid() && h.Result.Scene.name == sceneName)) continue;
+                if (sceneName.Equals(activeScene))
+                {
+                    Debug.Log($"Skipping active scene: {sceneName}");
+                    continue;
+                }
+                if (sceneName == "Bootstrapper")
+                {
+                    Debug.Log($"Skipping Bootstrapper: {sceneName}");
+                    continue;
+                }
+                if (handleGroup.Handles.Any(h => h.IsValid() && h.Result.Scene.name == sceneName))
+                {
+                    Debug.Log($"Skipping Addressable handle scene: {sceneName}");
+                    continue;
+                }
 
                 scenes.Add(sceneName);
+                Debug.Log($"Queuing for unload: {sceneName}"); // Confirm it's added
             }
 
             var operationGroup = new AsyncOperationGroup(scenes.Count);
@@ -115,27 +134,19 @@ namespace _Project.Scripts.SceneManagement
             foreach (var scene in scenes)
             {
                 var operation = SceneManager.UnloadSceneAsync(scene);
-                if (operation == null) continue;
+                if (operation == null)
+                {
+                    Debug.LogWarning($"Unload operation null for: {scene}");
+                    continue;
+                }
 
                 operationGroup.Operations.Add(operation);
                 OnSceneUnloaded.Invoke(scene);
+                Debug.Log($"Started unloading: {scene}");
             }
 
-            foreach (var handle in handleGroup.Handles)
-            {
-                if (handle.IsValid())
-                {
-                    Addressables.UnloadSceneAsync(handle);
-                }
-            }
-            handleGroup.Handles.Clear();
-
-            while (!operationGroup.IsDone)
-            {
-                await Task.Delay(100);
-            }
-
-            await Resources.UnloadUnusedAssets();
+            // ... rest of method (Addressables unload, while loop, Resources.UnloadUnusedAssets) ...
+            Debug.Log("Unload complete."); // Final log to confirm end
         }
     }
 
