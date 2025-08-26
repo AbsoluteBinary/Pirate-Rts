@@ -1164,9 +1164,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1452094962}
-  - component: {fileID: 1452094963}
   m_Layer: 0
-  m_Name: BootUiContainer
+  m_Name: ComponentIOBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1189,18 +1188,6 @@ Transform:
   - {fileID: 2144421711}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1452094963
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1452094961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e23341c3a97730332a7e3e6db727a9a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BootUiControl
 --- !u!1 &1472641555
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,6 +1362,10 @@ PrefabInstance:
       value: SceneLoader
       objectReference: {fileID: 0}
     - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: componentIOBox
+      value: 
+      objectReference: {fileID: 1452094961}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
       propertyPath: bootUIContainer
       value: 
       objectReference: {fileID: 1452094961}
@@ -1453,6 +1444,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  componentIOBox: {fileID: 1452094961}
   loginUiCanvas: {fileID: 1998043134}
   loginCanvasGroup: {fileID: 450604303}
   backgroundDisplay: {fileID: 1094431580}

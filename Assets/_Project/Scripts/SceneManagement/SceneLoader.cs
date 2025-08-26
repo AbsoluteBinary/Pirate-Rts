@@ -15,11 +15,12 @@ namespace _Project.Scripts.SceneManagement
         // Singleton Instance
         public static SceneLoader Instance { get; private set; }
         
-        private BootUiControl _bootUiControl;
+        //private BootUiControl _bootUiControl;
 
         // Event binding for LoadSceneGroupEvent
         private EventBinding<LoadSceneGroupEvent> loadSceneGroupBinding;
 
+        
         // Configuration for loading bar animation speed
         [SerializeField] private float fillSmoothingSpeed = 5f;
         // Array of scene groups to load
@@ -218,6 +219,7 @@ namespace _Project.Scripts.SceneManagement
                 // Access methods robustly
                 mainMenuManager.ToggleBackgroundOff();
                 mainMenuManager.ToggleCanvasOff();
+                mainMenuManager.DisableComponentIOBox();
                 //mainMenuManager.
                 // Or ToggleBackgroundOn(), etc.
                 // Example: mainMenuManager.SaveUIState(); if needed
@@ -277,10 +279,11 @@ namespace _Project.Scripts.SceneManagement
             SceneGroup oldGroup = manager.ActiveSceneGroup;
 
             // Toggle Boot container if needed
-            if (_bootUiControl != null)
-            {
-                _bootUiControl.gameObject.SetActive(index == 0); // Enable only for Boot (index 0)
-            }
+            //AssignAndDisableOldComponents();
+            // if (_bootUiControl != null)
+            // {
+            //     _bootUiControl.gameObject.SetActive(index == 0); // Enable only for Boot (index 0)
+            // }
 
             currentGroupIndex = index;
             NewGroupPrep(); // Prepare flag
@@ -298,8 +301,9 @@ namespace _Project.Scripts.SceneManagement
 
         public async Task ToggleNextSceneGroup() // Already async
         {
+            
             HideLoginUIBootOut();
-            BootUiControl.Instance.gameObject.SetActive(false);
+            //BootUiControl.Instance.gameObject.SetActive(false);
             if (sceneGroups == null || sceneGroups.Length == 0)
             {
                 Debug.LogWarning("No scene groups assigned to SceneLoader.");
@@ -320,12 +324,40 @@ namespace _Project.Scripts.SceneManagement
                 Debug.Log("Testing unload: Unloading previous scene group...");
                 await manager.UnloadScenes();
             }
+            
+            
+            // New: Cache and disable old
+            //AssignAndDisableOldComponents();
+            
+
+            // Load new...
+            await LoadSceneGroup(currentGroupIndex);
+
+            // Unload old...
+            if (oldGroup != null && oldGroup != sceneGroups[currentGroupIndex])
+            {
+                await manager.UnloadScenes();
+            }
         }
         
         private void NewGroupPrep()
         {
             isPreparingNewGroup = true;
         }
+        
+        // New helper method
+        // private void AssignAndDisableOldComponents()
+        // {
+        //     // Assuming old scene has known names/tags; adjust as needed
+        //     componentIOBox = GameObject.FindWithTag("ComponentIOBox"); // Or Find("CameraContainer")?.GetComponent<Camera>()
+        //     //oldEventSystem = GameObject.FindWithTag("EventSystem"); // Or similar
+        //
+        //     if (componentIOBox != null)
+        //     {
+        //         componentIOBox.SetActive(false);
+        //         Debug.Log("Disabled old Camera.");
+        //     }
+        // }
     }
 
     public class LoadingProgress : IProgress<float>

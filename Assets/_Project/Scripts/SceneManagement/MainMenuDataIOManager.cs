@@ -21,7 +21,8 @@ namespace _Project.Scripts.SceneManagement
     public class MainMenuDataIOManager : SerializedMonoBehaviour
     {
         public static MainMenuDataIOManager Instance { get; private set; } // Singleton access
-
+        
+        [SerializeField] GameObject componentIOBox; // New field for the container
         [SerializeField] private Canvas loginUiCanvas;
         [SerializeField] private CanvasGroup loginCanvasGroup; // New: Assign CanvasGroup on canvas GO in Inspector
         [SerializeField] private GameObject backgroundDisplay;
@@ -138,6 +139,15 @@ namespace _Project.Scripts.SceneManagement
             {
                 byte[] bytes = File.ReadAllBytes(savePath);
                 mainMenuIOData = SerializationUtility.DeserializeValue<MainMenuIOData>(bytes, DataFormat.Binary);
+            }
+        }
+        
+        // New: Method to disable componentIOBox (called from HideLoginUIBootOut)
+        public void DisableComponentIOBox()
+        {
+            if (componentIOBox != null)
+            {
+                componentIOBox.SetActive(false);
             }
         }
     }
