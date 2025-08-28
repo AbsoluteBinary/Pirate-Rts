@@ -86,6 +86,11 @@ namespace _Project.Scripts.SceneManagement
             if (activeScene.IsValid())
             {
                 SceneManager.SetActiveScene(activeScene);
+                Debug.Log("Set active scene to: " + activeScene.name); // New log to confirm
+            }
+            else
+            {
+                Debug.LogWarning("No valid ActiveScene found in group—check SceneType in Inspector.");
             }
 
             OnSceneGroupLoaded.Invoke();

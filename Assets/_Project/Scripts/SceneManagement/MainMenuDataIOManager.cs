@@ -3,7 +3,8 @@ using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using System.IO;
 using SerializationUtility = Sirenix.Serialization.SerializationUtility;
-using DG.Tweening; // Ensure DOTween is imported
+using DG.Tweening;
+using UnityEngine.EventSystems;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -22,9 +23,10 @@ namespace _Project.Scripts.SceneManagement
     {
         public static MainMenuDataIOManager Instance { get; private set; } // Singleton access
         
-        [SerializeField] GameObject componentIOBox; // New field for the container
+        private GameObject componentIOBox; // Changed: Not serialized, find at runtime
+        [SerializeField] private GameObject bootComponentIOBox; // Keep serialized for Boot
         [SerializeField] private Canvas loginUiCanvas;
-        [SerializeField] private CanvasGroup loginCanvasGroup; // New: Assign CanvasGroup on canvas GO in Inspector
+        [SerializeField] private CanvasGroup loginCanvasGroup;
         [SerializeField] private GameObject backgroundDisplay;
         [OdinSerialize, ShowInInspector] private MainMenuIOData mainMenuIOData = new MainMenuIOData { isCanvasEnabled = false, isBackgroundEnabled = false };
 
@@ -34,11 +36,11 @@ namespace _Project.Scripts.SceneManagement
         {
             if (Instance == null)
             {
-                Instance = this; // Set singleton
+                Instance = this;
             }
             else
             {
-                Destroy(gameObject); // Prevent duplicates
+                Destroy(gameObject);
                 return;
             }
 
@@ -48,7 +50,19 @@ namespace _Project.Scripts.SceneManagement
 
         void Start()
         {
+            // New: Find componentIOBox at start
+            AssignComponentIOBox();
             ApplyUIState();
+        }
+
+        // New: Find componentIOBox at runtime
+        private void AssignComponentIOBox()
+        {
+            componentIOBox = GameObject.FindWithTag("ComponentBoxIO"); // Assumes tag on container
+            if (componentIOBox == null)
+            {
+                Debug.LogWarning("componentIOBox not found with tag ComponentBoxIO.");
+            }
         }
 
         private void ApplyUIState()
@@ -66,14 +80,12 @@ namespace _Project.Scripts.SceneManagement
 
         private void SetCanvasEnabled(bool enable)
         {
-            if (loginUiCanvas == null || loginCanvasGroup == null) return; // Safety check
+            if (loginUiCanvas == null || loginCanvasGroup == null) return;
 
-            // Kill any ongoing tweens to prevent conflicts
             DOTween.Kill(loginCanvasGroup);
 
             if (enable)
             {
-                // Fade in: Activate, set alpha 0, fade to 1, then enable
                 loginUiCanvas.gameObject.SetActive(true);
                 loginCanvasGroup.alpha = 0f;
                 loginCanvasGroup.DOFade(1f, 0.5f).OnComplete(() =>
@@ -86,7 +98,6 @@ namespace _Project.Scripts.SceneManagement
             }
             else
             {
-                // Fade out: Fade to 0, then deactivate and disable
                 loginCanvasGroup.DOFade(0f, 0.5f).OnComplete(() =>
                 {
                     loginUiCanvas.gameObject.SetActive(false);
@@ -141,14 +152,77 @@ namespace _Project.Scripts.SceneManagement
                 mainMenuIOData = SerializationUtility.DeserializeValue<MainMenuIOData>(bytes, DataFormat.Binary);
             }
         }
-        
-        // New: Method to disable componentIOBox (called from HideLoginUIBootOut)
+
         public void DisableComponentIOBox()
         {
-            if (componentIOBox != null)
+            // New: Ensure componentIOBox is assigned before disabling
+            if (componentIOBox == null)
             {
-                componentIOBox.SetActive(false);
+                AssignComponentIOBox();
             }
+
+            AudioListener listener = FindAudioListener(componentIOBox);
+            if (listener != null)
+            {
+                listener.enabled = false;
+                Debug.Log("Disabled AudioListener on componentIOBox.");
+            }
+            else
+            {
+                Debug.LogWarning("No AudioListener found on componentIOBox.");
+            }
+
+            EventSystem eventSystem = FindEventSystem(componentIOBox);
+            if (eventSystem != null)
+            {
+                eventSystem.enabled = false;
+                Debug.Log("Disabled EventSystem on componentIOBox.");
+            }
+            else
+            {
+                Debug.LogWarning("No EventSystem found on componentIOBox.");
+            }
+        }
+
+        public void DisableBootComponentIOBox()
+        {
+            AudioListener listener = FindAudioListener(bootComponentIOBox);
+            if (listener != null)
+            {
+                listener.enabled = false;
+                Debug.Log("Disabled AudioListener on bootComponentIOBox.");
+            }
+            else
+            {
+                Debug.LogWarning("No AudioListener found on bootComponentIOBox.");
+            }
+
+            EventSystem eventSystem = FindEventSystem(bootComponentIOBox);
+            if (eventSystem != null)
+            {
+                eventSystem.enabled = false;
+                Debug.Log("Disabled EventSystem on bootComponentIOBox.");
+            }
+            else
+            {
+                Debug.LogWarning("No EventSystem found on bootComponentIOBox.");
+            }
+        }
+
+        private AudioListener FindAudioListener(GameObject container)
+        {
+            if (container == null) return null;
+            AudioListener listener = container.GetComponent<AudioListener>();
+            if (listener != null) return listener;
+            return container.GetComponentInChildren<AudioListener>();
+        }
+
+        private EventSystem FindEventSystem(GameObject container)
+        {
+            if (container == null) return null;
+            EventSystem eventSystem = container.GetComponent<EventSystem>();
+            if (eventSystem != null) return eventSystem;
+            return container.GetComponentInChildren<EventSystem>();
         }
     }
 }
