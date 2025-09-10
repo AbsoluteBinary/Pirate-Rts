@@ -130,6 +130,24 @@ namespace TGS {
 
 
         [SerializeField]
+        int _territoriesMaxRange = 100;
+
+        /// <summary>
+        /// Maximum distance in cell units from the origin cell when generating territories. 0 = only origin cells.
+        /// </summary>
+        public int territoriesMaxRange {
+            get { return _territoriesMaxRange; }
+            set {
+                if (_territoriesMaxRange != value) {
+                    _territoriesMaxRange = Mathf.Max(0, value);
+                    needGenerateMap = true;
+                    isDirty = true;
+                }
+            }
+        }
+
+
+        [SerializeField]
         float _territoriesAsymmetry;
 
         /// <summary>
@@ -994,6 +1012,48 @@ namespace TGS {
         }
 
         /// <summary>
+        /// Returns the adjacent territory and region index for a given edge defined by two vertices.
+        /// </summary>
+        /// <param name="territoryIndex">The territory index containing the edge</param>
+        /// <param name="vertex1">First vertex of the edge</param>
+        /// <param name="vertex2">Second vertex of the edge</param>
+        /// <param name="adjacentTerritoryIndex">Output: The adjacent territory index, or -1 if not found</param>
+        /// <param name="adjacentTerritoryRegionIndex">Output: The region index within the adjacent territory, or -1 if not found</param>
+        /// <returns>True if an adjacent territory was found, false otherwise</returns>
+        public bool TerritoryGetAdjacentTerritoryForEdge(int territoryIndex, Vector2 vertex1, Vector2 vertex2, out int adjacentTerritoryIndex, out int adjacentTerritoryRegionIndex) {
+            adjacentTerritoryIndex = -1;
+            adjacentTerritoryRegionIndex = -1;
+            if (!ValidTerritoryIndex(territoryIndex)) return false;
+
+            CheckGridChanges();
+
+            // Find territories at positions slightly offset from the midpoint in perpendicular directions
+            Vector2 edgeMidpoint = (vertex1 + vertex2) * 0.5f;
+            Vector2 edgeDirection = (vertex2 - vertex1).normalized;
+            Vector2 perpendicular = new Vector2(-edgeDirection.y, edgeDirection.x);
+
+            const float offsetDistance = 0.001f; // Small offset to find adjacent territories
+            Vector2 point1 = edgeMidpoint + perpendicular * offsetDistance;
+            Vector2 point2 = edgeMidpoint - perpendicular * offsetDistance;
+
+            Territory territory1 = TerritoryGetAtLocalPosition(point1, out int regionIndex1);
+            Territory territory2 = TerritoryGetAtLocalPosition(point2, out int regionIndex2);
+
+            // Find the territory that is not the input territory and determine the region index
+            if (territory1 != null && TerritoryGetIndex(territory1) != territoryIndex) {
+                adjacentTerritoryIndex = TerritoryGetIndex(territory1);
+                adjacentTerritoryRegionIndex = regionIndex1;
+                return true;
+            } else if (territory2 != null && TerritoryGetIndex(territory2) != territoryIndex) {
+                adjacentTerritoryIndex = TerritoryGetIndex(territory2);
+                adjacentTerritoryRegionIndex = regionIndex2;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns a list of cells that forms the frontiers between a given territory and another one.
         /// </summary>
         /// <returns>The get frontier cells.</returns>
@@ -1060,7 +1120,9 @@ namespace TGS {
 
             CheckGridChanges();
 
-            if (territoryIndex < 0 || territoryIndex >= territories.Count || territories[territoryIndex].cells == null || cells == null)
+            if (!ValidTerritoryIndex(territoryIndex)) return 0;
+
+            if (territories[territoryIndex].cells == null || cells == null)
                 return 0;
 
             cellUsedFlag++;
@@ -1081,13 +1143,13 @@ namespace TGS {
                 Cell cell1 = (Cell)frontier.region1.entity;
                 Cell cell2 = (Cell)frontier.region2.entity;
                 if (cell1.territoryIndex == territoryIndex && (otherTerritoryIndex < 0 || cell2.territoryIndex == otherTerritoryIndex)) {
-                    if (cell2.usedFlag != cellUsedFlag && (regionIndex < 0 || cell1.usedFlag2 == cellUsedFlag)) {
+                    if (cell2.usedFlag != cellUsedFlag && cell2.index != cell1.index && cell2.territoryIndex != territoryIndex && cell2.visible && (regionIndex < 0 || cell1.usedFlag2 == cellUsedFlag)) {
                         cell2.usedFlag = cellUsedFlag;
                         cellIndices.Add(cell2.index);
                     }
                 }
                 else if (cell2.territoryIndex == territoryIndex && (otherTerritoryIndex < 0 || cell1.territoryIndex == otherTerritoryIndex)) {
-                    if (cell1.usedFlag != cellUsedFlag && (regionIndex < 0 || cell2.usedFlag2 == cellUsedFlag)) {
+                    if (cell1.usedFlag != cellUsedFlag && cell1.index != cell2.index && cell1.territoryIndex != territoryIndex && cell1.visible && (regionIndex < 0 || cell2.usedFlag2 == cellUsedFlag)) {
                         cell1.usedFlag = cellUsedFlag;
                         cellIndices.Add(cell1.index);
                     }
@@ -1106,10 +1168,46 @@ namespace TGS {
         }
 
         /// <summary>
+        /// Colors a list of territories with "color" and "duration" in seconds.
+        /// </summary>
+        public void TerritoryFadeOut (List<Territory> territories, Color color, float duration, int repetitions = 1) {
+            foreach (Territory territory in territories) {
+                TerritoryAnimate(FaderStyle.FadeOut, TerritoryGetIndex(territory), color, duration, repetitions);
+            }
+        }
+
+        /// <summary>
+        /// Colors a list of territories with "color" and "duration" in seconds.
+        /// </summary>
+        public void TerritoryFadeOut (List<int> territoryIndices, Color color, float duration, int repetitions = 1) {
+            foreach (int territoryIndex in territoryIndices) {
+                TerritoryAnimate(FaderStyle.FadeOut, territoryIndex, color, duration, repetitions);
+            }
+        }
+
+        /// <summary>
         /// Flashes a territory with "color" and "duration" in seconds.
         /// </summary>
         public void TerritoryFlash (int territoryIndex, Color color, float duration, int repetitions = 1) {
             TerritoryAnimate(FaderStyle.Flash, territoryIndex, color, duration, repetitions);
+        }
+
+        /// <summary>
+        /// Flashes a list of territories with "color" and "duration" in seconds.
+        /// </summary>
+        public void TerritoryFlash (List<Territory> territories, Color color, float duration, int repetitions = 1) {
+            foreach (Territory territory in territories) {
+                TerritoryAnimate(FaderStyle.Flash, TerritoryGetIndex(territory), color, duration, repetitions);
+            }
+        }
+
+        /// <summary>
+        /// Flashes a list of territories with "color" and "duration" in seconds.
+        /// </summary>
+        public void TerritoryFlash (List<int> territoryIndices, Color color, float duration, int repetitions = 1) {
+            foreach (int territoryIndex in territoryIndices) {
+                TerritoryAnimate(FaderStyle.Flash, territoryIndex, color, duration, repetitions);
+            }
         }
 
         /// <summary>
@@ -1120,10 +1218,45 @@ namespace TGS {
         }
 
         /// <summary>
+        /// Blinks a list of territories with "color" and "duration" in seconds.
+        /// </summary>
+        public void TerritoryBlink (List<Territory> territories, Color color, float duration, int repetitions = 1) {
+            foreach (Territory territory in territories) {
+                TerritoryAnimate(FaderStyle.Blink, TerritoryGetIndex(territory), color, duration, repetitions);
+            }
+        }
+        /// <summary>
+        /// Blinks a list of territories with "color" and "duration" in seconds.
+        /// </summary>
+        public void TerritoryBlink (List<int> territoryIndices, Color color, float duration, int repetitions = 1) {
+            foreach (int territoryIndex in territoryIndices) {
+                TerritoryAnimate(FaderStyle.Blink, territoryIndex, color, duration, repetitions);
+            }
+        }
+
+        /// <summary>
         /// Temporarily colors a territory for "duration" in seconds.
         /// </summary>
         public void TerritoryColorTemp (int territoryIndex, Color color, float duration) {
             TerritoryAnimate(FaderStyle.ColorTemp, territoryIndex, color, duration, 1);
+        }
+
+        /// <summary>
+        /// Temporarily colors a list of territories for "duration" in seconds.
+        /// </summary>
+        public void TerritoryColorTemp (List<Territory> territories, Color color, float duration) {
+            foreach (Territory territory in territories) {
+                TerritoryAnimate(FaderStyle.ColorTemp, TerritoryGetIndex(territory), color, duration, 1);
+            }
+        }
+
+        /// <summary>
+        /// Temporarily colors a list of territories for "duration" in seconds.
+        /// </summary>
+        public void TerritoryColorTemp (List<int> territoryIndices, Color color, float duration) {
+            foreach (int territoryIndex in territoryIndices) {
+                TerritoryAnimate(FaderStyle.ColorTemp, territoryIndex, color, duration, 1);
+            }
         }
 
         /// <summary>
@@ -1134,11 +1267,29 @@ namespace TGS {
             TerritoryCancelAnimation(territoryIndex, fadeOutDuration);
         }
 
+        /// <summary>
+        /// Cancels any ongoing visual effect on a list of territories
+        /// </summary>
+        public void TerritoryCancelAnimations (List<Territory> territories, float fadeOutDuration = 0) {
+            foreach (Territory territory in territories) {
+                TerritoryCancelAnimation(TerritoryGetIndex(territory), fadeOutDuration);
+            }
+        }
+
+        /// <summary>
+        /// Cancels any ongoing visual effect on a list of territories
+        /// </summary>
+        public void TerritoryCancelAnimations (List<int> territoryIndices, float fadeOutDuration = 0) {
+            foreach (int territoryIndex in territoryIndices) {
+                TerritoryCancelAnimation(territoryIndex, fadeOutDuration);
+            }
+        }
+
 
         /// <summary>
         /// Specifies if a given territory is visible.
         /// </summary>
-        public void TerritorySetVisible (int territoryIndex, bool visible) {
+        public void TerritorySetVisible (int territoryIndex, bool visible, bool includeCells = false) {
             if (!ValidTerritoryIndex(territoryIndex)) return;
             territories[territoryIndex].visible = visible;
             if (territoryIndex == _territoryLastOverIndex) {
@@ -1146,6 +1297,10 @@ namespace TGS {
             }
             needUpdateTerritories = true;
             issueRedraw = RedrawType.Full;
+
+            if (includeCells) {
+                CellSetVisible(territories[territoryIndex].cells, visible);
+            }
         }
 
         /// <summary>
@@ -1290,7 +1445,14 @@ namespace TGS {
         /// <summary>
         /// Creates a gameobject with the interior border for the given territory with optional padding and thickness.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="padding">The padding of the border</param>
+        /// <param name="thickness">The thickness of the border</param>
+        /// <param name="color">The color of the border</param>
+        /// <param name="secondColor">The second color of the border</param>
+        /// <param name="regionIndex">The region index to draw the border for</param>
+        /// <param name="animationSpeed">The animation speed of the border</param>
+        /// <param name="includeEnclaves">Draw additional interior borders for other regions contained inside this territory region</param>
+        /// <returns>The gameobject of the border</returns>
         public GameObject TerritoryDrawInteriorBorder (int territoryIndex, float padding, float thickness, Color color = default, Color secondColor = default, int regionIndex = 0, float animationSpeed = 0, bool includeEnclaves = false) {
 
             if (!ValidTerritoryIndex(territoryIndex, regionIndex)) return null;
@@ -1302,11 +1464,12 @@ namespace TGS {
         /// Creates a gameobject with the interior border for the given territory with optional padding and thickness.
         /// </summary>
         /// <param name="includeEnclaves">Draw additional interior borders for other regions contained inside this territory region</param>
-        /// <returns></returns>
-        public GameObject TerritoryDrawInteriorBorder (Territory territory, float padding = -0.7f, float thickness = 3f, Color color = default, Color secondColor = default, int regionIndex = 0, float animationSpeed = 0, bool includeEnclaves = false) {
+        /// <param name="removeExistingBorders">Remove existing borders</param>
+        /// <returns>The gameobject of the border</returns>
+        public GameObject TerritoryDrawInteriorBorder (Territory territory, float padding = -0.7f, float thickness = 3f, Color color = default, Color secondColor = default, int regionIndex = 0, float animationSpeed = 0, bool includeEnclaves = false, bool removeExistingBorders = true) {
 
             GetInteriorBorderColors(territory, ref color, ref secondColor);
-            GameObject border = TerritoryDrawInteriorBorderSingle(territory, padding, thickness, color, secondColor, regionIndex, animationSpeed);
+            GameObject border = TerritoryDrawInteriorBorderSingle(territory, padding, thickness, color, secondColor, regionIndex, animationSpeed, removeExistingBorders);
             if (border == null) return null;
 
             // Check other regions inside this region
@@ -1320,7 +1483,7 @@ namespace TGS {
                     for (int r = 0; r < otherRegionCount; r++) {
                         Region otherRegion = otherTerritory.regions[r];
                         if (thisRegion.ContainsRegion(otherRegion)) {
-                            GameObject enclaveBorder = TerritoryDrawInteriorBorderSingle(otherTerritory, -padding, thickness, secondColor, color, r, animationSpeed);
+                            GameObject enclaveBorder = TerritoryDrawInteriorBorderSingle(otherTerritory, -padding, thickness, secondColor, color, r, animationSpeed, removeExistingBorders);
                             enclaveBorder.transform.SetParent(border.transform);
                         }
                     }
@@ -1330,6 +1493,23 @@ namespace TGS {
             return border;
         }
 
+        /// <summary>
+        /// Creates a gameobject with the interior border for the given territory with optional padding and thickness.
+        /// </summary>
+        /// <param name="regionIndex">The region index to draw the border for</param>
+        /// <param name="padding">The padding of the border</param>
+        /// <param name="thickness">The thickness of the border</param>
+        /// <param name="color">The color of the border</param>
+        /// <param name="secondColor">The second color of the border</param>
+        /// <param name="animationSpeed">The animation speed of the border</param>
+        /// <param name="includeEnclaves">Draw additional interior borders for other regions contained inside this territory region</param>
+        /// <param name="removeExistingBorders">Remove existing borders</param>
+        /// <returns>The gameobject of the border</returns>
+        public GameObject TerritoryDrawInteriorBorder (Territory territory, int regionIndex, float padding = -0.7f, float thickness = 3f, Color color = default, Color secondColor = default, float animationSpeed = 0, bool includeEnclaves = false, bool removeExistingBorders = true) {
+            int territoryIndex = TerritoryGetIndex(territory);
+            if (!ValidTerritoryIndex(territoryIndex, regionIndex)) return null;
+            return TerritoryDrawInteriorBorder(territory, padding, thickness, color, secondColor, regionIndex, animationSpeed, includeEnclaves, removeExistingBorders);
+        }
 
         void GetInteriorBorderColors (Territory territory, ref Color color, ref Color secondColor) {
             if (color == default) {
@@ -1379,7 +1559,7 @@ namespace TGS {
 
             GameObject go = DrawTerritoryFrontier(tm, material, territoryInteriorBorderLayer, TERRITORY_INTERIOR_BORDER_NAME, useVertexDisplacementForTerritoryThickness: true, usesGradient: true, thickness, padding);
             Region region = territory.regions[regionIndex];
-            if (region.interiorBorderGameObject != null) DestroyImmediate(region.interiorBorderGameObject);
+            if (removeExistingBorders && region.interiorBorderGameObject != null) DestroyImmediate(region.interiorBorderGameObject);
             region.interiorBorderGameObject = go;
             return go;
         }
@@ -1390,7 +1570,7 @@ namespace TGS {
         /// </summary>
         [Obsolete("Use TerritoryGetAtWorldPosition or TerritoryGetAtLocalPosition instead.")]
         public Territory TerritoryGetAtPosition (Vector2 localPosition) {
-            return GetTerritoryAtPoint(localPosition, false);
+            return GetTerritoryAtPoint(localPosition, false, out _);
         }
 
         /// <summary>
@@ -1398,21 +1578,36 @@ namespace TGS {
         /// </summary>
         [Obsolete("Use TerritoryGetAtWorldPosition or TerritoryGetAtLocalPosition instead.")]
         public Territory TerritoryGetAtPosition (Vector3 position, bool worldSpace) {
-            return GetTerritoryAtPoint(position, worldSpace);
+            return GetTerritoryAtPoint(position, worldSpace, out _);
         }
 
         /// <summary>
         /// Returns the territory object under position in worldSpace coordinates
         /// </summary>
         public Territory TerritoryGetAtWorldPosition (Vector3 position) {
-            return GetTerritoryAtPoint(position, worldSpace: true);
+            return GetTerritoryAtPoint(position, worldSpace: true, out _);
         }
+
+
+        /// <summary>
+        /// Returns the territory object under position in worldSpace coordinates
+        /// </summary>
+        public Territory TerritoryGetAtWorldPosition (Vector3 position, out int regionIndex) {
+            return GetTerritoryAtPoint(position, worldSpace: true, out regionIndex);
+        }        
 
         /// <summary>
         /// Returns the territory object under position in local coordinates
         /// </summary>
         public Territory TerritoryGetAtLocalPosition (Vector3 position) {
-            return GetTerritoryAtPoint(position, worldSpace: false);
+            return GetTerritoryAtPoint(position, worldSpace: false, out _);
+        }
+
+        /// <summary>
+        /// Returns the territory object under position in local coordinates
+        /// </summary>
+        public Territory TerritoryGetAtLocalPosition (Vector3 position, out int regionIndex) {
+            return GetTerritoryAtPoint(position, worldSpace: false, out regionIndex);
         }
 
         /// <summary>

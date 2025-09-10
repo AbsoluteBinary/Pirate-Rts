@@ -1,6 +1,6 @@
 ************************************
 *        TERRAIN GRID SYSTEM       *
-* (C) Copyright 2015-2024 Kronnect * 
+*     (C) Copyright Kronnect       * 
 *            README FILE           *
 ************************************
 
@@ -44,6 +44,12 @@ Of course, all updates of Terrain Grid System will be eventually available on th
 
 Version history
 ---------------
+
+Version 19.6
+- Added "Territory Max Range" option to the territory generation options in the inspector
+- API: added TerritoryGetAdjacentTerritoryForEdge(...): given an edge, returns neighbour territory and region 
+- [Fix] API: Fixed TerritoryDrawInteriorBorder bug with "removeExistingBorder" option
+- [Fix] API: Fixed TerritoryGetAdjancentCells bug with hidden or missing neighbours
 
 Version 19.5
 - Improved handling of territories texture and exported grid configurations

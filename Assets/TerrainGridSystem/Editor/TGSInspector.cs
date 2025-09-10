@@ -269,6 +269,7 @@ namespace TGS_Editor {
                                 tgs.territoriesAsymmetry = EditorGUILayout.Slider(new GUIContent("Asymmetry", "Determines the distribution of cells among territories. Increase this value to produce territories with different sizes."), tgs.territoriesAsymmetry, 0, 1);
                                 tgs.territoriesOrganic = EditorGUILayout.Slider(new GUIContent("Organic", "Produces wacky borders."), tgs.territoriesOrganic, 0, 1);
                                 tgs.territoriesMaxIterations = EditorGUILayout.IntField(new GUIContent("Max Iterations", "Maximum number of iterations used in the process that assigns cells to territories. 0 = no limit."), tgs.territoriesMaxIterations);
+                                tgs.territoriesMaxRange = EditorGUILayout.IntField(new GUIContent("Max Range", "Maximum distance in cell units from the origin cell when growing a territory. 0 = only origin cell."), tgs.territoriesMaxRange);
                             }
                             EditorGUI.indentLevel--;
                         }

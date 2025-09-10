@@ -56,7 +56,7 @@ namespace TGS {
         /// <summary>
         /// Controls visibility of the cell. Bit 1 = visibleSelf, Bit 2 = visibleByRules, Bit 3 = visibleAlways.
         /// </summary>
-        private byte visibleFlags = 3;
+        byte visibleFlags = 3;
 
         /// <summary>
         /// Gets or sets whether the cell is visible. If true, the cell will be visible if visibleByRules is also visible. Use "visible" to determine the actual visibility state.

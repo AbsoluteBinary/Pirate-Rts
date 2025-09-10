@@ -17,7 +17,7 @@ namespace TGS {
         Transparent
     }
 
-    public delegate bool CellFilterDelegate(int cellIndex);
+    public delegate bool CellFilterDelegate (int cellIndex);
 
     public partial class TerrainGridSystem : MonoBehaviour {
 
@@ -1851,7 +1851,7 @@ namespace TGS {
             for (int k = 0; k < cellCount; k++) {
                 CellToggleRegionSurface(cellIndices[k], color.a > 0, color, false, null, Misc.Vector2one, Misc.Vector2zero, 0, false, false, isCanvasTexture: false);
             }
-        }        
+        }
 
         /// <summary>
         /// Sets current cell's fill texture. Use CellToggleRegionSurface for more options
@@ -2522,6 +2522,69 @@ namespace TGS {
             issueRedraw = RedrawType.Full;
         }
 
+        /// <summary>
+        /// Specifies if a given cell is visible.
+        /// </summary>
+        /// <param name="excludeFromAnyTerritory">If true, cell won't be part of any territory. Territory borders will be updated.</param>
+        public void CellSetVisible (List<int> cellIndices, bool visible, bool excludeFromAnyTerritory = false) {
+            if (cellIndices == null || cellIndices.Count == 0 || cells == null)
+                return;
+            foreach (int cellIndex in cellIndices) {
+                if (cellIndex < 0 || cellIndex >= cells.Count)
+                    continue;
+                Cell cell = cells[cellIndex];
+                if (cell.visible == visible)
+                    continue; // nothing to do
+
+                cell.visible = visible;
+                if (cellIndex == _cellLastOverIndex) {
+                    ClearLastOver();
+                }
+            }
+            needRefreshRouteMatrix = true;
+            refreshCellMesh = true;
+            if (excludeFromAnyTerritory) {
+                foreach (int cellIndex in cellIndices) {
+                    Cell cell = cells[cellIndex];
+                    if (cell.territoryIndex >= 0) {
+                        cell.territoryIndex = -1;
+                    }
+                }
+                needUpdateTerritories = true;
+                issueRedraw = RedrawType.Full;
+            }
+        }
+
+        /// <summary>
+        /// Specifies if a given cell is visible.
+        /// </summary>
+        /// <param name="excludeFromAnyTerritory">If true, cell won't be part of any territory. Territory borders will be updated.</param>
+        public void CellSetVisible (List<Cell> cells, bool visible, bool excludeFromAnyTerritory = false) {
+            if (cells == null || cells.Count == 0)
+                return;
+            foreach (Cell cell in cells) {
+                if (cell.visible == visible)
+                    continue; // nothing to do
+
+                cell.visible = visible;
+                if (cell.index == _cellLastOverIndex) {
+                    ClearLastOver();
+                }
+            }
+            needRefreshRouteMatrix = true;
+            refreshCellMesh = true;
+            if (excludeFromAnyTerritory) {
+                foreach (Cell cell in cells) {
+                    if (cell.territoryIndex >= 0) {
+                        cell.territoryIndex = -1;
+                    }
+                }
+                needUpdateTerritories = true;
+                issueRedraw = RedrawType.Full;
+            }
+        }
+
+
 
         CELL_SIDE GetSideByVector (Vector2 dir) {
             switch (_gridTopology) {
@@ -3003,15 +3066,17 @@ namespace TGS {
         public bool CellSetTerritory (List<int> cellIndices, int territoryIndex) {
             if (needGenerateMap) CheckGridChanges();
             if (!ValidTerritoryIndex(territoryIndex)) return false;
-            int terrCount = territories != null ? territories.Count : 0;
+            int terrCount = territories.Count;
             foreach (int cellIndex in cellIndices) {
                 if (!ValidCellIndex(cellIndex)) continue;
                 Cell cell = cells[cellIndex];
-                if (cell.territoryIndex == territoryIndex) return true;
+                if (cell.territoryIndex == territoryIndex) continue;
+                // remove cell from old territory
                 if (cell.territoryIndex >= 0 && cell.territoryIndex < terrCount && territories[cell.territoryIndex].cells.Contains(cell)) {
                     territories[cell.territoryIndex].isDirty = true;
                     territories[cell.territoryIndex].cells.Remove(cell);
                 }
+                // add cell to new territory
                 cell.territoryIndex = (short)territoryIndex;
                 if (territoryIndex >= 0 && territoryIndex < terrCount) {
                     territories[territoryIndex].isDirty = true;

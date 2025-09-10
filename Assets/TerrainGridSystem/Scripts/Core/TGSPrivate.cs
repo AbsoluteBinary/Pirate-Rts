@@ -1715,7 +1715,8 @@ namespace TGS {
                 for (int f = 0; f < frontierPoolLength; f++) {
                     frontierPool[f] = new Frontier();
                 }
-            } else {
+            }
+            else {
                 for (int f = 0; f < frontierPoolLength; f++) {
                     frontierPool[f].Clear();
                 }
@@ -1793,15 +1794,7 @@ namespace TGS {
                                         seg.territoryIndex = -1; // if segment belongs to a visible cell and valid territory2, mark this segment as disputed. Otherwise make it part of territory1
                                         frontier.region2 = cell.region;
                                     }
-                                }
-                                else {
-                                    seg.territoryIndex = territory1Index;
-                                    frontier.region2 = cell.region;
-                                }
-
-                                if (seg.territoryIndex < 0) {
                                     // add territory neighbours
-                                    Territory territory2 = territories[territory2Index];
                                     if (!territory1.neighbours.Contains(territory2)) {
                                         territory1.neighbours.Add(territory2);
                                     }
@@ -1809,7 +1802,12 @@ namespace TGS {
                                         territory2.neighbours.Add(territory1);
                                     }
                                 }
-                            } else {
+                                else {
+                                    seg.territoryIndex = territory1Index;
+                                    frontier.region2 = cell.region;
+                                }
+                            }
+                            else {
                                 frontier.region2 = neighbourCell.region;
                             }
                             if (territory2Index >= 0) {
@@ -2259,6 +2257,12 @@ namespace TGS {
 
             // Continue conquering cells
             int[] territoryCellIndex = new int[territories.Count];
+            // Track origin cell index per territory to enforce max range
+            int[] territoryOriginCellIndex = new int[territories.Count];
+            for (int ti = 0; ti < territories.Count; ti++) {
+                // first cell added above is the origin
+                territoryOriginCellIndex[ti] = territories[ti].cells[0].index;
+            }
 
             // Iterate one cell per country (this is not efficient but ensures balanced distribution)
             bool remainingCells = true;
@@ -2280,6 +2284,20 @@ namespace TGS {
                         for (int n = 0; n < nCount; n++) {
                             Cell otherCell = cell.neighbours[n];
                             if (otherCell.territoryIndex == -1 && otherCell.visible) {
+                                // Enforce max range from origin cell if configured
+                                if (_territoriesMaxRange >= 0 && _gridTopology != GridTopology.Irregular) {
+                                    int originIndex = territoryOriginCellIndex[k];
+                                    int dist;
+                                    if (_gridTopology == GridTopology.Hexagonal) {
+                                        dist = CellGetHexagonDistance(originIndex, otherCell.index);
+                                    }
+                                    else {
+                                        dist = CellGetBoxDistance(originIndex, otherCell.index);
+                                    }
+                                    if (dist > _territoriesMaxRange) {
+                                        continue;
+                                    }
+                                }
                                 otherCell.territoryIndex = (short)k;
                                 territory.cells.Add(otherCell);
                                 territoryCellsCount++;
@@ -3704,7 +3722,8 @@ namespace TGS {
                         Color fillColor;
                         if (_territoriesColorScheme == TerritoryColorScheme.UserDefined && _territoriesFillColors != null && k < _territoriesFillColors.Length && territoriesTexture == null) {
                             fillColor = _territoriesFillColors[k];
-                        } else {
+                        }
+                        else {
                             fillColor = territories[k].fillColor;
                         }
                         fillColor.a *= colorizedTerritoriesAlpha;
@@ -3734,8 +3753,13 @@ namespace TGS {
             // Reload configuration if component exists
             TGSConfig[] configs = GetComponents<TGSConfig>();
             for (int k = 0; k < configs.Length; k++) {
-                if (configs[k].enabled)
-                    configs[k].LoadConfiguration();
+                TGSConfig config = configs[k];
+                if (config.enabled) {
+                    config.LoadConfiguration();
+                    if (Application.isPlaying) {
+                        config.enabled = false;
+                    }
+                }
             }
         }
 
@@ -4116,7 +4140,8 @@ namespace TGS {
                 recreateTerritories = false;
                 if (territoriesTexture != null) {
                     CreateTerritories(territoriesTexture, territoriesTextureNeutralColor, territoriesHideNeutralCells);
-                } else {
+                }
+                else {
                     CreateTerritories();
                 }
                 needUpdateTerritories = false;
@@ -5171,7 +5196,7 @@ namespace TGS {
         public void NotifyPointerEnters () {
             mouseIsOver = true;
             ClearLastOver();
-            OnEnter?.Invoke(this); 
+            OnEnter?.Invoke(this);
         }
 
         public void NotifyPointerExits () {
@@ -5739,7 +5764,8 @@ namespace TGS {
             }
         }
 
-        Territory GetTerritoryAtPoint (Vector3 position, bool worldSpace) {
+        Territory GetTerritoryAtPoint (Vector3 position, bool worldSpace, out int regionIndex) {
+            regionIndex = -1;
             if (worldSpace) {
                 if (!GetLocalHitFromWorldPosition(ref position))
                     return null;
@@ -5747,8 +5773,10 @@ namespace TGS {
             int territoriesCount = territories.Count;
             for (int p = 0; p < territoriesCount; p++) {
                 Territory territory = territories[p];
-                for (int r = 0; r < territory.regions.Count; r++) {
+                int regionsCount = territory.regions.Count;
+                for (int r = 0; r < regionsCount; r++) {
                     if (territory.regions[r].Contains(position.x, position.y)) {
+                        regionIndex = r;
                         return territory;
                     }
                 }
@@ -5789,11 +5817,11 @@ namespace TGS {
         }
 
         bool ValidTerritoryIndex (int territoryIndex) {
-            return territoryIndex >= 0 && territoryIndex < territories.Count;
+            return territoryIndex >= 0 && territories != null && territoryIndex < territories.Count;
         }
 
         bool ValidTerritoryIndex (int territoryIndex, int regionIndex) {
-            return territoryIndex >= 0 && territoryIndex < territories.Count && regionIndex >= 0 && regionIndex < territories[territoryIndex].regions.Count;
+            return territoryIndex >= 0 && territories != null && territoryIndex < territories.Count && regionIndex >= 0 && regionIndex < territories[territoryIndex].regions.Count;
         }
 
         #endregion

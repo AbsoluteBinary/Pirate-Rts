@@ -79,12 +79,6 @@ namespace TGS {
 			}
 		}
 
-		void Start () {
-            if (Application.isPlaying) {
-                LoadConfiguration();
-            }
-		}
-
 
 		public void Clear () {
 			TerrainGridSystem tgs = GetTGS ();
