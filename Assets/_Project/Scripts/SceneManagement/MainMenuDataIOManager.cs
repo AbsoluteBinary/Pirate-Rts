@@ -23,8 +23,8 @@ namespace _Project.Scripts.SceneManagement
     {
         public static MainMenuDataIOManager Instance { get; private set; } // Singleton access
         
-        private GameObject componentIOBox; // Changed: Not serialized, find at runtime
-        [SerializeField] private GameObject bootComponentIOBox; // Keep serialized for Boot
+        private GameObject componentIOBox; // Runtime find
+        [SerializeField] private GameObject bootComponentIOBox; // Boot container
         [SerializeField] private Canvas loginUiCanvas;
         [SerializeField] private CanvasGroup loginCanvasGroup;
         [SerializeField] private GameObject backgroundDisplay;
@@ -50,15 +50,13 @@ namespace _Project.Scripts.SceneManagement
 
         void Start()
         {
-            // New: Find componentIOBox at start
             AssignComponentIOBox();
             ApplyUIState();
         }
 
-        // New: Find componentIOBox at runtime
         private void AssignComponentIOBox()
         {
-            componentIOBox = GameObject.FindWithTag("ComponentBoxIO"); // Assumes tag on container
+            componentIOBox = GameObject.FindWithTag("ComponentBoxIO");
             if (componentIOBox == null)
             {
                 Debug.LogWarning("componentIOBox not found with tag ComponentBoxIO.");
@@ -155,7 +153,6 @@ namespace _Project.Scripts.SceneManagement
 
         public void DisableComponentIOBox()
         {
-            // New: Ensure componentIOBox is assigned before disabling
             if (componentIOBox == null)
             {
                 AssignComponentIOBox();
@@ -206,6 +203,17 @@ namespace _Project.Scripts.SceneManagement
             else
             {
                 Debug.LogWarning("No EventSystem found on bootComponentIOBox.");
+            }
+
+            // New: Disable the entire bootComponentIOBox GameObject
+            if (bootComponentIOBox != null)
+            {
+                bootComponentIOBox.SetActive(false);
+                Debug.Log("Disabled bootComponentIOBox GameObject.");
+            }
+            else
+            {
+                Debug.LogWarning("bootComponentIOBox not assigned.");
             }
         }
 
