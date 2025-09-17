@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: 494484249561989114}
   - component: {fileID: 2213797152914641108}
   - component: {fileID: 7500157695061462648}
-  - component: {fileID: 4214250531091262154}
   m_Layer: 0
   m_Name: CameraRoot
   m_TagString: Untagged
@@ -87,8 +86,8 @@ MonoBehaviour:
   maxXAngle: 75
   zoomInLimit: 20
   zoomOutLimit: 75
-  lowerLeftLimit: {x: -500, y: 0, z: -500}
-  upperRightLimit: {x: 500, y: 500, z: 500}
+  lowerLeftLimit: {x: -5000, y: 0, z: -5000}
+  upperRightLimit: {x: 5000, y: 500, z: 5000}
   camera: {fileID: 2994700597230131716}
 --- !u!114 &2343428117227369548
 MonoBehaviour:
@@ -116,7 +115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecc63cb9811a9a647a08c0834d123ba9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sensitivity: 100
+  sensitivity: 175
   invertX: 0
   invertY: 0
 --- !u!114 &603938514586850869
@@ -131,7 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dcd41481c7d3847bcc74ba371a352e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
+  speed: 300
   isInverted: 0
 --- !u!114 &494484249561989114
 MonoBehaviour:
@@ -176,21 +175,6 @@ MonoBehaviour:
   rotationTransitionTime: 1
   shouldLockOnSelected: 1
   lockDefaultAngle: 70
---- !u!114 &4214250531091262154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2882241516187895797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd07b76b55c5fad4aa6e16b985e28002, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  terrainMask:
-    serializedVersion: 2
-    m_Bits: 63
 --- !u!1 &8938229903389064920
 GameObject:
   m_ObjectHideFlags: 0
@@ -257,8 +241,8 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
+  far clip plane: 60000
+  field of view: 35
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -296,7 +280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
+  m_RenderShadows: 0
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0

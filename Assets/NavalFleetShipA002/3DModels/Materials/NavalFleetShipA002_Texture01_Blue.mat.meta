@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 54f5a2c88d66df345bbd672ec5a2d9c6
+timeCreated: 1502282577
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 97569
+  packageName: Naval Fleet Ship A002
+  packageVersion: 2.0
+  assetPath: Assets/NavalFleetShipA002/3DModels/Materials/NavalFleetShipA002_Texture01_Blue.mat
+  uploadId: 197769

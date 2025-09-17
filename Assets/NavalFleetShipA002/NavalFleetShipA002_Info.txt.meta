@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 78624735f24ac364c8ee75274ccdbc50
+timeCreated: 1502283982
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 97569
+  packageName: Naval Fleet Ship A002
+  packageVersion: 2.0
+  assetPath: Assets/NavalFleetShipA002/NavalFleetShipA002_Info.txt
+  uploadId: 197769

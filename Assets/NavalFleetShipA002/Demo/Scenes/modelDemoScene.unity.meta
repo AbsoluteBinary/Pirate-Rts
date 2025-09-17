@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3cf8f72d243c3904f93be17aa1ab49ce
+timeCreated: 1502626966
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 97569
+  packageName: Naval Fleet Ship A002
+  packageVersion: 2.0
+  assetPath: Assets/NavalFleetShipA002/Demo/Scenes/modelDemoScene.unity
+  uploadId: 197769

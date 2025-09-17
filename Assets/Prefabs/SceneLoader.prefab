@@ -588,6 +588,4 @@ MonoBehaviour:
   loadingBarFill: {fileID: 8007914723836393267}
   loadingText: {fileID: 1433492831285112335}
   loadingUICanvasGroup: {fileID: 4385153264709212702}
-  loginUICanvas: {fileID: 0}
-  bootUIContainer: {fileID: 0}
   isLoading: 0

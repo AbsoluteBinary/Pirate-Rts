@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a80c7ad557df05e4ea3b6f481fddbd82
+timeCreated: 1502282675
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 97569
+  packageName: Naval Fleet Ship A002
+  packageVersion: 2.0
+  assetPath: Assets/NavalFleetShipA002/Prefabs/NavalFleetShipA002_Prefab_Gray.prefab
+  uploadId: 197769

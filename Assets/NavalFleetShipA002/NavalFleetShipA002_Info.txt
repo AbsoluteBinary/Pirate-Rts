@@ -1,0 +1,23 @@
+Naval Fleet Ship A002 - Unity Asset Package
+
+3D Model + Textures.
+
+To View the Demo Scene:
+
+1. Open the modelDemoScene.unity scene located in the NavalFleetShipA002/Demo/Scenes folder.
+2. Play the Demo Scene and Use these Orbit Camera Controls to View the 3D Model:
+> Zoom In - E Key
+> Zoom Out - Q Key
+> Rotate Left - A Key
+> Rotate Right - D Key
+> Rotate Up - W Key
+> Rotate Down - S Key
+
+To use this 3D model in your project:
+
+1. Locate naval ship prefab in the NavalFleetShipA002/Prefab folder.
+2. Drag into your prefered scene.
+
+
+Daniel Kole Productions
+www.danielkoleproductions.com

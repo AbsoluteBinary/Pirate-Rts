@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 54efb01140b866c4791c9d7495259198
+timeCreated: 1502283011
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 97569
+  packageName: Naval Fleet Ship A002
+  packageVersion: 2.0
+  assetPath: Assets/NavalFleetShipA002/Prefabs/NavalFleetShipA002_Prefab_Orange.prefab
+  uploadId: 197769
