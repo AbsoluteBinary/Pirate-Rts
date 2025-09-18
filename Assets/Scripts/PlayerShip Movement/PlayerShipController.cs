@@ -11,10 +11,10 @@ namespace PlayerShip_Movement
         private Tween FreeRoamTween;
         [SerializeField] private GameObject ship;
         [Range(1.0f, 400.0f)] [SerializeField] private float moveDuration = 1.0f;
-        [SerializeField] private GameObject frButton; // Changed from Button to GameObject
+        [SerializeField] private GameObject frButton; // Marker Prefab for target position
         private Vector3 btnPos;
         private Vector3 btnResetPos;
-
+        
         public ClickBehavior ClickBehavior; // Unused, retained for compatibility
         private Coroutine coroutine;
         public int timeRemaining;
@@ -25,30 +25,82 @@ namespace PlayerShip_Movement
             MovementTwoWay
         }
 
+        private void Awake()
+        {
+            Debug.Log($"PlayerShipController: Awake called on {gameObject.name}. IsActive: {gameObject.activeInHierarchy}");
+
+            // Validate GameObject state
+            if (!gameObject.activeSelf)
+            {
+                Debug.LogWarning("PlayerShipController: GameObject is not active. Enabling it.");
+                gameObject.SetActive(true);
+            }
+
+            // Validate serialized fields
+            if (frButton == null)
+            {
+                Debug.LogError("PlayerShipController: frButton is not assigned!");
+                return;
+            }
+            if (ship == null)
+            {
+                Debug.LogError("PlayerShipController: Ship is not assigned!");
+                return;
+            }
+            Debug.Log($"PlayerShipController: frButton ({frButton.name}) and ship ({ship.name}) are assigned. frButton InstanceID: {frButton.GetInstanceID()}");
+
+            // Register for button click event
+            EventBus.MarkerButtonClicked += OnButtonClicked;
+        }
+
         private void Start()
         {
-            // Validate serialized fields
-            Debug.Assert(frButton != null, "FrButton is not assigned!");
-            Debug.Assert(ship != null, "Ship is not assigned!");
+            Debug.Log($"PlayerShipController: Start called on {gameObject.name}.");
+            if (frButton != null)
+            {
+                Debug.Log($"PlayerShipController: frButton in Start: {frButton.name}, InstanceID: {frButton.GetInstanceID()}, Active: {frButton.activeInHierarchy}");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            EventBus.MarkerButtonClicked -= OnButtonClicked; // Prevent memory leaks
+        }
+
+        public void SetFrButton(GameObject newFrButton)
+        {
+            frButton = newFrButton;
+            if (frButton == null)
+            {
+                Debug.LogError("PlayerShipController: SetFrButton received null!");
+                return;
+            }
+            Debug.Log($"PlayerShipController: frButton updated to {frButton.name}, InstanceID: {frButton.GetInstanceID()}, Active: {frButton.activeInHierarchy}");
+        }
+
+        private void OnButtonClicked()
+        {
+            Debug.Log("PlayerShipController: World Space Button Clicked via EventBus!");
+            StartTween();
         }
 
         public void StartTween()
         {
-            // Set target location to the button's position
             targetLocation = frButton.transform.position;
+            Debug.Log($"PlayerShipController: StartTween called. Target location: {targetLocation}");
 
             if (doTweenType == DOTweenType.MovementOneWay)
             {
-                Debug.Log("Start Moving");
-                // If coroutine is running, stop it
+                Debug.Log("PlayerShipController: Start Moving");
                 if (coroutine != null) StopCoroutine(coroutine);
-                // Start coroutine
                 coroutine = StartCoroutine(PopUpCountdown());
 
                 if (targetLocation == Vector3.zero)
+                {
                     targetLocation = transform.position;
+                    Debug.Log("PlayerShipController: Target location was zero, set to transform.position.");
+                }
 
-                // Movement
                 FreeRoamTween = ship.transform.DOLookAt(targetLocation, moveDuration / 2);
                 FreeRoamTween = ship.transform.DOMove(targetLocation, moveDuration);
             }
@@ -59,11 +111,12 @@ namespace PlayerShip_Movement
             for (var e = timeRemaining; e > 0; e--)
             {
                 yield return new WaitForSeconds(1f);
+                Debug.Log($"PlayerShipController: Countdown: {e} seconds remaining.");
                 if (e == 1)
                 {
-                    // Move button off-screen and hide it
-                    frButton.transform.position = new Vector3(0, -10, 0); // Adjust as needed for UI
-                    frButton.SetActive(false); // Hide button
+                    frButton.transform.position = new Vector3(0, -10, 0);
+                    frButton.SetActive(false);
+                    Debug.Log("PlayerShipController: frButton moved off-screen and hidden.");
                 }
             }
 
@@ -71,12 +124,9 @@ namespace PlayerShip_Movement
         }
     }
 
-    // Retained for compatibility, but appears unused
     public enum ClickBehavior
     {
         None,
         // Add other behaviors if needed
     }
 }
-
-
