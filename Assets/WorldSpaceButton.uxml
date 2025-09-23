@@ -1,3 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:Button text="Click Me" name="WorldSpaceButton" />
+    <ui:Button text="Move Here" name="WorldSpaceButton" style="background-image: url(&quot;project://database/Assets/Sci-fi%20Buttons%20and%20Panels/Sci-fi%20Components%20Resources/Sliced%20elements/Part01/Button7-3click.png?fileID=2800000&amp;guid=bc7112b0f247e98449c5a4fdc9eb4638&amp;type=3#Button7-3click&quot;); background-size: 100% 200%; height: 124px; background-color: rgba(255, 165, 0, 0); -unity-background-image-tint-color: rgb(255, 165, 0); font-size: 80px; color: rgb(0, 191, 255); rotate: 0 180 1 180deg;" />
+    <ui:VisualElement name="Pointer" style="flex-grow: 1; translate: 0 -174px; transform-origin: center; background-size: 100% 175%; background-image: url(&quot;project://database/Assets/SCI-FI%20UI%20Pack%20Pro/Common/White%20Icons/Textures/Icons4/ICON_down03.png?fileID=2800000&amp;guid=bf23382a3e28c7841a0409a3298dd9d0&amp;type=3#ICON_down03&quot;); -unity-background-image-tint-color: rgb(210, 105, 30); background-color: rgba(181, 17, 17, 0); scale: 0.5 0.5 0.5;" />
 </ui:UXML>

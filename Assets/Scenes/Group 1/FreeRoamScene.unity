@@ -119,43 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!84 &43230704
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: GerstnerCascades
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 64
-  m_Height: 64
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 48
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 0
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 5
-  m_VolumeDepth: 16
-  m_ShadowSamplingMode: 2
 --- !u!1 &214986490 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
@@ -174,12 +137,24 @@ PrefabInstance:
       value: navalFleetShipA002_3DModel
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 7.4689064
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.20960677
+      value: -0.932
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalPosition.z
@@ -354,6 +329,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 432897394}
+  - component: {fileID: 432897395}
+  - component: {fileID: 432897396}
   m_Layer: 5
   m_Name: UIDocument
   m_TagString: Untagged
@@ -369,13 +346,48 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 432897392}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1538954480}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &432897395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432897392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 17f9fa07ffa4b7873b3cc6bfcb6a64ab, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: d7e4138890ae3fc5685bb0c841323af9, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 350
+  m_WorldSpaceHeight: 200
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!114 &432897396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432897392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 390de5656c7f612aabd711e148f90ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.UI.UIBillboard
 --- !u!1001 &492500257
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -469,7 +481,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.PlayerShipController
   doTweenType: 0
   ship: {fileID: 214986490}
-  moveDuration: 1
+  moveDuration: 22
   frButton: {fileID: 1522577081}
   ClickBehavior: 0
   timeRemaining: 0
@@ -1092,6 +1104,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e5df202d59d6fab49538cae40e1e2ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!84 &1186318846
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GerstnerCascades
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 64
+  m_Height: 64
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 48
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 5
+  m_VolumeDepth: 16
+  m_ShadowSamplingMode: 2
 --- !u!1 &1220702937
 GameObject:
   m_ObjectHideFlags: 0
@@ -1372,6 +1421,7 @@ GameObject:
   - component: {fileID: 1538954479}
   - component: {fileID: 1538954478}
   - component: {fileID: 1538954477}
+  - component: {fileID: 1538954481}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -1394,7 +1444,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -1472,6 +1522,26 @@ Transform:
   - {fileID: 432897394}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1538954481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538954476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de5c41e9e1550afcb8ad89882c20888e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.UI.BaseUIController
+  uiDocument: {fileID: 432897395}
+  uiTransform: {fileID: 432897394}
+  buttonElementName: PlayerBaseInteraction
+  displayDuration: 3
+  tweenDuration: 0.5
+  fadeInDuration: 1
+  startY: 2
+  endY: 10
 --- !u!1 &1643339208
 GameObject:
   m_ObjectHideFlags: 0
