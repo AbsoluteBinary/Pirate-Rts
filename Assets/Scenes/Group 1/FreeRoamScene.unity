@@ -331,7 +331,8 @@ GameObject:
   - component: {fileID: 432897394}
   - component: {fileID: 432897395}
   - component: {fileID: 432897396}
-  m_Layer: 5
+  - component: {fileID: 432897397}
+  m_Layer: 0
   m_Name: UIDocument
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -388,6 +389,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 390de5656c7f612aabd711e148f90ff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.UI.UIBillboard
+--- !u!114 &432897397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432897392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dc49fbe329275c138b676d715c3db89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Managers.World_Map.ObjectInteractions.BaseButtonHandler
 --- !u!1001 &492500257
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -579,43 +592,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1643339209}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &653900324
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: GerstnerCascades
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 64
-  m_Height: 64
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 48
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 0
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 5
-  m_VolumeDepth: 16
-  m_ShadowSamplingMode: 2
 --- !u!1 &698236008
 GameObject:
   m_ObjectHideFlags: 0
@@ -1656,6 +1632,43 @@ MonoBehaviour:
   markerPrefab: {fileID: 1917515822}
   timeRemaining: 10
   shipController: {fileID: 597270314}
+--- !u!84 &1831443255
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GerstnerCascades
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 64
+  m_Height: 64
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 48
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 5
+  m_VolumeDepth: 16
+  m_ShadowSamplingMode: 2
 --- !u!1 &1917515822 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3695688807541448656, guid: 5fd8aedfc10448218ae19c4a94848b41, type: 3}

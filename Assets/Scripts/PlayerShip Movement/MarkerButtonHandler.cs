@@ -11,7 +11,7 @@ namespace PlayerShip_Movement
     {
         private void Awake()
         {
-            Debug.Log($"MarkerButtonHandler: Awake called on {gameObject.name}. InstanceID: {gameObject.GetInstanceID()}");
+            //Debug.Log($"MarkerButtonHandler: Awake called on {gameObject.name}. InstanceID: {gameObject.GetInstanceID()}");
 
             UIDocument uiDocument = GetComponent<UIDocument>();
             if (uiDocument == null)
@@ -19,7 +19,7 @@ namespace PlayerShip_Movement
                 Debug.LogError($"MarkerButtonHandler: UIDocument not found on {gameObject.name}.");
                 return;
             }
-            Debug.Log($"MarkerButtonHandler: UIDocument found. Visual Tree Asset: {uiDocument.visualTreeAsset?.name}");
+            //Debug.Log($"MarkerButtonHandler: UIDocument found. Visual Tree Asset: {uiDocument.visualTreeAsset?.name}");
 
             VisualElement root = uiDocument.rootVisualElement;
             if (root == null)
@@ -36,17 +36,20 @@ namespace PlayerShip_Movement
                 return;
             }
 
-            Debug.Log($"MarkerButtonHandler: Button 'WorldSpaceButton' found. Interactable: {button.enabledSelf}. Position: {button.worldBound}");
+            //Debug.Log($"MarkerButtonHandler: Button 'WorldSpaceButton' found. Interactable: {button.enabledSelf}. Position: {button.worldBound}");
             button.clicked += () =>
             {
                 Debug.Log("MarkerButtonHandler: World Space Button Clicked!");
                 EventBus.TriggerMarkerButtonClick();
             };
-            button.RegisterCallback<UnityEngine.UIElements.ClickEvent>(evt => Debug.Log($"MarkerButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
+            button.RegisterCallback<UnityEngine.UIElements.ClickEvent>(evt =>
+                Debug.Log($"MarkerButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
             //button.RegisterCallback<ClickEvent>(evt => Debug.Log($"MarkerButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
             //button.RegisterCallback<PointerDownEvent>(evt => Debug.Log($"MarkerButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
-            button.RegisterCallback<UnityEngine.UIElements.PointerDownEvent>(evt => Debug.Log($"MarkerButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
-            button.RegisterCallback<PointerEnterEvent>(evt => Debug.Log($"MarkerButtonHandler: PointerEnterEvent detected on {((VisualElement)evt.target).name}!"));
+            button.RegisterCallback<PointerDownEvent>(evt =>
+                Debug.Log($"MarkerButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
+            button.RegisterCallback<PointerEnterEvent>(evt =>
+                Debug.Log($"MarkerButtonHandler: PointerEnterEvent detected on {((VisualElement)evt.target).name}!"));
         }
     }
 }
