@@ -44,8 +44,6 @@ namespace PlayerShip_Movement
             };
             button.RegisterCallback<UnityEngine.UIElements.ClickEvent>(evt =>
                 Debug.Log($"MarkerButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
-            //button.RegisterCallback<ClickEvent>(evt => Debug.Log($"MarkerButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
-            //button.RegisterCallback<PointerDownEvent>(evt => Debug.Log($"MarkerButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
             button.RegisterCallback<PointerDownEvent>(evt =>
                 Debug.Log($"MarkerButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
             button.RegisterCallback<PointerEnterEvent>(evt =>
