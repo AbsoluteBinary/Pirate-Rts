@@ -39,11 +39,27 @@ namespace _Project.Scripts.SceneManagement
             PlayerShip_Movement.EventBus.BaseButtonClicked += OnBaseButtonClicked;
         }
 
+        // private void OnBaseButtonClicked()
+        // {
+        //     
+        //     Debug.Log("Base button clicked, loading FreeRoamScene.");
+        //     SceneLoader.Instance.LoadSpecificSceneGroup(2);
+        // }
         private void OnBaseButtonClicked()
         {
-            
-            Debug.Log("Base button clicked, loading FreeRoamScene.");
+            Debug.Log("OnBaseButtonClicked started"); // Confirm method is called
+
+            // Example: If line 46 is something like 'manager.LoadScene();'
+            if (SceneLoader.Instance == null)
+            {
+                Debug.LogError("Manager is null! Check assignment in Inspector or Awake().");
+                return; // Prevent crash for testing
+            }
+
+            // Your original code here...
             SceneLoader.Instance.LoadSpecificSceneGroup(2);
+
+            Debug.Log("OnBaseButtonClicked completed");
         }
         
         private void OnDestroy()
