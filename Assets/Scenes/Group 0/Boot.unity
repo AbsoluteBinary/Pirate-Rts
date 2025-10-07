@@ -1370,6 +1370,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1452094961}
     - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
+      propertyPath: bypassLoginForTesting
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8948789893616276065, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
       propertyPath: sceneGroups.Array.size
       value: 4
       objectReference: {fileID: 0}

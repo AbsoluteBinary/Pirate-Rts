@@ -102,13 +102,13 @@ namespace _Project.Scripts.SceneManagement
             _ = LoadSpecificSceneGroup(e.groupIndex);
         }
 
-        private async void Start()
-        {
-            if (manager.ActiveSceneGroup == null)
-            {
-                await LoadSceneGroup(0);
-            }
-        }
+        // private async void Start()
+        // {
+        //     if (manager.ActiveSceneGroup == null)
+        //     {
+        //         await LoadSceneGroup(0);
+        //     }
+        // }
 
         public async Task LoadSceneGroup(int index)
         {
@@ -326,6 +326,61 @@ namespace _Project.Scripts.SceneManagement
         {
             isPreparingNewGroup = true;
         }
+        
+        // Add this at the end of SceneLoader.cs
+
+        [Header("Dev Testing")]
+        [SerializeField] private bool bypassLoginForTesting = false; // Inspector toggle (Editor-only)
+
+        private async void Start()
+        {
+            if (manager.ActiveSceneGroup == null)
+            {
+#if UNITY_EDITOR // Dev-only bypass
+                if (bypassLoginForTesting)
+                {
+                    await LoadSceneGroup(0); // Load Boot minimally
+                    await BypassLoginAndLoadNext();
+                    return;
+                }
+#endif
+                await LoadSceneGroup(0); // Original Boot load + login
+            }
+        }
+
+        private async Task BypassLoginAndLoadNext()
+        {
+            Debug.Log("Bypassing login for testing...");
+
+            // Step 1: Instantly hide login UI (skip fades for speed)
+            var mainMenuManager = MainMenuDataIOManager.Instance;
+            if (mainMenuManager != null)
+            {
+                mainMenuManager.ToggleCanvasOff();
+                mainMenuManager.ToggleBackgroundOff();
+                mainMenuManager.DisableBootComponentIOBox(); // Handles audio/EventSystem disable
+            }
+
+            // Step 2: Load next group (e.g., index 1) with minimal delay
+            minLoadingTime = 0f; // Override for testing (restore if needed)
+            currentGroupIndex = 1; // Or your desired next index
+            await LoadSceneGroup(currentGroupIndex);
+
+            // Step 3: Unload Boot extras (UI/camera/audio/scene group)
+            if (manager.ActiveSceneGroup != null)
+            {
+                await manager.UnloadScenes(); // Unloads previous (Boot)
+                Debug.Log("Unloaded Boot scene group.");
+            }
+
+            // Optional: Disable Boot camera if separate (find via tag/type)
+            var bootCamera = GameObject.FindWithTag("BootCamera"); // Add tag if needed
+            if (bootCamera != null) bootCamera.SetActive(false);
+
+            // Restore minLoadingTime if changed
+            minLoadingTime = 3f;
+            Debug.Log("Bypass complete—ready for testing!");
+        }
     }
 
     public class LoadingProgress : IProgress<float>
@@ -339,4 +394,6 @@ namespace _Project.Scripts.SceneManagement
             Progressed?.Invoke(normalizedValue);
         }
     }
+    
+    
 }
