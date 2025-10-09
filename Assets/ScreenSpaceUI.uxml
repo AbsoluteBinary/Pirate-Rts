@@ -1,9 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="ScreenSpaceUI" style="flex-grow: 1; position: absolute;">
         <ui:VisualElement name="ButtonHUD" style="flex-grow: 1; align-items: flex-end; justify-content: flex-start; align-self: stretch; align-content: flex-start;">
-            <ui:Button text="Button" name="Button" />
-            <ui:Button text="Button" />
-            <ui:Button text="Button" />
+            <ui:Button text="Enter Harbour" name="EnterHarbourButton" style="height: 53px; width: 166px; font-size: 24px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

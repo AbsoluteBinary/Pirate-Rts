@@ -37,10 +37,10 @@ namespace Managers.World_Map.ObjectInteractions
             button.clicked += () =>
             {
                 Debug.Log("BaseButtonHandler: Player Base Button Clicked!");
-                EventBus.TriggerBaseButtonClick();
+                WorldSpaceInteractionsEventBus.TriggerBaseButtonClick();
             };
-            button.RegisterCallback<UnityEngine.UIElements.ClickEvent>(evt => Debug.Log($"BaseButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
-            button.RegisterCallback<UnityEngine.UIElements.PointerDownEvent>(evt => Debug.Log($"BaseButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
+            button.RegisterCallback<ClickEvent>(evt => Debug.Log($"BaseButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
+            button.RegisterCallback<PointerDownEvent>(evt => Debug.Log($"BaseButtonHandler: PointerDownEvent detected on {((VisualElement)evt.target).name}!"));
             button.RegisterCallback<PointerEnterEvent>(evt => Debug.Log($"BaseButtonHandler: PointerEnterEvent detected on {((VisualElement)evt.target).name}!"));
         }
     }

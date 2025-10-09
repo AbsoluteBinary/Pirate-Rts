@@ -50,7 +50,7 @@ namespace PlayerShip_Movement
             Debug.Log($"PlayerShipController: frButton ({frButton.name}) and ship ({ship.name}) are assigned. frButton InstanceID: {frButton.GetInstanceID()}");
 
             // Register for button click event
-            EventBus.MarkerButtonClicked += OnMarkerButtonClicked;
+            WorldSpaceInteractionsEventBus.MarkerButtonClicked += OnMarkerButtonClicked;
             
         }
 
@@ -65,7 +65,7 @@ namespace PlayerShip_Movement
 
         private void OnDestroy()
         {
-            EventBus.MarkerButtonClicked -= OnMarkerButtonClicked; // Prevent memory leaks
+            WorldSpaceInteractionsEventBus.MarkerButtonClicked -= OnMarkerButtonClicked; // Prevent memory leaks
         }
 
         public void SetFrButton(GameObject newFrButton)

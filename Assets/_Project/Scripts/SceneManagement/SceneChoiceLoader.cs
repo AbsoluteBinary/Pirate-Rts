@@ -36,7 +36,7 @@ namespace _Project.Scripts.SceneManagement
         private void Awake()
         {
             // Register for button click event
-            PlayerShip_Movement.EventBus.BaseButtonClicked += OnBaseButtonClicked;
+            PlayerShip_Movement.WorldSpaceInteractionsEventBus.BaseButtonClicked += OnBaseButtonClicked;
         }
 
         // private void OnBaseButtonClicked()
@@ -45,7 +45,7 @@ namespace _Project.Scripts.SceneManagement
         //     Debug.Log("Base button clicked, loading FreeRoamScene.");
         //     SceneLoader.Instance.LoadSpecificSceneGroup(2);
         // }
-        private void OnBaseButtonClicked()
+        public void OnBaseButtonClicked()
         {
             Debug.Log("OnBaseButtonClicked started"); // Confirm method is called
 
@@ -64,7 +64,7 @@ namespace _Project.Scripts.SceneManagement
         
         private void OnDestroy()
         {
-            PlayerShip_Movement.EventBus.MarkerButtonClicked -= OnBaseButtonClicked; // Prevent memory leaks
+            PlayerShip_Movement.WorldSpaceInteractionsEventBus.MarkerButtonClicked -= OnBaseButtonClicked; // Prevent memory leaks
         }
     }
 }

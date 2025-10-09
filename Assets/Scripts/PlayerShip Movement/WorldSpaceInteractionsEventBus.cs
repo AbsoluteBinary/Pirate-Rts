@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PlayerShip_Movement
 {
-    public static class EventBus
+    public static class WorldSpaceInteractionsEventBus
     {
         public static event Action MarkerButtonClicked;
         public static event Action BaseButtonClicked;

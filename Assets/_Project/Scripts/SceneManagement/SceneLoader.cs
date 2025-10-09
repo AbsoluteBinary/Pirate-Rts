@@ -6,7 +6,8 @@ using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus; // For EventBus
 using System.Linq;
-using _Project.Scripts.MainMenu_Controls; // For FirstOrDefault
+using _Project.Scripts.MainMenu_Controls;
+using UnityEngine.SceneManagement; // For FirstOrDefault
 
 namespace _Project.Scripts.SceneManagement
 {
@@ -271,13 +272,13 @@ namespace _Project.Scripts.SceneManagement
             currentGroupIndex = index;
             NewGroupPrep();
 
-            // Load new group first
+            // Load new group first (this sets the new active scene)
             await LoadSceneGroup(index);
 
             // Then unload old if exists and different
             if (oldGroup != null && oldGroup != sceneGroups[index])
             {
-                Debug.Log("Testing unload: Unloading previous scene group...");
+                Debug.Log("Unloading previous scene group after new activation...");
                 await manager.UnloadScenes();
             }
         }

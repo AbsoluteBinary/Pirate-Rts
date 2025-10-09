@@ -40,7 +40,7 @@ namespace PlayerShip_Movement
             button.clicked += () =>
             {
                 Debug.Log("MarkerButtonHandler: World Space Button Clicked!");
-                EventBus.TriggerMarkerButtonClick();
+                WorldSpaceInteractionsEventBus.TriggerMarkerButtonClick();
             };
             button.RegisterCallback<UnityEngine.UIElements.ClickEvent>(evt =>
                 Debug.Log($"MarkerButtonHandler: ClickEvent detected on {((VisualElement)evt.target).name}!"));
