@@ -2,7 +2,7 @@ using Managers.World_Map.HUDInteractions;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UI
+namespace UI.WorldMap
 {
     public class HUDButtonHandler : MonoBehaviour
     {
