@@ -25,6 +25,7 @@ namespace _Project.Scripts.SceneManagement
         
         private GameObject componentIOBox; // Runtime find
         [SerializeField] private GameObject bootComponentIOBox; // Boot container
+        [SerializeField] private GameObject harbourComponentIOBox; // ← NEW LINE
         [SerializeField] private Canvas loginUiCanvas;
         [SerializeField] private CanvasGroup loginCanvasGroup;
         [SerializeField] private GameObject backgroundDisplay;
@@ -150,6 +151,13 @@ namespace _Project.Scripts.SceneManagement
                 mainMenuIOData = SerializationUtility.DeserializeValue<MainMenuIOData>(bytes, DataFormat.Binary);
             }
         }
+        
+        [Button("Disable Harbour Component Box")]
+        private void Editor_DisableHarbourBox()
+        {
+            if (!Application.isPlaying) return;
+            DisableHarbourComponentIOBox();
+        }
 
         public void DisableComponentIOBox()
         {
@@ -214,6 +222,42 @@ namespace _Project.Scripts.SceneManagement
             else
             {
                 Debug.LogWarning("bootComponentIOBox not assigned.");
+            }
+        }
+        
+        public void DisableHarbourComponentIOBox()
+        {
+            AudioListener listener = FindAudioListener(harbourComponentIOBox);
+            if (listener != null)
+            {
+                listener.enabled = false;
+                Debug.Log("Disabled AudioListener on harbourComponentIOBox.");
+            }
+            else
+            {
+                Debug.LogWarning("No AudioListener found on harbourComponentIOBox.");
+            }
+
+            EventSystem eventSystem = FindEventSystem(harbourComponentIOBox);
+            if (eventSystem != null)
+            {
+                eventSystem.enabled = false;
+                Debug.Log("Disabled EventSystem on harbourComponentIOBox.");
+            }
+            else
+            {
+                Debug.LogWarning("No EventSystem found on harbourComponentIOBox.");
+            }
+
+            // Disable the whole container (most important!)
+            if (harbourComponentIOBox != null)
+            {
+                harbourComponentIOBox.SetActive(false);
+                Debug.Log("Disabled harbourComponentIOBox GameObject.");
+            }
+            else
+            {
+                Debug.LogWarning("harbourComponentIOBox not assigned.");
             }
         }
 

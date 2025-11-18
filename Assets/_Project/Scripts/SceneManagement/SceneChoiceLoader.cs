@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UI.WorldMap;
 
 namespace _Project.Scripts.SceneManagement
 {
@@ -36,7 +37,7 @@ namespace _Project.Scripts.SceneManagement
         private void Awake()
         {
             // Register for button click event
-            PlayerShip_Movement.WorldSpaceInteractionsEventBus.BaseButtonClicked += OnBaseButtonClicked;
+            WorldSpaceInteractionsEventBus.HarbourButtonClicked += OnHarbourButtonClicked;
         }
 
         // private void OnBaseButtonClicked()
@@ -45,7 +46,7 @@ namespace _Project.Scripts.SceneManagement
         //     Debug.Log("Base button clicked, loading FreeRoamScene.");
         //     SceneLoader.Instance.LoadSpecificSceneGroup(2);
         // }
-        public void OnBaseButtonClicked()
+        public void OnHarbourButtonClicked()
         {
             Debug.Log("OnBaseButtonClicked started"); // Confirm method is called
 
@@ -64,7 +65,7 @@ namespace _Project.Scripts.SceneManagement
         
         private void OnDestroy()
         {
-            PlayerShip_Movement.WorldSpaceInteractionsEventBus.MarkerButtonClicked -= OnBaseButtonClicked; // Prevent memory leaks
+            WorldSpaceInteractionsEventBus.MarkerButtonClicked -= OnHarbourButtonClicked; // Prevent memory leaks
         }
     }
 }

@@ -1,4 +1,4 @@
-using Managers.World_Map.HUDInteractions;
+using UI.WorldMap.HUDInteractions;
 using UnityEngine;
 using UnityEngine.UIElements;
 

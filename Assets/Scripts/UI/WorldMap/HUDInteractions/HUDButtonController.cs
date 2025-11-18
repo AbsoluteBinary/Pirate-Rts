@@ -1,10 +1,9 @@
 using System.Collections;
 using _Project.Scripts.SceneManagement;
 using Crest;
-using Managers.World_Map.HUDInteractions;
 using UnityEngine;
 
-namespace UI.WorldMap
+namespace UI.WorldMap.HUDInteractions
 {
     public class HUDButtonController : MonoBehaviour
     {
@@ -26,6 +25,7 @@ namespace UI.WorldMap
             Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
             StartCoroutine(LoadSceneGroup2WithOceanTransition());
         }
+        
 
         private IEnumerator LoadSceneGroup2WithOceanTransition()
         {

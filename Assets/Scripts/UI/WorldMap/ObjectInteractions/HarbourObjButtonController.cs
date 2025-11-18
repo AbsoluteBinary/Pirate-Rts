@@ -4,42 +4,42 @@ using Crest;
 using UI.WorldMap.HUDInteractions;
 using UnityEngine;
 
-namespace UI.Harbour
+namespace UI.WorldMap.ObjectInteractions
 {
-    public class IdleHudButtonController : MonoBehaviour
+    public class HarbourObjButtonController : MonoBehaviour
     {
         private OceanRenderer _currentOcean;
 
         private void Awake()
         {
-            HUDMenuButtonsEventBus.HUDEnterWorldClicked += OnLaunchWorldButtonClicked;
-            //Debug.Log("HUDController: Awake called. Registering event.");
+            WorldSpaceInteractionsEventBus.HarbourButtonClicked += OnHarbourButtonClicked;
+            Debug.Log("HUDController: Awake called. Registering event.");
         }
 
         private void OnDestroy()
         {
-            HUDMenuButtonsEventBus.HUDEnterWorldClicked -= OnLaunchWorldButtonClicked;
+            WorldSpaceInteractionsEventBus.HarbourButtonClicked -= OnHarbourButtonClicked;
         }
 
-        public void OnLaunchWorldButtonClicked()
+        public void OnHarbourButtonClicked()
         {
-           // Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
-            StartCoroutine(LoadSceneGroupOneWithOceanTransition());
+            Debug.Log(": Enter Harbour clicked - Loading Scene Group 2");
+            StartCoroutine(LoadSceneGroup2WithOceanTransition());
         }
 
-        private IEnumerator LoadSceneGroupOneWithOceanTransition()
+        private IEnumerator LoadSceneGroup2WithOceanTransition()
         {
             // 1. Find current ocean and disable it
             _currentOcean = FindObjectOfType<OceanRenderer>();
             if (_currentOcean != null)
             {
                 _currentOcean.gameObject.SetActive(false);
-                Debug.Log("[Ocean] Disabled old ocean for Scene Group 1");
+                Debug.Log("[Ocean] Disabled old ocean for Scene Group 2");
             }
 
-            // 2. Load your Scene Group 1 (replace with your actual scene name)
+            // 2. Load your Scene Group 2 (replace with your actual scene name)
             // If SceneLoader has a coroutine version, use it here
-            SceneLoader.Instance.LoadSpecificSceneGroup(1);
+            SceneLoader.Instance.LoadSpecificSceneGroup(2);
             
             // 3. Wait for new scene to load fully
             yield return new WaitForSeconds(0.1f); // Small delay for Crest init
@@ -51,7 +51,7 @@ namespace UI.Harbour
             if (_currentOcean != null)
             {
                 _currentOcean.gameObject.SetActive(true);
-                Debug.Log("[Ocean] Activated ocean in Scene Group 1");
+                Debug.Log("[Ocean] Activated ocean in Scene Group 2");
             }
             else
             {

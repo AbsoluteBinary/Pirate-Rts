@@ -1000,7 +1000,7 @@ GameObject:
   - component: {fileID: 1372256218}
   m_Layer: 0
   m_Name: Camera
-  m_TagString: Untagged
+  m_TagString: BootCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1449,6 +1449,7 @@ MonoBehaviour:
       Entry: 8
       Data: 
   bootComponentIOBox: {fileID: 1452094961}
+  harbourComponentIOBox: {fileID: 3480319152777946760, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
   loginUiCanvas: {fileID: 1998043134}
   loginCanvasGroup: {fileID: 450604303}
   backgroundDisplay: {fileID: 1094431580}

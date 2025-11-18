@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-namespace PlayerShip_Movement
+namespace UI.WorldMap
 {
     public static class WorldSpaceInteractionsEventBus
     {
         public static event Action MarkerButtonClicked;
-        public static event Action BaseButtonClicked;
+        public static event Action HarbourButtonClicked;
 
         public static void TriggerMarkerButtonClick()
         {
@@ -15,8 +15,8 @@ namespace PlayerShip_Movement
         }
         public static void TriggerBaseButtonClick()
         {
-            Debug.Log("EventBus: Triggering BaseButtonClicked event.");
-            BaseButtonClicked?.Invoke();
+            Debug.Log("EventBus: Triggering HarbourButtonClicked event.");
+            HarbourButtonClicked?.Invoke();
         }
     }
 }

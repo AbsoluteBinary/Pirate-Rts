@@ -7,6 +7,7 @@ TagManager:
   - Player Build Camera
   - ComponentBoxIO
   - BootComponentBoxIO
+  - BootCamera
   layers:
   - Default
   - TransparentFX

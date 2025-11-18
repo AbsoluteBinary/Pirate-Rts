@@ -1,8 +1,7 @@
-using Managers.World_Map.HUDInteractions;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UI.WorldMap
+namespace UI.WorldMap.HUDInteractions
 {
     public class HUDButtonHandler : MonoBehaviour
     {
@@ -10,14 +9,14 @@ namespace UI.WorldMap
         {
             Debug.Log($"HUDButtonHandler: Awake called on {gameObject.name}");
 
-            UIDocument _uiDocument = GetComponent<UIDocument>();
-            if (_uiDocument == null)
+            UIDocument uiDocument = GetComponent<UIDocument>();
+            if (uiDocument == null)
             {
                 Debug.LogError("HUDButtonHandler: UIDocument not found");
                 return;
             }
 
-            VisualElement root = _uiDocument.rootVisualElement;
+            VisualElement root = uiDocument.rootVisualElement;
             Button button = root.Q<Button>("EnterHarbourButton");
 
             if (button != null)

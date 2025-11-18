@@ -199,16 +199,25 @@ namespace _Project.Scripts.SceneManagement
         private void HideLoginUIBootOut()
         {
             var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null)
-            {
-                mainMenuManager.ToggleBackgroundOff();
-                mainMenuManager.ToggleCanvasOff();
-                mainMenuManager.DisableComponentIOBox();
-            }
-            else
+            if (mainMenuManager == null)
             {
                 Debug.LogWarning("MainMenuDataIOManager instance not found.");
+                return;
             }
+
+            // Hide the login/main menu UI
+            mainMenuManager.ToggleBackgroundOff();
+            mainMenuManager.ToggleCanvasOff();
+
+            // === CLEAN UP OLD COMPONENT BOXES ===
+            // Boot scene cleanup (always safe to call)
+            mainMenuManager.DisableBootComponentIOBox();
+
+            // Harbour scene cleanup (if you have it)
+            mainMenuManager.DisableHarbourComponentIOBox();  // ← Your new method!
+
+            // Runtime/world scene cleanup (the one with tag "ComponentBoxIO")
+            mainMenuManager.DisableComponentIOBox();
         }
 
         private void ResetUi()

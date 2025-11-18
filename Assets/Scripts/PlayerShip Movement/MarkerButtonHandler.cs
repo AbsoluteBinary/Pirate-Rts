@@ -2,6 +2,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TGS;
+using UI.WorldMap;
 using UnityEngine;
 using UnityEngine.UIElements;
 

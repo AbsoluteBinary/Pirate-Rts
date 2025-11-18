@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Managers.World_Map.HUDInteractions
+namespace UI.WorldMap.HUDInteractions
 {
     public class HUDMenuButtonsEventBus : MonoBehaviour
     {
