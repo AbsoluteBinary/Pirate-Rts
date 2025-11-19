@@ -1,31 +1,30 @@
-using PlayerShip_Movement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UI.WorldMap.ObjectInteractions
 {
-    public class HarbourObjButtonHandlerver1 : MonoBehaviour
+    public class Type0AButtonHandler : MonoBehaviour
     {
         private void Awake()
         {
-            Debug.Log($"HarbourObjButtonHandler: Awake called on {gameObject.name}");
+            Debug.Log($"Type0AObjButtonHandler: Awake called on {gameObject.name}");
 
             UIDocument uiDocument = GetComponent<UIDocument>();
             if (uiDocument == null)
             {
-                Debug.LogError("HarbourObjButtonHandler: UIDocument not found");
+                Debug.LogError("Type0AObjButtonHandler: UIDocument not found");
                 return;
             }
 
             VisualElement root = uiDocument.rootVisualElement;
-            Button button = root.Q<Button>("PlayerHarbourButton");
+            Button button = root.Q<Button>("AttackButtonTypeOA");
 
             if (button != null)
             {
                 button.clicked += () =>
                 {
-                    Debug.Log("HarbourObjButtonHandler: Enter Harbour Button Clicked!");
-                    WorldSpaceInteractionsEventBus.TriggerBaseButtonClick();
+                    Debug.Log("Type0AObjButtonHandler: Enter Type0A Button Clicked!");
+                    WorldSpaceInteractionsEventBus.TriggerType0AObjButtonClick();
                 };
             }
         }

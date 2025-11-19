@@ -7,6 +7,7 @@ namespace UI.WorldMap
     {
         public static event Action MarkerButtonClicked;
         public static event Action HarbourButtonClicked;
+        public static event Action Type0AObjButtonClicked;
 
         public static void TriggerMarkerButtonClick()
         {
@@ -17,6 +18,12 @@ namespace UI.WorldMap
         {
             Debug.Log("EventBus: Triggering HarbourButtonClicked event.");
             HarbourButtonClicked?.Invoke();
+        }
+
+        public static void TriggerType0AObjButtonClick()
+        {
+            Debug.Log("EventBus: Triggering Type0AObjButtonClicked event.");
+            Type0AObjButtonClicked?.Invoke();
         }
     }
 }
