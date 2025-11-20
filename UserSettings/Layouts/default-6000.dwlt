@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 2048
     height: 1057
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Inspector
   m_RootView: {fileID: 5}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 89
+  controlID: 75
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -197,7 +197,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 47
+  controlID: 49
   draggingID: 0
 --- !u!114 &9
 MonoBehaviour:
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 48
+  controlID: 50
   draggingID: 0
 --- !u!114 &10
 MonoBehaviour:
@@ -249,7 +249,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 49
+  controlID: 51
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -855,7 +855,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 687efdff149efdff96a3fdffb8a9fdffc6a9fdff18cafdff32d7fdff7ea0feff86c2feff6ccafeff6402fffff20dffff0c10ffff3881ffff92bbffffd8bbffff48c9ffff06fbffff82e6000024e7000030e70000b8f70000e6f70000ee0201004a070100780701005c2c0100
+      m_ExpandedIDs: a2a3feff1accfeff7e31ffff50c8ffff06fbffff0ccb000028cb000056cb0000fc000100ce0f0100
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -872,7 +872,7 @@ MonoBehaviour:
         m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
-        m_ClientGUIView: {fileID: 11}
+        m_ClientGUIView: {fileID: 0}
       m_SearchString: 
     m_ExpandedScenes: []
     m_CurrenRootInstanceID: 0
@@ -1515,9 +1515,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 8.5819435, y: -63.09011, z: 101.66874}
+    m_Target: {x: 0.97948647, y: 1.6420529, z: 6.0648656}
     speed: 2
-    m_Value: {x: 8.5819435, y: -63.09011, z: 101.66874}
+    m_Value: {x: 0.97948647, y: 1.6420529, z: 6.0648656}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 2
@@ -1567,9 +1567,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: -0.2909132, y: -0.017795013, z: 0.0054157185, w: -0.9565686}
   m_Size:
-    m_Target: 65.591156
+    m_Target: 10.965871
     speed: 2
-    m_Value: 65.591156
+    m_Value: 10.965871
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -1686,7 +1686,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scenes/Group 1
+    - Assets
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1696,16 +1696,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scenes/Group 1
+  - Assets
   m_LastFoldersGridSize: -1
   m_LastProjectPath: /home/conchobar/Documents/Unity/Pirate-Rts-Repo
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 259}
-    m_SelectedIDs: 82cd0000
-    m_LastClickedID: 52610
-    m_ExpandedIDs: 00000000c8cc0000cacc0000cccc0000cecc0000d0cc0000d2cc0000d4cc0000d6cc000096cd0000a0cd000000ca9a3b
+    scrollPos: {x: 0, y: 79}
+    m_SelectedIDs: 9ecc0000
+    m_LastClickedID: 52382
+    m_ExpandedIDs: 0000000092cc000094cc000096cc000098cc00009acc00009ccc00009ecc0000a0cc0000a2cc0000a4cc000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1734,7 +1734,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000c8cc0000cacc0000cccc0000cecc0000d0cc0000d2cc0000d4cc0000d6cc0000
+    m_ExpandedIDs: 0000000092cc000094cc000096cc000098cc00009acc00009ccc00009ecc0000a0cc0000a2cc0000a4cc0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1780,7 +1780,7 @@ MonoBehaviour:
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_TrimLeadingAndTrailingWhitespace: 0
-      m_ClientGUIView: {fileID: 0}
+      m_ClientGUIView: {fileID: 2}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0
@@ -1788,7 +1788,7 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
     m_NewAssetIndexInList: -1
-    m_ScrollPosition: {x: 0, y: 0}
+    m_ScrollPosition: {x: 0, y: 133}
     m_GridSize: 64
   m_SkipHiddenPackages: 0
   m_DirectoriesAreaWidth: 207

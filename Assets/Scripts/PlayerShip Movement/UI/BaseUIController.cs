@@ -10,7 +10,7 @@ namespace PlayerShip_Movement.UI
     {
         [SerializeField] private UIDocument uiDocument; // Reference to the UIDocument
         [SerializeField] private Transform uiTransform; // Transform of the GameObject with UIDocument (for world position tween)
-        [SerializeField] private string buttonElementName = "BaseButton"; // Name of the button VisualElement in UXML
+        [SerializeField] private string buttonElementName = "PlayerHarbourButton"; // Name of the button VisualElement in UXML
         [SerializeField] [Range(1f, 10f)] private float displayDuration = 3f; // Adjustable timer in Inspector
         [SerializeField] private float tweenDuration = 0.5f; // Duration of position tween
         [SerializeField] private float fadeInDuration = 1f; // Duration of fade-in (longer)
