@@ -145,12 +145,18 @@ namespace _Project.Scripts.SceneManagement
             }
         }
 
-        private void ShowLoadingUI()
+        public void ShowLoadingUI()
         {
             if (loadingUICanvasGroup != null)
             {
                 loadingUICanvasGroup.DOFade(1f, 0.4f);
             }
+        }
+        
+        public void InitiateLoad(int index)
+        {
+            ShowLoadingUI(); // Covers the flash instantly
+            _ = LoadSpecificSceneGroup(index);
         }
 
         private void HideLoadingUI()

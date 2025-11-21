@@ -8,6 +8,7 @@ namespace UI.WorldMap.HUDInteractions
     public class HUDButtonController : MonoBehaviour
     {
         private OceanRenderer _currentOcean;
+        [SerializeField] private int targetSceneGroupIndex = 2; // e.g., Harbour = 2
 
         private void Awake()
         {
@@ -39,7 +40,15 @@ namespace UI.WorldMap.HUDInteractions
 
             // 2. Load your Scene Group 2 (replace with your actual scene name)
             // If SceneLoader has a coroutine version, use it here
-            SceneLoader.Instance.LoadSpecificSceneGroup(2);
+            //Old line
+            //SceneLoader.Instance.LoadSpecificSceneGroup(2);
+            
+            
+            // Professional way: Fade → Load → Fade back
+            SceneTransition.Instance.PerformTransition(() =>
+            {
+                SceneLoader.Instance.LoadSpecificSceneGroup(targetSceneGroupIndex);
+            });
             
             // 3. Wait for new scene to load fully
             yield return new WaitForSeconds(0.1f); // Small delay for Crest init
