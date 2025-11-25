@@ -9,6 +9,7 @@ namespace UI.Harbour
     public class IdleHudButtonController : MonoBehaviour
     {
         private OceanRenderer _currentOcean;
+        [SerializeField] private int targetSceneGroupIndex = 1;
 
         private void Awake()
         {
@@ -24,7 +25,9 @@ namespace UI.Harbour
         public void OnLaunchWorldButtonClicked()
         {
            // Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
-            StartCoroutine(LoadSceneGroupOneWithOceanTransition());
+            //StartCoroutine(LoadSceneGroupOneWithOceanTransition());
+            
+            _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
         }
 
         private IEnumerator LoadSceneGroupOneWithOceanTransition()

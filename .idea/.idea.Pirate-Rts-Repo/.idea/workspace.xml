@@ -6,11 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Ocean Body.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Ocean Body.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/HUDInteractions/HUDButtonController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/HUDInteractions/HUDButtonController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Harbour/IdleHudButtonController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Harbour/IdleHudButtonController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/Type0AButtonController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/Type0AButtonController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

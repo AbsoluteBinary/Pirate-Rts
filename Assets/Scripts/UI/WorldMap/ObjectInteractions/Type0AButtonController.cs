@@ -8,7 +8,8 @@ namespace UI.WorldMap.ObjectInteractions
     public class Type0AButtonController : MonoBehaviour
     {
         private OceanRenderer _currentOcean;
-
+        [SerializeField] private int targetSceneGroupIndex = 3;
+        
         private void Awake()
         {
             WorldSpaceInteractionsEventBus.Type0AObjButtonClicked += OnType0AButtonClicked;
@@ -23,7 +24,8 @@ namespace UI.WorldMap.ObjectInteractions
         public void OnType0AButtonClicked()
         {
             Debug.Log(": Enter Type0AObj clicked - Loading Scene Group 3");
-            StartCoroutine(LoadSceneGroup3WithOceanTransition());
+            
+            _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
         }
 
         private IEnumerator LoadSceneGroup3WithOceanTransition()
