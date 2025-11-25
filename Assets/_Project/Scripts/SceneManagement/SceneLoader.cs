@@ -297,6 +297,89 @@ namespace _Project.Scripts.SceneManagement
                 await manager.UnloadScenes();
             }
         }
+        
+        /// <summary>
+        /// NEW PROFESSIONAL ENTRY POINT — Smooth fade transition + load
+        /// Use this from ALL buttons instead of LoadSpecificSceneGroup directly
+        /// </summary>
+        public async Task BeginSceneTransition(int targetGroupIndex)
+        {
+            // ───── STEP 1: SMOOTH FADE TO BLACK (covers everything beautifully) ─────
+            await FadeToBlack();
+
+            // ───── STEP 2: YELLOW DEBUG MESSAGE ─────
+            Debug.Log($"<color=yellow>Call start Load process → Target Group: {targetGroupIndex}</color>");
+
+            // ───── STEP 3: Load the new scene group safely behind black screen ─────
+            await LoadSpecificSceneGroup(targetGroupIndex);
+
+            // ───── STEP 4: SMOOTH FADE BACK IN (reveals new world perfectly) ─────
+            await FadeFromBlack();
+        }
+        
+        private async Task FadeToBlack(float duration = 0.5f)
+        {
+            ForceShowLoadingBackgroundInstantly(); // Reuse our instant method
+
+            if (backgroundImage != null)
+            {
+                backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 0f);
+                await backgroundImage.DOFade(1f, duration).SetEase(Ease.OutCubic).AsyncWaitForCompletion();
+            }
+
+            if (loadingUICanvasGroup != null)
+            {
+                loadingUICanvasGroup.alpha = 0f;
+                await loadingUICanvasGroup.DOFade(1f, duration * 0.8f).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
+            }
+
+            Debug.Log("<color=black>Screen fully black — safe to load</color>");
+        }
+
+        private async Task FadeFromBlack(float duration = 0.6f)
+        {
+            if (backgroundImage != null)
+            {
+                await backgroundImage.DOFade(0f, duration).SetEase(Ease.InCubic).AsyncWaitForCompletion();
+            }
+
+            if (loadingUICanvasGroup != null)
+            {
+                await loadingUICanvasGroup.DOFade(0f, duration * 0.8f).SetEase(Ease.InQuad).AsyncWaitForCompletion();
+            }
+
+            // Optional: deactivate when fully invisible
+            if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
+            if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
+
+            Debug.Log("<color=green>Transition complete — new world revealed!</color>");
+        }
+        
+        private void ForceShowLoadingBackgroundInstantly()
+        {
+            if (backgroundImage != null)
+            {
+                backgroundImage.gameObject.SetActive(true);
+                backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 1f); // Force full opacity
+                Debug.Log("[SceneLoader] Background forced ON instantly — covering old scene");
+            }
+
+            if (loadingUICanvasGroup != null)
+            {
+                loadingUICanvasGroup.gameObject.SetActive(true);
+                loadingUICanvasGroup.alpha = 1f;
+            }
+
+            if (loadingBarFill != null)
+            {
+                loadingBarFill.fillAmount = 0f;
+            }
+
+            if (loadingText != null)
+            {
+                loadingText.text = "Loading...";
+            }
+        }
 
         public async Task ToggleNextSceneGroup()
         {

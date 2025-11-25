@@ -23,8 +23,10 @@ namespace UI.WorldMap.HUDInteractions
 
         public void OnMarkerButtonClicked()
         {
-            Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
-            StartCoroutine(LoadSceneGroup2WithOceanTransition());
+            Debug.Log("HUDController: Entering Harbour...");
+
+            // SMOOTH PROFESSIONAL TRANSITION
+            _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
         }
         
 
