@@ -10,7 +10,7 @@ using UnityEditor.Experimental.GraphView;
 
 namespace TGS_Editor {
     [CustomEditor(typeof(TerrainGridSystem))]
-    public class TGSInspector : Editor {
+    public class TGSInspector : UnityEditor.Editor {
 
         TerrainGridSystem tgs;
         Texture2D _headerTexture;

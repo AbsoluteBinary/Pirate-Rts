@@ -121,78 +121,9 @@ NavMeshSettings:
   m_NavMeshData: {fileID: 0}
 --- !u!1 &214986490 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-  m_PrefabInstance: {fileID: 410084936}
+  m_CorrespondingSourceObject: {fileID: 5297235620881004013, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+  m_PrefabInstance: {fileID: 6756502333599930494}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &410084936
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Name
-      value: navalFleetShipA002_3DModel
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 7.4689064
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.932
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -2.053743
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.00000008146034
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1214,6 +1145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45f028e3049962805aff5085be2d32e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.WorldMap.ObjectInteractions.Type0AButtonController
+  targetSceneGroupIndex: 3
 --- !u!114 &1211652369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2154,6 +2086,63 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 5fd8aedfc10448218ae19c4a94848b41, type: 3}
+--- !u!1001 &6756502333599930494
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5297235620881004013, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_Name
+      value: navalFleetShipA002_3DModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 7.4689064
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.932
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.053743
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.00000008146034
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2166,7 +2155,7 @@ SceneRoots:
   - {fileID: 2508573917316407385}
   - {fileID: 972349440}
   - {fileID: 1643339209}
-  - {fileID: 410084936}
+  - {fileID: 6756502333599930494}
   - {fileID: 1538954480}
   - {fileID: 1465588838}
   - {fileID: 698236010}

@@ -85,6 +85,20 @@ namespace PlayerShip_Movement
             Debug.Log("PlayerShipController: World Space Button Clicked via EventBus!");
             StartTween();
         }
+        
+        public void MoveToLocation(Vector3 location)
+        {
+            if (ship == null) return;
+
+            // Kill any existing movement
+            FreeRoamTween?.Kill();
+
+            // Look + move
+            FreeRoamTween = ship.transform.DOLookAt(location, moveDuration * 0.4f);
+            FreeRoamTween = ship.transform.DOMove(location, moveDuration)
+                .SetEase(Ease.InOutSine)
+                .OnComplete(() => Debug.Log($"[Combat] Ship arrived at {location}"));
+        }
 
         public void StartTween()
         {

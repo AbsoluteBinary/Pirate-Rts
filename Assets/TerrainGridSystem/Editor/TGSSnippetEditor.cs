@@ -6,7 +6,7 @@ using UnityEditor;
 namespace TGS {
 	
 	[CustomEditor (typeof(TGSSnippetBase), true)]
-	public class TGSSnippetEditor : Editor {
+	public class TGSSnippetEditor : UnityEditor.Editor {
 
 		SerializedProperty execute, order, delay, duration, easeType;
 

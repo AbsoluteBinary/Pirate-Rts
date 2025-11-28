@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 
 namespace Michsky.UI.Shift
 {
-    public class ToolsMenu : Editor
+    public class ToolsMenu : UnityEditor.Editor
     {
         static string objectPath;
 

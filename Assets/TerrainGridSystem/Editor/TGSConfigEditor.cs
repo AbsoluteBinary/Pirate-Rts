@@ -6,7 +6,7 @@ using UnityEditor;
 namespace TGS {
 
 	[CustomEditor (typeof(TGSConfig))]
-	public class TGSConfigEditor : Editor {
+	public class TGSConfigEditor : UnityEditor.Editor {
 
 		SerializedProperty title, filterTerritories;
 		TGSConfig config;

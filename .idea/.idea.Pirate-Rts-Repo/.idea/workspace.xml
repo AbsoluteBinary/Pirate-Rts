@@ -6,7 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Sirenix/Odin Inspector/Modules/Unity.Addressables/AddressablesInspectors.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Sirenix/Odin Inspector/Modules/Unity.Addressables/AddressablesInspectors.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerShipController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerShipController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Settings/Ultra_PipelineAsset_ForwardRenderer.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Settings/Ultra_PipelineAsset_ForwardRenderer.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Shift - Complete Sci-Fi UI/Editor/Scripts/ToolsMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Shift - Complete Sci-Fi UI/Editor/Scripts/ToolsMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Shift - Complete Sci-Fi UI/Editor/Scripts/UIManagerEditor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Shift - Complete Sci-Fi UI/Editor/Scripts/UIManagerEditor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Shift - Complete Sci-Fi UI/Scripts/Editor Handlers/ShiftUIEditorHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Shift - Complete Sci-Fi UI/Scripts/Editor Handlers/ShiftUIEditorHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TerrainGridSystem/Editor/TGSConfigEditor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TerrainGridSystem/Editor/TGSConfigEditor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TerrainGridSystem/Editor/TGSInspector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TerrainGridSystem/Editor/TGSInspector.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TerrainGridSystem/Editor/TGSSnippetEditor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TerrainGridSystem/Editor/TGSSnippetEditor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -18,9 +29,25 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/CombatScenes/CombatSceneManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/CombatScenes/FaceCamera.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/CombatPointerController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerShipController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/UI/BaseUIController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/RipplePointer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Harbour/IdleHudButtonController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/HUDInteractions/HUDButtonController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/HUDInteractions/HUDButtonHandler.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/EnemyType0A.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/HarbourObjButtonController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/HarbourObjButtonHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/Type0AButtonController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/Type0AButtonHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/WorldSpaceInteractionsEventBus.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneTransition.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.render-pipelines.universal@4f66ce9345de/Shaders/Lit.shader" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -134,6 +161,10 @@
       <workItem from="1763720999089" duration="3637000" />
       <workItem from="1763724975669" duration="933000" />
       <workItem from="1764157084516" duration="819000" />
+      <workItem from="1764253952954" duration="2741000" />
+      <workItem from="1764257639398" duration="1010000" />
+      <workItem from="1764258664374" duration="893000" />
+      <workItem from="1764323117328" duration="3309000" />
     </task>
     <servers />
   </component>

@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Michsky.UI.Shift
 {
-    public class ShiftUIEditorHandler : Editor
+    public class ShiftUIEditorHandler : UnityEditor.Editor
     {
         public static void DrawProperty(SerializedProperty property, GUISkin skin, string content)
         {
