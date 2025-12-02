@@ -74,7 +74,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 92
+  controlID: 95
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -197,7 +197,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 22
+  controlID: 93
   draggingID: 0
 --- !u!114 &9
 MonoBehaviour:
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 23
+  controlID: 94
   draggingID: 0
 --- !u!114 &10
 MonoBehaviour:
@@ -249,7 +249,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 24
+  controlID: 55
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -855,7 +855,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 0295ffff0af2ffff06fbffff92cf0000bacf0000
+      m_ExpandedIDs: fc53ffff9899ffff94dbffffaafaffffb4faffffbefaffff06fbffff80e5000090e50000d8e5000046f1000056f100009ef100009e010100ae010100f6010100
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1515,9 +1515,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -1.0388658, y: -0.118348554, z: 0.11893453}
+    m_Target: {x: -4.7430677, y: -1.1344852, z: 6.4155474}
     speed: 2
-    m_Value: {x: -1.0388658, y: -0.118348554, z: 0.11893453}
+    m_Value: {x: -4.7430677, y: -1.1344852, z: 6.4155474}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 2
@@ -1563,13 +1563,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.18582214, y: -0.048591215, z: 0.009200886, w: 0.98133653}
+    m_Target: {x: 0.12175789, y: -0.6373834, z: 0.10294397, w: 0.7538699}
     speed: 2
-    m_Value: {x: 0.18582243, y: -0.048591286, z: 0.0092009, w: 0.981338}
+    m_Value: {x: 0.121757895, y: -0.63738346, z: 0.10294398, w: 0.75386995}
   m_Size:
-    m_Target: 3.8679826
+    m_Target: 7.427477
     speed: 2
-    m_Value: 3.8679826
+    m_Value: 7.427477
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -1686,7 +1686,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets
+    - Assets/Prefabs/Combat
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1696,16 +1696,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets
+  - Assets/Prefabs/Combat
   m_LastFoldersGridSize: -1
   m_LastProjectPath: /home/conchobar/Documents/Unity/Pirate-Rts-Repo
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 79}
-    m_SelectedIDs: 8ece0000
-    m_LastClickedID: 52878
-    m_ExpandedIDs: 0000000084ce000086ce000088ce00008ace00008cce00008ece000090ce000092ce000094ce000000ca9a3b
+    scrollPos: {x: 0, y: 303}
+    m_SelectedIDs: aecd0000
+    m_LastClickedID: 52654
+    m_ExpandedIDs: 00000000c8cc0000cacc0000cccc0000cecc0000d0cc0000d2cc0000d4cc0000d6cc0000d8cc000072cd0000a8cd0000e8fb0000eafb000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1734,7 +1734,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000082ce000084ce000086ce000088ce00008ace00008cce00008ece000090ce000092ce000094ce0000
+    m_ExpandedIDs: 00000000c8cc0000cacc0000cccc0000cecc0000d0cc0000d2cc0000d4cc0000d6cc0000d8cc0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

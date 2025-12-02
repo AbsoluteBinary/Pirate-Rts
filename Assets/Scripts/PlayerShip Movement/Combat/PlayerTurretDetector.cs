@@ -5,7 +5,7 @@ namespace PlayerShip_Movement.Combat
     public class PlayerTurretDetector : MonoBehaviour
     {
         [Header("Detection Settings")]
-        [SerializeField] private float detectionRange = 50f;
+        [SerializeField] private float detectionRange = 10f;
         [SerializeField] private LayerMask turretLayer = 1 << 10; // "Turret" layer
         [SerializeField] private float scanInterval = 0.5f;       // Not every frame = perf!
 
