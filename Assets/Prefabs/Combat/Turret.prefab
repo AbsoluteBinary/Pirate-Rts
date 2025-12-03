@@ -129,6 +129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Combat.TurretAimer
   player: {fileID: 0}
+  fireRange: 10
 --- !u!1 &3445669750163993784
 GameObject:
   m_ObjectHideFlags: 0
@@ -400,11 +401,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Combat.CannonFire
   player: {fileID: 0}
-  fireRange: 200
+  fireRange: 10
   bulletPrefab: {fileID: 1153557873438720694, guid: ecd9bbbc3611a20c3aa167cffa7eb058, type: 3}
-  bulletSpeed: 180
+  bulletSpeed: 60
   bulletLifetime: 3
-  fireRate: 0.8
+  fireRate: 2
   fireDirection: {fileID: 827336744711439891}
 --- !u!1 &8757177117969761223
 GameObject:

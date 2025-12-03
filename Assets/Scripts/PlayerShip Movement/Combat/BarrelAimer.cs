@@ -6,6 +6,7 @@ namespace PlayerShip_Movement.Combat
     public class BarrelAimer : MonoBehaviour
     {
         [SerializeField] private Transform player;
+        [SerializeField] private float fireRange = 20f;  // ← Match CannonFire range
 
         private void Awake()
         {
@@ -17,6 +18,10 @@ namespace PlayerShip_Movement.Combat
         {
             if (player == null) return;
 
+            // ← NEW: Only aim when in fire range
+            float sqrDist = (player.position - transform.position).sqrMagnitude;
+            if (sqrDist > fireRange * fireRange) return;
+
             // Direction to player on horizontal plane only
             Vector3 toPlayer = player.position - transform.position;
             toPlayer.y = 0;
@@ -26,7 +31,7 @@ namespace PlayerShip_Movement.Combat
             // Desired rotation (Y-axis only)
             Quaternion targetRot = Quaternion.LookRotation(toPlayer, Vector3.up);
 
-            // Apply while preserving the 90° X pitch you set in the prefab
+            // Apply while preserving the 90° X pitch
             transform.rotation = Quaternion.Euler(90f, targetRot.eulerAngles.y, 0f);
         }
     }
