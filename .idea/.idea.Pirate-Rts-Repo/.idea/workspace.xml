@@ -7,7 +7,9 @@
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Combat/Turret.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Combat/Turret.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/BarrelAimer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/BarrelAimer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/navalFleetShipA002_3DModel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/navalFleetShipA002_3DModel.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/CannonFire.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/TurretRaycastFire.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/CannonFire.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/TurretRaycastFire.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

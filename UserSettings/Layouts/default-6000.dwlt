@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.ContainerWindow
   m_PixelRect:
     serializedVersion: 2
-    x: 2048
+    x: 2044
     y: 69
     width: 2048
     height: 1057
@@ -1515,9 +1515,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 0.40589795, y: 0.49268183, z: 0.9393925}
+    m_Target: {x: 1.2258906, y: -2.1150908, z: -4.607606}
     speed: 2
-    m_Value: {x: -4.7430677, y: -1.1344852, z: 6.4155474}
+    m_Value: {x: 0.40589795, y: 0.49268183, z: 0.9393925}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 2
@@ -1563,13 +1563,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.21034072, y: -0.48596805, z: 0.121761024, w: 0.8395033}
+    m_Target: {x: -0.09188762, y: -0.8989426, z: 0.22768395, w: -0.36278963}
     speed: 2
-    m_Value: {x: -0.12175788, y: 0.63738334, z: -0.102943964, w: -0.75386983}
+    m_Value: {x: -0.21034072, y: 0.48596805, z: -0.121761024, w: -0.83950335}
   m_Size:
-    m_Target: 1.5139936
+    m_Target: 4.8998957
     speed: 2
-    m_Value: 7.427477
+    m_Value: 1.5139936
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -1705,7 +1705,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 303}
     m_SelectedIDs: aecd0000
     m_LastClickedID: 52654
-    m_ExpandedIDs: 000000000ecd000010cd000012cd000014cd000016cd000018cd00001acd00001ccd00001ecd0000
+    m_ExpandedIDs: 000000001acd00001ccd00001ecd000020cd000022cd000024cd000026cd000028cd00002acd0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1734,7 +1734,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000000ecd000010cd000012cd000014cd000016cd000018cd00001acd00001ccd00001ecd0000
+    m_ExpandedIDs: 000000001acd00001ccd00001ecd000020cd000022cd000024cd000026cd000028cd00002acd0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
