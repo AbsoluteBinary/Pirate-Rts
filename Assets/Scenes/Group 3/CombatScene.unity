@@ -1198,13 +1198,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1517778160}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 877f2eb6a6d25b34193a3e974d386050, type: 3}
+  m_Script: {fileID: 11500000, guid: bf988e0a6a78293b9b403975b8714492, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UI.IMGUI.NavalCombatHUD
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Combat.NavalCombatManager
+  player: {fileID: 519233096}
   playerHealth: 100
-  cannonAmmo: 48
-  shipSpeed: 0
-  windDirection: 45
+  turretBarrels:
+  - {fileID: 8028541789134799565}
+  turretRange: 10
+  damage: 10
+  fireRate: 1.5
+  trailPrefab: {fileID: 6191541304733331936, guid: 4a40a5abca12a70f5b1cea2d7f054f71, type: 3}
   flashDuration: 0.2
 --- !u!1 &1725493540
 GameObject:
@@ -1562,10 +1566,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1855865782587623243, guid: f246e4babdac65810bac0d97f303844b, type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 519233096}
     - target: {fileID: 4531720483115632374, guid: f246e4babdac65810bac0d97f303844b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1610,15 +1610,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Turret
       objectReference: {fileID: 0}
-    - target: {fileID: 6453117939804255665, guid: f246e4babdac65810bac0d97f303844b, type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 519233096}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f246e4babdac65810bac0d97f303844b, type: 3}
+--- !u!4 &8028541789134799565 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 472723425044952734, guid: f246e4babdac65810bac0d97f303844b, type: 3}
+  m_PrefabInstance: {fileID: 8028541789134799564}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8938229903604419577
 GameObject:
   m_ObjectHideFlags: 0
