@@ -10,11 +10,11 @@ namespace PlayerShip_Movement
         [Header("Settings")]
         [SerializeField] private TerrainGridSystem tgs;
         [SerializeField] private GameObject pointerPrefab;
-        [SerializeField, Range(0.5f, 10f)] private float fadeDuration = 0.8f;  // Fade after landing
+        [SerializeField, Range(0.5f, 10f)] private float fadeDuration = 0.8f;
 
         [Header("Visual Feedback")]
-        [SerializeField] private float dropHeight = 15f;
-        [SerializeField] private float landHeight = 1.5f;
+        [SerializeField] private float dropHeight = 15f;           // Start drop from sky
+        private static float finalHeightAboveWater = 1f;  // ← ADJUST THIS: Final Y height on water
         [SerializeField] private float dropDuration = 0.8f;
         [SerializeField] private Ease dropEase = Ease.OutBounce;
 
@@ -45,7 +45,7 @@ namespace PlayerShip_Movement
 
         private void OnCellClick(TerrainGridSystem sender, int cellIndex, int buttonIndex)
         {
-            if (buttonIndex != 1) return;  // ← RIGHT CLICK ONLY (buttonIndex == 1)
+            if (buttonIndex != 1) return;  // Right click only
 
             // Cancel any existing
             cts?.Cancel();
@@ -65,11 +65,10 @@ namespace PlayerShip_Movement
 
             // Drop → land → SHIP MOVES IMMEDIATELY + fade pointer
             currentPointer.transform
-                .DOMoveY(targetPos.y + landHeight, dropDuration)
+                .DOMoveY(targetPos.y + finalHeightAboveWater, dropDuration)  // ← Uses new variable
                 .SetEase(dropEase)
                 .OnComplete(() =>
                 {
-                    // ← SHIP MOVES AS SOON AS IT TOUCHES WATER!
                     shipController?.MoveToLocation(targetPos);
 
                     // Fade/destroy pointer quickly

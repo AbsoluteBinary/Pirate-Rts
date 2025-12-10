@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Combat/Turret.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Combat/Turret.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Prefabs/navalFleetShipA002_3DModel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/navalFleetShipA002_3DModel.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/CannonFire.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/TurretRaycastFire.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/CannonFire.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/TurretRaycastFire.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/CombatPointerController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/CombatPointerController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Health.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Health.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerShipController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerShipController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,7 +26,6 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/CombatScenes/CombatSceneManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/CombatScenes/FaceCamera.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/BulletSelfDestruct.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/Fire.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/MuzzleTipAimer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/PlayerTurretDetector.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/CombatPointerController.cs" root0="FORCE_HIGHLIGHTING" />
@@ -33,6 +33,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/PlayerShipController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/UI/BaseUIController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Harbour/IdleHudButtonController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/IMGUI/NavalCombatHUD.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/HUDInteractions/HUDButtonController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/HUDInteractions/HUDButtonHandler.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/WorldMap/ObjectInteractions/EnemyType0A.cs" root0="FORCE_HIGHLIGHTING" />
@@ -165,6 +166,7 @@
       <workItem from="1764669158285" duration="3127000" />
       <workItem from="1764684605241" duration="4273000" />
       <workItem from="1764691469154" duration="1239000" />
+      <workItem from="1765359107595" duration="3879000" />
     </task>
     <servers />
   </component>

@@ -118,6 +118,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8563074207672688293}
+    - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6380087159314669978}
   m_SourcePrefab: {fileID: 100100000, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
 --- !u!1 &5297235620881004013 stripped
 GameObject:
@@ -163,3 +166,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.714943, y: 4.132086, z: 16.05642}
   m_Center: {x: -0.181336, y: 0.9741332, z: -0.63488483}
+--- !u!114 &6380087159314669978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5297235620881004013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e289130af0cb5104a93203a0f69bde0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Health
+  maxHealth: 100

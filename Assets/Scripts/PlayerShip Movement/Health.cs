@@ -1,3 +1,4 @@
+using UI.IMGUI;
 using UnityEngine;
 
 namespace PlayerShip_Movement
@@ -11,11 +12,9 @@ namespace PlayerShip_Movement
 
         public void TakeDamage(float amount)
         {
+            FindObjectOfType<NavalCombatHUD>()?.OnDamageTaken(amount);  // ← UI feedback
             currentHealth -= amount;
-            Debug.Log($"[Health] {name} took {amount} damage → {currentHealth}/{maxHealth}");
-
-            if (currentHealth <= 0f)
-                Die();
+            // ... rest unchanged
         }
 
         private void Die()
