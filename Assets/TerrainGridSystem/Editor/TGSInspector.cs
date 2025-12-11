@@ -10,7 +10,7 @@ using UnityEditor.Experimental.GraphView;
 
 namespace TGS_Editor {
     [CustomEditor(typeof(TerrainGridSystem))]
-    public class TGSInspector : UnityEditor.Editor {
+    public class TGSInspector : Editor {
 
         TerrainGridSystem tgs;
         Texture2D _headerTexture;
@@ -304,6 +304,9 @@ namespace TGS_Editor {
                     else {
                         tgs.gridCurvature = EditorGUILayout.Slider("Curvature", tgs.gridCurvature, 0, 0.1f);
                     }
+                    if (tgs.gridTopology == GridTopology.Hexagonal || tgs.gridTopology == GridTopology.Box) {
+                        tgs.cornerJitter = EditorGUILayout.Slider("Corner Jitter", tgs.cornerJitter, 0f, 0.5f);
+                    }
                     if (tgs.gridTopology != GridTopology.Irregular) {
                         EditorGUILayout.LabelField("Relaxation", "Only available with irregular topology");
                     }
@@ -528,6 +531,7 @@ namespace TGS_Editor {
                         tgs.territoryCustomBorderThickness = EditorGUILayout.Toggle(new GUIContent("Custom Thickness", "Draws territory borders with a thick line."), tgs.territoryCustomBorderThickness);
                         if (tgs.territoryCustomBorderThickness) {
                             tgs.territoryFrontiersThickness = EditorGUILayout.FloatField("Thickness", tgs.territoryFrontiersThickness);
+                            tgs.territoryFrontiersMiterJoins = EditorGUILayout.Toggle(new GUIContent("Miter Joins", "Reuses vertices at joints to produce continuous borders without gaps/overlaps (CPU mitering when geometry shaders are disabled)."), tgs.territoryFrontiersMiterJoins);
                         }
                         tgs.showTerritoriesOuterBorders = EditorGUILayout.Toggle("Outer Borders", tgs.showTerritoriesOuterBorders);
                         EditorGUI.indentLevel--;
@@ -778,6 +782,29 @@ namespace TGS_Editor {
                             }
                             EditorGUILayout.EndHorizontal();
 
+                            EditorGUILayout.BeginHorizontal();
+                            GUILayout.Label("", GUILayout.Width(labelWidth));
+                            if (GUILayout.Button("Reset Selected Cells", GUILayout.Width(160))) {
+                                tgs.CellsReset(cellSelectedIndices);
+                                if (cellSelectedIndices.Count > 0) {
+                                    int firstIndex = cellSelectedIndices[0];
+                                    cellTerritoryIndex = tgs.CellGetTerritoryIndex(firstIndex);
+                                    cellColor = tgs.CellGetColor(firstIndex);
+                                    if (cellColor.a == 0) cellColor = Color.white;
+                                    cellTextureIndex = tgs.CellGetTextureIndex(firstIndex);
+                                    cellTextureScale = tgs.CellGetTextureScale(firstIndex);
+                                    if (cellTextureScale == Vector2.zero) cellTextureScale = Vector2.one;
+                                    cellTextureOffset = tgs.CellGetTextureOffset(firstIndex);
+                                    cellTag = tgs.CellGetTag(firstIndex);
+                                    cellCrossCost = tgs.CellGetCrossCost(firstIndex);
+                                    ReadCrossSidesCost(firstIndex);
+                                }
+                                RefreshGrid();
+                                GUIUtility.ExitGUI();
+                                return;
+                            }
+                            EditorGUILayout.EndHorizontal();
+
                             bool needsRedraw = false;
 
                             Cell selectedCell = tgs.cells[cellSelectedIndex];
@@ -787,6 +814,7 @@ namespace TGS_Editor {
                                 for (int k = 0; k < selectedCount; k++) {
                                     tgs.cells[cellSelectedIndices[k]].visible = selectedCell.visible;
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                                 needsRedraw = true;
                             }
 
@@ -796,6 +824,7 @@ namespace TGS_Editor {
                                 for (int k = 0; k < selectedCount; k++) {
                                     tgs.cells[cellSelectedIndices[k]].visibleAlways = selectedCell.visibleAlways;
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                                 needsRedraw = true;
                             }
 
@@ -805,6 +834,7 @@ namespace TGS_Editor {
                                 for (int k = 0; k < selectedCount; k++) {
                                     tgs.cells[cellSelectedIndices[k]].canCross = selectedCell.canCross;
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                             }
 
                             EditorGUILayout.BeginHorizontal();
@@ -814,6 +844,7 @@ namespace TGS_Editor {
                                 for (int k = 0; k < selectedCount; k++) {
                                     tgs.cells[cellSelectedIndices[k]].SetAllSidesCost(cellCrossCost);
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                                 tgs.ResetDebugInfo();
                                 ReadCrossSidesCost(selectedCell.index);
                             }
@@ -843,6 +874,7 @@ namespace TGS_Editor {
                                 for (int k = 0; k < selectedCount; k++) {
                                     tgs.CellSetTerritory(cellSelectedIndices[k], cellTerritoryIndex);
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                                 needsRedraw = true;
                             }
                             EditorGUILayout.EndHorizontal();
@@ -855,6 +887,7 @@ namespace TGS_Editor {
                                     GUI.enabled = false;
                                 if (GUILayout.Button("Set Tag", GUILayout.Width(100))) {
                                     tgs.CellSetTag(cellSelectedIndex, cellTag);
+                                    MarkCellsAsCustomized(new List<int> { cellSelectedIndex });
                                 }
                                 GUI.enabled = true;
                                 EditorGUILayout.EndHorizontal();
@@ -892,6 +925,7 @@ namespace TGS_Editor {
                                     o.transform.parent.gameObject.hideFlags = 0;
                                     o.hideFlags = 0;
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                                 needsRedraw = true;
                             }
                             GUI.enabled = true;
@@ -899,6 +933,7 @@ namespace TGS_Editor {
                                 for (int k = 0; k < selectedCount; k++) {
                                     tgs.CellHideRegionSurface(cellSelectedIndices[k]);
                                 }
+                                MarkCellsAsCustomized(cellSelectedIndices);
                                 needsRedraw = true;
                             }
                             EditorGUILayout.EndHorizontal();
@@ -976,17 +1011,22 @@ namespace TGS_Editor {
             if (cell.hasAttributes) {
                 foreach (string key in cell.attrib.keys) {
                     EditorGUILayout.BeginHorizontal();
+                    EditorGUI.BeginChangeCheck();
                     string stringValue = EditorGUILayout.TextField(key, cell.attrib[key]);
-                    if (float.TryParse(stringValue, out float floatValue)) {
-                        cell.attrib[key].str = "";
-                        cell.attrib[key] = floatValue;
-                    }
-                    else {
-                        cell.attrib[key].n = 0;
-                        cell.attrib[key] = stringValue;
+                    if (EditorGUI.EndChangeCheck()) {
+                        if (float.TryParse(stringValue, out float floatValue)) {
+                            cell.attrib[key].str = "";
+                            cell.attrib[key] = floatValue;
+                        }
+                        else {
+                            cell.attrib[key].n = 0;
+                            cell.attrib[key] = stringValue;
+                        }
+                        MarkCellsAsCustomized(new List<int> { cell.index });
                     }
                     if (GUILayout.Button("Remove", GUILayout.Width(100))) {
                         cell.attrib.RemoveField(key);
+                        MarkCellsAsCustomized(new List<int> { cell.index });
                         break;
                     }
                     EditorGUILayout.EndHorizontal();
@@ -997,6 +1037,7 @@ namespace TGS_Editor {
             if (GUILayout.Button("Add", GUILayout.Width(100))) {
                 cell.attrib[newAttribKey] = "";
                 newAttribKey = "";
+                MarkCellsAsCustomized(new List<int> { cell.index });
                 EditorGUIUtility.ExitGUI();
             }
             EditorGUILayout.EndHorizontal();
@@ -1070,6 +1111,7 @@ namespace TGS_Editor {
                         cellSelectedIndices.Add(cellHighlightedIndex);
                         if (textureMode > 0) {
                             tgs.CellToggleRegionSurface(cellHighlightedIndex, true, Color.white, true, textureMode);
+                            MarkCellsAsCustomized(new List<int> { cellHighlightedIndex });
                             SceneView.RepaintAll();
                         }
                         if (cellHighlightedIndex >= 0) {
@@ -1091,6 +1133,15 @@ namespace TGS_Editor {
         }
 
         #region Utility functions
+
+        void MarkCellsAsCustomized (List<int> cellIndices) {
+            if (cellIndices == null || tgs.cells == null) return;
+            foreach (int index in cellIndices) {
+                if (index >= 0 && index < tgs.cells.Count && tgs.cells[index] != null) {
+                    tgs.cells[index].customized = true;
+                }
+            }
+        }
 
         Texture2D MakeTex (int width, int height, Color col) {
             Color[] pix = new Color[width * height];
@@ -1196,7 +1247,6 @@ namespace TGS_Editor {
         void ExportGridConfig () {
             TGSConfig configComponent = tgs.gameObject.AddComponent<TGSConfig>();
             configComponent.SaveConfiguration(tgs);
-            configComponent.enabled = false;
         }
 
         bool CheckTextureImportSettings (Texture2D tex) {
@@ -1238,6 +1288,7 @@ namespace TGS_Editor {
                 for (int k = 0; k < selectedCount; k++) {
                     tgs.CellSetSideCrossCost(cellSelectedIndices[k], side, crossCost);
                 }
+                MarkCellsAsCustomized(cellSelectedIndices);
             }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();

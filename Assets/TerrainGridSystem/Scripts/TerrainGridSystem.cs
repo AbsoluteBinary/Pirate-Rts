@@ -638,6 +638,19 @@ namespace TGS {
             }
         }
 
+        [SerializeField, Range(0f, 0.5f)]
+        float _cornerJitter = 0f;
+        public float cornerJitter {
+            get { return _cornerJitter; }
+            set {
+                if (_cornerJitter != value) {
+                    _cornerJitter = value;
+                    needGenerateMap = true;
+                    isDirty = true;
+                }
+            }
+        }
+
         [SerializeField]
         HighlightMode _highlightMode = HighlightMode.Cells;
 
@@ -1532,6 +1545,95 @@ namespace TGS {
             Vector2 scale = new Vector2(size.x / terrainWidth, size.y / terrainDepth);
             gridScale = scale;
         }
+
+		/// <summary>
+		/// Fits the grid to the current camera viewport on the grid plane.
+		/// Works with both orthographic and perspective cameras.
+		/// </summary>
+		/// <param name="cam">Camera used to compute viewport bounds. If null, uses cameraMain or Camera.main.</param>
+		/// <param name="margin">Extra fractional padding added on each side (e.g. 0.05 = 5%).</param>
+		public void FitToScreen (Camera cam = null, float margin = 0f, bool keepAspectRatio = false) {
+			if (cam == null) cam = cameraMain != null ? cameraMain : Camera.main;
+			if (cam == null) return;
+			if (margin < 0f) margin = 0f;
+
+			Plane plane = new Plane(transform.TransformDirection(Vector3.forward), transform.TransformPoint(Vector3.zero));
+
+			Vector3 p00, p10, p01, p11;
+			bool ok00 = plane.Raycast(cam.ViewportPointToRay(new Vector3(0f, 0f, 0f)), out float t00);
+			bool ok10 = plane.Raycast(cam.ViewportPointToRay(new Vector3(1f, 0f, 0f)), out float t10);
+			bool ok01 = plane.Raycast(cam.ViewportPointToRay(new Vector3(0f, 1f, 0f)), out float t01);
+			bool ok11 = plane.Raycast(cam.ViewportPointToRay(new Vector3(1f, 1f, 0f)), out float t11);
+			if (ok00) p00 = cam.ViewportPointToRay(new Vector3(0f, 0f, 0f)).GetPoint(t00); else p00 = Vector3.zero;
+			if (ok10) p10 = cam.ViewportPointToRay(new Vector3(1f, 0f, 0f)).GetPoint(t10); else p10 = Vector3.zero;
+			if (ok01) p01 = cam.ViewportPointToRay(new Vector3(0f, 1f, 0f)).GetPoint(t01); else p01 = Vector3.zero;
+			if (ok11) p11 = cam.ViewportPointToRay(new Vector3(1f, 1f, 0f)).GetPoint(t11); else p11 = Vector3.zero;
+
+			if (!(ok00 && ok10 && ok01 && ok11)) {
+				Vector3 center;
+				if (!plane.Raycast(cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)), out float tc)) return;
+				center = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)).GetPoint(tc);
+				float halfH, halfW;
+				if (cam.orthographic) {
+					halfH = cam.orthographicSize;
+					halfW = halfH * cam.aspect;
+				} else {
+					return;
+				}
+				float width = (halfW * 2f);
+				float height = (halfH * 2f);
+				if (keepAspectRatio) {
+					Vector2 currSize = GetSize();
+					if (currSize.x > 0f && currSize.y > 0f) {
+						float scale = Mathf.Max(width / currSize.x, height / currSize.y);
+						width = currSize.x * scale;
+						height = currSize.y * scale;
+					}
+				}
+				width *= (1f + margin * 2f);
+				height *= (1f + margin * 2f);
+				SetGridCenterWorldPosition(center, false);
+				SetSize(new Vector2(width, height));
+				Redraw();
+				return;
+			}
+
+			Vector3 c = (p00 + p10 + p01 + p11) * 0.25f;
+			Vector3 axisX = transform.TransformDirection(Vector3.right).normalized;
+			Vector3 axisY = transform.TransformDirection(Vector3.up).normalized;
+
+			float minX = float.PositiveInfinity, maxX = float.NegativeInfinity;
+			float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
+
+			Vector3 v;
+			float s;
+			v = p00 - c; s = Vector3.Dot(v, axisX); if (s < minX) minX = s; if (s > maxX) maxX = s; s = Vector3.Dot(v, axisY); if (s < minY) minY = s; if (s > maxY) maxY = s;
+			v = p10 - c; s = Vector3.Dot(v, axisX); if (s < minX) minX = s; if (s > maxX) maxX = s; s = Vector3.Dot(v, axisY); if (s < minY) minY = s; if (s > maxY) maxY = s;
+			v = p01 - c; s = Vector3.Dot(v, axisX); if (s < minX) minX = s; if (s > maxX) maxX = s; s = Vector3.Dot(v, axisY); if (s < minY) minY = s; if (s > maxY) maxY = s;
+			v = p11 - c; s = Vector3.Dot(v, axisX); if (s < minX) minX = s; if (s > maxX) maxX = s; s = Vector3.Dot(v, axisY); if (s < minY) minY = s; if (s > maxY) maxY = s;
+
+			float widthWorld = (maxX - minX);
+			float heightWorld = (maxY - minY);
+			if (widthWorld <= 0f || heightWorld <= 0f) return;
+
+			if (keepAspectRatio) {
+				Vector2 currSize = GetSize();
+				if (currSize.x > 0f && currSize.y > 0f) {
+					float scale = Mathf.Max(widthWorld / currSize.x, heightWorld / currSize.y);
+					widthWorld = currSize.x * scale;
+					heightWorld = currSize.y * scale;
+				}
+			}
+
+			if (margin > 0f) {
+				widthWorld *= (1f + margin * 2f);
+				heightWorld *= (1f + margin * 2f);
+			}
+
+			SetGridCenterWorldPosition(c, false);
+			SetSize(new Vector2(widthWorld, heightWorld));
+			Redraw();
+		}
 
         /// <summary>
         /// Returns the top/left corner of the grid in world space

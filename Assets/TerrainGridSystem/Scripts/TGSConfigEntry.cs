@@ -5,6 +5,7 @@ namespace TGS {
 
     [Serializable]
     public struct TGSConfigEntry {
+        public int cellIndex;
         public bool visible;
         public bool visibleAlways;
         public int territoryIndex;

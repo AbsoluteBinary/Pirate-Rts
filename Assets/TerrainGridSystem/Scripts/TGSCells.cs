@@ -1782,6 +1782,7 @@ namespace TGS {
         public int CellGetTerritoryRegionIndex (int cellIndex) {
             if (!ValidCellIndex(cellIndex)) return -1;
             int terrIndex = cells[cellIndex].territoryIndex;
+            if (!ValidTerritoryIndex(terrIndex)) return -1;
             Territory terr = territories[terrIndex];
             if (terr.regions.Count == 1) return 0;
 
@@ -3150,46 +3151,73 @@ namespace TGS {
 
 
         /// <summary>
-        /// Returns an array with the main settings of each cell
+        /// Returns an array with the main settings of each cell.
         /// </summary>
-        /// <returns>The get settings.</returns>
         public TGSConfigEntry[] CellGetSettings () {
+            return CellGetSettings(false);
+        }
+
+        public TGSConfigEntry[] CellGetSettings (bool onlyCustomized) {
             if (cells == null) return null;
             int cellCount = cells.Count;
-            TGSConfigEntry[] cellSettings = new TGSConfigEntry[cellCount];
+
+            if (!onlyCustomized) {
+                TGSConfigEntry[] allSettings = new TGSConfigEntry[cellCount];
+                for (int k = 0; k < cellCount; k++) {
+                    Cell cell = cells[k];
+                    if (cell == null) continue;
+                    PopulateConfigEntry(ref allSettings[k], k, cell, includeIndex: false);
+                }
+                return allSettings;
+            }
+
+            List<TGSConfigEntry> customized = new List<TGSConfigEntry>();
             for (int k = 0; k < cellCount; k++) {
                 Cell cell = cells[k];
-                if (cell == null)
-                    continue;
-                cellSettings[k].territoryIndex = cell.territoryIndex;
-                cellSettings[k].visible = cell.visibleSelf;
-                cellSettings[k].visibleAlways = cell.visibleAlways;
-                cellSettings[k].color = CellGetColor(k);
-                cellSettings[k].textureIndex = CellGetTextureIndex(k);
-                cellSettings[k].tag = cell.tag;
-                cellSettings[k].canCross = cell.canCross;
-                cellSettings[k].crossCost = cell.GetSidesCost();
-                cellSettings[k].crossSidesCost = cell.crossCost;
-                cellSettings[k].textureScale = CellGetTextureScale(k);
-                cellSettings[k].textureOffset = CellGetTextureOffset(k);
-                if (cell.hasAttributes) {
-                    List<string> keys = cell.attrib.keys;
-                    int keysCount = keys.Count;
+                if (cell == null) continue;
+                if (!cell.customized) continue;
+
+                TGSConfigEntry entry = default;
+                PopulateConfigEntry(ref entry, k, cell, includeIndex: true);
+                customized.Add(entry);
+            }
+            return customized.ToArray();
+        }
+
+        void PopulateConfigEntry (ref TGSConfigEntry entry, int cellIndex, Cell cell, bool includeIndex) {
+            if (includeIndex) entry.cellIndex = cellIndex;
+            entry.territoryIndex = cell.territoryIndex;
+            entry.visible = cell.visibleSelf;
+            entry.visibleAlways = cell.visibleAlways;
+            entry.color = CellGetColor(cellIndex);
+            entry.textureIndex = CellGetTextureIndex(cellIndex);
+            entry.textureScale = CellGetTextureScale(cellIndex);
+            entry.textureOffset = CellGetTextureOffset(cellIndex);
+            entry.tag = cell.tag;
+            entry.canCross = cell.canCross;
+            entry.crossCost = cell.GetSidesCost();
+            entry.crossSidesCost = cell.crossCost != null ? (float[])cell.crossCost.Clone() : null;
+
+            if (cell.hasAttributes) {
+                List<string> keys = cell.attrib.keys;
+                int keysCount = keys.Count;
+                if (keysCount > 0) {
                     TGSConfigAttribPair[] attribs = new TGSConfigAttribPair[keysCount];
                     for (int j = 0; j < keysCount; j++) {
                         attribs[j].key = keys[j];
                         string stringValue = cell.attrib[j];
-                        if (float.TryParse(cell.attrib, out float floatValue)) {
+                        if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float floatValue)) {
                             attribs[j].numericValue = floatValue;
                         }
                         else {
                             attribs[j].stringValue = stringValue;
                         }
-                        cellSettings[k].attribData = attribs;
                     }
+                    entry.attribData = attribs;
+                    return;
                 }
             }
-            return cellSettings;
+            entry.attribData = null;
         }
 
         /// <summary>
@@ -3249,7 +3277,7 @@ namespace TGS {
             isDirty = true;
         }
 
-        public void CellSetSettings (TGSConfigEntry[] cellSettings, int[] filterTerritories) {
+        public void CellSetSettings (TGSConfigEntry[] cellSettings, int[] filterTerritories, bool entriesHaveIndices = false) {
             if (cellSettings == null)
                 return;
 
@@ -3258,66 +3286,160 @@ namespace TGS {
                 if (cells == null) return;
             }
 
-            if (cellSettings.Length != cells.Count) {
-                Debug.LogWarning("Grids 2D Config component has different cell count than grid itself.");
-            }
-            // Get territory count
+            bool assignTerritories = territoriesTexture == null;
             int maxTerritoryIndex = 0;
-            int cellSettingsCount = cellSettings.Length;
-            for (int k = 0; k < cellSettingsCount; k++) {
+            int settingsCount = cellSettings.Length;
+            for (int k = 0; k < settingsCount; k++) {
                 if (cellSettings[k].territoryIndex > maxTerritoryIndex) {
                     maxTerritoryIndex = cellSettings[k].territoryIndex;
                 }
             }
-            bool assignTerritories = territoriesTexture == null;
             if (!assignTerritories) {
                 _numTerritories = Mathf.Max(_numTerritories, maxTerritoryIndex + 1);
             }
-            int minCount = Mathf.Min(cellSettingsCount, cells.Count);
-            for (int k = 0; k < minCount; k++) {
-                int territoryIndex = cellSettings[k].territoryIndex;
-                if (filterTerritories != null && !filterTerritories.Contains(territoryIndex))
-                    continue;
-                Cell cell = cells[k];
-                cell.visible = cellSettings[k].visible;
-                if (assignTerritories) {
-                    cell.territoryIndex = territoryIndex < _numTerritories ? (short)territoryIndex : (short)-1;
-                }
-                cell.visibleAlways = cellSettings[k].visibleAlways;
-                Color color = cellSettings[k].color;
-                int textureIndex = cellSettings[k].textureIndex;
-                if (color.a > 0 || textureIndex >= 1) {
-                    Vector2 textureScale = cellSettings[k].textureScale;
-                    if (textureScale == Vector2.zero) textureScale = Vector2.one;
-                    Vector2 textureOffset = cellSettings[k].textureOffset;
-                    CellToggleRegionSurface(k, true, color, false, textureIndex, textureScale, textureOffset);
-                }
-                cell.tag = cellSettings[k].tag;
-                cell.canCross = cellSettings[k].canCross;
-                if (cellSettings[k].crossSidesCost != null && cellSettings[k].crossSidesCost.Length > 0) {
-                    cell.crossCost = cellSettings[k].crossSidesCost;
-                }
-                else {
-                    cell.SetAllSidesCost(cellSettings[k].crossCost);
-                }
-                TGSConfigAttribPair[] attribs = cellSettings[k].attribData;
-                if (attribs != null) {
-                    int keysCount = attribs.Length;
-                    for (int j = 0; j < keysCount; j++) {
-                        string key = attribs[j].key;
-                        if (string.IsNullOrEmpty(key)) continue;
-                        if (!string.IsNullOrEmpty(attribs[j].stringValue)) {
-                            cell.attrib[key] = attribs[j].stringValue;
-                            continue;
-                        }
-                        cell.attrib[key] = attribs[j].numericValue;
-                    }
+
+            bool useIndices = entriesHaveIndices;
+            if (!useIndices && cellSettings.Length != cells.Count && entriesHaveIndices) {
+                useIndices = true;
+            }
+
+            if (!useIndices && cellSettings.Length != cells.Count) {
+                Debug.LogWarning("Grids 2D Config component has different cell count than grid itself.");
+            }
+
+            if (useIndices) {
+                for (int i = 0; i < settingsCount; i++) {
+                    TGSConfigEntry entry = cellSettings[i];
+                    int cellIndex = entry.cellIndex;
+                    if (!ValidCellIndex(cellIndex)) continue;
+                    if (filterTerritories != null && !filterTerritories.Contains(entry.territoryIndex)) continue;
+                    ApplyConfigEntry(cellIndex, entry, assignTerritories);
                 }
             }
+            else {
+                int minCount = Mathf.Min(settingsCount, cells.Count);
+                for (int k = 0; k < minCount; k++) {
+                    TGSConfigEntry entry = cellSettings[k];
+                    if (filterTerritories != null && !filterTerritories.Contains(entry.territoryIndex))
+                        continue;
+                    ApplyConfigEntry(k, entry, assignTerritories);
+                }
+            }
+
             needUpdateTerritories = true;
             needRefreshRouteMatrix = true;
             Redraw();
             isDirty = true;
+        }
+
+        void ApplyConfigEntry (int cellIndex, TGSConfigEntry entry, bool assignTerritories) {
+            Cell cell = cells[cellIndex];
+            cell.visible = entry.visible;
+            cell.visibleAlways = entry.visibleAlways;
+
+            if (assignTerritories) {
+                cell.territoryIndex = entry.territoryIndex >= 0 && entry.territoryIndex < _numTerritories ? (short)entry.territoryIndex : (short)-1;
+            }
+
+            Color color = entry.color;
+            int textureIndex = entry.textureIndex;
+            if (color.a > 0f || textureIndex >= 1) {
+                Vector2 textureScale = entry.textureScale;
+                if (textureScale == Vector2.zero) textureScale = Vector2.one;
+                Vector2 textureOffset = entry.textureOffset;
+                CellToggleRegionSurface(cellIndex, true, color, false, textureIndex, textureScale, textureOffset);
+            }
+            else {
+                CellHideRegionSurface(cellIndex);
+            }
+
+            cell.tag = entry.tag;
+            cell.canCross = entry.canCross;
+
+            if (entry.crossSidesCost != null && entry.crossSidesCost.Length > 0) {
+                cell.crossCost = (float[])entry.crossSidesCost.Clone();
+            }
+            else if (entry.crossCost > 0f) {
+                cell.SetAllSidesCost(entry.crossCost);
+            }
+            else {
+                cell.crossCost = null;
+            }
+
+            if (cell.hasAttributes && cell.attrib.Count > 0) {
+                cell.attrib.Clear();
+            }
+            if (entry.attribData != null) {
+                int keysCount = entry.attribData.Length;
+                for (int j = 0; j < keysCount; j++) {
+                    string key = entry.attribData[j].key;
+                    if (string.IsNullOrEmpty(key)) continue;
+                    if (!string.IsNullOrEmpty(entry.attribData[j].stringValue)) {
+                        cell.attrib[key] = entry.attribData[j].stringValue;
+                    }
+                    else {
+                        cell.attrib[key] = entry.attribData[j].numericValue;
+                    }
+                }
+            }
+
+            if (cell.region != null && cell.region.customBorderGameObject != null && color.a <= 0f && textureIndex <= 0) {
+                CellDestroyBorder(cellIndex);
+            }
+
+            cell.customized = true;
+        }
+
+        /// <summary>
+        /// Resets the cells to their default state
+        /// </summary>
+        /// <param name="cellIndices"></param>
+        public void CellsReset (List<int> cellIndices) {
+            if (cellIndices == null || cellIndices.Count == 0 || cells == null)
+                return;
+
+            bool changed = false;
+            int count = cellIndices.Count;
+            for (int k = 0; k < count; k++) {
+                int cellIndex = cellIndices[k];
+                if (!ValidCellIndex(cellIndex)) continue;
+
+                Cell cell = cells[cellIndex];
+                if (cell == null) continue;
+
+                bool cellChanged = false;
+
+                if (!cell.visibleSelf) { cell.visible = true; cellChanged = true; }
+                if (cell.visibleAlways) { cell.visibleAlways = false; cellChanged = true; }
+                if (!cell.canCross) { cell.canCross = true; cellChanged = true; }
+                if (cell.tag != 0) { cell.tag = 0; cellChanged = true; }
+                if (cell.crossCost != null) { cell.crossCost = null; cellChanged = true; }
+                if (cell.hasAttributes && cell.attrib.Count > 0) { cell.attrib.Clear(); cellChanged = true; }
+                if (cell.group != 1) { cell.group = 1; cellChanged = true; }
+
+                if (CellGetColor(cellIndex).a > 0f || CellGetTextureIndex(cellIndex) > 0) {
+                    CellHideRegionSurface(cellIndex);
+                    cellChanged = true;
+                }
+                if (cell.region != null && cell.region.customBorderGameObject != null) {
+                    CellDestroyBorder(cellIndex);
+                    cellChanged = true;
+                }
+
+                if (cellChanged) {
+                    changed = true;
+                    cell.customized = false;
+                }
+            }
+
+            if (changed) {
+                needRefreshRouteMatrix = true;
+                refreshCellMesh = true;
+                needUpdateTerritories = true;
+                issueRedraw = RedrawType.Full;
+                Redraw();
+                isDirty = true;
+            }
         }
 
         /// <summary>

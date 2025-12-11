@@ -502,6 +502,26 @@ namespace TGS {
 
 
         [SerializeField]
+        bool _territoryFrontiersMiterJoins;
+
+        /// <summary>
+        /// Uses miter joins for territory frontier thick lines (avoids gaps/overlaps at corners when geometry shaders are not used)
+        /// </summary>
+        public bool territoryFrontiersMiterJoins {
+            get { return _territoryFrontiersMiterJoins; }
+            set {
+                if (value != _territoryFrontiersMiterJoins) {
+                    _territoryFrontiersMiterJoins = value;
+                    if (_showTerritories) {
+                        DrawTerritoryFrontiers();
+                    }
+                    isDirty = true;
+                }
+            }
+        }
+
+
+        [SerializeField]
         float
         _territoryInteriorBorderThickness = 2f;
 

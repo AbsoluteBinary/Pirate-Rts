@@ -8,6 +8,11 @@ namespace TGS {
 	[DefaultExecutionOrder(100)]
 	public class TGSConfig : MonoBehaviour {
 
+		public enum ApplyMode {
+			OnlyOnStart,
+			Always
+		}
+
 		[Tooltip ("User-defined name for this configuration")]
 		[TextArea]
 		public string title = "Optionally name this configuration editing this text.";
@@ -16,6 +21,8 @@ namespace TGS {
 		public string filterTerritories;
 
 		public TGSConfigEntry[] cellSettings;
+		[HideInInspector]
+		public bool storeCellIndices;
 
 		[HideInInspector]
 		public string config;
@@ -66,6 +73,7 @@ namespace TGS {
                 cellSettings[k] = entry;
 			}
 			config = null;
+			storeCellIndices = false;
 			#if UNITY_EDITOR
 			UnityEditor.EditorUtility.SetDirty(this);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
@@ -76,6 +84,15 @@ namespace TGS {
 		void OnEnable () {
 			if (!Application.isPlaying) {
 				LoadConfiguration ();
+			}
+		}
+
+		[SerializeField]
+		ApplyMode applyMode = ApplyMode.OnlyOnStart;
+
+		public ApplyMode ConfigApplyMode {
+			get {
+				return applyMode;
 			}
 		}
 
@@ -98,7 +115,8 @@ namespace TGS {
 					textures [k] = tgs.textures [k];
 				}
 			}
-            cellSettings = tgs.CellGetSettings ();
+			storeCellIndices = true;
+            cellSettings = tgs.CellGetSettings (true);
 			#if UNITY_EDITOR
 			UnityEditor.EditorUtility.SetDirty(this);
 			#endif
@@ -129,7 +147,7 @@ namespace TGS {
 				}
 				territories = tt.ToArray ();
 			}
-			tgs.CellSetSettings (cellSettings, territories);
+			tgs.CellSetSettings (cellSettings, territories, storeCellIndices);
 		}
 
 		TerrainGridSystem GetTGS () {

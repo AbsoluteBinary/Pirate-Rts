@@ -6,14 +6,15 @@ using UnityEditor;
 namespace TGS {
 
 	[CustomEditor (typeof(TGSConfig))]
-	public class TGSConfigEditor : UnityEditor.Editor {
+	public class TGSConfigEditor : Editor {
 
-		SerializedProperty title, filterTerritories;
+		SerializedProperty title, filterTerritories, applyMode;
 		TGSConfig config;
 
 		void OnEnable() {
 			title = serializedObject.FindProperty ("title");
 			filterTerritories = serializedObject.FindProperty ("filterTerritories");
+			applyMode = serializedObject.FindProperty ("applyMode");
 			config = (TGSConfig)target;
 		}
 
@@ -26,6 +27,7 @@ namespace TGS {
 			EditorGUILayout.HelpBox ("To load this configuration, just activate this component or call LoadConfiguration() method of this script.", MessageType.Info);
 			EditorGUILayout.PropertyField (title);
 			EditorGUILayout.PropertyField (filterTerritories);
+			EditorGUILayout.PropertyField (applyMode);
 
 			EditorGUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Clear Grid")) {

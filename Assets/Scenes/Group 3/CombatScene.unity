@@ -1209,7 +1209,8 @@ MonoBehaviour:
   damage: 10
   fireRate: 1.5
   trailPrefab: {fileID: 6191541304733331936, guid: 4a40a5abca12a70f5b1cea2d7f054f71, type: 3}
-  flashDuration: 0.2
+  flashDuration: 0.5
+  damageFadeSpeed: 2
 --- !u!1 &1725493540
 GameObject:
   m_ObjectHideFlags: 0

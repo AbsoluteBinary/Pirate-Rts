@@ -224,18 +224,24 @@ namespace TGS {
             if (startCell == null || endCell == null) return 0;
             bool startCellCanCross = startCell.canCross;
             bool endCellCanCross = endCell.canCross;
+            int startCellGroup = startCell.group;
+            int endCellGroup = endCell.group;
             if (options.canCrossCheckType != CanCrossCheckType.IgnoreCanCrossCheckOnAllCells) {
                 switch (options.canCrossCheckType) {
                     case CanCrossCheckType.IgnoreCanCrossCheckOnStartAndEndCells:
                         startCell.canCross = endCell.canCross = true;
+                        startCell.group |= options.cellGroupMask;
+                        endCell.group |= options.cellGroupMask;
                         break;
                     case CanCrossCheckType.IgnoreCanCrossCheckOnStartCell:
                         if (!endCell.canCross) return 0;
                         startCell.canCross = true;
+                        startCell.group |= options.cellGroupMask;
                         break;
                     case CanCrossCheckType.IgnoreCanCrossCheckOnEndCell:
                         if (!startCell.canCross) return 0;
                         endCell.canCross = true;
+                        endCell.group |= options.cellGroupMask;
                         break;
                     default:
                         if (!startCell.canCross || !endCell.canCross)
@@ -276,6 +282,8 @@ namespace TGS {
             List<PathFinderNode> route = finder.FindPath(this, startCell, endCell, out totalCost, _evenLayout);
             startCell.canCross = startCellCanCross;
             endCell.canCross = endCellCanCross;
+            startCell.group = startCellGroup;
+            endCell.group = endCellGroup;
             if (route != null) {
                 int routeCount = route.Count;
                 if (_gridTopology == GridTopology.Irregular) {

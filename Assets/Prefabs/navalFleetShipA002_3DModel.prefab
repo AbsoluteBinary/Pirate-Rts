@@ -114,9 +114,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2842132050400869799}
-    - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 8563074207672688293}
     - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       insertIndex: -1
@@ -127,24 +124,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
   m_PrefabInstance: {fileID: 5297235620881101661}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2842132050400869799
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5297235620881004013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017ea68e72cb485d7ab54891a3bd87a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Combat.PlayerTurretDetector
-  detectionRange: 15
-  turretLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  scanInterval: 0.5
-  turretInRange: 0
 --- !u!65 &8563074207672688293
 BoxCollider:
   m_ObjectHideFlags: 0

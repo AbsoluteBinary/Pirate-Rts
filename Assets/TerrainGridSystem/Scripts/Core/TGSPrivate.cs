@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TGS.Geom;
 using TGS.Poly2Tri;
 using TGS.ClipperLib;
@@ -95,6 +96,7 @@ namespace TGS {
             new Vector4(1, 0, 0, 0),
             new Vector4(0, 0, 0, 0)
         };
+        const float MITER_LIMIT = 4f;
         Dictionary<Segment, Frontier> territoryNeighbourHit;
         Frontier[] frontierPool;
         List<Segment> territoryFrontiers;
@@ -109,6 +111,9 @@ namespace TGS {
         List<TriangulationPoint> steinerPoints;
         PolygonPoint[] tempPolyPoints;
         PolygonPoint[] tempPolyPoints2;
+        readonly HashSet<int> tempNeutralCellsVisited = new HashSet<int>();
+        readonly List<Cell> tempNeutralEnclaveCells = new List<Cell>();
+        readonly Queue<Cell> tempNeutralEnclaveQueue = new Queue<Cell>();
         Dictionary<TriangulationPoint, int> surfaceMeshHit;
         readonly Connector tempConnector = new Connector();
         List<Vector3> meshPoints;
@@ -118,6 +123,56 @@ namespace TGS {
         List<Vector3> tempPoints;
         List<Vector4> tempUVs;
         List<int> tempIndices;
+
+        // Temp structures for miter-join reordering (to avoid per-frame allocations)
+        List<Vector3> tempOrderedFrontierVertices;
+        List<int> tempPolylineStarts;
+        List<int> tempPolylineEnds;
+        List<bool> tempPolylineClosed;
+        bool[] tempVisitedSegments;
+        Dictionary<long, List<int>> segmentStartMap;
+        Dictionary<long, List<int>> segmentEndMap;
+        List<Vector3> tempChainBuffer;
+        List<Vector3> tempBackBuffer;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static long VertexKey (Vector3 v) {
+            long ix = (long)Mathf.Round(v.x * 1000000f);
+            long iy = (long)Mathf.Round(v.y * 1000000f);
+            return (ix << 32) ^ (iy & 0xFFFFFFFFL);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        TGS.Geom.Point JitterCornerFast (TGS.Geom.Point p, double maxR) {
+            if (_cornerJitter <= 0f || maxR <= 0) return p;
+            unchecked {
+                // Quantize to integer grid so shared corners hash identically
+                const double Q = 1e6;
+                long ix = (long)Math.Round((p.x + 0.5) * Q);
+                long iy = (long)Math.Round((p.y + 0.5) * Q);
+                double qx = ix / Q - 0.5;
+                double qy = iy / Q - 0.5;
+
+                // SplitMix64-like hashing for robust per-corner variation
+                ulong key = ((ulong)(uint)ix << 32) ^ (uint)iy ^ ((ulong)(uint)seed * 0x9E3779B9u);
+
+                ulong x = key + 0x9E3779B97F4A7C15UL;
+                x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9UL;
+                x = (x ^ (x >> 27)) * 0x94D049BB133111EBUL;
+                ulong h1 = x ^ (x >> 31);
+
+                x = h1 + 0x9E3779B97F4A7C15UL;
+                x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9UL;
+                x = (x ^ (x >> 27)) * 0x94D049BB133111EBUL;
+                ulong h2 = x ^ (x >> 31);
+
+                double dx = ((h1 & 0x7FFFFFFFUL) / 2147483648.0 * 2.0 - 1.0) * maxR;
+                double dy = ((h2 & 0x7FFFFFFFUL) / 2147483648.0 * 2.0 - 1.0) * maxR;
+
+                // Use quantized base so closures match exactly
+                return new TGS.Geom.Point(qx + dx, qy + dy);
+            }
+        }
         bool canUseGeometryShaders;
 
         // Terrain data
@@ -165,7 +220,7 @@ namespace TGS {
         int cellIteration;
         Dictionary<Point, Segment> dictSegments;
         bool gridNeedsUpdate;
-        bool applyingChanges, redrawing;
+        bool applyingChanges, redrawing, applyingConfigs;
         int cellUsedFlag;
 
         [NonSerialized]
@@ -637,6 +692,14 @@ namespace TGS {
             tempPoints = new List<Vector3>();
             tempUVs = new List<Vector4>();
             tempIndices = new List<int>();
+            tempOrderedFrontierVertices = new List<Vector3>();
+            tempPolylineStarts = new List<int>();
+            tempPolylineEnds = new List<int>();
+            tempPolylineClosed = new List<bool>();
+            segmentStartMap = new Dictionary<long, List<int>>();
+            segmentEndMap = new Dictionary<long, List<int>>();
+            tempChainBuffer = new List<Vector3>();
+            tempBackBuffer = new List<Vector3>();
 
             if (!_disableMeshGeneration) {
                 LoadGeometryShaders();
@@ -745,9 +808,19 @@ namespace TGS {
             UnityEngine.Random.InitState(seed);
 
             ReadMaskContents();
-            Redraw();
+
+            // Deferr terrain snapshot util SRP has been initialized during first frame
+            BuildTerrainWrapper();
+            if (_terrainWrapper is MeshTerrainWrapper) {
+                issueRedraw = RedrawType.Full;
+            } else {
+                Redraw();
+            }
 
             UnityEngine.Random.state = prevRandomState;
+            if (Application.isPlaying) {
+                ApplyTGSConfigs(startOnly: true);
+            }
         }
 
         void LoadGeometryShaders () {
@@ -1147,6 +1220,13 @@ namespace TGS {
                     Point p2 = center.Offset(-halfStepX, halfStepY);
                     Point p3 = center.Offset(halfStepX, halfStepY);
                     Point p4 = center.Offset(halfStepX, -halfStepY);
+                    if (_cornerJitter > 0f) {
+                        double maxR = _cornerJitter * Math.Min(halfStepX, halfStepY);
+                        p1 = JitterCornerFast(p1, maxR);
+                        p2 = JitterCornerFast(p2, maxR);
+                        p3 = JitterCornerFast(p3, maxR);
+                        p4 = JitterCornerFast(p4, maxR);
+                    }
 
                     Segment left = k > 0 ? sides[k - 1, j, 2] : new Segment(p1, p2, true);
                     sides[k, j, 0] = left;
@@ -1224,6 +1304,15 @@ namespace TGS {
                     Point p4 = center.Offset(halfStepX, offsetY);
                     Point p5 = center.Offset(halfStepX / 2, -halfStepY + offsetY);
                     Point p6 = center.Offset(-halfStepX / 2, -halfStepY + offsetY);
+                    if (_cornerJitter > 0f) {
+                        double maxR = _cornerJitter * Math.Min(halfStepX, halfStepY);
+                        p1 = JitterCornerFast(p1, maxR);
+                        p2 = JitterCornerFast(p2, maxR);
+                        p3 = JitterCornerFast(p3, maxR);
+                        p4 = JitterCornerFast(p4, maxR);
+                        p5 = JitterCornerFast(p5, maxR);
+                        p6 = JitterCornerFast(p6, maxR);
+                    }
 
                     Segment leftUp = (k > 0 && offsetY < 0) ? sides[k - 1, j, 3] : new Segment(p1, p2, k == 0 || (j == qy2 - 1 && offsetY == 0));
                     sides[k, j, 0] = leftUp;
@@ -1322,6 +1411,15 @@ namespace TGS {
                     Point p4 = center.Offset(offsetX, halfStepY);
                     Point p5 = center.Offset(-halfStepX + offsetX, halfStepY / 2);
                     Point p6 = center.Offset(-halfStepX + offsetX, -halfStepY / 2);
+                    if (_cornerJitter > 0f) {
+                        double maxR = _cornerJitter * Math.Min(halfStepX, halfStepY);
+                        p1 = JitterCornerFast(p1, maxR);
+                        p2 = JitterCornerFast(p2, maxR);
+                        p3 = JitterCornerFast(p3, maxR);
+                        p4 = JitterCornerFast(p4, maxR);
+                        p5 = JitterCornerFast(p5, maxR);
+                        p6 = JitterCornerFast(p6, maxR);
+                    }
 
                     Segment leftUp = new Segment(p4, p5, (k == 0 && offsetX < 0) || j == qy2 - 1);
                     sides[k, j, 0] = leftUp;
@@ -1642,7 +1740,26 @@ namespace TGS {
                 cell.neighbours.Clear();
                 int segCount = region.segments.Count;
                 for (int j = 0; j < segCount; j++) {
-                    region.segments[j].cellIndex = k;
+                    Segment seg = region.segments[j];
+                    if (seg.cellIndex < 0) {
+                        seg.cellIndex = cell.index;
+                    }
+                    else if (seg.cellIndex != cell.index) {
+                        Cell neighbour = cells[seg.cellIndex];
+                        int pairIndex;
+                        if (cell.index < neighbour.index) {
+                            pairIndex = cell.index * cellCount + neighbour.index;
+                        }
+                        else {
+                            pairIndex = neighbour.index * cellCount + cell.index;
+
+                        }
+                        if (!cachedNeighboursControl.Contains(pairIndex)) { // avoid duplicates in merged cells which can have several segments adjancent to same neighbour
+                            cachedNeighboursControl.Add(pairIndex);
+                            cell.neighbours.Add(neighbour);
+                            neighbour.neighbours.Add(cell);
+                        }
+                    }
                 }
             }
             CellsFindNeighbours();
@@ -1684,7 +1801,6 @@ namespace TGS {
             }
 
         }
-
         readonly List<Region> newRegions = new List<Region>();
 
         void FindTerritoriesFrontiers () {
@@ -1808,7 +1924,7 @@ namespace TGS {
                                 }
                             }
                             else {
-                                frontier.region2 = neighbourCell.region;
+                                frontier.region2 = cell.region;
                             }
                             if (territory2Index >= 0) {
                                 territoryConnectors[territory2Index].Add(seg);
@@ -2466,7 +2582,6 @@ namespace TGS {
                 }
             }
         }
-
         void GenerateTerritoriesMeshData () {
 
             int terrCount = territories.Count;
@@ -3750,19 +3865,28 @@ namespace TGS {
                 }
             }
             Redraw(reuseTerrainData);
-            // Reload configuration if component exists
+            ApplyTGSConfigs(startOnly: false);
+        }
+
+        void ApplyTGSConfigs (bool startOnly) {
+            if (applyingConfigs)
+                return;
+
+            applyingConfigs = true;
+
             TGSConfig[] configs = GetComponents<TGSConfig>();
             for (int k = 0; k < configs.Length; k++) {
                 TGSConfig config = configs[k];
-                if (config.enabled) {
+                if (!config.enabled)
+                    continue;
+
+                if (!startOnly || !Application.isPlaying || config.ConfigApplyMode == TGSConfig.ApplyMode.OnlyOnStart) {
                     config.LoadConfiguration();
-                    if (Application.isPlaying) {
-                        config.enabled = false;
-                    }
                 }
             }
-        }
 
+            applyingConfigs = false;
+        }
         void SetScaleByCellSize () {
             if (_gridTopology == GridTopology.Hexagonal) {
                 _gridScale.x = _cellSize.x * (1f + (_cellColumnCount - 1f) * 0.75f) / transform.lossyScale.x;
@@ -4119,6 +4243,215 @@ namespace TGS {
             mesh.SetTriangles(tempIndices, 0);
         }
 
+        void BuildOrderedFrontierVertices (Vector3[] vertices) {
+            // Reorder independent segment pairs into continuous polylines by connecting shared endpoints in both directions
+            tempOrderedFrontierVertices.Clear();
+            tempPolylineStarts.Clear();
+            tempPolylineEnds.Clear();
+            tempPolylineClosed.Clear();
+            int numVertices = vertices.Length;
+            if (numVertices < 2) return;
+            int segCount = numVertices >> 1;
+            if (tempVisitedSegments == null || tempVisitedSegments.Length < segCount) {
+                tempVisitedSegments = new bool[segCount];
+            }
+            else {
+                Array.Clear(tempVisitedSegments, 0, segCount);
+            }
+            segmentStartMap.Clear();
+            segmentEndMap.Clear();
+            for (int s = 0, i = 0; s < segCount; s++, i += 2) {
+                long k0 = VertexKey(vertices[i]);
+                long k1 = VertexKey(vertices[i + 1]);
+                if (!segmentStartMap.TryGetValue(k0, out List<int> listS)) { listS = new List<int>(); segmentStartMap[k0] = listS; }
+                listS.Add(s);
+                if (!segmentEndMap.TryGetValue(k1, out List<int> listE)) { listE = new List<int>(); segmentEndMap[k1] = listE; }
+                listE.Add(s);
+            }
+
+            for (int s = 0, i = 0; s < segCount; s++, i += 2) {
+                if (tempVisitedSegments[s]) continue;
+
+                int vi = i;
+                Vector3 p0 = vertices[vi];
+                Vector3 p1 = vertices[vi + 1];
+                tempVisitedSegments[s] = true;
+
+                // Build the full point chain in tempChainBuffer: [prev ... prev2, p0, p1, next2 ...]
+                tempChainBuffer.Clear();
+                tempBackBuffer.Clear();
+
+                // Extend backwards from p0
+                long currentStartKey = VertexKey(p0);
+                while (true) {
+                    int prevSeg = -1; bool reversePrev = false;
+                    if (segmentEndMap.TryGetValue(currentStartKey, out List<int> peList)) {
+                        int c = peList.Count;
+                        for (int n = 0; n < c; n++) { int idx = peList[n]; if (!tempVisitedSegments[idx]) { prevSeg = idx; break; } }
+                    }
+                    if (prevSeg < 0 && segmentStartMap.TryGetValue(currentStartKey, out List<int> psList)) {
+                        int c = psList.Count;
+                        for (int n = 0; n < c; n++) { int idx = psList[n]; if (!tempVisitedSegments[idx]) { prevSeg = idx; reversePrev = true; break; } }
+                    }
+                    if (prevSeg < 0) break;
+                    int pvi = (prevSeg << 1);
+                    Vector3 b0 = reversePrev ? vertices[pvi + 1] : vertices[pvi];
+                    Vector3 b1 = reversePrev ? vertices[pvi] : vertices[pvi + 1];
+                    Vector3 prevPoint = (VertexKey(b1) == currentStartKey) ? b0 : b1;
+                    tempBackBuffer.Add(prevPoint);
+                    tempVisitedSegments[prevSeg] = true;
+                    currentStartKey = VertexKey(prevPoint);
+                }
+
+                // Append backwards points in correct order (earliest first), then seed segment points
+                for (int b = tempBackBuffer.Count - 1; b >= 0; b--) tempChainBuffer.Add(tempBackBuffer[b]);
+                tempChainBuffer.Add(p0);
+                tempChainBuffer.Add(p1);
+
+                // Extend forward from p1
+                long currentEndKey = VertexKey(p1);
+                while (true) {
+                    int nextSeg = -1; bool reverse = false;
+                    if (segmentStartMap.TryGetValue(currentEndKey, out List<int> nsList)) {
+                        int c = nsList.Count;
+                        for (int n = 0; n < c; n++) { int idx = nsList[n]; if (!tempVisitedSegments[idx]) { nextSeg = idx; break; } }
+                    }
+                    if (nextSeg < 0 && segmentEndMap.TryGetValue(currentEndKey, out List<int> neList)) {
+                        int c = neList.Count;
+                        for (int n = 0; n < c; n++) { int idx = neList[n]; if (!tempVisitedSegments[idx]) { nextSeg = idx; reverse = true; break; } }
+                    }
+                    if (nextSeg < 0) break;
+                    int nvi = (nextSeg << 1);
+                    Vector3 np0 = reverse ? vertices[nvi + 1] : vertices[nvi];
+                    Vector3 np1 = reverse ? vertices[nvi] : vertices[nvi + 1];
+                    Vector3 nextPoint = (VertexKey(np0) == currentEndKey) ? np1 : np0;
+                    tempChainBuffer.Add(nextPoint);
+                    tempVisitedSegments[nextSeg] = true;
+                    currentEndKey = VertexKey(nextPoint);
+                }
+
+                // Emit as segment pairs into tempOrderedFrontierVertices
+                int chainStart = tempOrderedFrontierVertices.Count;
+                int chainPoints = tempChainBuffer.Count;
+                for (int p = 0; p < chainPoints - 1; p++) {
+                    tempOrderedFrontierVertices.Add(tempChainBuffer[p]);
+                    tempOrderedFrontierVertices.Add(tempChainBuffer[p + 1]);
+                }
+                int chainEnd = tempOrderedFrontierVertices.Count; // exclusive
+                bool isClosed = chainPoints >= 3 && VertexKey(tempChainBuffer[0]) == VertexKey(tempChainBuffer[chainPoints - 1]);
+                tempPolylineStarts.Add(chainStart);
+                tempPolylineEnds.Add(chainEnd);
+                tempPolylineClosed.Add(isClosed);
+            }
+        }
+
+        void ComputeExplodedMeshFromList (Mesh mesh, List<Vector3> vertices, float lineWidth, float padding) {
+            int totalVertices = vertices.Count;
+            tempPoints.Clear();
+            tempUVs.Clear();
+            tempIndices.Clear();
+
+            int chains = tempPolylineStarts.Count;
+            for (int c = 0; c < chains; c++) {
+                int start = tempPolylineStarts[c];
+                int end = tempPolylineEnds[c];
+                bool closed = tempPolylineClosed[c];
+                if (end - start < 2) continue;
+
+                // rebuild unique poly points for this chain
+                int pointCount = 1 + ((end - start) >> 1);
+                if (pointCount < 2) continue;
+                // store in tempPointsLeft/Right via tempPoints buffer indices
+                int leftBase = tempPoints.Count; // we'll append left/right in place as we go creating quads
+
+                // Collect points
+                // pp[0] = v[start], pp[1] = v[start+1], then for each segment append its end
+                // We'll compute per-joint offsets first into local arrays
+                Vector3[] pp = new Vector3[pointCount];
+                pp[0] = vertices[start];
+                pp[1] = vertices[start + 1];
+                for (int i = 2, k = start + 2; i < pointCount; i++, k += 2) pp[i] = vertices[k + 1];
+
+                Vector3[] left = new Vector3[pointCount];
+                Vector3[] right = new Vector3[pointCount];
+
+                for (int i = 0; i < pointCount; i++) {
+                    int ip = (i == 0) ? (closed ? pointCount - 1 : 0) : i - 1;
+                    int inx = (i == pointCount - 1) ? (closed ? 0 : i) : i + 1;
+                    Vector2 pPrev = (Vector2)pp[ip];
+                    Vector2 pCurr = (Vector2)pp[i];
+                    Vector2 pNext = (Vector2)pp[inx];
+
+                    Vector2 d1 = pCurr - pPrev; if (d1.sqrMagnitude < 1e-12f) d1 = pNext - pCurr;
+                    Vector2 d2 = pNext - pCurr; if (d2.sqrMagnitude < 1e-12f) d2 = pCurr - pPrev;
+                    d1.Normalize(); d2.Normalize();
+                    Vector2 n1 = new Vector2(-d1.y, d1.x);
+                    Vector2 n2 = new Vector2(-d2.y, d2.x);
+
+                    // Left side: intersect lines at pCurr offset by +w along normals
+                    Vector2 a0 = pCurr + n1 * (lineWidth * (1f + padding));
+                    Vector2 aDir = d1;
+                    Vector2 b0 = pCurr + n2 * (lineWidth * (1f + padding));
+                    Vector2 bDir = d2;
+                    Vector2 r = b0 - a0;
+                    float denom = aDir.x * bDir.y - aDir.y * bDir.x;
+                    Vector2 leftPos;
+                    if (Mathf.Abs(denom) > 1e-6f) {
+                        float t = (r.x * bDir.y - r.y * bDir.x) / denom;
+                        leftPos = a0 + aDir * t;
+                        if ((leftPos - pCurr).magnitude > lineWidth * MITER_LIMIT) {
+                            leftPos = b0; // bevel fallback
+                        }
+                    }
+                    else {
+                        leftPos = b0;
+                    }
+
+                    // Right side: intersect lines at pCurr offset by -w along normals
+                    Vector2 a0r = pCurr - n1 * lineWidth + (-n1 * lineWidth * padding);
+                    Vector2 b0r = pCurr - n2 * lineWidth + (-n2 * lineWidth * padding);
+                    Vector2 rr = b0r - a0r;
+                    float denomR = aDir.x * bDir.y - aDir.y * bDir.x;
+                    Vector2 rightPos;
+                    if (Mathf.Abs(denomR) > 1e-6f) {
+                        float t = (rr.x * bDir.y - rr.y * bDir.x) / denomR;
+                        rightPos = a0r + aDir * t;
+                        if ((rightPos - pCurr).magnitude > lineWidth * MITER_LIMIT) {
+                            rightPos = b0r;
+                        }
+                    }
+                    else {
+                        rightPos = b0r;
+                    }
+
+                    left[i] = (Vector3)leftPos;
+                    right[i] = (Vector3)rightPos;
+                }
+
+                // Build quads per segment using shared joint offsets
+                for (int i = 0; i < pointCount - 1 + (closed ? 1 : 0); i++) {
+                    int i0 = i;
+                    int i1 = (i + 1) % pointCount;
+                    int baseIndex = tempPoints.Count;
+                    tempPoints.Add(left[i0]);
+                    tempPoints.Add(left[i1]);
+                    tempPoints.Add(right[i1]);
+                    tempPoints.Add(right[i0]);
+                    tempUVs.AddRange(gradientUVs);
+                    tempIndices.Add(baseIndex);
+                    tempIndices.Add(baseIndex + 1);
+                    tempIndices.Add(baseIndex + 2);
+                    tempIndices.Add(baseIndex);
+                    tempIndices.Add(baseIndex + 2);
+                    tempIndices.Add(baseIndex + 3);
+                }
+            }
+
+            mesh.SetVertices(tempPoints);
+            mesh.SetUVs(0, tempUVs);
+            mesh.SetTriangles(tempIndices, 0);
+        }
+
         void DrawColorizedCells () {
             if (cells == null || _disableMeshGeneration)
                 return;
@@ -4225,7 +4558,6 @@ namespace TGS {
 
             UpdateMaterialThickness();
         }
-
         GameObject DrawTerritoryFrontier (TerritoryMesh tm, Material mat, Transform parent, string name, bool useVertexDisplacementForTerritoryThickness, bool usesGradient = false, float thickness = 1f, float padding = 0) {
             GameObject root = new GameObject(name);
             root.layer = gameObject.layer;
@@ -4250,7 +4582,15 @@ namespace TGS {
                     ComputeExplodedMesh(mesh, tm.territoryMeshBorders[k], adjustedThickness, padding);
                 }
                 else if (useVertexDisplacementForTerritoryThickness) {
-                    ComputeExplodedVertices(mesh, tm.territoryMeshBorders[k]);
+                    if (_territoryFrontiersMiterJoins) {
+                        float orthoAdjust = 1f; var cam = Camera.main; if (cam != null && cam.orthographic) orthoAdjust = 0.002f;
+                        float adjustedThickness = Mathf.Max(0.0001f, (_territoryFrontiersThickness / 5000f) * orthoAdjust);
+                        BuildOrderedFrontierVertices(tm.territoryMeshBorders[k]);
+                        ComputeExplodedMeshFromList(mesh, tempOrderedFrontierVertices, adjustedThickness, 0);
+                    }
+                    else {
+                        ComputeExplodedVertices(mesh, tm.territoryMeshBorders[k]);
+                    }
                 }
                 else {
                     mesh.vertices = tm.territoryMeshBorders[k];
@@ -4268,7 +4608,23 @@ namespace TGS {
                 mr.receiveShadows = false;
                 mr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                mr.sharedMaterial = mat;
+                Material renderMat = mat;
+                if (useVertexDisplacementForTerritoryThickness && _territoryFrontiersMiterJoins && !usesGradient) {
+                    if (mat == territoriesMat) {
+                        renderMat = territoriesThinMat;
+                    }
+                    else if (mat == territoriesDisputedMat) {
+                        renderMat = territoriesDisputedThinMat;
+                    }
+                    else {
+                        Material thin = new Material(territoriesThinMat);
+                        thin.color = mat.color;
+                        thin.renderQueue = mat.renderQueue;
+                        renderMat = thin;
+                        disposalManager.MarkForDisposal(thin);
+                    }
+                }
+                mr.sharedMaterial = renderMat;
             }
             return root;
         }
@@ -4596,6 +4952,9 @@ namespace TGS {
                     negativeRegions.Add(clonedRegion);
                 }
             }
+            if (region.entity is Territory territory) {
+                AddNeutralEnclaveRegions(region, territory, negativeRegions);
+            }
             // Collapse negative regions in big holes
             for (int nr = 0; nr < negativeRegions.Count - 1; nr++) {
                 for (int nr2 = nr + 1; nr2 < negativeRegions.Count; nr2++) {
@@ -4655,6 +5014,59 @@ namespace TGS {
             }
 
             return hasHoles;
+        }
+
+        void AddNeutralEnclaveRegions (Region containerRegion, Territory territory, List<Region> negativeRegions) {
+            List<Cell> territoryCells = territory.cells;
+            if (territoryCells == null || territoryCells.Count == 0) return;
+            tempNeutralCellsVisited.Clear();
+            int terrCellsCount = territoryCells.Count;
+            for (int k = 0; k < terrCellsCount; k++) {
+                Cell cell = territoryCells[k];
+                if (cell == null) continue;
+                int neighboursCount = cell.neighbours.Count;
+                for (int n = 0; n < neighboursCount; n++) {
+                    Cell neighbour = cell.neighbours[n];
+                    if (neighbour == null || !neighbour.visible || neighbour.territoryIndex >= 0) continue;
+                    TryRegisterNeutralEnclave(neighbour, containerRegion, negativeRegions);
+                }
+            }
+        }
+
+        void TryRegisterNeutralEnclave (Cell seed, Region containerRegion, List<Region> negativeRegions) {
+            if (!tempNeutralCellsVisited.Add(seed.index)) return;
+            tempNeutralEnclaveQueue.Clear();
+            tempNeutralEnclaveCells.Clear();
+            tempNeutralEnclaveQueue.Enqueue(seed);
+            bool fullyInside = true;
+            while (tempNeutralEnclaveQueue.Count > 0) {
+                Cell candidate = tempNeutralEnclaveQueue.Dequeue();
+                tempNeutralEnclaveCells.Add(candidate);
+                Vector2 center = candidate.scaledCenter;
+                if (!containerRegion.Contains(center.x, center.y)) {
+                    fullyInside = false;
+                }
+                int candidateNeighbours = candidate.neighbours.Count;
+                for (int n = 0; n < candidateNeighbours; n++) {
+                    Cell next = candidate.neighbours[n];
+                    if (next == null || !next.visible) continue;
+                    if (next.territoryIndex < 0 && tempNeutralCellsVisited.Add(next.index)) {
+                        tempNeutralEnclaveQueue.Enqueue(next);
+                    }
+                }
+            }
+            if (!fullyInside) {
+                tempNeutralEnclaveCells.Clear();
+                return;
+            }
+            float adjust = _gridTopology == GridTopology.Box ? -0.01f : 0.01f;
+            int enclaveCount = tempNeutralEnclaveCells.Count;
+            for (int i = 0; i < enclaveCount; i++) {
+                Region holeRegion = tempNeutralEnclaveCells[i].region.Clone();
+                holeRegion.Enlarge(adjust);
+                negativeRegions.Add(holeRegion);
+            }
+            tempNeutralEnclaveCells.Clear();
         }
 
         GameObject GenerateRegionSurface (Region region, int cacheIndex, Material material, Vector2 textureScale, Vector2 textureOffset, float textureRotation, bool rotateInLocalSpace, CELL_TEXTURE_MODE textureMode, bool isCanvasTexture) {
@@ -5002,7 +5414,6 @@ namespace TGS {
             region.renderer = surfRenderer;
             return surf;
         }
-
         GameObject ExtrudeGameObject (GameObject go, float extrusionAmount, PolygonPoint[] polygonPoints, int polygonPointsCount) {
 
             if (!go.TryGetComponent<MeshFilter>(out MeshFilter mf)) return null;
@@ -5857,7 +6268,7 @@ namespace TGS {
                 }
 
                 _highlightedObj = null;
-                if (_gridTopology != GridTopology.Irregular && _terrainWrapper == null) {
+                if (_gridTopology != GridTopology.Irregular && _terrainWrapper == null && _cornerJitter <= 0f) {
                     // optimization: try reusing a primitive cell shape
                     int expectedPointCount = _gridTopology == GridTopology.Hexagonal ? 6 : 4;
                     if (cell.region.points.Count == expectedPointCount) { // merged cells can't use this optimization
@@ -6141,9 +6552,6 @@ namespace TGS {
             if (position.y > r.yMax)
                 r.yMax = position.y;
         }
-
-
-
         int GetCellInArea (Bounds bounds, List<int> cellIndices, float padding = 0, bool checkAllVertices = false) {
             Vector3 min = bounds.min;
             Vector3 max = bounds.max;

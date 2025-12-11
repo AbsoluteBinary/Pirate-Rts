@@ -1,6 +1,6 @@
 ************************************
 *        TERRAIN GRID SYSTEM       *
-*     (C) Copyright Kronnect       * 
+*      (C) Copyright Kronnect      * 
 *            README FILE           *
 ************************************
 
@@ -44,6 +44,23 @@ Of course, all updates of Terrain Grid System will be eventually available on th
 
 Version history
 ---------------
+
+Version 20.1.1
+- [Fix] Fixed a race condition during intialization when using the grid over meshes on Unity 6.2.13
+
+Version 20.1
+- GridConfig: added option to specify when it applies (On Start Only or Always)
+- Change: exported grid settings now only include data from modified cells
+- Interior territories now support neutral cells (cells with no territories assigned)
+
+Version 20.0
+- Added "Corner Jitter" option: produces more organic hexagonal and boxed grids
+- Added "Miter Joins" option to territory frontiers: aligns corner vertices
+
+Version 19.7
+- API: Change: FindPath now ignores cell group masks according to CanCrossCheck parameter (for example, ignore can cross check on end cell will now also ignore the cell group mask)
+- API: added FitToScreen method
+- [Fix] Fixed regression: TGSConfig data not being loaded during start
 
 Version 19.6
 - Added "Territory Max Range" option to the territory generation options in the inspector

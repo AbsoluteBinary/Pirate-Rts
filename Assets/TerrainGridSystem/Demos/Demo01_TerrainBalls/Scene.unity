@@ -163,6 +163,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 260.7685, y: 39.439827, z: -35.05236}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -255,6 +256,7 @@ Transform:
   m_LocalRotation: {x: 0.17153691, y: -0.03516598, z: 0.0061269766, w: 0.98453087}
   m_LocalPosition: {x: 263.4328, y: 81.2659, z: 24.19342}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -285,9 +287,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 697431664}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &697431664
 Transform:
@@ -300,6 +303,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 250, y: 0.11, z: 250}
   m_LocalScale: {x: 500, y: 500, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 386158631}
   m_Father: {fileID: 2097169269}
@@ -342,56 +346,7 @@ MonoBehaviour:
   _isDirty: 0
   mouseIsOver: 0
   newInHierarchy: 0
-  _numCells: 500
-  _showCells: 1
-  _cellSize: {x: 7.8125, y: 7.812502}
-  _cellBorderColor: {r: 0.48659173, g: 0.49043074, b: 0.5294118, a: 1}
-  _cellCustomBorderThickness: 0
-  _cellBorderThickness: 1
-  _cellFillPadding: 0
-  _cellHighlightUseCellColor: 0
-  _cellHighlightColor: {r: 0, g: 0, b: 1, a: 0.7}
-  _cellHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
-  _cellHighlightBorderSize: 0
-  _cellHighlightBorderColor: {r: 1, g: 1, b: 1, a: 1}
-  _cellHighlightNonVisible: 1
-  _cellsFlat: 0
-  _gridFlatMask: {fileID: 0}
-  _cellsMaxSlope: 1
-  _cellsMaxHeightDifference: 0
-  _cellsMinimumAltitude: 0
-  _cellsMinimumAltitudeClampVertices: 0
-  _cellsMaximumAltitude: 0
-  _cellsMaximumAltitudeClampVertices: 0
-  _voronoiSerializationData: 
-  _pathFindingHeuristicFormula: 5
-  _pathFindingMaxSteps: 2000
-  _pathFindingMaxCost: 2000
-  _pathFindingUseDiagonals: 1
-  _pathFindingHeavyDiagonalsCost: 1.4
-  _pathFindingIncludeInvisibleCells: 1
-  _enableRectangleSelection: 0
-  territoriesTexture: {fileID: 0}
-  territoriesTextureNeutralColor: {r: 0, g: 0, b: 0, a: 0}
-  _territoriesHideNeutralCells: 0
-  _numTerritories: 8
-  _territoriesMaxIterations: 0
-  _territoriesAsymmetry: 0
-  _territoriesOrganic: 0
-  _showTerritories: 1
-  _showTerritoriesInteriorBorders: 0
-  _colorizeTerritories: 0
-  _colorizedTerritoriesAlpha: 0.71
-  _territoryHighlightColor: {r: 1, g: 0, b: 0, a: 0.7}
-  _territoryHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
-  _territoryFrontierColor: {r: 0, g: 0, b: 0, a: 1}
-  _territoryFrontiersThickness: 1.07
-  _territoryInteriorBorderThickness: 3
-  _territoryInteriorBorderPadding: -0.6
-  _territoryDisputedFrontierColor: {r: 0, g: 0, b: 0, a: 1}
-  _showTerritoriesOuterBorder: 1
-  _allowTerritoriesInsideTerritories: 0
-  _territoriesIgnoreHiddenCells: 0
+  territoryThicknessSettingMigrated: 1
   _terrain: {fileID: 0}
   _terrainObject: {fileID: 2097169267}
   _multiTerrain: 0
@@ -404,8 +359,11 @@ MonoBehaviour:
   canvasTexture: {fileID: 0}
   _transparentBackground: 0
   _useStencilBuffer: 1
+  _disableMeshGeneration: 0
   _useGeometryShaders: 1
   _sortingOrder: 0
+  _animationSortingOrder: 0
+  _animationSortingLayer: 
   _heightmapWidth: 513
   _heightmapHeight: 513
   _gridMask: {fileID: 0}
@@ -418,8 +376,16 @@ MonoBehaviour:
   _regularHexagons: 0
   _hexSize: 0.01
   _regularHexagonsWidth: 5.12
+  _adjustCanvasSize: 0
+  _canvasRect:
+    serializedVersion: 2
+    x: -0.5
+    y: -0.5
+    width: 1
+    height: 1
   _gridRelaxation: 1
   _gridCurvature: 0
+  _cornerJitter: 0
   _highlightMode: 2
   _allowHighlightWhileDragging: 0
   _highlightFadeMin: 0
@@ -491,9 +457,75 @@ MonoBehaviour:
   _circularFadeTarget: {fileID: 0}
   _circularFadeDistance: 500
   _circularFadeFallOff: 50
-  _showCellIndices: 0
+  _displayCellDebugInfo: 0
+  _displayTerritoryDebugInfo: 0
   _enableGridEditor: 0
   cameraMain: {fileID: 119610534}
+  _numCells: 500
+  _showCells: 1
+  _cellSize: {x: 7.8125, y: 7.812502}
+  _cellBorderColor: {r: 0.48659173, g: 0.49043074, b: 0.5294118, a: 1}
+  _cellCustomBorderThickness: 0
+  _cellBorderThickness: 1
+  _cellFillPadding: 0
+  _cellTileBackgroundMode: 1
+  _cellTextureMode: 0
+  _cellTileScale: {x: 1, y: 1}
+  _cellTileOffset: {x: 0, y: 0}
+  _cellAlphaClipping: 0
+  _cellHighlightUseCellColor: 0
+  _cellHighlightColor: {r: 0, g: 0, b: 1, a: 0.7}
+  _cellHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
+  _cellHighlightBorderSize: 0
+  _cellHighlightBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  _cellHighlightNonVisible: 1
+  _cellsFlat: 0
+  _gridFlatMask: {fileID: 0}
+  _cellsMaxSlope: 1
+  _cellsMaxHeightDifference: 0
+  _cellsMinimumAltitude: 0
+  _cellsMinimumAltitudeClampVertices: 0
+  _cellsMaximumAltitude: 0
+  _cellsMaximumAltitudeClampVertices: 0
+  _voronoiSerializationData: 
+  _pathFindingHeuristicFormula: 5
+  _pathFindingMaxSteps: 2000
+  _pathFindingMaxCost: 2000
+  _pathFindingUseDiagonals: 1
+  _pathFindingHeavyDiagonalsCost: 1.4
+  _pathFindingIncludeInvisibleCells: 1
+  _enableRectangleSelection: 0
+  territoriesTexture: {fileID: 0}
+  territoriesTextureNeutralColor: {r: 0, g: 0, b: 0, a: 0}
+  _territoriesHideNeutralCells: 0
+  _territoriesInitialCellMethod: 0
+  _territoriesInitialCellIndices: 
+  _numTerritories: 8
+  _territoriesMaxIterations: 0
+  _territoriesMaxRange: 100
+  _territoriesAsymmetry: 0
+  _territoriesOrganic: 0
+  _showTerritories: 1
+  _showTerritoriesInteriorBorders: 0
+  _territoryInteriorBorderOnTop: 0
+  _territoryInteriorBorderIncludeEnclaves: 1
+  _colorizeTerritories: 0
+  _territoriesColorScheme: 0
+  _territoriesFillColors: []
+  _colorizedTerritoriesAlpha: 0.71
+  _territoryHighlightColor: {r: 1, g: 0, b: 0, a: 0.7}
+  _territoryHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
+  _territoryFrontierColor: {r: 0, g: 0, b: 0, a: 1}
+  _territoryCustomBorderThickness: 1
+  _territoryFrontiersThickness: 2.7000003
+  _territoryFrontiersMiterJoins: 0
+  _territoryInteriorBorderThickness: 3
+  _territoryInteriorBorderPadding: -0.6
+  _territoryDisputedFrontierColor: {r: 0, g: 0, b: 0, a: 1}
+  _showTerritoriesOuterBorder: 1
+  _allowTerritoriesInsideTerritories: 0
+  _territoriesIgnoreHiddenCells: 0
+  _territoriesColorSeed: 1
 --- !u!23 &788676619
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -506,6 +538,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -634,75 +667,10 @@ Transform:
   m_LocalRotation: {x: 0.55838424, y: 0.014477211, z: -0.0097466335, w: 0.8293989}
   m_LocalPosition: {x: 0, y: 1000, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1287768314
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1287768317}
-  - component: {fileID: 1287768316}
-  - component: {fileID: 1287768315}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1287768315
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1287768314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &1287768316
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1287768314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 5
---- !u!4 &1287768317
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1287768314}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2097169267
 GameObject:
@@ -745,6 +713,7 @@ Terrain:
   m_DrawHeightmap: 1
   m_DrawInstanced: 0
   m_DrawTreesAndFoliage: 1
+  m_StaticShadowCaster: 0
   m_ReflectionProbeUsage: 1
   m_MaterialTemplate: {fileID: 10652, guid: 0000000000000000f000000000000000, type: 0}
   m_BakeLightProbesForTrees: 1
@@ -765,6 +734,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 697431664}
   m_Father: {fileID: 0}

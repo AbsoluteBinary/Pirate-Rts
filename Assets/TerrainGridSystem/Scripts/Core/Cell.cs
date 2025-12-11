@@ -61,7 +61,7 @@ namespace TGS {
         /// <summary>
         /// Gets or sets whether the cell is visible. If true, the cell will be visible if visibleByRules is also visible. Use "visible" to determine the actual visibility state.
         /// </summary>
-        
+
         public bool visibleSelf {
             get { return (visibleFlags & 1) != 0; } // Check if bit 1 is set
             set {
@@ -169,6 +169,16 @@ namespace TGS {
         /// </summary>
         [NonSerialized]
         public int iteration;
+
+
+        /// <summary>
+        /// Editor-only flag indicating this cell has been customized in the Grid Editor.
+        /// </summary>
+        bool _customized;
+        public bool customized {
+            get { return _customized; }
+            set { _customized = value; }
+        }
 
 
         /// <summary>
