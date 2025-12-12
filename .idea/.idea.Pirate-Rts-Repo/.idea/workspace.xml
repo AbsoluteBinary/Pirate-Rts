@@ -6,10 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/navalFleetShipA002_3DModel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/navalFleetShipA002_3DModel.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/NavalCombatManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerShip Movement/Combat/NavalCombatManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Harbour/HarbourHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Harbour/HarbourHUD.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
@@ -169,7 +167,7 @@
       <workItem from="1765359107595" duration="5986000" />
       <workItem from="1765450225876" duration="2521000" />
       <workItem from="1765464758413" duration="660000" />
-      <workItem from="1765537852640" duration="841000" />
+      <workItem from="1765537852640" duration="1846000" />
     </task>
     <servers />
   </component>

@@ -286,8 +286,8 @@ MonoBehaviour:
   oilIcon: {fileID: 2800000, guid: 27c3d7bd2cecd984b9b428efff35e839, type: 3}
   energyIcon: {fileID: 2800000, guid: 2d5067805e2122b4a9f28f1b39535fd0, type: 3}
   titaniumIcon: {fileID: 2800000, guid: ac8e5108a7194a24ba0e29fb8fad4fd9, type: 3}
-  barFill: {fileID: 2800000, guid: 219b75d54bc38dd429feec15cb9531e5, type: 3}
-  barBorder: {fileID: 2800000, guid: fc3b86627d5fe1c4d865b80627e2e37c, type: 3}
+  barFill: {fileID: 2800000, guid: 550ca6996091c8c4fb50d646d6e44ddc, type: 3}
+  barBorder: {fileID: 0}
 --- !u!4 &117091207
 Transform:
   m_ObjectHideFlags: 0
@@ -1738,7 +1738,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCellsSqrt: 100
   _isDirty: 0
-  mouseIsOver: 1
+  mouseIsOver: 0
   newInHierarchy: 0
   territoryThicknessSettingMigrated: 1
   _numCells: 6084

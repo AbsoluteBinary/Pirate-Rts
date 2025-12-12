@@ -4,38 +4,33 @@ namespace UI.Harbour
 {
     public class HarbourHUD : MonoBehaviour
     {
-        // Player profile (top left)
-        public Texture2D playerPicture;  // Drag your image here
-        public int playerLevel = 5;
-        public float playerExp = 1200f;
-        public float maxExp = 2000f;
+        [Header("Player Profile")]
+        [SerializeField] private Texture2D playerPicture;  // Drag your player image here
+        [SerializeField] private int playerLevel = 5;
+        [SerializeField] private float playerExp = 1200f;
+        [SerializeField] private float maxExp = 2000f;
 
-        // Resources (bottom left)
-        public float metal = 500f;
-        public float oil = 300f;
-        public float energy = 1000f;
-        public float titanium = 200f;
-        
-        [Header("Resource Icons (Drag Textures Here)")]
-        public Texture2D metalIcon;
-        public Texture2D oilIcon;
-        public Texture2D energyIcon;
-        public Texture2D titaniumIcon;
-        public Texture2D barFill;  // Green fill texture
-        public Texture2D barBorder; // Border texture
+        [Header("Resources")]
+        [SerializeField] private float metal = 500f;
+        [SerializeField] private float oil = 300f;
+        [SerializeField] private float energy = 1000f;
+        [SerializeField] private float titanium = 200f;
+        [SerializeField] private float maxResource = 1000f;  // Shared max for bars
 
-
+        [Header("Resource Images")]
+        [SerializeField] private Texture2D metalIcon;
+        [SerializeField] private Texture2D oilIcon;
+        [SerializeField] private Texture2D energyIcon;
+        [SerializeField] private Texture2D titaniumIcon;
+        [SerializeField] private Texture2D barFill;    // Green/colored fill (1x1 stretchable PNG)
+        [SerializeField] private Texture2D barBorder;  // Border frame (e.g., 128x16 PNG)
 
         private void OnGUI()
         {
-            // TOP LEFT: Player profile
+            // TOP LEFT: Player Profile
             GUILayout.BeginArea(new Rect(20, 20, 200, 150), GUI.skin.box);
             GUILayout.Label("<b>Player Profile</b>");
-
-            // Picture
-            if (playerPicture)
-                GUILayout.Label(playerPicture, GUILayout.Width(100), GUILayout.Height(100));
-
+            if (playerPicture) GUILayout.Label(playerPicture, GUILayout.Width(80), GUILayout.Height(80));
             GUILayout.Label($"Level: {playerLevel}");
             GUILayout.Label($"Exp: {playerExp:F0} / {maxExp:F0}");
             GUILayout.EndArea();
@@ -44,90 +39,46 @@ namespace UI.Harbour
             GUILayout.BeginArea(new Rect(Screen.width - 220, 20, 200, 50));
             if (GUILayout.Button("View Map", GUILayout.Height(40)))
             {
-                Debug.Log("View Map clicked – open map logic here");
+                Debug.Log("View Map clicked");
             }
             GUILayout.EndArea();
 
             // CENTER TOP: 4 buttons
             GUILayout.BeginArea(new Rect(Screen.width * 0.5f - 200, 20, 400, 50));
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Build", GUILayout.Height(40)))
-                Debug.Log("Build menu opened");
-            if (GUILayout.Button("Research", GUILayout.Height(40)))
-                Debug.Log("Research menu opened");
-            if (GUILayout.Button("Fleet", GUILayout.Height(40)))
-                Debug.Log("Fleet menu opened");
-            if (GUILayout.Button("Dock", GUILayout.Height(40)))
-                Debug.Log("Dock menu opened");
+            if (GUILayout.Button("Build", GUILayout.Height(40))) Debug.Log("Build menu opened");
+            if (GUILayout.Button("Research", GUILayout.Height(40))) Debug.Log("Research menu opened");
+            if (GUILayout.Button("Fleet", GUILayout.Height(40))) Debug.Log("Fleet menu opened");
+            if (GUILayout.Button("Dock", GUILayout.Height(40))) Debug.Log("Dock menu opened");
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
 
-            // BOTTOM LEFT: Resources (sliders)
+            // BOTTOM LEFT: Resources with Icons + Bars
             GUILayout.BeginArea(new Rect(20, Screen.height - 220, 300, 200), GUI.skin.box);
             GUILayout.Label("<b>Resources</b>");
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Metal: " + metal.ToString("F0"));
-            GUILayout.HorizontalSlider(metal, 0f, 1000f, GUILayout.Width(150));  // Read-only slider
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Oil: " + oil.ToString("F0"));
-            GUILayout.HorizontalSlider(oil, 0f, 1000f, GUILayout.Width(150));
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Energy: " + energy.ToString("F0"));
-            GUILayout.HorizontalSlider(energy, 0f, 2000f, GUILayout.Width(150));
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Titanium: " + titanium.ToString("F0"));
-            GUILayout.HorizontalSlider(titanium, 0f, 1000f, GUILayout.Width(150));
-            GUILayout.EndHorizontal();
-
-            GUILayout.EndArea();
-            
-            // Metal
-            GUILayout.BeginHorizontal();
-            if (metalIcon) GUILayout.Label(metalIcon, GUILayout.Width(32), GUILayout.Height(32));
-            GUILayout.Label("Metal: " + metal.ToString("F0"));
-            DrawImageBar(metal / 1000f, barFill, barBorder);
-            GUILayout.EndHorizontal();
-
-            // Oil
-            GUILayout.BeginHorizontal();
-            if (oilIcon) GUILayout.Label(oilIcon, GUILayout.Width(32), GUILayout.Height(32));
-            GUILayout.Label("Oil: " + oil.ToString("F0"));
-            DrawImageBar(oil / 1000f, barFill, barBorder);
-            GUILayout.EndHorizontal();
-
-            // Energy
-            GUILayout.BeginHorizontal();
-            if (energyIcon) GUILayout.Label(energyIcon, GUILayout.Width(32), GUILayout.Height(32));
-            GUILayout.Label("Energy: " + energy.ToString("F0"));
-            DrawImageBar(energy / 2000f, barFill, barBorder);
-            GUILayout.EndHorizontal();
-
-            // Titanium
-            GUILayout.BeginHorizontal();
-            if (titaniumIcon) GUILayout.Label(titaniumIcon, GUILayout.Width(32), GUILayout.Height(32));
-            GUILayout.Label("Titanium: " + titanium.ToString("F0"));
-            DrawImageBar(titanium / 1000f, barFill, barBorder);
-            GUILayout.EndHorizontal();
+            DrawResourceBar(metalIcon, "Metal", metal, maxResource);
+            DrawResourceBar(oilIcon, "Oil", oil, maxResource);
+            DrawResourceBar(energyIcon, "Energy", energy, maxResource * 2f);  // Example: double max for energy
+            DrawResourceBar(titaniumIcon, "Titanium", titanium, maxResource);
 
             GUILayout.EndArea();
         }
-        private void DrawImageBar(float fillAmount, Texture2D fillTex, Texture2D borderTex)
+
+        private void DrawResourceBar(Texture2D icon, string label, float value, float max)
         {
-            const float barWidth = 120f;
-            const float barHeight = 16f;
+            GUILayout.BeginHorizontal();
+            if (icon) GUILayout.Label(icon, GUILayout.Width(32), GUILayout.Height(32));
+            GUILayout.Label($"{label}: {value:F0}");
 
-            Rect borderRect = GUILayoutUtility.GetRect(barWidth, barHeight);
-            if (borderTex) GUI.DrawTexture(borderRect, borderTex);
+            // Bar border
+            Rect barRect = GUILayoutUtility.GetRect(120, 16);
+            if (barBorder) GUI.DrawTexture(barRect, barBorder);
 
-            Rect fillRect = new Rect(borderRect.x + 2, borderRect.y + 2, barWidth * fillAmount - 4, barHeight - 4);
-            if (fillTex) GUI.DrawTexture(fillRect, fillTex);
+            // Bar fill
+            Rect fillRect = new Rect(barRect.x + 2, barRect.y + 2, (barRect.width - 4) * (value / max), barRect.height - 4);
+            if (barFill) GUI.DrawTexture(fillRect, barFill);
+            GUILayout.EndHorizontal();
         }
     }
 }
