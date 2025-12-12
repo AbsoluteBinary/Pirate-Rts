@@ -245,6 +245,64 @@ Transform:
   - {fileID: 1072583173}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &117091205
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 117091207}
+  - component: {fileID: 117091206}
+  m_Layer: 0
+  m_Name: IMGUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &117091206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117091205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af76c59959401638fa3f5fd686891b58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Harbour.HarbourHUD
+  playerPicture: {fileID: 2800000, guid: 75f43b17bbb9f504bb2b713c69a5f77f, type: 3}
+  playerLevel: 5
+  playerExp: 1200
+  maxExp: 2000
+  metal: 500
+  oil: 300
+  energy: 1000
+  titanium: 200
+  metalIcon: {fileID: 2800000, guid: ab41e191e234d004484342bd3f1bab07, type: 3}
+  oilIcon: {fileID: 2800000, guid: 27c3d7bd2cecd984b9b428efff35e839, type: 3}
+  energyIcon: {fileID: 2800000, guid: 2d5067805e2122b4a9f28f1b39535fd0, type: 3}
+  titaniumIcon: {fileID: 2800000, guid: ac8e5108a7194a24ba0e29fb8fad4fd9, type: 3}
+  barFill: {fileID: 2800000, guid: 219b75d54bc38dd429feec15cb9531e5, type: 3}
+  barBorder: {fileID: 2800000, guid: fc3b86627d5fe1c4d865b80627e2e37c, type: 3}
+--- !u!4 &117091207
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117091205}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -7.71095, y: 3.94185, z: 13.34674}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &189772805
 GameObject:
   m_ObjectHideFlags: 0
@@ -331,9 +389,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 079d48f7ea5dc054a8b2cd9151030ee5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: e8333e151973f1c4188ff534979c823b, type: 2}
-  meshFilter: {fileID: 355234138}
-  meshRenderer: {fileID: 355234137}
 --- !u!23 &355234137
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -381,6 +436,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &355234138
 MeshFilter:
@@ -761,6 +817,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1061,6 +1118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6dd216640c88dc3aaece521b1182f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.Harbour.IdleHudButtonController
+  targetSceneGroupIndex: 1
 --- !u!1 &1125775866
 GameObject:
   m_ObjectHideFlags: 0
@@ -1087,14 +1145,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1125775866}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 2
     m_Resolution: -1
@@ -1206,7 +1264,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1166499156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1680,7 +1738,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCellsSqrt: 100
   _isDirty: 0
-  mouseIsOver: 0
+  mouseIsOver: 1
   newInHierarchy: 0
   territoryThicknessSettingMigrated: 1
   _numCells: 6084
@@ -1740,6 +1798,7 @@ MonoBehaviour:
   _territoryFrontierColor: {r: 0, g: 0, b: 0, a: 1}
   _territoryCustomBorderThickness: 0
   _territoryFrontiersThickness: 1
+  _territoryFrontiersMiterJoins: 0
   _territoryInteriorBorderThickness: 2
   _territoryInteriorBorderPadding: -0.6
   _territoryDisputedFrontierColor: {r: 0, g: 1, b: 0, a: 1}
@@ -1785,6 +1844,7 @@ MonoBehaviour:
     height: 1
   _gridRelaxation: 1
   _gridCurvature: 0
+  _cornerJitter: 0
   _highlightMode: 2
   _allowHighlightWhileDragging: 0
   _highlightFadeMin: 0
@@ -1907,6 +1967,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2018615750
 MeshFilter:
@@ -1977,6 +2038,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2323,6 +2385,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2423,6 +2486,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2811,6 +2875,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2903,6 +2968,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -3923,6 +3989,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -4054,6 +4121,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -4514,3 +4582,4 @@ SceneRoots:
   - {fileID: 40176560}
   - {fileID: 1166499159}
   - {fileID: 5705010333079632823}
+  - {fileID: 117091207}

@@ -8,73 +8,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 100000, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100002, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100004, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100006, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100008, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100010, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100012, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
     - target: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_Name
       value: navalFleetShipA002_3DModel
       objectReference: {fileID: 0}
-    - target: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_TagString
-      value: PlayerShip
-      objectReference: {fileID: 0}
-    - target: {fileID: 100018, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.3
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.3
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.3
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10
+      value: -8.86588
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.30201
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10
+      value: 2.6125
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       propertyPath: m_LocalRotation.w
@@ -104,27 +64,36 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8563074207672688293}
+      addedObject: {fileID: 1215149158835569592}
     - targetCorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6380087159314669978}
+      addedObject: {fileID: 8809025462579694786}
   m_SourcePrefab: {fileID: 100100000, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
 --- !u!1 &5297235620881004013 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100016, guid: ebc27f59702b9164ca435e1fa32a82eb, type: 3}
   m_PrefabInstance: {fileID: 5297235620881101661}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &8563074207672688293
+--- !u!114 &1215149158835569592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5297235620881004013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e289130af0cb5104a93203a0f69bde0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Health
+  maxHealth: 100
+--- !u!65 &8809025462579694786
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -145,16 +114,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.714943, y: 4.132086, z: 16.05642}
   m_Center: {x: -0.181336, y: 0.9741332, z: -0.63488483}
---- !u!114 &6380087159314669978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5297235620881004013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e289130af0cb5104a93203a0f69bde0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.Health
-  maxHealth: 100
