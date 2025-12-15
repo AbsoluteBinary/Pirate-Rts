@@ -19,7 +19,7 @@ namespace UI.WorldMap.HUDInteractions
         public static void TriggerHUDEnterWorldClicked()
         {
             //Debug.Log("EventBus: Triggering HUDEnterHarbourClicked event.");
-            Debug.Log("EventBus: Triggering HUDEnterBaseClicked event. Listeners: " + (HUDEnterBaseClicked?.GetInvocationList()?.Length ?? 0));
+            Debug.Log("EventBus: Triggering HUDEnterWorldClicked event. Listeners: " + (HUDEnterWorldClicked?.GetInvocationList()?.Length ?? 0));
             HUDEnterWorldClicked?.Invoke();
         }
         

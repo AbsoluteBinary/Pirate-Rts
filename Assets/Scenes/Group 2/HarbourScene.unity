@@ -228,7 +228,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &40176560
 Transform:
   m_ObjectHideFlags: 0
@@ -282,6 +282,7 @@ MonoBehaviour:
   oil: 300
   energy: 1000
   titanium: 200
+  maxResource: 1000
   metalIcon: {fileID: 2800000, guid: ab41e191e234d004484342bd3f1bab07, type: 3}
   oilIcon: {fileID: 2800000, guid: 27c3d7bd2cecd984b9b428efff35e839, type: 3}
   energyIcon: {fileID: 2800000, guid: 2d5067805e2122b4a9f28f1b39535fd0, type: 3}
@@ -1055,7 +1056,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1072583172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1063,7 +1064,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1072583171}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
@@ -1101,7 +1102,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1072583171}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fef144287ad83cbf3be675764dea19e2, type: 3}
   m_Name: 
@@ -1113,7 +1114,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1072583171}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6dd216640c88dc3aaece521b1182f3e, type: 3}
   m_Name: 

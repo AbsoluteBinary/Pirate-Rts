@@ -1,3 +1,6 @@
+using System.Threading.Tasks;
+using _Project.Scripts.SceneManagement;
+using UI.WorldMap.HUDInteractions;
 using UnityEngine;
 
 namespace UI.Harbour
@@ -24,6 +27,14 @@ namespace UI.Harbour
         [SerializeField] private Texture2D titaniumIcon;
         [SerializeField] private Texture2D barFill;    // Green/colored fill (1x1 stretchable PNG)
         [SerializeField] private Texture2D barBorder;  // Border frame (e.g., 128x16 PNG)
+        private Task _task;
+        private Task _task1;
+
+        private void Awake()
+        {
+            //_task1 = SceneLoader.Instance.BeginSceneTransition(1);
+            HUDMenuButtonsEventBus.TriggerHUDEnterWorldClicked();
+        }
 
         private void OnGUI()
         {
@@ -40,6 +51,8 @@ namespace UI.Harbour
             if (GUILayout.Button("View Map", GUILayout.Height(40)))
             {
                 Debug.Log("View Map clicked");
+                //_ = _task1;
+                SceneLoader.Instance.BeginSceneTransition(1);
             }
             GUILayout.EndArea();
 
