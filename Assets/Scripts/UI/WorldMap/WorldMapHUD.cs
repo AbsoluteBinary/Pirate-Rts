@@ -11,7 +11,7 @@ namespace UI.WorldMap
         private void Awake()
         {
             //_task1 = SceneLoader.Instance.BeginSceneTransition(1);
-            HUDMenuButtonsEventBus.TriggerHUDEnterWorldClicked();
+            HUDMenuButtonsEventBus.TriggerHUDEnterBaseClicked();;
         }
         private void OnGUI()
         {

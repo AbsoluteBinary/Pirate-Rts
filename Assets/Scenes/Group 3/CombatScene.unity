@@ -328,7 +328,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &600847301
 Transform:
   m_ObjectHideFlags: 0
@@ -435,7 +435,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 943195065}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fef144287ad83cbf3be675764dea19e2, type: 3}
   m_Name: 
@@ -447,7 +447,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 943195065}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6dd216640c88dc3aaece521b1182f3e, type: 3}
   m_Name: 
@@ -460,7 +460,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 943195065}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
@@ -1172,6 +1172,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1517778162}
   - component: {fileID: 1517778163}
+  - component: {fileID: 1517778164}
   m_Layer: 0
   m_Name: IMGUI
   m_TagString: Untagged
@@ -1217,6 +1218,18 @@ MonoBehaviour:
   trailPrefab: {fileID: 6191541304733331936, guid: 4a40a5abca12a70f5b1cea2d7f054f71, type: 3}
   flashDuration: 0.5
   damageFadeSpeed: 2
+--- !u!114 &1517778164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517778160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: faa25b14e9e01b4e398dbf786985e7e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Combat.SceneTransition
 --- !u!1 &1725493540
 GameObject:
   m_ObjectHideFlags: 0
