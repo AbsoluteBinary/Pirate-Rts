@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
@@ -30,7 +31,7 @@ namespace _Project.Scripts.SceneManagement
         [SerializeField] private CanvasGroup loginCanvasGroup;
         [SerializeField] private GameObject backgroundDisplay;
         [OdinSerialize, ShowInInspector] private MainMenuIOData mainMenuIOData = new MainMenuIOData { isCanvasEnabled = false, isBackgroundEnabled = false };
-
+        
         private string savePath;
 
         void Awake()
@@ -63,7 +64,7 @@ namespace _Project.Scripts.SceneManagement
                 Debug.LogWarning("componentIOBox not found with tag ComponentBoxIO.");
             }
         }
-
+        
         private void ApplyUIState()
         {
             if (loginUiCanvas != null)

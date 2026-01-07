@@ -86,11 +86,11 @@ GameObject:
   - component: {fileID: 6590312123552549999}
   m_Layer: 0
   m_Name: HarbourComponentIOBox
-  m_TagString: Untagged
+  m_TagString: HarbourIOBox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6590312123552549999
 Transform:
   m_ObjectHideFlags: 0

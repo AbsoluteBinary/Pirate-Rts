@@ -1739,7 +1739,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCellsSqrt: 100
   _isDirty: 0
-  mouseIsOver: 0
+  mouseIsOver: 1
   newInHierarchy: 0
   territoryThicknessSettingMigrated: 1
   _numCells: 6084
@@ -3485,10 +3485,6 @@ PrefabInstance:
     - target: {fileID: 3480319152777946760, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_Name
       value: HarbourComponentIOBox
-      objectReference: {fileID: 0}
-    - target: {fileID: 3480319152777946760, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6590312123552549999, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_LocalPosition.x

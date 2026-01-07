@@ -5,9 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus; // For EventBus
-using System.Linq;
-using _Project.Scripts.MainMenu_Controls;
-using UnityEngine.SceneManagement; // For FirstOrDefault
 
 namespace _Project.Scripts.SceneManagement
 {
@@ -20,7 +17,8 @@ namespace _Project.Scripts.SceneManagement
         private EventBinding<LoadSceneGroupEvent> loadSceneGroupBinding;
 
         // Configuration for loading bar animation speed
-        [SerializeField] private float fillSmoothingSpeed = 5f;
+        //TODO: Removed*
+        //[SerializeField] private float fillSmoothingSpeed = 5f;
         // Array of scene groups to load
         [SerializeField] private SceneGroup[] sceneGroups;
         // Minimum time to display loading screen
@@ -31,7 +29,7 @@ namespace _Project.Scripts.SceneManagement
         [SerializeField] private Image loadingBarBorder;        // Static border of the loading bar
         [SerializeField] private Image loadingBarFill;          // Fill image that progresses
         [SerializeField] private TextMeshProUGUI loadingText;   // Text displaying "Loading..." or progress
-        [SerializeField] private CanvasGroup loadingUICanvasGroup; // Group containing loading UI elements
+        //[SerializeField] private CanvasGroup loadingUICanvasGroup; // Group containing loading UI elements
         
         // Tracks the target progress of the loading bar
         private float targetProgress;
@@ -40,7 +38,7 @@ namespace _Project.Scripts.SceneManagement
         // Index of the current scene group
         private int currentGroupIndex = 0;
         // Cached reference to login UI CanvasGroup
-        private CanvasGroup loginUICanvasGroup;
+        //private CanvasGroup loginUICanvasGroup;
 
         // Solution 3: Flag to indicate if preparing for a new group (prevents enabling)
         private bool isPreparingNewGroup;
@@ -83,11 +81,11 @@ namespace _Project.Scripts.SceneManagement
                 backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 1f);
                 backgroundImage.DOFade(1.0f, 1.0f);
             }
-            if (loadingUICanvasGroup != null)
-            {
-                loadingUICanvasGroup.gameObject.SetActive(true);
-                loadingUICanvasGroup.alpha = 1f;
-            }
+            // if (loadingUICanvasGroup != null)
+            // {
+            //     loadingUICanvasGroup.gameObject.SetActive(true);
+            //     loadingUICanvasGroup.alpha = 1f;
+            // }
             if (loadingBarFill != null) loadingBarFill.fillAmount = 0f;
             if (loadingText != null) loadingText.text = "Loading...";
         }
@@ -147,10 +145,10 @@ namespace _Project.Scripts.SceneManagement
 
         public void ShowLoadingUI()
         {
-            if (loadingUICanvasGroup != null)
-            {
-                loadingUICanvasGroup.DOFade(1f, 0.4f);
-            }
+            // if (loadingUICanvasGroup != null)
+            // {
+            //     loadingUICanvasGroup.DOFade(1f, 0.4f);
+            // }
         }
         
         public void InitiateLoad(int index)
@@ -163,7 +161,7 @@ namespace _Project.Scripts.SceneManagement
         {
             Sequence seq = DOTween.Sequence();
             if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
-            if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
+           // if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
     
             // Insert callback at end of fade (almost faded out) to show login UI if Boot group
             seq.AppendCallback(() =>
@@ -181,7 +179,7 @@ namespace _Project.Scripts.SceneManagement
             seq.OnComplete(() =>
             {
                 if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
-                if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
+               // if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 isPreparingNewGroup = false;
                 isLoading = false; // Reset isLoading to allow new loads
                 Debug.Log("isLoading reset to false"); // Optional: For testing
@@ -240,7 +238,8 @@ namespace _Project.Scripts.SceneManagement
             if (!isLoading || loadingBarFill == null) return;
 
             float currentFillAmount = loadingBarFill.fillAmount;
-            loadingBarFill.fillAmount = Mathf.Lerp(currentFillAmount, targetProgress, Time.deltaTime * fillSmoothingSpeed);
+            //TODO: Removed*
+            //loadingBarFill.fillAmount = Mathf.Lerp(currentFillAmount, targetProgress, Time.deltaTime * fillSmoothingSpeed);
             if (loadingText != null)
                 loadingText.text = $"Loading... {Mathf.RoundToInt(targetProgress * 100f)}%";
         }
@@ -305,7 +304,7 @@ namespace _Project.Scripts.SceneManagement
         public async Task BeginSceneTransition(int targetGroupIndex)
         {
             // ───── STEP 1: SMOOTH FADE TO BLACK (covers everything beautifully) ─────
-            await FadeToBlack();
+            //await FadeToBlack();
 
             // ───── STEP 2: YELLOW DEBUG MESSAGE ─────
             Debug.Log($"<color=yellow>Call start Load process → Target Group: {targetGroupIndex}</color>");
@@ -314,72 +313,9 @@ namespace _Project.Scripts.SceneManagement
             await LoadSpecificSceneGroup(targetGroupIndex);
 
             // ───── STEP 4: SMOOTH FADE BACK IN (reveals new world perfectly) ─────
-            await FadeFromBlack();
+            //await FadeFromBlack();
         }
         
-        private async Task FadeToBlack(float duration = 0.5f)
-        {
-            ForceShowLoadingBackgroundInstantly(); // Reuse our instant method
-
-            if (backgroundImage != null)
-            {
-                backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 0f);
-                await backgroundImage.DOFade(1f, duration).SetEase(Ease.OutCubic).AsyncWaitForCompletion();
-            }
-
-            if (loadingUICanvasGroup != null)
-            {
-                loadingUICanvasGroup.alpha = 0f;
-                await loadingUICanvasGroup.DOFade(1f, duration * 0.8f).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
-            }
-
-            Debug.Log("<color=black>Screen fully black — safe to load</color>");
-        }
-
-        private async Task FadeFromBlack(float duration = 0.6f)
-        {
-            if (backgroundImage != null)
-            {
-                await backgroundImage.DOFade(0f, duration).SetEase(Ease.InCubic).AsyncWaitForCompletion();
-            }
-
-            if (loadingUICanvasGroup != null)
-            {
-                await loadingUICanvasGroup.DOFade(0f, duration * 0.8f).SetEase(Ease.InQuad).AsyncWaitForCompletion();
-            }
-
-            // Optional: deactivate when fully invisible
-            if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
-            if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
-
-            Debug.Log("<color=green>Transition complete — new world revealed!</color>");
-        }
-        
-        private void ForceShowLoadingBackgroundInstantly()
-        {
-            if (backgroundImage != null)
-            {
-                backgroundImage.gameObject.SetActive(true);
-                backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 1f); // Force full opacity
-                Debug.Log("[SceneLoader] Background forced ON instantly — covering old scene");
-            }
-
-            if (loadingUICanvasGroup != null)
-            {
-                loadingUICanvasGroup.gameObject.SetActive(true);
-                loadingUICanvasGroup.alpha = 1f;
-            }
-
-            if (loadingBarFill != null)
-            {
-                loadingBarFill.fillAmount = 0f;
-            }
-
-            if (loadingText != null)
-            {
-                loadingText.text = "Loading...";
-            }
-        }
 
         public async Task ToggleNextSceneGroup()
         {
