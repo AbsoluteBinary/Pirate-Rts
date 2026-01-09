@@ -9,6 +9,7 @@ TagManager:
   - BootComponentBoxIO
   - BootCamera
   - PlayerShip
+  - HarbourIOBox
   layers:
   - Default
   - TransparentFX
