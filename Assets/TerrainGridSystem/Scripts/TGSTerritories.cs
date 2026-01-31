@@ -2039,7 +2039,7 @@ namespace TGS {
         int _territoriesColorSeed = 1;
 
         /// <summary>
-        /// Randomize seed used to generate cells. Use this to control randomization.
+        /// Seed used to generate random territory fill colors.
         /// </summary>
         public int territoriesColorSeed {
             get { return _territoriesColorSeed; }

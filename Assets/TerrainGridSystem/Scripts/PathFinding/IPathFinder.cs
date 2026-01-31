@@ -86,6 +86,11 @@ namespace TGS.PathFinding {
             set;
         }
 
+        int StartCellIndex { get; set; }
+        int EndCellIndex { get; set; }
+        CanCrossCheckType CanCrossCheckType { get; set; }
+        byte[] ClearanceData { get; set; }
+
         List<PathFinderNode> FindPath(TerrainGridSystem tgs, Cell start, Cell end, out float cost, bool evenLayout);
 
         void SetCalcMatrix(Cell[] grid);

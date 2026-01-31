@@ -19,6 +19,26 @@ namespace TGS {
 
     public delegate bool CellFilterDelegate (int cellIndex);
 
+    /// <summary>
+    /// Data structure containing border cells and border vertices.
+    /// </summary>
+    public class CellBorderData {
+        /// <summary>
+        /// List of cell indices that form the border
+        /// </summary>
+        public List<int> borderCellIndices;
+        
+        /// <summary>
+        /// List of border vertex positions in world space
+        /// </summary>
+        public List<Vector3> borderVertices;
+        
+        public CellBorderData() {
+            borderCellIndices = new List<int>();
+            borderVertices = new List<Vector3>();
+        }
+    }
+
     public partial class TerrainGridSystem : MonoBehaviour {
 
         /// <summary>
@@ -625,6 +645,24 @@ namespace TGS {
             set {
                 if (_cellsMaximumAltitudeClampVertices != value) {
                     _cellsMaximumAltitudeClampVertices = value;
+                    issueRedraw = RedrawType.Full;
+                    Redraw(true);
+                }
+            }
+        }
+
+
+        [SerializeField]
+        bool _hideIsolatedCells;
+
+        /// <summary>
+        /// If enabled, cells with no visible neighbors after other visibility rules are applied will be hidden.
+        /// </summary>
+        public bool hideIsolatedCells {
+            get { return _hideIsolatedCells; }
+            set {
+                if (_hideIsolatedCells != value) {
+                    _hideIsolatedCells = value;
                     issueRedraw = RedrawType.Full;
                     Redraw(true);
                 }
@@ -1362,6 +1400,163 @@ namespace TGS {
             GameObject go = DrawTerritoryFrontier(tm, material, root, CUSTOM_BORDER_NAME, useVertexDisplacement);
 
             return go;
+        }
+
+        /// <summary>
+        /// Returns the border cells and border vertices for the given cell indices.
+        /// Similar to CellDrawBorder but returns data instead of drawing.
+        /// </summary>
+        public CellBorderData CellGetBorderData(List<int> cellIndices, float expand = 1f) {
+            CellBorderData result = new CellBorderData();
+            
+            if (cellIndices == null || cellIndices.Count == 0) {
+                return result;
+            }
+            
+            int cellIndicesCount = cellIndices.Count;
+            result.borderCellIndices = new List<int>(cellIndicesCount);
+            
+            if (cellIndicesCount == 1) {
+                int cellIndex = cellIndices[0];
+                if (!ValidCellIndex(cellIndex)) {
+                    return result;
+                }
+                result.borderCellIndices.Add(cellIndex);
+                Region singleCellRegion = cells[cellIndex].region;
+                
+                int singleCellSegCount = singleCellRegion.segments.Count;
+                if (expand != 1f && singleCellSegCount > 0) {
+                    Vector2 center = Vector2.zero;
+                    int count = 0;
+                    for (int k = 0; k < singleCellSegCount; k++) {
+                        Segment s = singleCellRegion.segments[k];
+                        center.x += (float)s.start.x;
+                        center.y += (float)s.start.y;
+                        center.x += (float)s.end.x;
+                        center.y += (float)s.end.y;
+                        count += 2;
+                    }
+                    if (count > 0) {
+                        center /= count;
+                    }
+                    
+                    for (int k = 0; k < singleCellSegCount; k++) {
+                        Segment s = singleCellRegion.segments[k];
+                        float sx = ((float)s.start.x - center.x) * expand + center.x;
+                        float sy = ((float)s.start.y - center.y) * expand + center.y;
+                        float ex = ((float)s.end.x - center.x) * expand + center.x;
+                        float ey = ((float)s.end.y - center.y) * expand + center.y;
+                        singleCellRegion.segments[k] = new Segment(new Point(sx, sy), new Point(ex, ey), s.border);
+                    }
+                }
+                
+                HashSet<Point> singleCellVertices = new HashSet<Point>(singleCellSegCount * 2);
+                for (int k = 0; k < singleCellSegCount; k++) {
+                    Segment s = singleCellRegion.segments[k];
+                    singleCellVertices.Add(s.start);
+                    singleCellVertices.Add(s.end);
+                }
+                
+                result.borderVertices = new List<Vector3>(singleCellVertices.Count);
+                foreach (Point point in singleCellVertices) {
+                    result.borderVertices.Add(GetWorldSpacePosition(new Vector2((float)point.x, (float)point.y)));
+                }
+                
+                return result;
+            }
+            
+            Region borderRegion = new Region(null, false);
+            borderRegion.isFlat = _cellsFlat;
+            customBorderHit.Clear();
+            
+            for (int i = 0; i < cellIndicesCount; i++) {
+                int cellIndex = cellIndices[i];
+                if (!ValidCellIndex(cellIndex)) continue;
+                
+                result.borderCellIndices.Add(cellIndex);
+                Cell cell = cells[cellIndex];
+                List<Segment> segments = cell.region.segments;
+                int segCount = segments.Count;
+                for (int j = 0; j < segCount; j++) {
+                    Segment segment = segments[j];
+                    customBorderHit.TryGetValue(segment, out int count);
+                    customBorderHit[segment] = count + 1;
+                }
+            }
+            
+            if (result.borderCellIndices.Count == 0) {
+                return result;
+            }
+            
+            foreach (KeyValuePair<Segment, int> kvp in customBorderHit) {
+                if (kvp.Value == 1) {
+                    borderRegion.segments.Add(kvp.Key);
+                }
+            }
+            
+            int borderSegCount = borderRegion.segments.Count;
+            if (borderSegCount == 0) {
+                return result;
+            }
+            
+            if (expand != 1f) {
+                Vector2 center = Vector2.zero;
+                int count = 0;
+                for (int k = 0; k < borderSegCount; k++) {
+                    Segment s = borderRegion.segments[k];
+                    center.x += (float)s.start.x;
+                    center.y += (float)s.start.y;
+                    center.x += (float)s.end.x;
+                    center.y += (float)s.end.y;
+                    count += 2;
+                }
+                if (count > 0) {
+                    center /= count;
+                }
+                
+                for (int k = 0; k < borderSegCount; k++) {
+                    Segment s = borderRegion.segments[k];
+                    float sx = ((float)s.start.x - center.x) * expand + center.x;
+                    float sy = ((float)s.start.y - center.y) * expand + center.y;
+                    float ex = ((float)s.end.x - center.x) * expand + center.x;
+                    float ey = ((float)s.end.y - center.y) * expand + center.y;
+                    borderRegion.segments[k] = new Segment(new Point(sx, sy), new Point(ex, ey), s.border);
+                }
+            }
+            
+            HashSet<Point> uniqueVertices = new HashSet<Point>(borderSegCount * 2);
+            for (int k = 0; k < borderSegCount; k++) {
+                Segment s = borderRegion.segments[k];
+                uniqueVertices.Add(s.start);
+                uniqueVertices.Add(s.end);
+            }
+            
+            result.borderVertices = new List<Vector3>(uniqueVertices.Count);
+            foreach (Point point in uniqueVertices) {
+                result.borderVertices.Add(GetWorldSpacePosition(new Vector2((float)point.x, (float)point.y)));
+            }
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the border cells and border vertices for a single cell.
+        /// </summary>
+        public CellBorderData CellGetBorderData(int cellIndex, float expand = 1f) {
+            if (!ValidCellIndex(cellIndex)) {
+                return new CellBorderData();
+            }
+            tempListCells.Clear();
+            tempListCells.Add(cellIndex);
+            return CellGetBorderData(tempListCells, expand);
+        }
+
+        /// <summary>
+        /// Returns the border cells and border vertices for a list of cells.
+        /// </summary>
+        public CellBorderData CellGetBorderData(List<Cell> cells, float expand = 1f) {
+            GetCellIndices(cells, tempListCells);
+            return CellGetBorderData(tempListCells, expand);
         }
 
         /// <summary>
@@ -2586,8 +2781,12 @@ namespace TGS {
         }
 
 
-
-        CELL_SIDE GetSideByVector (Vector2 dir) {
+        /// <summary>
+        /// Returns the side of the cell that is closest to the given vector
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public CELL_SIDE GetSideByVector (Vector2 dir) {
             switch (_gridTopology) {
                 case GridTopology.Box:
                     if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {

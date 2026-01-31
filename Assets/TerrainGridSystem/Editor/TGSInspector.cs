@@ -356,6 +356,8 @@ namespace TGS_Editor {
                     if (tgs.cellsMaximumAltitude != 0) {
                         tgs.cellsMaximumAltitudeClampVertices = EditorGUILayout.Toggle(new GUIContent("   Clamp Vertices", "Clamp vertices altitude to the maximum altitude."), tgs.cellsMaximumAltitudeClampVertices);
                     }
+
+                    tgs.hideIsolatedCells = EditorGUILayout.Toggle(new GUIContent("Hide Isolated Cells", "Cells with no visible neighbors will be hidden."), tgs.hideIsolatedCells);
                 }
 
                 int cellsCreated = tgs.cells == null ? 0 : tgs.cells.Count;
@@ -368,45 +370,44 @@ namespace TGS_Editor {
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.Separator();
+            }
 
-                expandRenderingOptions = DrawSectionTitle("Rendering Options", expandRenderingOptions);
-                if (expandRenderingOptions) {
+            expandRenderingOptions = DrawSectionTitle("Rendering Options", expandRenderingOptions);
+            if (expandRenderingOptions) {
 
-                    tgs.disableMeshGeneration = EditorGUILayout.Toggle(new GUIContent("Disable Mesh Generation", "Grid system can be used through API but don't render any grid feature."), tgs.disableMeshGeneration);
+                tgs.disableMeshGeneration = EditorGUILayout.Toggle(new GUIContent("Disable Mesh Generation", "Grid system can be used through API but don't render any grid feature."), tgs.disableMeshGeneration);
 
-                    if (tgs.disableMeshGeneration) {
-                        EditorGUILayout.Separator();
-                    }
-                    else {
-
-                        tgs.gridMask = (Texture2D)EditorGUILayout.ObjectField(new GUIContent("Mask", "Alpha channel is used to determine cell visibility (0 = cell is not visible)"), tgs.gridMask, typeof(Texture2D), true);
-                        if (CheckTextureImportSettings(tgs.gridMask)) {
-                            tgs.ReloadGridMask();
-                        }
-                        if (tgs.gridMask != null) {
-                            tgs.gridMaskUseScale = EditorGUILayout.Toggle(new GUIContent("   Use Scale", "Respects offset and scale parameters when applying mask."), tgs.gridMaskUseScale);
-                            tgs.gridMaskInsideCount = EditorGUILayout.IntField(new GUIContent("   Inside Count", "Minimum number of vertices that must be inside the grid mask to consider the entire cell is inside the mask."), tgs.gridMaskInsideCount);
-                        }
-
-                        if (VRCheck.isActive) GUI.enabled = false;
-                        tgs.useGeometryShaders = EditorGUILayout.Toggle(new GUIContent("Use Geometry Shaders", "Use geometry shaders if platform supports them (not supported on VR/Metal)."), tgs.useGeometryShaders);
-                        GUI.enabled = true;
-                        tgs.transparentBackground = EditorGUILayout.Toggle("Transparent Background", tgs.transparentBackground);
-                        if (tgs.transparentBackground) {
-                            EditorGUI.indentLevel++;
-                            tgs.sortingOrder = EditorGUILayout.IntField("Sorting Order", tgs.sortingOrder);
-                            EditorGUI.indentLevel--;
-                        }
-
-                        tgs.useStencilBuffer = EditorGUILayout.Toggle(new GUIContent("Use Stencil Buffer", "When enabled, stencil buffer will be used to avoid overdraw and ensure correct rendering order of grid features. You can disable this option if it creates conflicts with other stencil-based renderers."), tgs.useStencilBuffer);
-
-                        tgs.canvasTexture = (Texture2D)EditorGUILayout.ObjectField(new GUIContent("Canvas Texture", "Optional texture for background that's revealed when using the texture methods of cells or territories."), tgs.canvasTexture, typeof(Texture2D), true);
-
-                        tgs.animationSortingOrder = EditorGUILayout.IntField(new GUIContent("Animation Sorting Order", "Sorting order for animation effects such as fade out grid elements."), tgs.animationSortingOrder);
-                        tgs.animationSortingLayer = EditorGUILayout.TextField(new GUIContent("Animation Sorting Layer", "Sorting layer for animation effects such as fade out grid elements."), tgs.animationSortingLayer);
-                    }
+                if (tgs.disableMeshGeneration) {
+                    EditorGUILayout.Separator();
                 }
+                else {
 
+                    tgs.gridMask = (Texture2D)EditorGUILayout.ObjectField(new GUIContent("Mask", "Alpha channel is used to determine cell visibility (0 = cell is not visible)"), tgs.gridMask, typeof(Texture2D), true);
+                    if (CheckTextureImportSettings(tgs.gridMask)) {
+                        tgs.ReloadGridMask();
+                    }
+                    if (tgs.gridMask != null) {
+                        tgs.gridMaskUseScale = EditorGUILayout.Toggle(new GUIContent("   Use Scale", "Respects offset and scale parameters when applying mask."), tgs.gridMaskUseScale);
+                        tgs.gridMaskInsideCount = EditorGUILayout.IntField(new GUIContent("   Inside Count", "Minimum number of vertices that must be inside the grid mask to consider the entire cell is inside the mask."), tgs.gridMaskInsideCount);
+                    }
+
+                    if (VRCheck.isActive) GUI.enabled = false;
+                    tgs.useGeometryShaders = EditorGUILayout.Toggle(new GUIContent("Use Geometry Shaders", "Use geometry shaders if platform supports them (not supported on VR/Metal)."), tgs.useGeometryShaders);
+                    GUI.enabled = true;
+                    tgs.transparentBackground = EditorGUILayout.Toggle("Transparent Background", tgs.transparentBackground);
+                    if (tgs.transparentBackground) {
+                        EditorGUI.indentLevel++;
+                        tgs.sortingOrder = EditorGUILayout.IntField("Sorting Order", tgs.sortingOrder);
+                        EditorGUI.indentLevel--;
+                    }
+
+                    tgs.useStencilBuffer = EditorGUILayout.Toggle(new GUIContent("Use Stencil Buffer", "When enabled, stencil buffer will be used to avoid overdraw and ensure correct rendering order of grid features. You can disable this option if it creates conflicts with other stencil-based renderers."), tgs.useStencilBuffer);
+
+                    tgs.canvasTexture = (Texture2D)EditorGUILayout.ObjectField(new GUIContent("Canvas Texture", "Optional texture for background that's revealed when using the texture methods of cells or territories."), tgs.canvasTexture, typeof(Texture2D), true);
+
+                    tgs.animationSortingOrder = EditorGUILayout.IntField(new GUIContent("Animation Sorting Order", "Sorting order for animation effects such as fade out grid elements."), tgs.animationSortingOrder);
+                    tgs.animationSortingLayer = EditorGUILayout.TextField(new GUIContent("Animation Sorting Layer", "Sorting layer for animation effects such as fade out grid elements."), tgs.animationSortingLayer);
+                }
             }
 
             if (!tgs.disableMeshGeneration) {

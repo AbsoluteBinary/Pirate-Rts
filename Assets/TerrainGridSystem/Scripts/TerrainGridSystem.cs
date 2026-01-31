@@ -470,15 +470,23 @@ namespace TGS {
         int _seed = 1;
 
         /// <summary>
-        /// Randomize seed used to generate cells. Use this to control randomization.
+        /// Randomize seed used to generate territories. For Box/Hexagonal grids, changing seed only affects territory distribution.
+        /// For Irregular grids, seed also affects cell positions unless voronoiSites are user-defined or Voronoi data is baked.
         /// </summary>
         public int seed {
             get { return _seed; }
             set {
                 if (_seed != value) {
                     _seed = value;
-                    needGenerateMap = true;
                     isDirty = true;
+                    bool cellsDependOnSeed = _gridTopology == GridTopology.Irregular && 
+                                             !hasBakedVoronoi && 
+                                             (_voronoiSites == null || _voronoiSites.Count < _numCells);
+                    if (cellsDependOnSeed) {
+                        needGenerateMap = true;
+                    } else {
+                        GenerateMap(reuseTerrainData: true, keepCells: true);
+                    }
                 }
             }
         }

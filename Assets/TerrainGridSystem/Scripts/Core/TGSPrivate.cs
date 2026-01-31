@@ -31,6 +31,12 @@ namespace TGS {
         const int STENCIL_MASK_INTERIOR_BORDER = 32;
         const int BIG_INT_NUMBER = 214748364;
         const string CANVAS_MESH_NAME = "CanvasQuad";
+        const int LEGACY_TRANSPARENT_QUEUE_OFFSET = 1000;
+        const int HDRP_TRANSPARENT_RANGE = 100;
+        const int GEOMETRY_QUEUE_BASE = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+        const int TRANSPARENT_QUEUE_BASE = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        const int HDRP_TRANSPARENT_MIN = TRANSPARENT_QUEUE_BASE - HDRP_TRANSPARENT_RANGE;
+        const int HDRP_TRANSPARENT_MAX = TRANSPARENT_QUEUE_BASE + HDRP_TRANSPARENT_RANGE;
 
         readonly int[] hexIndices = new int[] { 0, 5, 1, 1, 5, 2, 5, 4, 2, 2, 4, 3 };
         readonly int[] quadIndices = new int[] { 0, 2, 1, 0, 3, 2 };
@@ -209,6 +215,7 @@ namespace TGS {
         Dictionary<int, Material> coloredMatCacheGroundCell;
         Dictionary<int, Material> coloredMatCacheOverlayCell;
         Dictionary<Color, Material> frontierColorCache;
+        readonly Dictionary<Material, int> materialBaseRenderQueues = new Dictionary<Material, int>();
         Color[] factoryColors;
         bool refreshCellMesh, refreshTerritoriesMesh;
         List<Cell> sortedCells;
@@ -565,6 +572,7 @@ namespace TGS {
             if (materialPool != null) {
                 materialPool.Release();
             }
+            materialBaseRenderQueues.Clear();
             cells = null;
             territories.Clear();
         }
@@ -1707,6 +1715,26 @@ namespace TGS {
                 }
             }
 
+            if (_hideIsolatedCells) {
+                for (int k = 0; k < cellsCount; k++) {
+                    Cell cell = cells[k];
+                    if (cell == null || !cell.visible)
+                        continue;
+
+                    bool hasVisibleNeighbor = false;
+                    int neighborCount = cell.neighbours.Count;
+                    for (int n = 0; n < neighborCount; n++) {
+                        if (cell.neighbours[n].visible) {
+                            hasVisibleNeighbor = true;
+                            break;
+                        }
+                    }
+                    if (!hasVisibleNeighbor) {
+                        cell.visibleByRules = false;
+                    }
+                }
+            }
+
             ClearLastOver();
             needRefreshRouteMatrix = true;
         }
@@ -1746,6 +1774,7 @@ namespace TGS {
                     }
                     else if (seg.cellIndex != cell.index) {
                         Cell neighbour = cells[seg.cellIndex];
+                        if (neighbour == null) continue;
                         int pairIndex;
                         if (cell.index < neighbour.index) {
                             pairIndex = cell.index * cellCount + neighbour.index;
@@ -1783,6 +1812,7 @@ namespace TGS {
                     }
                     else if (seg.cellIndex != cell.index) {
                         Cell neighbour = cells[seg.cellIndex];
+                        if (neighbour == null) continue;
                         int pairIndex;
                         if (cell.index < neighbour.index) {
                             pairIndex = cell.index * cellCount + neighbour.index;
@@ -3292,6 +3322,44 @@ namespace TGS {
             mat.SetFloat(ShaderParams.Offset, depthOffset);
         }
 
+        int GetMaterialBaseRenderQueue (Material mat) {
+            if (mat == null) return 0;
+            if (!materialBaseRenderQueues.TryGetValue(mat, out int baseQueue)) {
+                baseQueue = mat.renderQueue;
+                materialBaseRenderQueues[mat] = baseQueue;
+            }
+            return baseQueue;
+        }
+
+        int GetTransparentRenderQueue (Material mat) {
+            int baseQueue = GetMaterialBaseRenderQueue(mat);
+            if (TGSHDRPCameraSetup.usesHDRP) {
+                int offset = baseQueue - GEOMETRY_QUEUE_BASE;
+                int target = HDRP_TRANSPARENT_MIN + offset;
+                if (target < HDRP_TRANSPARENT_MIN) {
+                    target = HDRP_TRANSPARENT_MIN;
+                }
+                else if (target > HDRP_TRANSPARENT_MAX) {
+                    target = HDRP_TRANSPARENT_MAX;
+                }
+                return target;
+            }
+            if (baseQueue < TRANSPARENT_QUEUE_BASE) {
+                return baseQueue + LEGACY_TRANSPARENT_QUEUE_OFFSET;
+            }
+            return baseQueue;
+        }
+
+        void SetMaterialTransparentQueue (Material mat) {
+            if (mat == null) return;
+            mat.renderQueue = GetTransparentRenderQueue(mat);
+        }
+
+        void RestoreMaterialQueue (Material mat) {
+            if (mat == null) return;
+            mat.renderQueue = GetMaterialBaseRenderQueue(mat);
+        }
+
         void SetBlend (Material mat) {
             SetBlend(mat, _transparentBackground);
         }
@@ -3302,17 +3370,13 @@ namespace TGS {
                 mat.SetInt(ShaderParams.ZWrite, 0);
                 mat.SetInt(ShaderParams.SrcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 mat.SetInt(ShaderParams.DstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                if (mat.renderQueue < 3000) {
-                    mat.renderQueue += 1000;
-                }
+                SetMaterialTransparentQueue(mat);
             }
             else {
                 mat.SetInt(ShaderParams.ZWrite, 0);
                 mat.SetInt(ShaderParams.SrcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 mat.SetInt(ShaderParams.DstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                if (mat.renderQueue >= 3000) {
-                    mat.renderQueue -= 1000;
-                }
+                RestoreMaterialQueue(mat);
             }
         }
 
@@ -3322,17 +3386,13 @@ namespace TGS {
                 mat.SetInt(ShaderParams.ZWrite, 0);
                 mat.SetInt(ShaderParams.SrcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 mat.SetInt(ShaderParams.DstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                if (mat.renderQueue < 3000) {
-                    mat.renderQueue += 1000;
-                }
+                SetMaterialTransparentQueue(mat);
             }
             else {
                 mat.SetInt(ShaderParams.ZWrite, 0);
                 mat.SetInt(ShaderParams.SrcBlend, (int)UnityEngine.Rendering.BlendMode.One);
                 mat.SetInt(ShaderParams.DstBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                if (mat.renderQueue >= 3000) {
-                    mat.renderQueue -= 1000;
-                }
+                RestoreMaterialQueue(mat);
             }
         }
 
@@ -3855,14 +3915,17 @@ namespace TGS {
                 if (cells != null) {
                     cells.Clear();
                 }
-                finder = null;
+                if (finderPool != null) {
+                    finderPool.Dispose();
+                    finderPool = null;
+                }
                 needRefreshRouteMatrix = true;
             }
             if (territories != null) {
-                territories.Clear();
                 if (territories.Count > 0) {
                     recreateTerritories = true;
                 }
+                territories.Clear();
             }
             Redraw(reuseTerrainData);
             ApplyTGSConfigs(startOnly: false);

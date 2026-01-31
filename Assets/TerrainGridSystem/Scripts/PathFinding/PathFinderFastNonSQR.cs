@@ -37,6 +37,10 @@ namespace TGS.PathFinding {
         PathFindingEvent mOnCellCross;
         int mMinClearance;
         object mData;
+        int mStartCellIndex = -1;
+        int mEndCellIndex = -1;
+        CanCrossCheckType mCanCrossCheckType;
+        byte[] mClearanceData;
 
         //Promoted local variables to member variables to avoid recreation between calls
         float mH = 0;
@@ -264,6 +268,25 @@ namespace TGS.PathFinding {
             set { mData = value; }
         }
 
+        public int StartCellIndex {
+            get { return mStartCellIndex; }
+            set { mStartCellIndex = value; }
+        }
+
+        public int EndCellIndex {
+            get { return mEndCellIndex; }
+            set { mEndCellIndex = value; }
+        }
+
+        public CanCrossCheckType CanCrossCheckType {
+            get { return mCanCrossCheckType; }
+            set { mCanCrossCheckType = value; }
+        }
+
+        public byte[] ClearanceData {
+            get { return mClearanceData; }
+            set { mClearanceData = value; }
+        }
 
         public List<PathFinderNode> FindPath(TerrainGridSystem tgs, Cell startCell, Cell endCell, out float totalCost, bool evenLayout) {
             PathFindingPoint start = new PathFindingPoint(startCell.column, startCell.row);
@@ -373,12 +396,31 @@ namespace TGS.PathFinding {
 
                     // Unbreakeable?
                     mNewLocation = (mNewLocationY * mColumnCount) + mNewLocationX;
-                    if (!mGrid[mNewLocation].canCross && !mIgnoreCanCrossCheck)
+                    Cell ncell = mGrid[mNewLocation];
+                    if (ncell == null)
                         continue;
 
-                    Cell ncell = mGrid[mNewLocation];
+                    // Check canCross with start/end cell exceptions (thread-safe: no cell mutation)
+                    if (!ncell.canCross && !mIgnoreCanCrossCheck) {
+                        bool isStartOrEndException = false;
+                        int cellIndex = ncell.index;
+                        switch (mCanCrossCheckType) {
+                            case CanCrossCheckType.IgnoreCanCrossCheckOnStartAndEndCells:
+                                isStartOrEndException = (cellIndex == mStartCellIndex || cellIndex == mEndCellIndex);
+                                break;
+                            case CanCrossCheckType.IgnoreCanCrossCheckOnStartCell:
+                                isStartOrEndException = (cellIndex == mStartCellIndex);
+                                break;
+                            case CanCrossCheckType.IgnoreCanCrossCheckOnEndCell:
+                                isStartOrEndException = (cellIndex == mEndCellIndex);
+                                break;
+                        }
+                        if (!isStartOrEndException) continue;
+                    }
 
-                    if (ncell.clearance < mMinClearance) {
+                    // Use clearance data array if provided (thread-safe), otherwise fall back to cell.clearance
+                    int cellClearance = mClearanceData != null ? mClearanceData[ncell.index] : ncell.clearance;
+                    if (cellClearance < mMinClearance) {
                         continue;
                     }
 
@@ -386,10 +428,21 @@ namespace TGS.PathFinding {
                         continue;
 
                     float gridValue;
+                    // Check group with start/end cell exceptions (thread-safe: no cell mutation)
+                    int cellGroup = ncell.group;
+                    if (mCanCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnStartAndEndCells ||
+                        mCanCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnStartCell) {
+                        if (ncell.index == mStartCellIndex) cellGroup |= mCellGroupMask;
+                    }
+                    if (mCanCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnStartAndEndCells ||
+                        mCanCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnEndCell) {
+                        if (ncell.index == mEndCellIndex) cellGroup |= mCellGroupMask;
+                    }
+
                     if (mCellGroupMaskExactComparison) {
-                        gridValue = ncell.group == mCellGroupMask ? 1 : 0;
+                        gridValue = cellGroup == mCellGroupMask ? 1 : 0;
                     } else {
-                        gridValue = (ncell.group & mCellGroupMask) != 0 ? 1 : 0;
+                        gridValue = (cellGroup & mCellGroupMask) != 0 ? 1 : 0;
                     }
                     if (gridValue == 0)
                         continue;

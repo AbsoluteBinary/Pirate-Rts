@@ -45,6 +45,16 @@ Of course, all updates of Terrain Grid System will be eventually available on th
 Version history
 ---------------
 
+Version 21.0
+- API: added thread-safe async pathfinding (FindPathAsync).
+- Demo: added Demo34_AsyncPathFinding
+
+Version 20.2
+- Added "Hide Isolated Cells" option
+- Changing Seed now preserves cells in box/hexagonal grid topologies
+- API: added CellGetBorderData() methods: returns border cells and border vertices for a group of cells (similar to CellDrawBorder but returns data instead of drawing)
+- [Fix] Fixed transparent background bug in HDRP on Unity 6
+
 Version 20.1.1
 - [Fix] Fixed a race condition during intialization when using the grid over meshes on Unity 6.2.13
 

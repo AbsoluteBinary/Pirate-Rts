@@ -1,5 +1,8 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using TGS.PathFinding;
 
 namespace TGS {
@@ -25,6 +28,15 @@ namespace TGS {
         public float maxCellCrossCost = float.MaxValue;
         public PathFindingEvent OnPathFindingCrossCell;
         public object OnPathFindingCrossCellData;
+    }
+
+    /// <summary>
+    /// Result of an async pathfinding operation
+    /// </summary>
+    public struct FindPathAsyncResult {
+        public List<int> path;
+        public float totalCost;
+        public bool success;
     }
 
 
@@ -222,26 +234,18 @@ namespace TGS {
             Cell startCell = cells[cellIndexStart];
             Cell endCell = cells[cellIndexEnd];
             if (startCell == null || endCell == null) return 0;
-            bool startCellCanCross = startCell.canCross;
-            bool endCellCanCross = endCell.canCross;
-            int startCellGroup = startCell.group;
-            int endCellGroup = endCell.group;
+
+            // Thread-safe: check canCross without mutation, let pathfinder handle exceptions
             if (options.canCrossCheckType != CanCrossCheckType.IgnoreCanCrossCheckOnAllCells) {
                 switch (options.canCrossCheckType) {
                     case CanCrossCheckType.IgnoreCanCrossCheckOnStartAndEndCells:
-                        startCell.canCross = endCell.canCross = true;
-                        startCell.group |= options.cellGroupMask;
-                        endCell.group |= options.cellGroupMask;
+                        // Pathfinder will handle the exception for both cells
                         break;
                     case CanCrossCheckType.IgnoreCanCrossCheckOnStartCell:
                         if (!endCell.canCross) return 0;
-                        startCell.canCross = true;
-                        startCell.group |= options.cellGroupMask;
                         break;
                     case CanCrossCheckType.IgnoreCanCrossCheckOnEndCell:
                         if (!startCell.canCross) return 0;
-                        endCell.canCross = true;
-                        endCell.group |= options.cellGroupMask;
                         break;
                     default:
                         if (!startCell.canCross || !endCell.canCross)
@@ -249,41 +253,18 @@ namespace TGS {
                         break;
                 }
             }
+
             if (options.minClearance > 1 && (needRefreshRouteMatrix || !clearanceComputed)) {
                 ComputeClearance(options.cellGroupMask);
             }
             ComputeRouteMatrix();
 
-            finder.Formula = _pathFindingHeuristicFormula;
-            finder.MaxSteps = options.maxSteps > 0 ? options.maxSteps : _pathFindingMaxSteps;
-            finder.Diagonals = _pathFindingUseDiagonals;
-            finder.HeavyDiagonalsCost = _pathFindingHeavyDiagonalsCost;
-            switch (_gridTopology) {
-                case GridTopology.Irregular: finder.CellShape = CellType.Irregular; break;
-                case GridTopology.Hexagonal: finder.CellShape = _pointyTopHexagons ? CellType.PointyTopHexagon : CellType.FlatTopHexagon; break;
-                default: finder.CellShape = CellType.Box; break;
-            }
-            finder.MaxSearchCost = options.maxSearchCost > 0 ? options.maxSearchCost : _pathFindingMaxCost;
-            finder.CellGroupMask = options.cellGroupMask;
-            finder.CellGroupMaskExactComparison = options.cellGroupMaskExactComparison;
-            finder.IgnoreCanCrossCheck = options.canCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnAllCells || options.canCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnAllCellsExceptStartAndEndCells;
-            finder.IgnoreCellCost = options.ignoreCellCosts;
-            finder.IncludeInvisibleCells = options.includeInvisibleCells;
-            finder.MinClearance = options.minClearance;
-            finder.MaxCellCrossCost = options.maxCellCrossCost;
-            finder.Data = options.OnPathFindingCrossCellData;
-            if (options.OnPathFindingCrossCell != null) {
-                finder.OnCellCross = options.OnPathFindingCrossCell;
-            } else if (OnPathFindingCrossCell != null) { 
-                finder.OnCellCross = OnPathFindingCrossCell;
-            } else {
-                finder.OnCellCross = null;
-            }
+            IPathFinder finder = GetPathFinder();
+            if (finder == null) return 0;
+
+            ConfigurePathFinder(finder, cellIndexStart, cellIndexEnd, options);
+
             List<PathFinderNode> route = finder.FindPath(this, startCell, endCell, out totalCost, _evenLayout);
-            startCell.canCross = startCellCanCross;
-            endCell.canCross = endCellCanCross;
-            startCell.group = startCellGroup;
-            endCell.group = endCellGroup;
             if (route != null) {
                 int routeCount = route.Count;
                 if (_gridTopology == GridTopology.Irregular) {
@@ -303,10 +284,224 @@ namespace TGS {
             return cellIndices.Count;
         }
 
+        void ConfigurePathFinder(IPathFinder finder, int cellIndexStart, int cellIndexEnd, FindPathOptions options) {
+            finder.Formula = _pathFindingHeuristicFormula;
+            finder.MaxSteps = options.maxSteps > 0 ? options.maxSteps : _pathFindingMaxSteps;
+            finder.Diagonals = _pathFindingUseDiagonals;
+            finder.HeavyDiagonalsCost = _pathFindingHeavyDiagonalsCost;
+            switch (_gridTopology) {
+                case GridTopology.Irregular: finder.CellShape = CellType.Irregular; break;
+                case GridTopology.Hexagonal: finder.CellShape = _pointyTopHexagons ? CellType.PointyTopHexagon : CellType.FlatTopHexagon; break;
+                default: finder.CellShape = CellType.Box; break;
+            }
+            finder.MaxSearchCost = options.maxSearchCost > 0 ? options.maxSearchCost : _pathFindingMaxCost;
+            finder.CellGroupMask = options.cellGroupMask;
+            finder.CellGroupMaskExactComparison = options.cellGroupMaskExactComparison;
+            finder.IgnoreCanCrossCheck = options.canCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnAllCells || options.canCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnAllCellsExceptStartAndEndCells;
+            finder.IgnoreCellCost = options.ignoreCellCosts;
+            finder.IncludeInvisibleCells = options.includeInvisibleCells;
+            finder.MinClearance = options.minClearance;
+            finder.MaxCellCrossCost = options.maxCellCrossCost;
+            finder.Data = options.OnPathFindingCrossCellData;
+
+            // Thread-safe: pass start/end cell indices to pathfinder for exception handling
+            finder.StartCellIndex = cellIndexStart;
+            finder.EndCellIndex = cellIndexEnd;
+            finder.CanCrossCheckType = options.canCrossCheckType;
+            finder.ClearanceData = GetClearanceCache();
+
+            if (options.OnPathFindingCrossCell != null) {
+                finder.OnCellCross = options.OnPathFindingCrossCell;
+            } else if (OnPathFindingCrossCell != null) { 
+                finder.OnCellCross = OnPathFindingCrossCell;
+            } else {
+                finder.OnCellCross = null;
+            }
+        }
 
         #endregion
 
+        #region Async Path Finding
 
+        // Main thread synchronization context for callbacks
+        static SynchronizationContext mainThreadContext;
+
+
+        /// <summary>
+        /// Finds a path asynchronously on a background thread. Thread-safe.
+        /// Results are returned via callback on the main thread.
+        /// IMPORTANT: Do not modify grid structure while async pathfinding is in progress.
+        /// </summary>
+        /// <param name="cellIndexStart">Start cell index</param>
+        /// <param name="cellIndexEnd">End cell index</param>
+        /// <param name="onComplete">Callback invoked on main thread with path results</param>
+        /// <param name="options">Pathfinding options (optional)</param>
+        public void FindPathAsync(int cellIndexStart, int cellIndexEnd, Action<FindPathAsyncResult> onComplete, FindPathOptions options = null) {
+            if (onComplete == null) return;
+            if (options == null) options = GetDefaultOptions();
+
+            // Capture main thread context if not already done
+            if (mainThreadContext == null) {
+                mainThreadContext = SynchronizationContext.Current;
+            }
+
+            // Validate parameters on main thread
+            if (cellIndexStart == cellIndexEnd || cellIndexStart < 0 || cellIndexEnd < 0 || 
+                cellIndexStart >= cells.Count || cellIndexEnd >= cells.Count) {
+                onComplete(new FindPathAsyncResult { path = null, totalCost = 0, success = false });
+                return;
+            }
+
+            Cell startCell = cells[cellIndexStart];
+            Cell endCell = cells[cellIndexEnd];
+            if (startCell == null || endCell == null) {
+                onComplete(new FindPathAsyncResult { path = null, totalCost = 0, success = false });
+                return;
+            }
+
+            // Check canCross without mutation
+            if (options.canCrossCheckType != CanCrossCheckType.IgnoreCanCrossCheckOnAllCells) {
+                switch (options.canCrossCheckType) {
+                    case CanCrossCheckType.IgnoreCanCrossCheckOnStartCell:
+                        if (!endCell.canCross) {
+                            onComplete(new FindPathAsyncResult { path = null, totalCost = 0, success = false });
+                            return;
+                        }
+                        break;
+                    case CanCrossCheckType.IgnoreCanCrossCheckOnEndCell:
+                        if (!startCell.canCross) {
+                            onComplete(new FindPathAsyncResult { path = null, totalCost = 0, success = false });
+                            return;
+                        }
+                        break;
+                    case CanCrossCheckType.Default:
+                        if (!startCell.canCross || !endCell.canCross) {
+                            onComplete(new FindPathAsyncResult { path = null, totalCost = 0, success = false });
+                            return;
+                        }
+                        break;
+                }
+            }
+
+            // Ensure route matrix and clearance are computed on main thread
+            if (options.minClearance > 1 && (needRefreshRouteMatrix || !clearanceComputed)) {
+                ComputeClearance(options.cellGroupMask);
+            }
+            ComputeRouteMatrix();
+
+            // Capture snapshot data for thread-safe access
+            Cell[] cellsSnapshot = cachedCellsArray;
+            byte[] clearanceSnapshot = GetClearanceCache();
+            int columnCount = _cellColumnCount;
+            int rowCount = _cellRowCount;
+            GridTopology topology = _gridTopology;
+            bool evenLayout = _evenLayout;
+            bool pointyTopHex = _pointyTopHexagons;
+            HeuristicFormula formula = _pathFindingHeuristicFormula;
+            int maxSteps = options.maxSteps > 0 ? options.maxSteps : _pathFindingMaxSteps;
+            float maxSearchCost = options.maxSearchCost > 0 ? options.maxSearchCost : _pathFindingMaxCost;
+            bool useDiagonals = _pathFindingUseDiagonals;
+            float heavyDiagonalsCost = _pathFindingHeavyDiagonalsCost;
+
+            // Copy options to avoid mutation
+            int cellGroupMask = options.cellGroupMask;
+            bool cellGroupMaskExact = options.cellGroupMaskExactComparison;
+            CanCrossCheckType canCrossCheckType = options.canCrossCheckType;
+            bool ignoreCellCosts = options.ignoreCellCosts;
+            bool includeInvisible = options.includeInvisibleCells;
+            int minClearance = options.minClearance;
+            float maxCellCrossCost = options.maxCellCrossCost;
+
+            // Run pathfinding on background thread
+            Task.Run(() => {
+                FindPathAsyncResult result = new FindPathAsyncResult();
+                try {
+                    // Create thread-local pathfinder
+                    IPathFinder threadFinder;
+                    if (topology == GridTopology.Irregular) {
+                        threadFinder = new PathFinderFastIrregular(cellsSnapshot);
+                    } else if ((columnCount & (columnCount - 1)) == 0) {
+                        threadFinder = new PathFinderFast(cellsSnapshot, columnCount, rowCount);
+                    } else {
+                        threadFinder = new PathFinderFastNonSQR(cellsSnapshot, columnCount, rowCount);
+                    }
+
+                    // Configure pathfinder
+                    threadFinder.Formula = formula;
+                    threadFinder.MaxSteps = maxSteps;
+                    threadFinder.Diagonals = useDiagonals;
+                    threadFinder.HeavyDiagonalsCost = heavyDiagonalsCost;
+                    switch (topology) {
+                        case GridTopology.Irregular: threadFinder.CellShape = CellType.Irregular; break;
+                        case GridTopology.Hexagonal: threadFinder.CellShape = pointyTopHex ? CellType.PointyTopHexagon : CellType.FlatTopHexagon; break;
+                        default: threadFinder.CellShape = CellType.Box; break;
+                    }
+                    threadFinder.MaxSearchCost = maxSearchCost;
+                    threadFinder.CellGroupMask = cellGroupMask;
+                    threadFinder.CellGroupMaskExactComparison = cellGroupMaskExact;
+                    threadFinder.IgnoreCanCrossCheck = canCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnAllCells || 
+                                                       canCrossCheckType == CanCrossCheckType.IgnoreCanCrossCheckOnAllCellsExceptStartAndEndCells;
+                    threadFinder.IgnoreCellCost = ignoreCellCosts;
+                    threadFinder.IncludeInvisibleCells = includeInvisible;
+                    threadFinder.MinClearance = minClearance;
+                    threadFinder.MaxCellCrossCost = maxCellCrossCost;
+                    threadFinder.StartCellIndex = cellIndexStart;
+                    threadFinder.EndCellIndex = cellIndexEnd;
+                    threadFinder.CanCrossCheckType = canCrossCheckType;
+                    threadFinder.ClearanceData = clearanceSnapshot;
+                    threadFinder.OnCellCross = null; // Callbacks not supported in async mode
+                    threadFinder.Data = null;
+
+                    // Execute pathfinding
+                    List<PathFinderNode> route = threadFinder.FindPath(null, startCell, endCell, out float totalCost, evenLayout);
+
+                    if (route != null) {
+                        result.path = new List<int>();
+                        int routeCount = route.Count;
+                        if (topology == GridTopology.Irregular) {
+                            for (int r = routeCount - 2; r >= 0; r--) {
+                                result.path.Add(route[r].PX);
+                            }
+                        } else {
+                            for (int r = routeCount - 2; r >= 0; r--) {
+                                int cellIndex = route[r].PY * columnCount + route[r].PX;
+                                result.path.Add(cellIndex);
+                            }
+                        }
+                        result.path.Add(cellIndexEnd);
+                        result.totalCost = totalCost;
+                        result.success = true;
+                    } else {
+                        result.path = null;
+                        result.totalCost = 0;
+                        result.success = false;
+                    }
+                } catch (Exception) {
+                    result.path = null;
+                    result.totalCost = 0;
+                    result.success = false;
+                }
+
+                // Invoke callback on main thread
+                if (mainThreadContext != null) {
+                    mainThreadContext.Post(_ => onComplete(result), null);
+                } else {
+                    onComplete(result);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Finds a path asynchronously and returns a Task. Thread-safe.
+        /// IMPORTANT: Do not modify grid structure while async pathfinding is in progress.
+        /// </summary>
+        public Task<FindPathAsyncResult> FindPathAsync(int cellIndexStart, int cellIndexEnd, FindPathOptions options = null) {
+            var tcs = new TaskCompletionSource<FindPathAsyncResult>();
+            FindPathAsync(cellIndexStart, cellIndexEnd, result => tcs.SetResult(result), options);
+            return tcs.Task;
+        }
+
+        #endregion
 
     }
 }
