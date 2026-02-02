@@ -1,3 +1,4 @@
+using Main_Screen;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -5,6 +6,7 @@ namespace UI.WorldMap.HUDInteractions
 {
     public class HUDButtonHandler : MonoBehaviour
     {
+         
         private void Awake()
         {
             Debug.Log($"HUDButtonHandler: Awake called on {gameObject.name}");
@@ -23,6 +25,7 @@ namespace UI.WorldMap.HUDInteractions
             {
                 button.clicked += () =>
                 {
+                    LoginMenuManager.Instance?.StartLoadingTransition();
                     Debug.Log("HUDButtonHandler: Enter Harbour Button Clicked!");
                     HUDMenuButtonsEventBus.TriggerHUDEnterBaseClicked();
                 };

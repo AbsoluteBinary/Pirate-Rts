@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6159621056420832038}
-  - component: {fileID: 4522309841096729340}
+  - component: {fileID: 1978781949167958155}
   m_Layer: 5
   m_Name: BootSplashIMGUI
   m_TagString: Untagged
@@ -36,7 +36,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &4522309841096729340
+--- !u!114 &1978781949167958155
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,13 +45,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 259638165326150685}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aeb25035f1ebce13d8ada38a8eeb230e, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e28178ae308b4b4c855d10f7de9d030, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BootSplashIMGUI
-  backgroundSprite: {fileID: 21300000, guid: a7c6b4b67b3ac9147b0eab538f188e0f, type: 3}
-  logoSprite: {fileID: 21300000, guid: 3321b6b0f5f5fd5c6b674751725b3f86, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: 59da25cc8872f164da4db6b05ad99d57, type: 3}
+  logoSprite: {fileID: 21300000, guid: c8719aeaccf916c0186b6c0fdcc48185, type: 3}
   backgroundFallback: {r: 0, g: 0, b: 0, a: 1}
-  minDisplayTime: 10
+  minDisplayTime: 15
   fadeOutDuration: 1.2
   delayBeforeLoginFadeIn: 0.6
 --- !u!1 &1582300547802979113
@@ -112,7 +112,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -182,14 +182,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: LoginScreen
       objectReference: {fileID: 0}
-    - target: {fileID: 2880259327186354134, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
-      propertyPath: startButton
-      value: 
-      objectReference: {fileID: 3149307729060083780}
-    - target: {fileID: 2880259327186354134, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
-      propertyPath: loginCanvasGroup
-      value: 
-      objectReference: {fileID: 2659960018791699439}
     - target: {fileID: 4727379436800211775, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -328,14 +320,3 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8125574221590789215, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
   m_PrefabInstance: {fileID: 7470226324247932056}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3149307729060083780 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5485109411583448284, guid: b66b261a95c7378b8b04dd8f803f48fe, type: 3}
-  m_PrefabInstance: {fileID: 7470226324247932056}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

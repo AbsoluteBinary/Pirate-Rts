@@ -1122,7 +1122,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8125574221590789215}
-  - component: {fileID: 6445188609856668053}
   - component: {fileID: 2880259327186354134}
   m_Layer: 5
   m_Name: LoginScreen
@@ -1151,18 +1150,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 350}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &6445188609856668053
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2530698017457812401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4078f67c0a4cda4559e313c7ae8476b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2880259327186354134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1176,7 +1163,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   toggleSceneButton: {fileID: 5485109411583448284}
-  sceneLoader: {fileID: 0}
+  loginCanvasGroup: {fileID: 0}
+  bootComponentIOBox: {fileID: 0}
+  bootCameraTag: BootCamera
+  startupOverlayDelayBeforeLoginFadeIn: 0.8
+  loginFadeDuration: 0.7
+  delayAfterLoginFadeOutBeforeOverlay: 0.4
 --- !u!1 &2584084723857089495
 GameObject:
   m_ObjectHideFlags: 0

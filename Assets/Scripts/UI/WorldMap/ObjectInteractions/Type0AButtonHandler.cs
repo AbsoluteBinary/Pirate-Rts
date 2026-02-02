@@ -1,3 +1,4 @@
+using Main_Screen;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -23,6 +24,7 @@ namespace UI.WorldMap.ObjectInteractions
             {
                 button.clicked += () =>
                 {
+                    LoginMenuManager.Instance?.StartLoadingTransition();
                     Debug.Log("Type0AObjButtonHandler: Enter Type0A Button Clicked!");
                     WorldSpaceInteractionsEventBus.TriggerType0AObjButtonClick();
                 };

@@ -47,10 +47,10 @@ namespace UI.WorldMap.HUDInteractions
             
             
             // Professional way: Fade → Load → Fade back
-            SceneTransition.Instance.PerformTransition(() =>
-            {
-                SceneLoader.Instance.LoadSpecificSceneGroup(targetSceneGroupIndex);
-            });
+            // SceneTransition.Instance.PerformTransition(() =>
+            // {
+            //     SceneLoader.Instance.LoadSpecificSceneGroup(targetSceneGroupIndex);
+            // });
             
             // 3. Wait for new scene to load fully
             yield return new WaitForSeconds(0.1f); // Small delay for Crest init
@@ -58,16 +58,16 @@ namespace UI.WorldMap.HUDInteractions
             yield return null;
 
             // 4. Enable new ocean in loaded scene
-            _currentOcean = FindObjectOfType<OceanRenderer>();
-            if (_currentOcean != null)
-            {
-                _currentOcean.gameObject.SetActive(true);
-                Debug.Log("[Ocean] Activated ocean in Scene Group 2");
-            }
-            else
-            {
-                Debug.LogWarning("[Ocean] No ocean found in new scene!");
-            }
+            // _currentOcean = FindObjectOfType<OceanRenderer>();
+            // if (_currentOcean != null)
+            // {
+            //     _currentOcean.gameObject.SetActive(true);
+            //     Debug.Log("[Ocean] Activated ocean in Scene Group 2");
+            // }
+            // else
+            // {
+            //     Debug.LogWarning("[Ocean] No ocean found in new scene!");
+            // }
         }
     }
 }

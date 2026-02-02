@@ -10,6 +10,7 @@ namespace Main_Screen
 {
     public class LoginMenuManager : MonoBehaviour
     {
+        public static LoginMenuManager Instance { get; private set; }
         [Header("UI References")]
         [SerializeField] private Button toggleSceneButton;
         [SerializeField] private CanvasGroup loginCanvasGroup;
@@ -31,10 +32,18 @@ namespace Main_Screen
 
         private void Awake()
         {
-            if (OverlayRef != null)
+            // if (OverlayRef != null)
+            // {
+            //     OverlayRef.TriggerLoadingScreen();
+            // }
+            // Singleton setup: Ensure only one instance
+            if (Instance != null && Instance != this)
             {
-                OverlayRef.TriggerLoadingScreen();
+                Destroy(gameObject);
+                return;
             }
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Persist across scenes
 
             if (loginCanvasGroup != null)
             {
@@ -102,7 +111,7 @@ namespace Main_Screen
                 .OnComplete(() => onComplete?.Invoke());
         }
 
-        private void StartLoadingTransition()
+        public void StartLoadingTransition()
         {
             if (OverlayRef != null)
             {
@@ -117,7 +126,7 @@ namespace Main_Screen
             DisableOtherObjects();  // ← This is where we clean up Boot stuff
         }
 
-        private void DisableOtherObjects()
+        public void DisableOtherObjects()
         {
             // 1. Disable the entire boot container
             if (bootComponentIOBox != null)

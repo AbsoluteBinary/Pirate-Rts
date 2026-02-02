@@ -811,6 +811,7 @@ MonoBehaviour:
   _cellsMinimumAltitudeClampVertices: 0
   _cellsMaximumAltitude: 0
   _cellsMaximumAltitudeClampVertices: 0
+  _hideIsolatedCells: 0
   _voronoiSerializationData: 
   _pathFindingHeuristicFormula: 5
   _pathFindingMaxSteps: 2000
@@ -1076,13 +1077,14 @@ GameObject:
   - component: {fileID: 1162518293}
   - component: {fileID: 1162518292}
   - component: {fileID: 1162518294}
+  - component: {fileID: 1162518295}
   m_Layer: 0
   m_Name: IMGUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1162518292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1090,7 +1092,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1162518291}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b5e9d1dca501d180fab03d22fdbf84b9, type: 3}
   m_Name: 
@@ -1117,7 +1119,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1162518291}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3c23b687ad6360eebb7ad1a481254f40, type: 3}
   m_Name: 
@@ -1323,6 +1325,44 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
+--- !u!114 &1162518295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162518291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d427ae3decd743979a7bb2e37dd7a1e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.SceneManagement.MainMenuDataIOManager
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: mainMenuIOData
+      Entry: 7
+      Data: 0|_Project.Scripts.SceneManagement.MainMenuIOData, Assembly-CSharp
+    - Name: isCanvasEnabled
+      Entry: 5
+      Data: false
+    - Name: isBackgroundEnabled
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+  bootComponentIOBox: {fileID: 0}
+  harbourComponentIOBox: {fileID: 0}
+  loginUiCanvas: {fileID: 0}
+  loginCanvasGroup: {fileID: 0}
+  backgroundDisplay: {fileID: 0}
 --- !u!1 &1211652362
 GameObject:
   m_ObjectHideFlags: 0
@@ -2087,7 +2127,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1872217903
 Transform:
   m_ObjectHideFlags: 0
@@ -2110,7 +2150,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1872217902}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
@@ -2133,7 +2173,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1872217902}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e5ed64329afecdb28d4c52c57b8ee28, type: 3}
   m_Name: 
@@ -2145,7 +2185,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1872217902}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d648846596d24e0cea88c7622a2f9cdc, type: 3}
   m_Name: 
@@ -2272,7 +2312,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2078643339
 Transform:
   m_ObjectHideFlags: 0
