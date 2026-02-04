@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Main_Screen;
+using UI.Manager;
 using UnityEngine;
 
 public class BootSplashIMGUI : MonoBehaviour
@@ -17,20 +18,40 @@ public class BootSplashIMGUI : MonoBehaviour
     private bool isVisible = true;
     private float guiAlpha = 1f;
 
+    private float startTime;
+    private bool fadeTriggered;
+
     private void Start()
     {
-        // Start timer immediately
+        startTime = Time.unscaledTime;
+        isVisible = true;
+        fadeTriggered = false;
+        //Debug.Log($"BootSplash started timer at {startTime:F2}s | minDisplayTime = {minDisplayTime}s");
     }
 
     private void Update()
     {
-        if (!isVisible) return;
+        if (!isVisible || fadeTriggered) return;
 
-        if (Time.unscaledTime >= minDisplayTime)
+        float elapsed = Time.unscaledTime - startTime;
+        //Debug.Log($"Splash elapsed: {elapsed:F2}s / {minDisplayTime}s | isVisible={isVisible}");
+
+        if (elapsed >= minDisplayTime)
         {
+            //Debug.Log("Timer reached threshold – triggering fade out");
+            fadeTriggered = true;
+            StartFadeOut();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Space forced fade");
+            fadeTriggered = true;
             StartFadeOut();
         }
     }
+    
+    
 
     private void StartFadeOut()
     {
@@ -40,22 +61,16 @@ public class BootSplashIMGUI : MonoBehaviour
             .OnComplete(() =>
             {
                 isVisible = false;
-                // Hook into login fade-in with delay
-                DOVirtual.DelayedCall(delayBeforeLoginFadeIn, () =>
+                gameObject.SetActive(false);
+
+                // Small delay for smooth feel (optional – adjust or remove)
+                DOVirtual.DelayedCall(0.2f, () =>
                 {
-                    var manager = FindObjectOfType<LoginMenuManager>();
-                    if (manager != null)
+                    if (UIManager.Instance != null)
                     {
-                        manager.FadeInLoginMenu();
-                    }
-                    else
-                    {
-                        Debug.LogWarning("LoginMenuManager not found for splash complete callback.");
+                        UIManager.Instance.ShowBootLoginPanel();
                     }
                 });
-
-                // Optional: disable or destroy self after fade
-                gameObject.SetActive(false);
             });
     }
 
