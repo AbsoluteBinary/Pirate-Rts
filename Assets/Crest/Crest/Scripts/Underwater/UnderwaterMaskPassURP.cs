@@ -110,7 +110,7 @@ namespace Crest
             camera.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(ur._urpMaskPass);
         }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
         void OnSetup(CommandBuffer buffer, PassData renderingData)
 #else
         public override void OnCameraSetup(CommandBuffer buffer, ref RenderingData renderingData)
@@ -156,7 +156,7 @@ namespace Crest
 #endif
         }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
         void ExecutePass(ScriptableRenderContext context, CommandBuffer commandBuffer, PassData renderingData)
 #else
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -167,7 +167,7 @@ namespace Crest
             XRHelpers.Update(camera);
             XRHelpers.UpdatePassIndex(ref UnderwaterRenderer.s_xrPassIndex);
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
             CommandBuffer commandBuffer = CommandBufferPool.Get(PassName);
 #endif
 
@@ -224,7 +224,7 @@ namespace Crest
                 _underwaterRenderer._maskTarget
             );
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
             context.ExecuteCommandBuffer(commandBuffer);
             CommandBufferPool.Release(commandBuffer);
 #endif

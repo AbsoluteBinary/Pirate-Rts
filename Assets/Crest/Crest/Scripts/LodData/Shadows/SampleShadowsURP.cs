@@ -66,7 +66,7 @@ namespace Crest
             }
         }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
         void ExecutePass(ScriptableRenderContext context, CommandBuffer buffer, PassData renderingData)
 #else
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -96,7 +96,7 @@ namespace Crest
 
             var camera = renderingData.cameraData.camera;
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
             var buffer = CommandBufferPool.Get(PassName);
 #endif
 
@@ -122,7 +122,7 @@ namespace Crest
                 buffer.EnableShaderKeyword("STEREO_INSTANCING_ON");
             }
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
             context.ExecuteCommandBuffer(buffer);
             CommandBufferPool.Release(buffer);
 #endif

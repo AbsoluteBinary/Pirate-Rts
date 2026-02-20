@@ -45,6 +45,11 @@
             "define": "CREST_URP"
         },
         {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "(,17.3.0)",
+            "define": "URP_COMPATIBILITY_MODE"
+        },
+        {
             "name": "com.unity.render-pipelines.high-definition",
             "expression": "",
             "define": "CREST_HDRP"

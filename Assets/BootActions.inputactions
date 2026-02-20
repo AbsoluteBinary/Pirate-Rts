@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "BootActions",
+    "maps": [
+        {
+            "name": "Splash",
+            "id": "1ee735b3-bab5-42e2-9910-c7d9bc1b4df1",
+            "actions": [
+                {
+                    "name": "ForceFade",
+                    "type": "Button",
+                    "id": "081d6410-ec8a-47b3-877f-6f5a23406346",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "96bdfb1d-2336-4300-9f7e-6a6f145a2fd4",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ForceFade",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

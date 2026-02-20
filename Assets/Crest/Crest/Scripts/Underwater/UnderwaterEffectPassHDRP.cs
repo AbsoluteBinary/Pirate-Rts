@@ -244,7 +244,7 @@ namespace Crest
             if (_renderer.EnableShaderAPI)
             {
                 var renderConfig =
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
                     HDUtils.GetRendererConfiguration(context.hdCamera.frameSettings.IsEnabled(FrameSettingsField.AdaptiveProbeVolume), context.hdCamera.frameSettings.IsEnabled(FrameSettingsField.Shadowmask));
 #elif UNITY_2022_3_OR_NEWER
                     HDUtils.GetRendererConfiguration(context.hdCamera.frameSettings.IsEnabled(FrameSettingsField.ProbeVolume), context.hdCamera.frameSettings.IsEnabled(FrameSettingsField.Shadowmask));
@@ -262,7 +262,9 @@ namespace Crest
                 };
 
                 context.cmd.EnableShaderKeyword("CREST_UNDERWATER_OBJECTS_PASS");
-#if UNITY_2021_2_OR_NEWER
+#if UNITY_6000_3_OR_NEWER
+                CoreUtils.DrawRendererList(context.cmd, context.renderContext.CreateRendererList(result));
+#elif UNITY_2021_2_OR_NEWER
                 CoreUtils.DrawRendererList(context.renderContext, context.cmd, context.renderContext.CreateRendererList(result));
 #else
                 CoreUtils.DrawRendererList(context.renderContext, context.cmd, RendererList.Create(result));

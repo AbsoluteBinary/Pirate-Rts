@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="LoginPanel" style="flex-grow: 1; opacity: 0;">
-        <ui:Button text="Button"/>
+        <ui:Button text="Button" name="StartGame"/>
         <ui:Button text="Button"/>
         <ui:Button text="Button"/>
     </ui:VisualElement>

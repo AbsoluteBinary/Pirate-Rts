@@ -3,7 +3,7 @@
 // Copyright 2024 Wave Harmonic Ltd
 
 #if CREST_URP
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
 
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
@@ -44,6 +44,7 @@ namespace Crest
             }
         }
 
+#if URP_COMPATIBILITY_MODE
         [System.Obsolete]
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
@@ -53,8 +54,9 @@ namespace Crest
             context.ExecuteCommandBuffer(buffer);
             CommandBufferPool.Release(buffer);
         }
+#endif
     }
 }
 
-#endif // UNITY_2023_3_OR_NEWER
+#endif // UNITY_6000_0_OR_NEWER
 #endif // CREST_URP

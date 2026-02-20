@@ -1,6 +1,9 @@
 using UnityEngine;
 using DG.Tweening;
 using _Project.Scripts.SceneManagement;
+using Managers.Registry;
+using UI.Manager;
+using UnityEngine.EventSystems;
 
 namespace UI.IMGUI
 {
@@ -56,6 +59,10 @@ namespace UI.IMGUI
 
         public void TriggerLoadingScreen()
         {
+            Debug.Log("Loading overlay triggered");
+            DisableOtherObjects();
+            UIManager.Instance.HideBootLoginPanel();
+            
             if (loadingSequence != null && loadingSequence.IsActive())
             {
                 loadingSequence.Kill();
@@ -153,6 +160,7 @@ namespace UI.IMGUI
             Debug.Log("Loading overlay faded out – ready for next trigger");
 
             OnFadeOutFinished?.Invoke();
+            //UIManager.HideBootLoginPanel();
         }
 
         private void OnGUI()
@@ -230,6 +238,40 @@ namespace UI.IMGUI
         private void OnDestroy()
         {
             loadingSequence?.Kill();
+        }
+        
+        public void DisableOtherObjects()
+        {
+            foreach (var container in ContainerRegistry.GetAllContainers())
+            {
+                if (container == null) continue;
+
+                // Disable the whole container (most important)
+                container.SetActive(false);
+                Debug.Log($"[Loading] Disabled container: {container.name}");
+
+                // Disable AudioListener
+                var listener = container.GetComponentInChildren<AudioListener>(true);
+                if (listener != null)
+                {
+                    listener.enabled = false;
+                }
+
+                // Disable EventSystem
+                var eventSystem = container.GetComponentInChildren<EventSystem>(true);
+                if (eventSystem != null)
+                {
+                    eventSystem.enabled = false;
+                }
+            }
+
+            // Optional: Disable BootCamera if tagged
+            var bootCamera = GameObject.FindWithTag("BootCamera");
+            if (bootCamera != null)
+            {
+                bootCamera.SetActive(false);
+                Debug.Log("[Loading] Disabled BootCamera");
+            }
         }
     }
 }

@@ -3,7 +3,7 @@
 // Copyright 2024 Wave Harmonic Ltd
 
 #if CREST_URP
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
 
 namespace Crest
 {
@@ -24,6 +24,7 @@ namespace Crest
                 var resources = frameData.Get<UniversalResourceData>();
                 cameraData = frameData.Get<UniversalCameraData>();
 
+#if URP_COMPATIBILITY_MODE
                 if (builder == null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -32,6 +33,8 @@ namespace Crest
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
                 else
+#endif
+
                 {
                     colorTargetHandle = resources.activeColorTexture;
                     depthTargetHandle = resources.activeDepthTexture;
@@ -59,6 +62,7 @@ namespace Crest
             }
         }
 
+#if URP_COMPATIBILITY_MODE
         [System.Obsolete]
         public override void OnCameraSetup(CommandBuffer buffer, ref RenderingData renderingData)
         {
@@ -75,6 +79,7 @@ namespace Crest
             context.ExecuteCommandBuffer(buffer);
             CommandBufferPool.Release(buffer);
         }
+#endif
 
         partial class RenderObjectsWithoutFogPass
         {
@@ -111,6 +116,7 @@ namespace Crest
                 }
             }
 
+#if URP_COMPATIBILITY_MODE
             [System.Obsolete]
             public override void OnCameraSetup(CommandBuffer buffer, ref RenderingData renderingData)
             {
@@ -126,9 +132,10 @@ namespace Crest
                 context.ExecuteCommandBuffer(buffer);
                 CommandBufferPool.Release(buffer);
             }
+#endif
         }
     }
 }
 
-#endif // UNITY_2023_3_OR_NEWER
+#endif // UNITY_6000_0_OR_NEWER
 #endif // CREST_URP

@@ -3,7 +3,7 @@
 // Copyright 2024 Wave Harmonic Ltd
 
 #if CREST_URP
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -51,5 +51,5 @@ namespace Crest
     }
 }
 
-#endif // UNITY_2023_3_OR_NEWER
+#endif // UNITY_6000_0_OR_NEWER
 #endif // CREST_URP

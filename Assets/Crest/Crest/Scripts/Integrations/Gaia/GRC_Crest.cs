@@ -12,7 +12,7 @@ namespace Gaia
     {
         internal static T FindObjectByType<T>(bool includeInactive = false) where T : Object
         {
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
             return Object.FindFirstObjectByType<T>(includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
 #else
             return Object.FindObjectOfType<T>(includeInactive);
@@ -21,7 +21,7 @@ namespace Gaia
 
         internal static T[] FindObjectsByType<T>(bool includeInactive = false) where T : Object
         {
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
             return Object.FindObjectsByType<T>(includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 #else
             return Object.FindObjectsOfType<T>(includeInactive);

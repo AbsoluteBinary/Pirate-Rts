@@ -60,7 +60,7 @@ namespace Crest
                 }
             }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
             class PassData { }
 
             public override void RecordRenderGraph(UnityEngine.Rendering.RenderGraphModule.RenderGraph graph, ContextContainer frame)
@@ -71,13 +71,17 @@ namespace Crest
                     builder.SetRenderFunc<PassData>((data, context) => { });
                 }
             }
+#endif
 
+#if URP_COMPATIBILITY_MODE
+#if UNITY_6000_0_OR_NEWER
             [System.Obsolete]
 #endif
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 // Blank
             }
+#endif
         }
     }
 }

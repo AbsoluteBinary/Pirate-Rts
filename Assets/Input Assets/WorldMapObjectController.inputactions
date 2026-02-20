@@ -1,0 +1,44 @@
+{
+    "version": 1,
+    "name": "WorldMapObjectController",
+    "maps": [
+        {
+            "name": "BaseUI",
+            "id": "9397e34e-ef30-4772-bdac-30295f1761da",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "acd5e0a8-68ca-43cd-ab74-1a92d05bfea2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ClickUI",
+                    "type": "Button",
+                    "id": "deb432c9-c996-4bf1-b4e5-fa97c8aaa4c8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8ae9defe-321a-41f4-91f6-9835c81cb2ba",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ClickUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

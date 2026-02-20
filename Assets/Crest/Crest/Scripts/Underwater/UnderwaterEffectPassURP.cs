@@ -93,13 +93,13 @@ namespace Crest
             }
         }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
         void OnSetup(CommandBuffer buffer, PassData renderingData)
 #else
         public override void OnCameraSetup(CommandBuffer buffer, ref RenderingData renderingData)
 #endif
         {
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
             _colorTarget = renderingData.colorTargetHandle.RT;
             _depthTarget = renderingData.depthTargetHandle.RT;
 #elif UNITY_2022_3_OR_NEWER
@@ -112,7 +112,7 @@ namespace Crest
             _camera = renderingData.cameraData.camera;
         }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
         void ExecutePass(ScriptableRenderContext context, CommandBuffer commandBuffer, PassData renderingData)
 #else
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -135,7 +135,7 @@ namespace Crest
             }
 #endif
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
             CommandBuffer commandBuffer = CommandBufferPool.Get("Underwater Effect");
 #endif
 
@@ -263,7 +263,7 @@ namespace Crest
             commandBuffer.ResolveAntiAliasedSurface(renderingData.colorTargetHandle.RT);
 #endif
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
             context.ExecuteCommandBuffer(commandBuffer);
             CommandBufferPool.Release(commandBuffer);
 #endif
@@ -290,7 +290,7 @@ namespace Crest
                 m_FilteringSettings = new FilteringSettings(RenderQueueRange.transparent, 0);
             }
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
             void ExecutePass(ScriptableRenderContext context, CommandBuffer buffer, PassData renderingData)
 #else
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -298,7 +298,7 @@ namespace Crest
             {
                 m_FilteringSettings.layerMask = _underwaterRenderer._transparentObjectLayers;
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
                 var buffer = CommandBufferPool.Get();
 #endif
 
@@ -325,7 +325,7 @@ namespace Crest
                 context.ExecuteCommandBuffer(buffer);
                 buffer.Clear();
 
-#if UNITY_2023_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
                 var drawingSettings = RenderingUtils.CreateDrawingSettings
                 (
                     m_ShaderTagIdList,
@@ -369,7 +369,7 @@ namespace Crest
 
                 buffer.DisableShaderKeyword("CREST_UNDERWATER_OBJECTS_PASS");
 
-#if !UNITY_2023_3_OR_NEWER
+#if !UNITY_6000_0_OR_NEWER
                 context.ExecuteCommandBuffer(buffer);
                 CommandBufferPool.Release(buffer);
 #endif

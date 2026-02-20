@@ -1,6 +1,7 @@
 using DG.Tweening;
 using UI.Manager;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace UI.IMGUI
 {
@@ -21,6 +22,11 @@ namespace UI.IMGUI
 
         private float startTime;
         private bool fadeTriggered;
+        
+        //[Header("Input")]
+        [SerializeField] private InputActionAsset inputActions; // Drag BootActions asset here
+
+        private InputAction forceFadeAction;
 
         private void Start()
         {
@@ -43,16 +49,31 @@ namespace UI.IMGUI
                 fadeTriggered = true;
                 StartFadeOut();
             }
-        
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Debug.Log("Space forced fade");
-                fadeTriggered = true;
-                StartFadeOut();
-            }
         }
     
-    
+         private void OnEnable()
+         {
+             // Get the action from the asset
+             var splashMap = inputActions.FindActionMap("Splash");
+             forceFadeAction = splashMap.FindAction("ForceFade");
+        
+             // Subscribe to performed (press)
+             forceFadeAction.performed += OnForceFadePerformed;
+             forceFadeAction.Enable();
+         }
+        
+         private void OnDisable()
+         {
+             forceFadeAction.performed -= OnForceFadePerformed;
+             forceFadeAction.Disable();
+         }
+
+         private void OnForceFadePerformed(InputAction.CallbackContext context)
+         {
+             Debug.Log("Space forced fade (new Input System)");
+             fadeTriggered = true;
+             StartFadeOut();
+         }
 
         private void StartFadeOut()
         {
@@ -107,7 +128,6 @@ namespace UI.IMGUI
                     drawWidth,
                     drawHeight
                 );
-
                 GUI.DrawTexture(logoRect, logoSprite.texture);
             }
 

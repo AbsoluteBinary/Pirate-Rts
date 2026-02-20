@@ -1,6 +1,7 @@
 using System.Collections;
 using _Project.Scripts.SceneManagement;
 using Crest;
+using UI.IMGUI;
 using UI.WorldMap.HUDInteractions;
 using UnityEngine;
 
@@ -24,6 +25,11 @@ namespace UI.Harbour
 
         public void OnLaunchWorldButtonClicked()
         {
+            if (IMGUILoadingOverlay.Instance != null)
+            {
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+            }
+            
            // Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
             //StartCoroutine(LoadSceneGroupOneWithOceanTransition());
             

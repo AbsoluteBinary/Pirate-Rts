@@ -84,6 +84,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6590312123552549999}
+  - component: {fileID: 372365019324701095}
   m_Layer: 0
   m_Name: HarbourComponentIOBox
   m_TagString: HarbourIOBox
@@ -108,6 +109,18 @@ Transform:
   - {fileID: 5589101122961922062}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &372365019324701095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3480319152777946760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52dbbb11fb66ef62da2c028bcdb21b45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Managers.Registry.ContainerRegister
 --- !u!1 &5018398277974084743
 GameObject:
   m_ObjectHideFlags: 0

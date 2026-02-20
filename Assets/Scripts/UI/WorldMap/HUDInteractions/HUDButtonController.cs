@@ -1,6 +1,7 @@
 using System.Collections;
 using _Project.Scripts.SceneManagement;
 using Crest;
+using UI.IMGUI;
 using UnityEngine;
 
 namespace UI.WorldMap.HUDInteractions
@@ -23,6 +24,11 @@ namespace UI.WorldMap.HUDInteractions
 
         public void OnMarkerButtonClicked()
         {
+            if (IMGUILoadingOverlay.Instance != null)
+            {
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+            }
+            
             Debug.Log("HUDController: Entering Harbour...");
 
             // SMOOTH PROFESSIONAL TRANSITION

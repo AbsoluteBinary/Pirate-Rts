@@ -77,18 +77,18 @@ namespace _Project.Scripts
     
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                EventBus<TestEvent>.Raise(new TestEvent());
-            }
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                EventBus<PlayerEvent>.Raise(new PlayerEvent
-                {
-                    health = health.GetHealth(),
-                    mana = mana.GetMana()
-                });
-            }
+            // if (Input.GetKeyDown(KeyCode.A))
+            // {
+            //     EventBus<TestEvent>.Raise(new TestEvent());
+            // }
+            // if (Input.GetKeyDown(KeyCode.B))
+            // {
+            //     EventBus<PlayerEvent>.Raise(new PlayerEvent
+            //     {
+            //         health = health.GetHealth(),
+            //         mana = mana.GetMana()
+            //     });
+            // }
             
             var heroTransform = transform;
             heroTransform.position = playerData.position;

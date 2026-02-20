@@ -9,14 +9,6 @@ onBoardingDoNotAskAgain = true
 showPackageIndexes = false
 showStatusBar = false
 scopes = {
-	"picker_window_position_offset.075BCD15" = "-1326;109;874;575"
-	"picker_visibility_flags.075BCD15" = "264"
-	"picker_item_size.075BCD15" = "96"
-	"picker_inspector.075BCD15" = "0"
-	"picker_window_position_offset.00000000" = "1139;150;320;550"
-	"picker_visibility_flags.00000000" = "0"
-	"picker_item_size.00000000" = "96"
-	"picker_inspector.00000000" = "0"
 }
 providers = {
 	asset = {
@@ -75,10 +67,9 @@ objectSelectors = {
 recentSearches = [
 ]
 searchItemFavorites = [
-	"80206"
 ]
 savedSearchesSortOrder = 0
-showSavedSearchPanel = true
+showSavedSearchPanel = false
 hideTabs = false
 indexOnEditorStartup = true
 logIndexingPerformanceReport = false

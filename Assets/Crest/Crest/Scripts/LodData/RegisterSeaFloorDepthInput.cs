@@ -35,7 +35,8 @@ namespace Crest
         protected override string ShaderPrefix => "Crest/Inputs/Depth";
 
         // Workaround to ODC depth not being relative. This allows the change without break current baked depth caches.
-        [SerializeField, HideInInspector]
+        [Tooltip("Apply transform Y as an offset.")]
+        [SerializeField]
         internal bool _relative;
 
         public static class ShaderIDs

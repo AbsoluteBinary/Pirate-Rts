@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
@@ -103,7 +102,7 @@ namespace UI.Manager
         }
 
         // Public toggle (use this from buttons / logic)
-        public void SetPanelVisible(string panelName, bool visible)
+        public void SetPanelVisible(string panelName, bool visible, bool isGlobal = false)
         {
             var existing = panelStates.Find(p => p.panelName == panelName);
             if (existing != null)

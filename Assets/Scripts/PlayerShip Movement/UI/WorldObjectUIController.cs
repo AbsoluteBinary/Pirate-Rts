@@ -2,11 +2,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace PlayerShip_Movement.UI
 {
-    public class BaseUIController : MonoBehaviour
+    public class WorldObjectUIController : MonoBehaviour
     {
         [SerializeField] private UIDocument uiDocument; // Reference to the UIDocument
         [SerializeField] private Transform uiTransform; // Transform of the GameObject with UIDocument (for world position tween)
@@ -19,52 +20,107 @@ namespace PlayerShip_Movement.UI
 
         private VisualElement buttonElement; // The button VisualElement (for fading)
         private CancellationTokenSource cts; // For canceling async timer
-        private bool isButtonVisible = false;
+        public bool isButtonVisible = false;
+        
+        // NEW: Input Action Asset (drag in Inspector)
+        [SerializeField] private InputActionAsset inputActions;
+        private InputAction clickAction;
 
         private void Awake()
         {
-            // Initialize DOTween
             DOTween.Init();
 
-            // Find the button VisualElement
             if (uiDocument != null)
             {
                 buttonElement = uiDocument.rootVisualElement.Q<VisualElement>(buttonElementName);
                 if (buttonElement != null)
                 {
-                    // Ensure button is hidden and positioned at startY
                     buttonElement.style.display = DisplayStyle.None;
                     buttonElement.style.opacity = 0f;
                     buttonElement.style.translate = new StyleTranslate(new Translate(0, startY, 0));
-                    // Fix reversed Y by rotating 180 degrees around Z
-                    //buttonElement.style.rotate = new StyleRotate(new Rotate(-180f));
+                    Debug.Log($"[BaseUI] Found button element: {buttonElementName}");
                 }
                 else
                 {
-                    Debug.LogWarning($"Button element '{buttonElementName}' not found in UIDocument!", this);
+                    Debug.LogError($"[BaseUI] Button '{buttonElementName}' not found in UIDocument", this);
                 }
             }
             else
             {
-                Debug.LogWarning("UIDocument not assigned!", this);
+                Debug.LogError("[BaseUI] UIDocument not assigned!", this);
             }
 
-            // Set initial world position if uiTransform is assigned
             if (uiTransform != null)
             {
                 Vector3 pos = uiTransform.position;
                 pos.y = startY;
                 uiTransform.position = pos;
+                Debug.Log($"[BaseUI] uiTransform set to startY = {startY}");
             }
             else
             {
-                Debug.LogWarning("uiTransform not assigned!", this);
+                Debug.LogError("[BaseUI] uiTransform not assigned!", this);
+            }
+
+            // Input setup
+            if (inputActions != null)
+            {
+                var map = inputActions.FindActionMap("BaseUI");
+                if (map == null)
+                {
+                    Debug.LogError("[BaseUI] ActionMap 'BaseUI' not found in InputActions asset", this);
+                    return;
+                }
+
+                clickAction = map.FindAction("ClickUI");
+                if (clickAction == null)
+                {
+                    Debug.LogError("[BaseUI] Action 'ClickUI' not found in 'BaseUI' map", this);
+                    return;
+                }
+
+                Debug.Log("[BaseUI] ClickUI action found – subscribing");
+                clickAction.performed += OnClickPerformed;
+                clickAction.Enable();
+            }
+            else
+            {
+                Debug.LogError("[BaseUI] InputActionAsset not assigned in Inspector!", this);
+            }
+        }
+        
+        private void OnClickPerformed(InputAction.CallbackContext context)
+        {
+            Debug.Log("[BaseUI] Click action performed – raw input detected");
+
+            var mousePos = Mouse.current.position.ReadValue();
+            Debug.Log($"[BaseUI] Mouse position: {mousePos}");
+
+            var ray = Camera.main.ScreenPointToRay(mousePos);
+            Debug.Log($"[BaseUI] Ray origin: {ray.origin} direction: {ray.direction}");
+
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                Debug.Log($"[BaseUI] Raycast hit object: {hit.transform.name} (expected: {gameObject.name})");
+
+                if (hit.transform == transform)
+                {
+                    Debug.Log("[BaseUI] Raycast success – this object clicked → toggling button");
+                    ToggleButton();
+                }
+                else
+                {
+                    Debug.LogWarning($"[BaseUI] Raycast hit wrong object: {hit.transform.name}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[BaseUI] Raycast hit nothing – no collider detected");
             }
         }
 
-        private void OnMouseDown()
+        private void ToggleButton()
         {
-            // Toggle UI on click
             if (!isButtonVisible)
             {
                 ShowButton();
