@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -23,22 +24,23 @@ namespace Harbour.Data
 
         private void Awake()
         {
+            Debug.Log($"[HarbourController] Awake() started on {gameObject.name} in scene {gameObject.scene.name}");
+
             if (Instance != null && Instance != this)
             {
+                Debug.LogWarning($"Duplicate HarbourController on {gameObject.name} – destroying self", this);
                 Destroy(gameObject);
                 return;
             }
+
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            if (state == null)
-            {
-                Debug.LogError("HarbourStateSO not assigned!", this);
-            }
+            Debug.Log("[HarbourController] Singleton set successfully");
         }
 
         private void Start()
         {
+            Debug.Log($"[HarbourController] Start() ran in scene {gameObject.scene.name} at frame {Time.frameCount}");
             ApplyHarbourState();
         }
 
@@ -51,48 +53,56 @@ namespace Harbour.Data
 
         private void ApplyHarbourState()
         {
+            // Hide ALL first (prevents overlap)
+            SetUIDocumentActive(idleHudDocument, false);
+            SetUIDocumentActive(harbourBuildDocument, false);
+            SetUIDocumentActive(shipBuildDocument, false);
+
             switch (state.currentMode)
             {
                 case HarbourStateSO.HarbourMode.Idle:
-                    SetUI(idleHudDocument, true);
-                    SetUI(harbourBuildDocument, false);
-                    SetUI(shipBuildDocument, false);
-
+                    SetUIDocumentActive(idleHudDocument, true);
+                    if (idleHudDocument != null && idleHudDocument.rootVisualElement != null)
+                    {
+                        var root = idleHudDocument.rootVisualElement;
+                        root.style.display = DisplayStyle.Flex;
+                        root.style.opacity = 1f;
+                        Debug.Log($"Forced Idle HUD root visible: display={root.style.display}, opacity={root.style.opacity}");
+                    }
+                    SetUIDocumentActive(idleHudDocument, true);
                     SetCamera(idleCamera, true);
                     SetCamera(harbourBuildCamera, false);
-
-                    SetTGSGrid(state.tgsGridEnabled); // or force false in Idle
+                    SetTGSGrid(false); // or state.tgsGridEnabled if you want to persist it
                     break;
 
                 case HarbourStateSO.HarbourMode.HarbourBuild:
-                    SetUI(idleHudDocument, false);
-                    SetUI(harbourBuildDocument, true);
-                    SetUI(shipBuildDocument, false);
-
+                    SetUIDocumentActive(harbourBuildDocument, true);
                     SetCamera(idleCamera, false);
                     SetCamera(harbourBuildCamera, true);
-
                     SetTGSGrid(true);
                     break;
 
                 case HarbourStateSO.HarbourMode.ShipBuild:
-                    SetUI(idleHudDocument, false);
-                    SetUI(harbourBuildDocument, false);
-                    SetUI(shipBuildDocument, true);
-
+                    SetUIDocumentActive(shipBuildDocument, true);
                     SetCamera(idleCamera, true);
                     SetCamera(harbourBuildCamera, false);
-
                     SetTGSGrid(false);
                     break;
             }
         }
 
-        private void SetUI(UIDocument doc, bool visible)
+        private void SetUIDocumentActive(UIDocument doc, bool active)
         {
-            if (doc == null || doc.rootVisualElement == null) return;
-            doc.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (doc == null || doc.gameObject == null) return;
+            doc.gameObject.SetActive(active);
+            Debug.Log($"Set UIDocument '{doc.gameObject.name}' active = {active}");
         }
+
+        // private void SetUI(UIDocument doc, bool visible)
+        // {
+        //     if (doc == null || doc.rootVisualElement == null) return;
+        //     doc.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        // }
 
         private void SetCamera(Camera cam, bool active)
         {

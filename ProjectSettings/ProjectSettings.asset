@@ -72,7 +72,7 @@ PlayerSettings:
   androidUseSwappy: 0
   androidDisplayOptions: 1
   androidBlitType: 0
-  androidResizeableActivity: 1
+  androidResizeableActivity: 0
   androidDefaultWindowWidth: 1920
   androidDefaultWindowHeight: 1080
   androidMinimumWindowWidth: 400
@@ -80,7 +80,7 @@ PlayerSettings:
   androidFullscreenMode: 1
   androidAutoRotationBehavior: 1
   androidPredictiveBackSupport: 0
-  androidApplicationEntry: 2
+  androidApplicationEntry: 1
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
   runInBackground: 0
@@ -568,7 +568,7 @@ PlayerSettings:
   m_BuildTargetDefaultTextureCompressionFormat:
   - serializedVersion: 3
     m_BuildTarget: Android
-    m_Formats: 03000000
+    m_Formats: 00000000
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
   actionOnDotNetUnhandledException: 1
@@ -847,6 +847,7 @@ PlayerSettings:
     PS5: DOTWEEN;SORTIFY;SORTIFY_ATTRIBUTES;SORTIFY_HIGHLIGHT
     QNX: DOTWEEN;SORTIFY;SORTIFY_ATTRIBUTES;SORTIFY_HIGHLIGHT
     ReservedCFE: DOTWEEN;SORTIFY;SORTIFY_ATTRIBUTES;SORTIFY_HIGHLIGHT
+    Stadia: DOTWEEN
     Standalone: ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1;ODIN_INSPECTOR_3_2;ODIN_INSPECTOR_3_3;DOTWEEN;ODIN_VALIDATOR;ODIN_VALIDATOR_3_1;ODIN_VALIDATOR_3_2;ODIN_VALIDATOR_3_3;SORTIFY;SORTIFY_ATTRIBUTES;SORTIFY_HIGHLIGHT;CREST_OCEAN
     VisionOS: DOTWEEN;SORTIFY;SORTIFY_ATTRIBUTES;SORTIFY_HIGHLIGHT
     WebGL: DOTWEEN;SORTIFY;SORTIFY_ATTRIBUTES;SORTIFY_HIGHLIGHT

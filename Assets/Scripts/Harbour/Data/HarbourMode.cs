@@ -28,5 +28,6 @@ namespace Harbour.Data
         // Add more later: resources, progress percentages, unlocked builds, etc.
         // public float metalCount = 0f;
         // public float shipBuildProgress = 0f;
+        
     }
 }

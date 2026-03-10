@@ -1,5 +1,12 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement style="flex-grow: 1;">
-        <ui:Button text="Button" name="WorldMapLoadButton" style="align-items: flex-end;"/>
+    <Style src="project://database/Assets/DropDownStyleSheet.uss?fileID=7433441132597879392&amp;guid=619b4fdff27291e64957fafe16f2a774&amp;type=3"/>
+    <Style src="project://database/Assets/TestDropdown.uss?fileID=7433441132597879392&amp;guid=c3ce0338bc4707099b52a2d4d7c4374f&amp;type=3"/>
+    <ui:VisualElement name="HUD" style="flex-grow: 1;">
+        <ui:VisualElement name="TopPanel" class="DropDownStyleSheet" style="flex-grow: 1; flex-direction: row; height: 100%; width: 85%; max-height: 10%; justify-content: flex-start; align-self: auto; align-content: auto; align-items: auto; background-color: rgba(0, 191, 255, 0.3);">
+            <ui:Button text="Button" name="WorldMapLoadButton" style="align-items: auto; align-content: auto; -unity-text-align: middle-center; white-space: pre; padding-left: 12px; margin-top: 1px; margin-bottom: 1px; min-width: 10%; min-height: 5%; align-self: center;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="OptionsPanel" class="DropDownStyleSheet" style="flex-grow: 1; align-self: flex-start; justify-content: space-evenly; align-items: flex-start; align-content: flex-start;">
+        <ui:DropdownField label="Options" name="OptionsMenu" choices="Button 1,Button 2,Button 3" style="width: 313px; height: 41px;"/>
     </ui:VisualElement>
 </ui:UXML>

@@ -121,7 +121,7 @@ namespace TGS_Editor {
                 EditorUtility.DisplayDialog("Terrain Grid System", "TGS is an advanced grid generator for Unity terrain. It can also work as a standalone 2D grid.\n\nFor a complete description of the options, please refer to the documentation guide (PDF) included in the asset.\nWe also invite you to visit and sign up on our support forum on kronnect.com where you can post your questions/requests.\n\nThanks for purchasing! Please rate Terrain Grid System on the Asset Store! Thanks.", "Close");
             }
             if (GUILayout.Button("Online Docs")) {
-                Application.OpenURL("https://kronnect.com/guides-category/terrain-grid-system/");
+                Application.OpenURL("https://kronnect.com/docs/terrain-grid/");
             }
             if (GUILayout.Button("Redraw")) {
                 tgs.GenerateMap();

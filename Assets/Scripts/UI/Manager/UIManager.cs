@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using DG.Tweening;
+using Harbour.Data;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
@@ -40,6 +41,16 @@ namespace UI.Manager
             DontDestroyOnLoad(gameObject);
 
             LoadState();
+        }
+        
+        [Button("Force Apply Harbour Idle")]
+        private void ForceIdle()
+        {
+            if (HarbourController.Instance != null)
+            {
+                HarbourController.Instance.SetMode(HarbourStateSO.HarbourMode.Idle);
+                Debug.Log("Forced Idle mode apply");
+            }
         }
         
         public void BlockInputDuringTransition(bool block)

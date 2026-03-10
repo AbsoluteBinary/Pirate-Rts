@@ -27,7 +27,7 @@ Support
 -------
 Please read the documentation and browse/play with the demo scene and sample source code included before contacting us for support :-)
 
-* Support-Web: https://kronnect.com/support
+* Support-Web: https://kronnect.com/docs/terrain-grid/
 * Support-Discord: https://discord.gg/EH2GMaM
 * Email: contact@kronnect.com
 * Twitter: @Kronnect
@@ -48,6 +48,7 @@ Version history
 Version 21.0
 - API: added thread-safe async pathfinding (FindPathAsync).
 - Demo: added Demo34_AsyncPathFinding
+- [Fix] CellGetBorderData vertex ordering with excluded cells
 
 Version 20.2
 - Added "Hide Isolated Cells" option

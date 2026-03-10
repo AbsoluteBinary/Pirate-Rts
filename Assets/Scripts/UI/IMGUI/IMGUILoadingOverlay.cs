@@ -59,6 +59,8 @@ namespace UI.IMGUI
 
         public void TriggerLoadingScreen()
         {
+            HarbourObjectRegistry.DisableAllForLoading();  // ← disables everything registered
+            
             Debug.Log("Loading overlay triggered");
             DisableOtherObjects();
             UIManager.Instance.HideBootLoginPanel();
@@ -165,6 +167,9 @@ namespace UI.IMGUI
 
         private void OnGUI()
         {
+            // Optional: re-enable if returning to Idle
+            //HarbourObjectRegistry.ReEnableAll();
+            
             if (!isVisible) return;
 
             GUI.color = new Color(1f, 1f, 1f, guiAlpha);

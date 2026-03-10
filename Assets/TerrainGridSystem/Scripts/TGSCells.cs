@@ -27,15 +27,22 @@ namespace TGS {
         /// List of cell indices that form the border
         /// </summary>
         public List<int> borderCellIndices;
-        
+
         /// <summary>
-        /// List of border vertex positions in world space
+        /// List of border vertex positions in world space (first segment only, for backward compatibility)
         /// </summary>
         public List<Vector3> borderVertices;
-        
+
+        /// <summary>
+        /// All border segments. Each element is an ordered list of vertices forming a closed loop.
+        /// When excluded cells are fully surrounded by the area, there will be multiple segments (outer border + inner hole borders).
+        /// </summary>
+        public List<List<Vector3>> borderSegments;
+
         public CellBorderData() {
             borderCellIndices = new List<int>();
             borderVertices = new List<Vector3>();
+            borderSegments = new List<List<Vector3>>();
         }
     }
 
@@ -1450,18 +1457,9 @@ namespace TGS {
                     }
                 }
                 
-                HashSet<Point> singleCellVertices = new HashSet<Point>(singleCellSegCount * 2);
-                for (int k = 0; k < singleCellSegCount; k++) {
-                    Segment s = singleCellRegion.segments[k];
-                    singleCellVertices.Add(s.start);
-                    singleCellVertices.Add(s.end);
-                }
-                
-                result.borderVertices = new List<Vector3>(singleCellVertices.Count);
-                foreach (Point point in singleCellVertices) {
-                    result.borderVertices.Add(GetWorldSpacePosition(new Vector2((float)point.x, (float)point.y)));
-                }
-                
+                result.borderSegments = ChainSegmentsOrderedMulti(singleCellRegion.segments, singleCellSegCount);
+                result.borderVertices = result.borderSegments.Count > 0 ? result.borderSegments[0] : new List<Vector3>();
+
                 return result;
             }
             
@@ -1524,19 +1522,155 @@ namespace TGS {
                 }
             }
             
-            HashSet<Point> uniqueVertices = new HashSet<Point>(borderSegCount * 2);
-            for (int k = 0; k < borderSegCount; k++) {
-                Segment s = borderRegion.segments[k];
-                uniqueVertices.Add(s.start);
-                uniqueVertices.Add(s.end);
-            }
-            
-            result.borderVertices = new List<Vector3>(uniqueVertices.Count);
-            foreach (Point point in uniqueVertices) {
-                result.borderVertices.Add(GetWorldSpacePosition(new Vector2((float)point.x, (float)point.y)));
-            }
-            
+            result.borderSegments = ChainSegmentsOrderedMulti(borderRegion.segments, borderSegCount);
+            result.borderVertices = result.borderSegments.Count > 0 ? result.borderSegments[0] : new List<Vector3>();
+
             return result;
+        }
+
+        static long PointKey(Point p) {
+            long ix = (long)(p.x * 1000000.0 + (p.x >= 0 ? 0.5 : -0.5));
+            long iy = (long)(p.y * 1000000.0 + (p.y >= 0 ? 0.5 : -0.5));
+            return (ix << 32) ^ (iy & 0xFFFFFFFFL);
+        }
+
+        // Reusable collections for ChainSegmentsOrderedMulti — avoids per-call allocations
+        readonly Dictionary<long, int> chainAdjHead = new Dictionary<long, int>();
+        int[] chainAdjNext;
+        int[] chainAdjSegIdx;
+        bool[] chainAdjIsStart;
+        int chainAdjCount;
+        bool[] chainUsed;
+
+        List<List<Vector3>> ChainSegmentsOrderedMulti(List<Segment> segments, int segCount) {
+            List<List<Vector3>> loops = new List<List<Vector3>>();
+            if (segCount == 0) return loops;
+
+            // Build adjacency using linked-list-in-array pattern (zero per-vertex allocation)
+            int adjCapacity = segCount * 2;
+            if (chainAdjNext == null || chainAdjNext.Length < adjCapacity) {
+                chainAdjNext = new int[adjCapacity];
+                chainAdjSegIdx = new int[adjCapacity];
+                chainAdjIsStart = new bool[adjCapacity];
+            }
+            chainAdjHead.Clear();
+            chainAdjCount = 0;
+
+            for (int i = 0; i < segCount; i++) {
+                long keyS = PointKey(segments[i].start);
+                long keyE = PointKey(segments[i].end);
+
+                // Add start endpoint
+                chainAdjHead.TryGetValue(keyS, out int headS);
+                if (!chainAdjHead.ContainsKey(keyS)) headS = -1;
+                chainAdjSegIdx[chainAdjCount] = i;
+                chainAdjIsStart[chainAdjCount] = true;
+                chainAdjNext[chainAdjCount] = headS;
+                chainAdjHead[keyS] = chainAdjCount;
+                chainAdjCount++;
+
+                // Add end endpoint
+                chainAdjHead.TryGetValue(keyE, out int headE);
+                if (!chainAdjHead.ContainsKey(keyE)) headE = -1;
+                chainAdjSegIdx[chainAdjCount] = i;
+                chainAdjIsStart[chainAdjCount] = false;
+                chainAdjNext[chainAdjCount] = headE;
+                chainAdjHead[keyE] = chainAdjCount;
+                chainAdjCount++;
+            }
+
+            if (chainUsed == null || chainUsed.Length < segCount) {
+                chainUsed = new bool[segCount];
+            } else {
+                System.Array.Clear(chainUsed, 0, segCount);
+            }
+            int totalUsed = 0;
+
+            while (totalUsed < segCount) {
+                int startIdx = -1;
+                for (int i = 0; i < segCount; i++) {
+                    if (!chainUsed[i]) { startIdx = i; break; }
+                }
+                if (startIdx < 0) break;
+
+                List<Vector3> loop = new List<Vector3>();
+                chainUsed[startIdx] = true;
+                totalUsed++;
+                Point prev = segments[startIdx].start;
+                Point current = segments[startIdx].end;
+                loop.Add(GetWorldSpacePosition(new Vector2((float)prev.x, (float)prev.y)));
+
+                bool found = true;
+                while (found) {
+                    loop.Add(GetWorldSpacePosition(new Vector2((float)current.x, (float)current.y)));
+                    found = false;
+
+                    long key = PointKey(current);
+                    if (!chainAdjHead.TryGetValue(key, out int nodeIdx)) continue;
+
+                    // Count unused candidates at this vertex
+                    int unusedCount = 0;
+                    int singleSegIdx = -1;
+                    Point singleNext = default;
+                    for (int n = nodeIdx; n >= 0; n = chainAdjNext[n]) {
+                        int si = chainAdjSegIdx[n];
+                        if (chainUsed[si]) continue;
+                        unusedCount++;
+                        singleSegIdx = si;
+                        singleNext = chainAdjIsStart[n] ? segments[si].end : segments[si].start;
+                        if (unusedCount > 1) break;
+                    }
+
+                    if (unusedCount == 1) {
+                        // Common case: single candidate, no angle computation needed
+                        chainUsed[singleSegIdx] = true;
+                        totalUsed++;
+                        prev = current;
+                        current = singleNext;
+                        found = true;
+                    } else if (unusedCount > 1) {
+                        // Junction: use angular sorting to stay on the same loop
+                        double inDx = current.x - prev.x;
+                        double inDy = current.y - prev.y;
+                        double inAngle = Math.Atan2(inDy, inDx);
+
+                        int bestIdx = -1;
+                        double bestAngle = double.MinValue;
+                        Point bestNext = default;
+
+                        for (int n = nodeIdx; n >= 0; n = chainAdjNext[n]) {
+                            int si = chainAdjSegIdx[n];
+                            if (chainUsed[si]) continue;
+                            Point otherEnd = chainAdjIsStart[n] ? segments[si].end : segments[si].start;
+                            double outAngle = Math.Atan2(otherEnd.y - current.y, otherEnd.x - current.x);
+
+                            double angleDiff = outAngle - inAngle;
+                            if (angleDiff > Math.PI) angleDiff -= 2.0 * Math.PI;
+                            if (angleDiff <= -Math.PI) angleDiff += 2.0 * Math.PI;
+
+                            if (bestIdx < 0 || angleDiff > bestAngle) {
+                                bestAngle = angleDiff;
+                                bestIdx = si;
+                                bestNext = otherEnd;
+                            }
+                        }
+
+                        if (bestIdx >= 0) {
+                            chainUsed[bestIdx] = true;
+                            totalUsed++;
+                            prev = current;
+                            current = bestNext;
+                            found = true;
+                        }
+                    }
+                }
+
+                if (loop.Count > 1) {
+                    loops.Add(loop);
+                }
+            }
+
+            return loops;
         }
 
         /// <summary>

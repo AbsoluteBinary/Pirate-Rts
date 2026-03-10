@@ -8,7 +8,7 @@ namespace UI.WorldMap.HUDInteractions
 {
     public class HUDButtonController : MonoBehaviour
     {
-        private OceanRenderer _currentOcean;
+        //private OceanRenderer _currentOcean;
         [SerializeField] private int targetSceneGroupIndex = 2; // e.g., Harbour = 2
 
         private void Awake()
@@ -36,15 +36,15 @@ namespace UI.WorldMap.HUDInteractions
         }
         
 
-        private IEnumerator LoadSceneGroup2WithOceanTransition()
-        {
+        //private IEnumerator LoadSceneGroup2WithOceanTransition()
+        //{
             // 1. Find current ocean and disable it
-            _currentOcean = FindObjectOfType<OceanRenderer>();
-            if (_currentOcean != null)
-            {
-                _currentOcean.gameObject.SetActive(false);
-                Debug.Log("[Ocean] Disabled old ocean for Scene Group 2");
-            }
+            // _currentOcean = FindObjectOfType<OceanRenderer>();
+            // if (_currentOcean != null)
+            // {
+            //     _currentOcean.gameObject.SetActive(false);
+            //     Debug.Log("[Ocean] Disabled old ocean for Scene Group 2");
+            // }
 
             // 2. Load your Scene Group 2 (replace with your actual scene name)
             // If SceneLoader has a coroutine version, use it here
@@ -59,9 +59,9 @@ namespace UI.WorldMap.HUDInteractions
             // });
             
             // 3. Wait for new scene to load fully
-            yield return new WaitForSeconds(0.1f); // Small delay for Crest init
-            yield return null;
-            yield return null;
+            // yield return new WaitForSeconds(0.1f); // Small delay for Crest init
+            // yield return null;
+            // yield return null;
 
             // 4. Enable new ocean in loaded scene
             // _currentOcean = FindObjectOfType<OceanRenderer>();
@@ -74,6 +74,6 @@ namespace UI.WorldMap.HUDInteractions
             // {
             //     Debug.LogWarning("[Ocean] No ocean found in new scene!");
             // }
-        }
+        //}
     }
 }

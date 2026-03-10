@@ -330,6 +330,43 @@ Transform:
   - {fileID: 603984410}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!84 &305364762
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GerstnerCascades
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 64
+  m_Height: 64
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 48
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 5
+  m_VolumeDepth: 16
+  m_ShadowSamplingMode: 2
 --- !u!1 &370635148
 GameObject:
   m_ObjectHideFlags: 0
@@ -717,43 +754,6 @@ Transform:
   - {fileID: 1928459136}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &817372451
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: GerstnerCascades
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 64
-  m_Height: 64
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 48
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 0
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 5
-  m_VolumeDepth: 16
-  m_ShadowSamplingMode: 2
 --- !u!1 &906306939
 GameObject:
   m_ObjectHideFlags: 0
@@ -910,6 +910,7 @@ GameObject:
   - component: {fileID: 1323365741}
   - component: {fileID: 1323365742}
   - component: {fileID: 1323365743}
+  - component: {fileID: 1323365744}
   m_Layer: 0
   m_Name: LoginScreen
   m_TagString: Untagged
@@ -946,7 +947,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: db2de7c37a94186d59e3584a8917bd92, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: f6e45b27138440db9a695a607209b863, type: 3}
+  sourceAsset: {fileID: 0}
   m_SortingOrder: 0
   m_Position: 0
   m_WorldSpaceSizeMode: 1
@@ -962,11 +963,25 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1323365740}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e43b6e201eaad1cd8a84dd30a811c20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.Manager.LoginScreenController
+  targetSceneGroupIndex: 2
+--- !u!114 &1323365744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1323365740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab3691c4ef970c12291758e990b306e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Boot.LoginMenuUI
+  targetSceneGroupIndex: 2
 --- !u!1 &1372256217
 GameObject:
   m_ObjectHideFlags: 0
@@ -1397,8 +1412,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.IMGUI.IMGUILoadingOverlay
   autoStartInPlayMode: 1
-  mainFillDuration: 6
-  endBufferDuration: 3
+  mainFillDuration: 1
+  endBufferDuration: 1
   fillEase: 6
   fadeOutDuration: 1
   backgroundColor: {r: 0, g: 0, b: 0, a: 0.8}
@@ -3130,7 +3145,7 @@ MonoBehaviour:
   backgroundSprite: {fileID: 21300000, guid: 59da25cc8872f164da4db6b05ad99d57, type: 3}
   logoSprite: {fileID: 21300000, guid: c8719aeaccf916c0186b6c0fdcc48185, type: 3}
   backgroundFallback: {r: 0, g: 0, b: 0, a: 1}
-  minDisplayTime: 15
+  minDisplayTime: 1
   fadeOutDuration: 1.2
   delayBeforeLoginFadeIn: 0.6
   inputActions: {fileID: -944628639613478452, guid: ddb993c2627c96d25b85219ea3a33748, type: 3}

@@ -1,0 +1,70 @@
+.dropdown-container {
+    width: 300px;
+    height: auto;
+    background-color: rgba(30, 30, 40, 0.85);
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgba(80, 120, 200, 0.6);
+    padding: 8px;
+    margin: 12px;
+}
+
+.dropdown-field {
+    background-color: rgba(50, 60, 80, 0.9);
+    color: rgb(220, 220, 240);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(100, 150, 255, 0.4);
+    padding: 10px 16px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    transition-duration: 0.15s;
+}
+
+.dropdown-field:hover {
+    background-color: rgba(70, 90, 140, 0.95);
+    border-color: rgba(120, 180, 255, 0.7);
+}
+
+.dropdown-field:active {
+    background-color: rgb(90, 110, 160);
+}
+
+.dropdown-menu {
+    background-color: rgba(25, 25, 35, 0.92);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(90, 130, 220, 0.5);
+    padding: 6px 0;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-option-button {
+    background-color: transparent;
+    color: rgb(200, 220, 255);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 10px 20px;
+    margin: 2px 8px;
+    font-size: 16px;
+    transition-duration: 0.12s;
+    -unity-text-align: middle-center;
+}
+
+.dropdown-option-button:hover {
+    background-color: rgba(60, 90, 160, 0.4);
+}
+
+.dropdown-option-button:active {
+    background-color: rgba(90, 130, 220, 0.6);
+}
+
+.dropdown-option-button.selected {
+    background-color: rgba(80, 120, 200, 0.7);
+    color: white;
+    -unity-font-style: bold;
+}
+
+.DropDownStyleSheet {
+}
