@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using _Project.Scripts.Inventory.Helpers;
 using _Project.Scripts.Persistence;
-using Systems.Inventory;
 using UnityEngine;
 
 namespace _Project.Scripts.Inventory {

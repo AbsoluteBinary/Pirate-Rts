@@ -10,16 +10,17 @@
 #pragma warning disable
 #endif
 
-using System.Collections.Generic;
-using UnityEditor.AddressableAssets;
-using Sirenix.OdinInspector.Editor.Validation;
-using UnityEditor.AddressableAssets.Settings;
 using System.Collections;
-using Sirenix.OdinInspector.Modules.Addressables.Editor;
+using System.Collections.Generic;
+using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators;
+using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor.Validation;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 
 [assembly: RegisterValidator(typeof(MissingAddressableGroupReferenceValidator))]
 
-namespace Sirenix.OdinInspector.Modules.Addressables.Editor
+namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators
 {
 	public class MissingAddressableGroupReferenceValidator : GlobalValidator
 	{

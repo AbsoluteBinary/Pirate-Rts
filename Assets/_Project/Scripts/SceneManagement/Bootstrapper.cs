@@ -15,7 +15,7 @@ namespace _Project.Scripts.SceneManagement
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()
         {
-            Debug.Log("Bootstrapper initializing...");
+            //Debug.Log("Bootstrapper initializing...");
 #if UNITY_EDITOR
             // Set the bootstrapper scene to be the play mode start scene when running in the editor
             if (!EditorApplication.isPlaying) return; // Ensure this runs only in play mode

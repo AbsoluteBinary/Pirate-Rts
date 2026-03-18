@@ -4,7 +4,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using _Project.Scripts.EventBus; // For EventBus
+using _Project.Scripts.EventBus;
+using _Project.Scripts.Harbour.Data;
+
+// For EventBus
 
 namespace _Project.Scripts.SceneManagement
 {
@@ -46,48 +49,36 @@ namespace _Project.Scripts.SceneManagement
         // Manages scene loading and unloading
         public readonly SceneGroupManager manager = new SceneGroupManager();
         
-        private void OnApplicationQuit()
-        {
-            Debug.Log("Application quitting or exiting play mode detected.");
-            ResetUi(); // Call your function here
-        }
+        // private void OnApplicationQuit()
+        // {
+        //     ResetUi(); // Call your function here
+        // }
 
         private void Awake()
         {
-            // Singleton setup: Ensure only one instance
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Persist across scenes
-            
-            // Initialize DOTween for animations
+            DontDestroyOnLoad(gameObject);
+    
             DOTween.Init();
-            // Subscribe to scene manager events for logging
-            manager.OnSceneLoaded += sceneName => Debug.Log("Loaded: " + sceneName);
-            manager.OnSceneUnloaded += sceneName => Debug.Log("Unloaded: " + sceneName);
-            manager.OnSceneGroupLoaded += () => Debug.Log("Scene group loaded.");
 
-            // Register event listener for LoadSceneGroupEvent
+            manager.OnSceneLoaded += _ => { };
+            manager.OnSceneUnloaded += _ => { };
+            manager.OnSceneGroupLoaded += () => { };
+
             loadSceneGroupBinding = new EventBinding<LoadSceneGroupEvent>(OnLoadSceneGroupEvent);
             EventBus<LoadSceneGroupEvent>.Register(loadSceneGroupBinding);
 
-            // Set initial UI state
             if (backgroundImage != null)
             {
                 backgroundImage.gameObject.SetActive(true);
                 backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 1f);
                 backgroundImage.DOFade(1.0f, 1.0f);
             }
-            // if (loadingUICanvasGroup != null)
-            // {
-            //     loadingUICanvasGroup.gameObject.SetActive(true);
-            //     loadingUICanvasGroup.alpha = 1f;
-            // }
-            if (loadingBarFill != null) loadingBarFill.fillAmount = 0f;
-            if (loadingText != null) loadingText.text = "Loading...";
         }
 
         private void OnDestroy()
@@ -111,10 +102,10 @@ namespace _Project.Scripts.SceneManagement
 
         public async Task LoadSceneGroup(int index)
         {
-            Debug.Log("Loading scene group...");
+            //Debug.Log("Loading scene group...");
             if (index < 0 || index >= sceneGroups.Length)
             {
-                Debug.LogError("Invalid scene group index: " + index);
+                Debug.LogError($"<color =yellow>Invalid scene group index: " + index);
                 return;
             }
 
@@ -135,7 +126,7 @@ namespace _Project.Scripts.SceneManagement
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Failed to load scene group {index}: {ex.Message}");
+                Debug.LogError($"<color=red>Failed to load scene group {index}: {ex.Message}");
             }
             finally
             {
@@ -168,11 +159,11 @@ namespace _Project.Scripts.SceneManagement
             {
                 if (currentGroupIndex == 0)
                 {
-                    ShowLoginUI();
+                    //ShowLoginUI();
                 }
                 else
                 {
-                    Debug.Log("Skipping ShowLoginUI() for non-Boot group: " + currentGroupIndex);
+                    //Debug.Log("Skipping ShowLoginUI() for non-Boot group: " + currentGroupIndex);
                 }
             });
 
@@ -182,56 +173,56 @@ namespace _Project.Scripts.SceneManagement
                // if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
                 isPreparingNewGroup = false;
                 isLoading = false; // Reset isLoading to allow new loads
-                Debug.Log("isLoading reset to false"); // Optional: For testing
+                //Debug.Log("isLoading reset to false"); // Optional: For testing
             });
         }
 
-        private void ShowLoginUI()
-        {
-            var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null)
-            {
-                mainMenuManager.ToggleCanvasOn();
-                mainMenuManager.ToggleBackgroundOn();
-            }
-            else
-            {
-                Debug.LogWarning("MainMenuDataIOManager instance not found.");
-            }
-        }
+        // private void ShowLoginUI()
+        // {
+        //     var mainMenuManager = MainMenuDataIOManager.Instance;
+        //     if (mainMenuManager != null)
+        //     {
+        //         mainMenuManager.ToggleCanvasOn();
+        //         mainMenuManager.ToggleBackgroundOn();
+        //     }
+        //     else
+        //     {
+        //         Debug.LogWarning("MainMenuDataIOManager instance not found.");
+        //     }
+        // }
         //TODO remove this! (Moved/Moving to IMGUILoadingOverlay(Currently but should posibly move to UIManager))
-        private void HideLoginUIBootOut()
-        {
-            var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager == null)
-            {
-                Debug.LogWarning("MainMenuDataIOManager instance not found.");
-                return;
-            }
+        // private void HideLoginUIBootOut()
+        // {
+        //     var mainMenuManager = MainMenuDataIOManager.Instance;
+        //     if (mainMenuManager == null)
+        //     {
+        //         Debug.LogWarning($"<color=orange>MainMenuDataIOManager instance not found.");
+        //         return;
+        //     }
+        //
+        //     // Hide the login/main menu UI
+        //     mainMenuManager.ToggleBackgroundOff();
+        //     mainMenuManager.ToggleCanvasOff();
+        //
+        //     // === CLEAN UP OLD COMPONENT BOXES ===
+        //     // Boot scene cleanup (always safe to call)
+        //     mainMenuManager.DisableBootComponentIOBox();
+        //
+        //     // Harbour scene cleanup (if you have it)
+        //     mainMenuManager.DisableHarbourComponentIOBox();  // ← Your new method!
+        //
+        //     // Runtime/world scene cleanup (the one with tag "ComponentBoxIO")
+        //     mainMenuManager.DisableComponentIOBox();
+        // }
 
-            // Hide the login/main menu UI
-            mainMenuManager.ToggleBackgroundOff();
-            mainMenuManager.ToggleCanvasOff();
-
-            // === CLEAN UP OLD COMPONENT BOXES ===
-            // Boot scene cleanup (always safe to call)
-            mainMenuManager.DisableBootComponentIOBox();
-
-            // Harbour scene cleanup (if you have it)
-            mainMenuManager.DisableHarbourComponentIOBox();  // ← Your new method!
-
-            // Runtime/world scene cleanup (the one with tag "ComponentBoxIO")
-            mainMenuManager.DisableComponentIOBox();
-        }
-
-        private void ResetUi()
-        {
-            var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null)
-            {
-                mainMenuManager.SaveUIState();
-            }
-        }
+        // private void ResetUi()
+        // {
+        //     var mainMenuManager = MainMenuDataIOManager.Instance;
+        //     if (mainMenuManager != null)
+        //     {
+        //         mainMenuManager.SaveUIState();
+        //     }
+        // }
 
         private void Update()
         {
@@ -246,14 +237,14 @@ namespace _Project.Scripts.SceneManagement
 
         public void LoadNextSceneGroupForButton()
         {
-            Debug.Log("Load next Scene Group");
+            //Debug.Log("Load next Scene Group");
             if (isLoading)
             {
-                Debug.LogWarning("Cannot load next scene group while loading is in progress.");
+                //Debug.LogWarning($"<color=yellow>Cannot load next scene group while loading is in progress.");
                 return;
             }
 
-            ToggleNextSceneGroup();
+            _ = ToggleNextSceneGroup();
         }
 
         // New method: Load a specific scene group by index (for external calls)
@@ -261,7 +252,7 @@ namespace _Project.Scripts.SceneManagement
         {
             if (index < 0 || index >= sceneGroups.Length)
             {
-                Debug.LogError("Invalid scene group index: " + index);
+                Debug.LogError($"<color=red>Invalid scene group index: " + index);
                 return;
             }
 
@@ -269,30 +260,38 @@ namespace _Project.Scripts.SceneManagement
             SceneGroup oldGroup = manager.ActiveSceneGroup;
 
             // New: Disable old container before loading new (prevents overlap/pause)
-            var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null && oldGroup != null)
-            {
-                int oldIndex = Array.IndexOf(sceneGroups, oldGroup);
-                if (oldIndex == 0)
-                {
-                    mainMenuManager.DisableBootComponentIOBox();
-                }
-                else
-                {
-                    mainMenuManager.DisableComponentIOBox();
-                }
-            }
+            // var mainMenuManager = MainMenuDataIOManager.Instance;
+            // if (mainMenuManager != null && oldGroup != null)
+            // {
+            //     int oldIndex = Array.IndexOf(sceneGroups, oldGroup);
+            //     if (oldIndex == 0)
+            //     {
+            //         mainMenuManager.DisableBootComponentIOBox();
+            //     }
+            //     else
+            //     {
+            //         mainMenuManager.DisableComponentIOBox();
+            //     }
+            // }
 
             currentGroupIndex = index;
             NewGroupPrep();
 
             // Load new group first (this sets the new active scene)
             await LoadSceneGroup(index);
+            
+            if (index == 2) // e.g. 2
+            {
+                if (HarbourController.Instance != null)
+                {
+                    HarbourController.Instance.OnHarbourEntered();
+                }
+            }
 
             // Then unload old if exists and different
             if (oldGroup != null && oldGroup != sceneGroups[index])
             {
-                Debug.Log("Unloading previous scene group after new activation...");
+                //Debug.Log("Unloading previous scene group after new activation...");
                 await manager.UnloadScenes();
             }
         }
@@ -307,7 +306,7 @@ namespace _Project.Scripts.SceneManagement
             //await FadeToBlack();
 
             // ───── STEP 2: YELLOW DEBUG MESSAGE ─────
-            Debug.Log($"<color=yellow>Call start Load process → Target Group: {targetGroupIndex}</color>");
+            //Debug.Log($"<color=yellow>Call start Load process → Target Group: {targetGroupIndex}</color>");
 
             // ───── STEP 3: Load the new scene group safely behind black screen ─────
             await LoadSpecificSceneGroup(targetGroupIndex);
@@ -319,10 +318,10 @@ namespace _Project.Scripts.SceneManagement
 
         public async Task ToggleNextSceneGroup()
         {
-            HideLoginUIBootOut();
+            //HideLoginUIBootOut();
             if (sceneGroups == null || sceneGroups.Length == 0)
             {
-                Debug.LogWarning("No scene groups assigned to SceneLoader.");
+                Debug.LogWarning($"<color=red>No scene groups assigned to SceneLoader.");
                 return;
             }
             currentGroupIndex = (currentGroupIndex + 1) % sceneGroups.Length;
@@ -331,19 +330,19 @@ namespace _Project.Scripts.SceneManagement
             SceneGroup oldGroup = manager.ActiveSceneGroup;
 
             // New: Disable old container before loading new
-            var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null && oldGroup != null)
-            {
-                int oldIndex = Array.IndexOf(sceneGroups, oldGroup);
-                if (oldIndex == 0)
-                {
-                    mainMenuManager.DisableBootComponentIOBox();
-                }
-                else
-                {
-                    mainMenuManager.DisableComponentIOBox();
-                }
-            }
+            // var mainMenuManager = MainMenuDataIOManager.Instance;
+            // if (mainMenuManager != null && oldGroup != null)
+            // {
+            //     int oldIndex = Array.IndexOf(sceneGroups, oldGroup);
+            //     if (oldIndex == 0)
+            //     {
+            //         mainMenuManager.DisableBootComponentIOBox();
+            //     }
+            //     else
+            //     {
+            //         mainMenuManager.DisableComponentIOBox();
+            //     }
+            // }
 
             // Load new group
             await LoadSceneGroup(currentGroupIndex);
@@ -352,7 +351,7 @@ namespace _Project.Scripts.SceneManagement
             // Unload old
             if (oldGroup != null && oldGroup != sceneGroups[currentGroupIndex])
             {
-                Debug.Log("Testing unload: Unloading previous scene group...");
+                //Debug.Log("Testing unload: Unloading previous scene group...");
                 await manager.UnloadScenes();
             }
         }
@@ -385,16 +384,16 @@ namespace _Project.Scripts.SceneManagement
 
         private async Task BypassLoginAndLoadNext()
         {
-            Debug.Log("Bypassing login for testing...");
+            //Debug.Log("Bypassing login for testing...");
 
             // Step 1: Instantly hide login UI (skip fades for speed)
-            var mainMenuManager = MainMenuDataIOManager.Instance;
-            if (mainMenuManager != null)
-            {
-                mainMenuManager.ToggleCanvasOff();
-                mainMenuManager.ToggleBackgroundOff();
-                mainMenuManager.DisableBootComponentIOBox(); // Handles audio/EventSystem disable
-            }
+            // var mainMenuManager = MainMenuDataIOManager.Instance;
+            // if (mainMenuManager != null)
+            // {
+            //     mainMenuManager.ToggleCanvasOff();
+            //     mainMenuManager.ToggleBackgroundOff();
+            //     mainMenuManager.DisableBootComponentIOBox(); // Handles audio/EventSystem disable
+            // }
 
             // Step 2: Load next group (e.g., index 1) with minimal delay
             minLoadingTime = 0f; // Override for testing (restore if needed)
@@ -405,7 +404,7 @@ namespace _Project.Scripts.SceneManagement
             if (manager.ActiveSceneGroup != null)
             {
                 await manager.UnloadScenes(); // Unloads previous (Boot)
-                Debug.Log("Unloaded Boot scene group.");
+                //Debug.Log("Unloaded Boot scene group.");
             }
 
             // Optional: Disable Boot camera if separate (find via tag/type)
@@ -414,7 +413,7 @@ namespace _Project.Scripts.SceneManagement
 
             // Restore minLoadingTime if changed
             minLoadingTime = 3f;
-            Debug.Log("Bypass complete—ready for testing!");
+            //Debug.Log("Bypass complete—ready for testing!");
         }
     }
 

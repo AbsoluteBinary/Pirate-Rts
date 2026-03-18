@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using _Project.Scripts._Project.Scripts.Persistence;
+using _Project.Scripts.Inventory;
 using _Project.Scripts.Inventory.Helpers;
+using _Project.Scripts.Player;
+using _Project.Scripts.Player._Project.Scripts.Persistence;
 using _Project.Scripts.Utility;
 using Sirenix.OdinInspector;
-using Systems.Inventory;
-using Systems.Persistence;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

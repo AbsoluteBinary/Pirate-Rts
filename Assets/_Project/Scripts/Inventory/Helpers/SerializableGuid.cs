@@ -1,4 +1,5 @@
 ﻿using System;
+using _Project.Scripts.Inventory.Extensions;
 using UnityEngine;
 
 namespace _Project.Scripts.Inventory.Helpers

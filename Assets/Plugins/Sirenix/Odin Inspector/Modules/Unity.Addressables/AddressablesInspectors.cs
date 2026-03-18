@@ -7,18 +7,36 @@
 #if !SIRENIX_INTERNAL
 #pragma warning disable
 #endif
-
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables;
+using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Internal;
 using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Reflection.Editor;
+using Sirenix.Serialization;
+using Sirenix.Utilities;
+using Sirenix.Utilities.Editor;
+using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.GUI;
+using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.U2D;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.U2D;
+using Object = UnityEngine.Object;
 
 [assembly: RegisterAssetReferenceAttributeForwardToChild(typeof(InlineEditorAttribute))]
 [assembly: RegisterAssetReferenceAttributeForwardToChild(typeof(PreviewFieldAttribute))]
 
-namespace Sirenix.OdinInspector
+namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
 {
-    using System.Diagnostics;
-
     /// <summary>
     /// <para>DisallowAddressableSubAssetField is used on AssetReference properties, and disallows and prevents assigned sub-assets to the asset reference.</para>
     /// </summary>
@@ -66,31 +84,8 @@ namespace Sirenix.OdinInspector
             this.AttributeType = attributeType;
         }
     }
-}
 
 #if UNITY_EDITOR
-namespace Sirenix.OdinInspector.Modules.Addressables.Editor
-{
-    using Sirenix.OdinInspector.Editor;
-    using Sirenix.Serialization;
-    using Sirenix.Utilities;
-    using Sirenix.Utilities.Editor;
-    using Sirenix.OdinInspector.Modules.Addressables.Editor.Internal;
-    using Sirenix.Reflection.Editor;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using UnityEditor;
-    using UnityEditor.AddressableAssets;
-    using UnityEditor.AddressableAssets.Settings;
-    using UnityEditor.AddressableAssets.GUI;
-    using UnityEngine;
-    using UnityEngine.AddressableAssets;
-	using System.Runtime.Serialization;
-    using UnityEngine.U2D;
-    using UnityEditor.U2D;
-    using System.IO;
-
     /// <summary>
     /// Draws an AssetReference property.
     /// </summary>
@@ -507,14 +502,14 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             if (mainAsset != null && mainAsset is SpriteAtlas)
             {
                 subAssets = OdinAddressableUtility.EnumerateAllActualAndVirtualSubAssets(mainAsset, path)
-                                                  .Where(val => val != null && (val is Sprite || val is Texture2D))
-                                                  .ToList();
+                    .Where(val => val != null && (val is Sprite || val is Texture2D))
+                    .ToList();
             }
             else
             {
                 subAssets = OdinAddressableUtility.EnumerateAllActualAndVirtualSubAssets(mainAsset, path)
-                                                  .Where(val => val != null && this.targetType.IsInstanceOfType(val))
-                                                  .ToList();
+                    .Where(val => val != null && this.targetType.IsInstanceOfType(val))
+                    .ToList();
             }
 
             var items = new GenericSelectorItem<UnityEngine.Object>[subAssets.Count + 1];
@@ -1468,12 +1463,12 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 {
                     if (to.InheritsFrom(typeof(AssetReferenceT<>)))
                     {
-						var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
+                        var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
 
-						var targetType = baseType.GetGenericArguments()[0];
+                        var targetType = baseType.GetGenericArguments()[0];
 
-						return from.InheritsFrom(targetType);
-					}
+                        return from.InheritsFrom(targetType);
+                    }
                     else
                     {
                         return true;
@@ -1518,12 +1513,12 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             if (to.InheritsFrom(typeof(AssetReference)))
             {
                 Type assetType;
-				if (to.InheritsFrom(typeof(AssetReferenceT<>)))
-				{
-					var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
-					assetType = baseType.GetGenericArguments()[0];
-				}
-				else
+                if (to.InheritsFrom(typeof(AssetReferenceT<>)))
+                {
+                    var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
+                    assetType = baseType.GetGenericArguments()[0];
+                }
+                else
                 {
                     assetType = typeof(UnityEngine.Object);
                 }
@@ -1816,15 +1811,15 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
         {
             if (assetReferenceType == null) throw new ArgumentNullException(nameof(assetReferenceType));
 
-			if (assetReferenceType.InheritsFrom(typeof(AssetReferenceT<>)))
+            if (assetReferenceType.InheritsFrom(typeof(AssetReferenceT<>)))
             {
-			    var genericBase = assetReferenceType.GetGenericBaseType(typeof(AssetReferenceT<>));
-				return genericBase.GetGenericArguments()[0];
-			}
+                var genericBase = assetReferenceType.GetGenericBaseType(typeof(AssetReferenceT<>));
+                return genericBase.GetGenericArguments()[0];
+            }
             else
-			{
-				return typeof(UnityEngine.Object);
-			}
+            {
+                return typeof(UnityEngine.Object);
+            }
         }
 
         public static Type[] GetAssetReferenceValidMainAssetTypes(Type assetReferenceType)
@@ -1931,5 +1926,6 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             return entry;
         }
     }
-}
+
 #endif
+}

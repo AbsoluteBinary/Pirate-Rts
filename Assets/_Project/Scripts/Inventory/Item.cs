@@ -1,9 +1,8 @@
 ﻿using System;
-using _Project.Scripts.Inventory;
 using _Project.Scripts.Inventory.Helpers;
 using UnityEngine;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     [Serializable]
     public class Item {
         [field: SerializeField] public SerializableGuid Id;

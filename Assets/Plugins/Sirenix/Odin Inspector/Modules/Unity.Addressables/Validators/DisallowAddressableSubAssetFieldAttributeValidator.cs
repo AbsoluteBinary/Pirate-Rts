@@ -10,13 +10,13 @@
 #pragma warning disable
 #endif
 
+using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators;
 using Sirenix.OdinInspector.Editor.Validation;
-using Sirenix.OdinInspector.Modules.Addressables.Editor;
 using UnityEngine.AddressableAssets;
 
 [assembly: RegisterValidator(typeof(DisallowAddressableSubAssetFieldAttributeValidator))]
 
-namespace Sirenix.OdinInspector.Modules.Addressables.Editor
+namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators
 {
 	/// <summary>
 	/// Validator for the DisallowAddressableSubAssetFieldAttribute.

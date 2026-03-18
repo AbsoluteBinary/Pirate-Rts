@@ -183,6 +183,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1280138258}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!84 &52315610
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GerstnerCascades
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 64
+  m_Height: 64
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 48
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 5
+  m_VolumeDepth: 16
+  m_ShadowSamplingMode: 2
 --- !u!1 &67627686
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,43 +367,6 @@ Transform:
   - {fileID: 603984410}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &305364762
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: GerstnerCascades
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 64
-  m_Height: 64
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 48
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 0
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 5
-  m_VolumeDepth: 16
-  m_ShadowSamplingMode: 2
 --- !u!1 &370635148
 GameObject:
   m_ObjectHideFlags: 0
@@ -824,7 +824,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1261943721}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af399b4ea7909bf8492fe16fbaaa69c6, type: 3}
   m_Name: 
@@ -840,7 +840,7 @@ MonoBehaviour:
     SerializationNodes:
     - Name: bootIOData
       Entry: 7
-      Data: 0|UI.Manager.BootIOData, Assembly-CSharp
+      Data: 0|_Project.Scripts.UI.Manager.BootIOData, Assembly-CSharp
     - Name: showMainMenu
       Entry: 5
       Data: true
@@ -909,7 +909,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1323365741}
   - component: {fileID: 1323365742}
-  - component: {fileID: 1323365743}
   - component: {fileID: 1323365744}
   m_Layer: 0
   m_Name: LoginScreen
@@ -956,19 +955,6 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &1323365743
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1323365740}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e43b6e201eaad1cd8a84dd30a811c20, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UI.Manager.LoginScreenController
-  targetSceneGroupIndex: 2
 --- !u!114 &1323365744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1360,14 +1346,14 @@ MonoBehaviour:
     SerializationNodes:
     - Name: panelStates
       Entry: 7
-      Data: 0|System.Collections.Generic.List`1[[UI.Manager.UIManager+PanelState,
+      Data: 0|System.Collections.Generic.List`1[[_Project.Scripts.UI.Manager.UIManager+PanelState,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 1|UI.Manager.UIManager+PanelState, Assembly-CSharp
+      Data: 1|_Project.Scripts.UI.Manager.UIManager+PanelState, Assembly-CSharp
     - Name: panelName
       Entry: 1
       Data: LoginPanel

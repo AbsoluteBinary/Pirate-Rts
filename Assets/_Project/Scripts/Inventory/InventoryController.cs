@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using _Project.Scripts.Inventory;
 using _Project.Scripts.Inventory.Helpers;
 using UnityEngine;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     public class ViewModel {
         public readonly int Capacity;
         public readonly BindableProperty<string> Coins;

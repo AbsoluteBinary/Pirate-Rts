@@ -1,10 +1,12 @@
 ﻿using System.Collections;
+using _Project.Scripts.Inventory.Extensions;
+using _Project.Scripts.Inventory.Helpers;
 using _Project.Scripts.Inventory.Manipulators;
 using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     public class InventoryView : StorageView {
         [SerializeField] string panelName = "Inventory";
 

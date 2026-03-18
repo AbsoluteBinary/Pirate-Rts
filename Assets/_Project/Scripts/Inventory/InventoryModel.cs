@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using _Project.Scripts.Inventory;
-using UnityEngine;
+using _Project.Scripts.Inventory.Helpers;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     public class InventoryModel { 
         ObservableArray<Item> Items { get; }
         InventoryData inventoryData = new InventoryData();

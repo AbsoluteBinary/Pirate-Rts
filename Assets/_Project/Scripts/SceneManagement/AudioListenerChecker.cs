@@ -15,7 +15,7 @@ namespace _Project.Scripts.SceneManagement
                 Debug.LogError($"Multiple AudioListeners active: {activeListeners.Length}");
                 foreach (var listener in activeListeners)
                 {
-                    Debug.Log($"Active AudioListener on {listener.gameObject.name} in scene {listener.gameObject.scene.name}");
+                    //Debug.Log($"Active AudioListener on {listener.gameObject.name} in scene {listener.gameObject.scene.name}");
                 }
             }
         }

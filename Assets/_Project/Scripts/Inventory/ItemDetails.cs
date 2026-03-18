@@ -1,7 +1,6 @@
 ﻿using System;
 using _Project.Scripts.Inventory.Helpers;
 using Sirenix.OdinInspector;
-using Systems.Inventory;
 using UnityEngine;
 
 namespace _Project.Scripts.Inventory {

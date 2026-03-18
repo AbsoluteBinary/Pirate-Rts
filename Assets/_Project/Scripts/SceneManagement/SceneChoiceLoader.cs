@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using UI.WorldMap;
+using _Project.Scripts.UI.WorldMap;
 
 namespace _Project.Scripts.SceneManagement
 {
@@ -58,7 +58,7 @@ namespace _Project.Scripts.SceneManagement
             }
 
             // Your original code here...
-            SceneLoader.Instance.LoadSpecificSceneGroup(2);
+            _ = SceneLoader.Instance.LoadSpecificSceneGroup(2);
 
             Debug.Log("OnBaseButtonClicked completed");
         }

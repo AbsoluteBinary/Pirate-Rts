@@ -1,9 +1,10 @@
 ﻿using System;
+using _Project.Scripts.Inventory.Extensions;
 using _Project.Scripts.Inventory.Helpers;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     public class Slot : VisualElement {
         public Image Icon;
         public Label StackLabel;

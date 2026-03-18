@@ -3,16 +3,17 @@
 // Copyright (c) Sirenix ApS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
+
+using System;
+using System.IO;
+using System.Reflection;
+using UnityEditor;
+using UnityEngine;
+
 #if UNITY_EDITOR
 
-namespace Sirenix.OdinValidator.Editor
+namespace Plugins.Sirenix.Odin_Validator
 {
-    using System;
-    using System.IO;
-    using System.Reflection;
-    using UnityEditor;
-    using UnityEngine;
-
     internal static class EnsureCorrectOdinVersion
     {
         private const string validatorVersion = "4.0.1.4";
@@ -133,10 +134,10 @@ namespace Sirenix.OdinValidator.Editor
                     EditorPrefs.SetBool("ODIN_VALIDATOR_SHOW_GETTING_STARTED", false);
                     EditorApplication.delayCall += () =>
                     {
-                        var t = Sirenix.Serialization.TwoWaySerializationBinder.Default.BindToType("Sirenix.OdinInspector.Editor.GettingStarted.GettingStartedWindow");
+                        var t = global::Sirenix.Serialization.TwoWaySerializationBinder.Default.BindToType("Sirenix.OdinInspector.Editor.GettingStarted.GettingStartedWindow");
                         if (t != null)
                         {
-                            var action = Utilities.Editor.Expressions.ExpressionUtility.ParseAction<bool, bool>("ShowWindow(false, true)", true, t, out var _);
+                            var action = global::Sirenix.Utilities.Editor.Expressions.ExpressionUtility.ParseAction<bool, bool>("ShowWindow(false, true)", true, t, out var _);
                             action.Invoke(false, true);
                         }
                     };

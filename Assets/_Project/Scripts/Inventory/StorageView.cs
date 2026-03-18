@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Systems.Inventory {
+namespace _Project.Scripts.Inventory {
     public abstract class StorageView : MonoBehaviour {
         public Slot[] Slots;
 

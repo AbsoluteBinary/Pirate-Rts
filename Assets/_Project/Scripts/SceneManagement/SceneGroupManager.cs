@@ -86,7 +86,7 @@ namespace _Project.Scripts.SceneManagement
             if (activeScene.IsValid())
             {
                 SceneManager.SetActiveScene(activeScene);
-                Debug.Log("Set active scene to: " + activeScene.name); // New log to confirm
+                //Debug.Log("Set active scene to: " + activeScene.name); // New log to confirm
             }
             else
             {
@@ -102,20 +102,20 @@ namespace _Project.Scripts.SceneManagement
             var activeScene = SceneManager.GetActiveScene().name;
 
             int sceneCount = SceneManager.sceneCount;
-            Debug.Log($"UnloadScenes: Total loaded scenes: {sceneCount}. Active: {activeScene}");
+            //Debug.Log($"UnloadScenes: Total loaded scenes: {sceneCount}. Active: {activeScene}");
 
             for (var i = sceneCount - 1; i > 0; i--)
             {
                 var sceneAt = SceneManager.GetSceneAt(i);
-                Debug.Log($"Checking scene: {sceneAt.name} (Loaded: {sceneAt.isLoaded}, Active: {sceneAt.name == activeScene})");
+                //Debug.Log($"Checking scene: {sceneAt.name} (Loaded: {sceneAt.isLoaded}, Active: {sceneAt.name == activeScene})");
 
-                if (!sceneAt.isLoaded) { Debug.Log($"Skip: Not loaded - {sceneAt.name}"); continue; }
-                if (sceneAt.name.Equals(activeScene)) { Debug.Log($"Skip: Active - {sceneAt.name}"); continue; }
-                if (sceneAt.name == "Bootstrapper") { Debug.Log($"Skip: Bootstrapper - {sceneAt.name}"); continue; }
-                if (handleGroup.Handles.Any(h => h.IsValid() && h.Result.Scene.name == sceneAt.name)) { Debug.Log($"Skip: Addressable - {sceneAt.name}"); continue; }
+                if (!sceneAt.isLoaded) { continue; }
+                if (sceneAt.name.Equals(activeScene)) { continue; }
+                if (sceneAt.name == "Bootstrapper") { continue; }
+                if (handleGroup.Handles.Any(h => h.IsValid() && h.Result.Scene.name == sceneAt.name)) { continue; }
 
                 scenes.Add(sceneAt.name);
-                Debug.Log($"Queuing unload: {sceneAt.name}");
+                //Debug.Log($"Queuing unload: {sceneAt.name}");
             }
 
             var operationGroup = new AsyncOperationGroup(scenes.Count);
@@ -125,12 +125,12 @@ namespace _Project.Scripts.SceneManagement
                 var operation = SceneManager.UnloadSceneAsync(scene);
                 if (operation == null)
                 {
-                    Debug.LogWarning($"Unload failed: Operation null for {scene}. Is it loaded/valid?");
+                    Debug.LogWarning($"<color=yellow>Unload failed: Operation null for {scene}. Is it loaded/valid?");
                     continue;
                 }
                 operationGroup.Operations.Add(operation);
                 OnSceneUnloaded.Invoke(scene);
-                Debug.Log($"Started unloading: {scene}");
+                //Debug.Log($"Started unloading: {scene}");
             }
 
             // Addressables unload (if any—add your existing code here if needed)
@@ -141,7 +141,7 @@ namespace _Project.Scripts.SceneManagement
                 float totalProgress = (operationGroup.Progress + handleGroup.Progress) / 2f;
                 if (Mathf.Abs(totalProgress - lastReportedProgress) > 0.01f)
                 {
-                    Debug.Log($"Unload progress: {totalProgress}");
+                    //Debug.Log($"Unload progress: {totalProgress}");
                     lastReportedProgress = totalProgress;
                 }
                 await Task.Delay(16);
@@ -149,7 +149,7 @@ namespace _Project.Scripts.SceneManagement
 
             await Resources.UnloadUnusedAssets(); // If in your original code
 
-            Debug.Log("Unload complete. Remaining scenes: " + SceneManager.sceneCount);
+            //Debug.Log("Unload complete. Remaining scenes: " + SceneManager.sceneCount);
         }
     }
 

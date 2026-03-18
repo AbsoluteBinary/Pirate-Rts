@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using _Project.Scripts.Persistence;
 
-namespace Systems.Persistence {
+namespace _Project.Scripts.Persistence {
     public interface IDataService {
         void Save(GameData data, bool overwrite = true);
         GameData Load(string name);
