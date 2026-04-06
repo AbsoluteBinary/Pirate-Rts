@@ -15,7 +15,7 @@ namespace _Project.Scripts.Harbour.Data
 
         // UIDocument references (drag in Inspector or find by name/tag)
         [SerializeField] private UIDocument idleHudDocument;        // LoginScreen / HarbourScreenSpaceIdleHud
-        //[SerializeField] private UIDocument harbourBuildDocument;   // HarbourBuildHud
+        [SerializeField] private UIDocument harbourBuildDocument;   // HarbourBuildHud
         //[SerializeField] private UIDocument shipBuildDocument;      // ShipBuildHud
 
         // Camera references (drag or tag)
@@ -112,7 +112,7 @@ namespace _Project.Scripts.Harbour.Data
                     break;
 
                 case HarbourStateSO.HarbourMode.HarbourBuild:
-                    //SetUIDocumentActive(harbourBuildDocument, true);
+                    SetUIDocumentActive(harbourBuildDocument, true);
                     SetCamera(idleCamera, false);
                     SetCamera(harbourBuildCamera, true);
                     SetTGSGrid(true);

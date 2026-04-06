@@ -1,109 +1,163 @@
+using _Project.Scripts.Harbour.Data;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace _Project.Scripts.Harbour.UIControllers
 {
+    [RequireComponent(typeof(UIDocument))]
     public class HarbourBuildHUDController : MonoBehaviour
     {
-        [SerializeField] private UIDocument uiDocument;
+        private Button _buildToolsTrigger;
+        private VisualElement _buildToolsDropdown;
+        private bool _buildToolsDropdownVisible = false;
 
-        private VisualElement dropdownPanel;
-        private bool isDropdownOpen = false;
-
-        private void Awake()
+        private void OnEnable()
         {
-            if (uiDocument == null)
+            var doc = GetComponent<UIDocument>();
+            if (doc == null || doc.rootVisualElement == null)
             {
-                Debug.LogError("UIDocument not assigned on HarbourBuildHUDController!", this);
+                Debug.LogError("<color=yellow>No UIDocument found on Build HUD!</color>");
                 return;
             }
 
-            CreateTopBar();
+            var root = doc.rootVisualElement;
+            root.Clear();
+
+            // ────────────────────────────────────────────────
+            // MAIN BUILD TOP BAR — full width, thin
+            // ────────────────────────────────────────────────
+            var buildBar = new VisualElement { name = "BuildTopBar" };
+            buildBar.style.position = Position.Absolute;
+            buildBar.style.top = 0;
+            buildBar.style.left = 0;
+            buildBar.style.right = 0;
+            buildBar.style.height = 60;
+            buildBar.style.backgroundColor = new Color(0.85f, 0.35f, 0.1f, 0.95f); // distinct build mode color
+            buildBar.style.flexDirection = FlexDirection.Row;
+            buildBar.style.alignItems = Align.Center;
+            buildBar.style.paddingLeft = 20;
+            buildBar.style.paddingRight = 20;
+
+            // ─── LEFT SIDE: Build Tools Dropdown Trigger ─────────────────────
+            _buildToolsTrigger = new Button { text = "Build Tools ▼" };
+            _buildToolsTrigger.style.minWidth = 160;
+            _buildToolsTrigger.style.height = 44;
+            _buildToolsTrigger.style.fontSize = 17;
+            _buildToolsTrigger.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _buildToolsTrigger.style.backgroundColor = new StyleColor(new Color(0.22f, 0.45f, 0.18f));
+            _buildToolsTrigger.style.color = Color.white;
+            _buildToolsTrigger.style.borderTopLeftRadius = 8;
+            _buildToolsTrigger.style.borderTopRightRadius = 8;
+            _buildToolsTrigger.style.borderBottomLeftRadius = 8;
+            _buildToolsTrigger.style.borderBottomRightRadius = 8;
+            _buildToolsTrigger.clicked += ToggleBuildToolsDropdown;
+
+            buildBar.Add(_buildToolsTrigger);
+
+            // ─── CENTER: Mode Title ─────────────────────────────────────────
+            var modeLabel = new Label("HARBOUR BUILD MODE");
+            modeLabel.style.flexGrow = 1;                    // pushes it to center
+            modeLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            modeLabel.style.fontSize = 24;
+            modeLabel.style.color = Color.white;
+            modeLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            buildBar.Add(modeLabel);
+
+            // ─── RIGHT SIDE: Exit Button ────────────────────────────────────
+            var exitBtn = new Button { text = "Exit Build Mode" };
+            exitBtn.style.height = 44;
+            exitBtn.style.fontSize = 16;
+            exitBtn.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            exitBtn.style.color = Color.white;
+            exitBtn.clicked += OnExitBuildClicked;
+            buildBar.Add(exitBtn);
+
+            root.Add(buildBar);
+
+            // ─── Build Tools Dropdown Panel (hidden by default) ─────────────
+            _buildToolsDropdown = new VisualElement { name = "BuildToolsDropdown" };
+            _buildToolsDropdown.style.position = Position.Absolute;
+            _buildToolsDropdown.style.top = 60;               // below the bar
+            _buildToolsDropdown.style.left = 20;              // aligned under the trigger button
+            _buildToolsDropdown.style.width = 220;
+            _buildToolsDropdown.style.backgroundColor = new StyleColor(new Color(0.10f, 0.15f, 0.32f, 0.94f));
+            _buildToolsDropdown.style.borderTopLeftRadius = 6;
+            _buildToolsDropdown.style.borderTopRightRadius = 6;
+            _buildToolsDropdown.style.borderBottomLeftRadius = 6;
+            _buildToolsDropdown.style.borderBottomRightRadius = 6;
+            _buildToolsDropdown.style.borderTopWidth = 1;
+            _buildToolsDropdown.style.borderRightWidth = 1;
+            _buildToolsDropdown.style.borderBottomWidth = 1;
+            _buildToolsDropdown.style.borderLeftWidth = 1;
+            _buildToolsDropdown.style.borderTopColor = new StyleColor(Color.cyan);
+            _buildToolsDropdown.style.borderRightColor = new StyleColor(Color.cyan);
+            _buildToolsDropdown.style.borderBottomColor = new StyleColor(Color.cyan);
+            _buildToolsDropdown.style.borderLeftColor = new StyleColor(Color.cyan);
+            _buildToolsDropdown.style.paddingTop = 8;
+            _buildToolsDropdown.style.paddingBottom = 8;
+            _buildToolsDropdown.style.display = DisplayStyle.None;
+
+            // Add the 3 requested buttons
+            AddDropdownItem("Build Base",       () => Debug.Log("Build Base clicked"));
+            AddDropdownItem("Save Build",       () => Debug.Log("Save Build clicked"));
+            AddDropdownItem("Load Saved Build", () => Debug.Log("Load Saved Build clicked"));
+
+            buildBar.Add(_buildToolsDropdown);   // attach to bar so positioning is relative
+
+            Debug.Log("<color=lime>Harbour Build HUD with Build Tools dropdown loaded</color>");
         }
 
-        private void CreateTopBar()
+        private void AddDropdownItem(string text, System.Action action)
         {
-            var root = uiDocument.rootVisualElement;
+            var item = new Button { text = text };
+            item.style.height = 42;
+            item.style.marginLeft = 12;
+            item.style.marginRight = 12;
+            item.style.marginBottom = 4;
+            item.style.fontSize = 16;
+            item.style.backgroundColor = new StyleColor(new Color(0.14f, 0.18f, 0.34f));
+            item.style.color = Color.white;
+            item.style.borderTopLeftRadius = 4;
+            item.style.borderTopRightRadius = 4;
+            item.style.borderBottomLeftRadius = 4;
+            item.style.borderBottomRightRadius = 4;
 
-            // Full-width top bar
-            var topBar = new VisualElement { name = "HarbourBuildTopBar" };
-            topBar.style.position = Position.Absolute;
-            topBar.style.top = 0;
-            topBar.style.left = 0;
-            topBar.style.width = new Length(100, LengthUnit.Percent);
-            topBar.style.height = new Length(7, LengthUnit.Percent);
-            topBar.style.backgroundColor = new StyleColor(new Color(0.08f, 0.18f, 0.35f, 0.95f));
-            topBar.style.flexDirection = FlexDirection.Row;
-            topBar.style.justifyContent = Justify.FlexEnd;
-            topBar.style.alignItems = Align.Center;
-            topBar.style.paddingRight = 20;
-
-            // Options trigger button
-            var optionsTrigger = new Button(ToggleDropdown)
+            item.clicked += () =>
             {
-                text = "Options ▼"
+                action?.Invoke();
+                ToggleBuildToolsDropdown();   // auto-close after selection
             };
-            optionsTrigger.style.height = new Length(68, LengthUnit.Percent);
-            optionsTrigger.style.minWidth = 180;
 
-            // Dropdown Panel (added to ROOT - this is the key that worked in TopHUDController)
-            dropdownPanel = new VisualElement { name = "DropdownPanel" };
-            dropdownPanel.style.position = Position.Absolute;
-            dropdownPanel.style.top = new Length(105, LengthUnit.Percent);
-            dropdownPanel.style.right = 20;
-            dropdownPanel.style.width = 280;
-            dropdownPanel.style.backgroundColor = new StyleColor(new Color(0.09f, 0.20f, 0.38f, 0.98f));
-            //dropdownPanel.style.borderWidth = 4;
-            //dropdownPanel.style.borderColor = new StyleColor(Color.cyan);
-            dropdownPanel.style.borderTopLeftRadius = 12;
-            dropdownPanel.style.borderTopRightRadius = 12;
-            dropdownPanel.style.borderBottomLeftRadius = 12;
-            dropdownPanel.style.borderBottomRightRadius = 12;
-            dropdownPanel.style.paddingTop = 12;
-            dropdownPanel.style.paddingBottom = 12;
-            dropdownPanel.style.display = DisplayStyle.None;
-
-            // 2 buttons
-            AddDropdownButton("Save and Exit", () => Debug.Log("Save and Exit clicked"));
-            AddDropdownButton("Exit without Saving", () => Debug.Log("Exit without Saving clicked"));
-
-            topBar.Add(optionsTrigger);
-            root.Add(topBar);
-            root.Add(dropdownPanel);   // ← Critical line (same as working TopHUDController)
-
-            Debug.Log("Harbour Build HUD ready");
+            _buildToolsDropdown.Add(item);
         }
 
-        private void AddDropdownButton(string text, System.Action onClick)
+        private void ToggleBuildToolsDropdown()
         {
-            var btn = new Button(() =>
+            _buildToolsDropdownVisible = !_buildToolsDropdownVisible;
+            _buildToolsDropdown.style.display = _buildToolsDropdownVisible ? DisplayStyle.Flex : DisplayStyle.None;
+
+            // Visual feedback on trigger button
+            _buildToolsTrigger.style.backgroundColor = _buildToolsDropdownVisible
+                ? new StyleColor(new Color(0.32f, 0.55f, 0.28f))
+                : new StyleColor(new Color(0.22f, 0.45f, 0.18f));
+        }
+
+        private void OnExitBuildClicked()
+        {
+            // Switch back to normal Harbour mode — CHANGE THIS to your actual default mode
+            HarbourController.Instance.SetMode(HarbourStateSO.HarbourMode.Idle);
+
+            // Switch HUDs back
+            var normalHUD = GameObject.Find("NormalGameHUD");
+            if (normalHUD != null)
             {
-                onClick?.Invoke();
-                CloseDropdown();
-            })
+                gameObject.SetActive(false);
+                normalHUD.SetActive(true);
+            }
+            else
             {
-                text = text
-            };
-            btn.style.height = 52;
-            btn.style.marginTop = 6;
-            btn.style.marginBottom = 6;
-            btn.style.marginLeft = 12;
-            btn.style.marginRight = 12;
-            btn.style.fontSize = 18;
-            dropdownPanel.Add(btn);
-        }
-
-        private void ToggleDropdown()
-        {
-            isDropdownOpen = !isDropdownOpen;
-            dropdownPanel.style.display = isDropdownOpen ? DisplayStyle.Flex : DisplayStyle.None;
-            Debug.Log($"Harbour Build dropdown {(isDropdownOpen ? "OPENED" : "CLOSED")}");
-        }
-
-        private void CloseDropdown()
-        {
-            isDropdownOpen = false;
-            dropdownPanel.style.display = DisplayStyle.None;
+                Debug.LogWarning("NormalGameHUD not found when trying to exit build mode!");
+            }
         }
     }
 }

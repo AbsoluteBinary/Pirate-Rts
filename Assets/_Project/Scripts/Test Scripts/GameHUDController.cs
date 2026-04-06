@@ -287,8 +287,15 @@ namespace _Project.Scripts.Test_Scripts
         
         private void OnEditHarbourClicked()
         {
-            //Debug.Log("Edit Harbour clicked");
             HarbourController.Instance.SetMode(HarbourStateSO.HarbourMode.HarbourBuild);
+    
+            // === NEW: Switch to the Build HUD prototype ===
+            var buildHUD = GameObject.Find("BuildGameHUD");
+            if (buildHUD != null)
+            {
+                gameObject.SetActive(false);   // hide normal HUD
+                buildHUD.SetActive(true);      // show build HUD
+            }
         }
 
         private void OnSaveAndExitClicked()
