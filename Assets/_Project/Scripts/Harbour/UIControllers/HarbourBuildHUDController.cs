@@ -11,6 +11,10 @@ namespace _Project.Scripts.Harbour.UIControllers
         private VisualElement _buildToolsDropdown;
         private bool _buildToolsDropdownVisible = false;
 
+        // ─── Camera References (for Build ↔ Idle toggle) ─────────────────────
+        //[SerializeField] private GameObject playerCameraRoot;     // "Player View - CameraRoot"
+        //[SerializeField] private GameObject buildCameraRoot;
+        
         private void OnEnable()
         {
             var doc = GetComponent<UIDocument>();
@@ -144,20 +148,9 @@ namespace _Project.Scripts.Harbour.UIControllers
 
         private void OnExitBuildClicked()
         {
-            // Switch back to normal Harbour mode — CHANGE THIS to your actual default mode
+            // Use your actual normal/idle mode here (from your enum)
             HarbourController.Instance.SetMode(HarbourStateSO.HarbourMode.Idle);
-
-            // Switch HUDs back
-            var normalHUD = GameObject.Find("NormalGameHUD");
-            if (normalHUD != null)
-            {
-                gameObject.SetActive(false);
-                normalHUD.SetActive(true);
-            }
-            else
-            {
-                Debug.LogWarning("NormalGameHUD not found when trying to exit build mode!");
-            }
         }
+        
     }
 }

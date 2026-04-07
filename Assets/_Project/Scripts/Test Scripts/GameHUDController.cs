@@ -16,6 +16,9 @@ namespace _Project.Scripts.Test_Scripts
         private bool _dropdownVisible = false;
         private Button _optionsTrigger;
         
+        // Camera Referneces
+        //[SerializeField] private GameObject playerCameraRoot;     // "Player View - CameraRoot" (inside HarbourComponentIOBox prefab)
+        //[SerializeField] private GameObject buildCameraRoot;
         private void OnEnable()
         {
             var doc = GetComponent<UIDocument>();
@@ -287,15 +290,8 @@ namespace _Project.Scripts.Test_Scripts
         
         private void OnEditHarbourClicked()
         {
+            // Just call the controller — everything else is handled centrally
             HarbourController.Instance.SetMode(HarbourStateSO.HarbourMode.HarbourBuild);
-    
-            // === NEW: Switch to the Build HUD prototype ===
-            var buildHUD = GameObject.Find("BuildGameHUD");
-            if (buildHUD != null)
-            {
-                gameObject.SetActive(false);   // hide normal HUD
-                buildHUD.SetActive(true);      // show build HUD
-            }
         }
 
         private void OnSaveAndExitClicked()
