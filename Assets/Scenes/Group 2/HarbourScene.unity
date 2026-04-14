@@ -301,6 +301,9 @@ MonoBehaviour:
   objectsToEnableOnReset: []
   objectsToDisableOnReset: []
   playerBuildGO: {fileID: 6687760166003687934}
+  testTile: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+  eventSystem: {fileID: 5705010333079632824}
+  tgs: {fileID: 2018615748}
 --- !u!1 &134604185
 GameObject:
   m_ObjectHideFlags: 0
@@ -395,7 +398,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 189772805}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9adf05fd1b4e7851983b589e29765b6e, type: 3}
   m_Name: 
@@ -410,7 +413,6 @@ MonoBehaviour:
   tempPlacementcnt: 0
   placementcnt: 0
   buildLimtcnt: 5
-  cellIO: 0
 --- !u!1 &580345371
 GameObject:
   m_ObjectHideFlags: 0
@@ -1426,6 +1428,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+--- !u!114 &5705010333079632824 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1553655746808235726, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+  m_PrefabInstance: {fileID: 5705010333079632823}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6687760166003687934
 GameObject:
   m_ObjectHideFlags: 0

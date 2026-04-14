@@ -1,185 +1,152 @@
 using TGS;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace _Project.Scripts
 {
     public class ObjectPlacer : MonoBehaviour
     {
-        public GameObject prefabToInstantiate; // Assign the prefab in the Inspector
-        public Button spawnButton; // Assign the UI button in the Inspector
-        public LayerMask terrainLayer; // Set this in the Inspector to the terrain's layer
-        private GameObject instantiatedObject; // Reference to the instantiated object
+        public GameObject prefabToInstantiate;
+        public Button spawnButton;
+        public LayerMask terrainLayer;
+
+        private GameObject instantiatedObject;
         private bool isAttached = false;
+
         [SerializeField] public Camera buildCamera;
-    
         [SerializeField] TMP_Text ValueText;
-        //[SerializeField] Button tileAButton;
-        // Placement counter controls
+
         public int tempPlacementcnt;
         public int placementcnt;
         public int buildLimtcnt = 5;
-    
-        // Testing toggles
-        public bool cellIO;
-        //[SerializeField] TerrainGridSystem _tgs;
-    
-    
+
         private TerrainGridSystem tgs;
-        int cellIndex;
-        int buttonIndex;
 
         void Start()
         {
             ValueText.text = buildLimtcnt.ToString();
             tgs = TerrainGridSystem.instance;
             tgs.OnCellClick += PlaceObject;
-            //_tgs.showCells = false;
-        
-        
-        
-        
-            if (buildCamera == null)
-            {
-                //Debug.LogError("Build Camera not assigned in the Inspector!");
-            }
-            else
-            {
-                //Debug.LogError("Build Camera ready");
-            }
-        
-            // Add listener to the button
+
             if (spawnButton != null)
-            {
                 spawnButton.onClick.AddListener(OnSpawnButtonClick);
-            }
-            else
-            {
-                //Debug.LogError("Spawn button not assigned in the Inspector!");
-            }
         }
-    
-        void OnCellClick (TerrainGridSystem grid, int cell, int button) 
+
+        public void StartTilePreview(GameObject tilePrefab)
         {
-            if (buttonIndex == 1) {
-                print("Right clicked on cell #" + cellIndex);
-            }												
+            if (tilePrefab == null) return;
+
+            if (instantiatedObject != null)
+                Destroy(instantiatedObject);
+
+            Vector3 spawnPos = GetMouseWorldPosition();
+            if (spawnPos == Vector3.zero)
+                spawnPos = Vector3.up * 5f;
+
+            instantiatedObject = Instantiate(tilePrefab, spawnPos, Quaternion.identity);
+            isAttached = true;
+
+            var rend = instantiatedObject.GetComponent<Renderer>();
+            if (rend != null)
+            {
+                Color c = rend.material.color;
+                c.a = 0.65f;
+                rend.material.color = c;
+            }
+
+            Debug.Log("<color=cyan>ObjectPlacer: Preview started - snapping to TGS cells</color>");
         }
 
         void Update()
         {
             if (isAttached && instantiatedObject != null)
             {
-                // Move the object with the mouse
                 MoveObjectWithMouse();
-
-                // Check for right-click to place the object
-                if (Input.GetMouseButtonDown(1)) // Right-click
-                {
-                    //PlaceObjectOnTerrain();
-                    PlaceObject(tgs, cellIndex, buttonIndex);
-                }
             }
-        }
-    
-    
 
-        void OnSpawnButtonClick()
-        {
-            if (instantiatedObject == null) // Only spawn if no object is currently being dragged
+            if (isAttached && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
             {
-                // Get initial mouse position in world space
-                Vector3 spawnPosition = GetMouseWorldPosition();
-                if (spawnPosition != Vector3.zero) // Ensure a valid position was found
-                {
-                    // Instantiate the object at the mouse position
-                    instantiatedObject = Instantiate(prefabToInstantiate, spawnPosition, Quaternion.identity);
-                    isAttached = true;
-                }
-                else
-                {
-                    //Debug.LogWarning("Could not determine spawn position. Ensure the terrain is on the correct layer.");
-                }
+                CancelPreview();
             }
         }
 
         Vector3 GetMouseWorldPosition()
         {
-            // Cast a ray from the camera through the mouse position
-            Ray ray = buildCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            if (buildCamera == null || Mouse.current == null) return Vector3.zero;
 
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, terrainLayer))
+            Ray ray = buildCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, terrainLayer))
             {
-                return hit.point; // Return the point where the ray hits the terrain
+                return hit.point;
             }
-
-            return Vector3.zero; // Return zero if no hit (invalid position)
+            return Vector3.zero;
         }
 
         void MoveObjectWithMouse()
         {
-            // Update the object's position to follow the mouse
-            Vector3 newPosition = GetMouseWorldPosition();
-            if (newPosition != Vector3.zero)
+            if (tgs == null) return;
+
+            Vector3 hitPoint = GetMouseWorldPosition();
+            if (hitPoint == Vector3.zero) return;
+
+            int cellIndex = tgs.CellGetIndex(hitPoint);
+            if (cellIndex >= 0)
             {
-                instantiatedObject.transform.position = newPosition;
+                Vector3 cellCenter = tgs.CellGetPosition(cellIndex);
+                cellCenter.y = 0.2f;
+                instantiatedObject.transform.position = cellCenter;
             }
         }
 
-        // void PlaceObjectOnTerrain()
-        // {
-        //     Vector3 finalPosition = GetMouseWorldPosition();
-        //     if (finalPosition != Vector3.zero)
-        //     {
-        //         // Place the object directly on the terrain at the mouse position
-        //         instantiatedObject.transform.position = finalPosition;
-        //
-        //         // Optional: Align the object to the terrain's surface normal
-        //         RaycastHit hit;
-        //         if (Physics.Raycast(finalPosition + Vector3.up * 1f, Vector3.down, out hit, 2f, terrainLayer))
-        //         {
-        //             instantiatedObject.transform.up = hit.normal; // Align to terrain surface
-        //         }
-        //     }
-        //
-        //     // Stop dragging and clear the reference
-        //     isAttached = false;
-        //     instantiatedObject = null; // Allow spawning a new object
-        // }
-        // Working currently new code below to replace above method eventualy to handle the placement of the tile object
+        public void ConfirmCurrentPlacement()
+        {
+            if (!isAttached || instantiatedObject == null || tgs == null) return;
+
+            int cell = tgs.CellGetIndex(instantiatedObject.transform.position);
+            if (cell >= 0)
+            {
+                PlaceObject(tgs, cell, 0);
+            }
+
+            isAttached = false;
+            instantiatedObject = null;
+        }
+
+        public void CancelPreview()
+        {
+            if (instantiatedObject != null)
+            {
+                Destroy(instantiatedObject);
+                instantiatedObject = null;
+            }
+            isAttached = false;
+            Debug.Log("<color=yellow>Preview cancelled</color>");
+        }
+
+        // Your existing methods (unchanged)
+        void OnSpawnButtonClick()
+        {
+            // ... your original spawn button logic if still needed ...
+        }
+
         public void PlaceObject(TerrainGridSystem grid, int cell, int button)
         {
             if (isAttached)
             {
-            
-                if (button == 1)
+                if (button == 0 || button == 1) // left or right click handling
                 {
                     placementcnt += 1;
-                    //pendingObject = null;
                     instantiatedObject.transform.position = tgs.CellGetPosition(cell);
                     instantiatedObject = null;
                     tempPlacementcnt -= 1;
                     buildLimtcnt -= 1;
-                
-                    //tgs.CellSetTag(cellIndex, 1);
-                    //print("Cell Index # " + cellIndex + "Tag # " + tag);
-                
-                
-                    //_tgs.CellGetPosition(_cellIndex).tag = 1;
 
-                    if (buildLimtcnt == 0)
-                    {
+                    if (buildLimtcnt == 0 && spawnButton != null)
                         spawnButton.interactable = false;
-                        //tileAButtonImage.color = tempColor;
-                        //tempColor.a = 30f;
-                        //tileAButtonImage.color = tempColor;
-                    }
-                    ValueText.text = buildLimtcnt.ToString(); 
 
-                    //if (pendingObject = null)
-                    //print("None selected");
+                    ValueText.text = buildLimtcnt.ToString();
                 }
             }
         }

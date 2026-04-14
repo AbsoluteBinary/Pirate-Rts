@@ -14,8 +14,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HarbourController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HarbourController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourBuildHUDController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourBuildHUDController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Test Scripts/GameHUDController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Test Scripts/GameHUDController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/ObjectPlacer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/ObjectPlacer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -70,7 +69,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -228,7 +227,12 @@
       <workItem from="1773830907681" duration="6576000" />
       <workItem from="1775471611267" duration="6901000" />
       <workItem from="1775552274804" duration="5687000" />
-      <workItem from="1775565508037" duration="6988000" />
+      <workItem from="1775565508037" duration="7077000" />
+      <workItem from="1775634836643" duration="661000" />
+      <workItem from="1775636184234" duration="6494000" />
+      <workItem from="1775723660566" duration="11520000" />
+      <workItem from="1776072172992" duration="9635000" />
+      <workItem from="1776156909292" duration="631000" />
     </task>
     <servers />
   </component>
