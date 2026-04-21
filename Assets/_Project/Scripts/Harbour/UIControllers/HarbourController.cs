@@ -14,7 +14,6 @@ namespace _Project.Scripts.Harbour.UIControllers
         [SerializeField] private Camera harbourBuildCamera;
 
         [SerializeField] private GameObject playerBuildGO;
-
         [SerializeField] private GameObject tgsGridObject;
 
         [SerializeField] private HarbourHUD harbourHUD;
@@ -50,23 +49,21 @@ namespace _Project.Scripts.Harbour.UIControllers
             if (harbourBuilderManager == null)
                 harbourBuilderManager = FindObjectOfType<HarbourBuilderManager>();
 
-            // === EVENT WIRING ===
-            if (harbourHUD != null)
+            if (harbourHUD != null && harbourBuilderManager != null)
             {
                 harbourHUD.OnBuildHarbourBaseClicked += () => SetMode(HarbourStateSO.HarbourMode.HarbourBuild);
                 harbourHUD.OnLandTileSlotClicked += (tabName, slotIndex) =>
-                    harbourBuilderManager?.StartPreview();
+                {
+                    Debug.Log($"<color=orange>HarbourController: Received slot click event from HUD - forwarding to BuilderManager</color>");
+                    harbourBuilderManager.StartPreview();
+                };
 
-                Debug.Log("<color=lime>✅ All UI buttons wired correctly</color>");
+                Debug.Log("<color=lime>✅ All events wired successfully</color>");
             }
-
-            ApplyHarbourState();
-        }
-
-        public void SetMode(HarbourStateSO.HarbourMode newMode)
-        {
-            if (state != null)
-                state.currentMode = newMode;
+            else
+            {
+                Debug.LogError("HarbourHUD or HarbourBuilderManager reference is missing in Inspector!");
+            }
 
             ApplyHarbourState();
         }
@@ -111,7 +108,14 @@ namespace _Project.Scripts.Harbour.UIControllers
             }
         }
 
-        // Helper methods
+        public void SetMode(HarbourStateSO.HarbourMode newMode)
+        {
+            if (state != null)
+                state.currentMode = newMode;
+
+            ApplyHarbourState();
+        }
+
         public void EnterHarbourBuildMode() => SetMode(HarbourStateSO.HarbourMode.HarbourBuild);
         public void ReturnToIdle() => SetMode(HarbourStateSO.HarbourMode.Idle);
 

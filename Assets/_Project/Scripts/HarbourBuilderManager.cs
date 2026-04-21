@@ -1,4 +1,3 @@
-using TGS;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,26 +7,14 @@ namespace _Project.Scripts
     {
         [Header("References")]
         [SerializeField] private Camera harbourBuildCamera;
-        [SerializeField] private TerrainGridSystem tgs;
-        [SerializeField] private GameObject testTilePrefab;
-
-        [Header("Preview Settings")]
-        [SerializeField] private float previewHeight = 0.4f;
 
         private GameObject currentPreview;
         private bool isPreviewActive = false;
-
-        private void Awake()
-        {
-            if (tgs == null)
-                tgs = TerrainGridSystem.instance;
-
-            Debug.Log("<color=cyan>HarbourBuilderManager Awake - TGS: " + (tgs != null) + "</color>");
-        }
+        [SerializeField] private GameObject testTilePrefab;
 
         public void StartPreview()
         {
-            Debug.Log("<color=yellow>StartPreview() called from slot click</color>");
+            Debug.Log("<color=magenta>HarbourBuilderManager.StartPreview() CALLED</color>");
 
             if (testTilePrefab == null)
             {
@@ -41,81 +28,44 @@ namespace _Project.Scripts
             currentPreview = Instantiate(testTilePrefab);
             currentPreview.name = "Preview_Tile";
 
-            // Force very visible
+            // Force visible scale and starting position
             currentPreview.transform.localScale = new Vector3(2.5f, 0.8f, 2.5f);
-            currentPreview.transform.position = new Vector3(0, 15, 0); // start high
+            currentPreview.transform.position = new Vector3(0, 15, 0);
 
+            // Make it bright green for testing
             var rend = currentPreview.GetComponentInChildren<Renderer>(true);
             if (rend != null)
             {
                 Color c = rend.material.color;
                 c.a = 0.9f;
-                rend.material.color = new Color(0f, 1f, 0.3f, 0.9f); // bright green for testing
-            }
-            else
-            {
-                Debug.LogWarning("Preview tile has no Renderer!");
+                rend.material.color = new Color(0f, 1f, 0.3f, 0.9f);
             }
 
             isPreviewActive = true;
-            Debug.Log("<color=green>✅ Preview instantiated - should now follow mouse</color>");
+            Debug.Log("<color=green>✅ TestTile instantiated - should now follow mouse cursor</color>");
         }
 
         private void Update()
         {
             if (!isPreviewActive || currentPreview == null) return;
 
-            UpdatePreviewPosition();
-
-            if (Mouse.current.rightButton.wasPressedThisFrame)
-                PlaceTile();
-
-            if (Mouse.current.leftButton.wasPressedThisFrame)
-                CancelPreview();
+            FollowMouseCursor();
         }
 
-        private void UpdatePreviewPosition()
+        private void FollowMouseCursor()
         {
-            if (harbourBuildCamera == null || tgs == null || currentPreview == null)
-            {
-                Debug.LogWarning("UpdatePreviewPosition: Missing camera or tgs");
-                return;
-            }
+            if (harbourBuildCamera == null || Mouse.current == null) return;
 
             Ray ray = harbourBuildCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 2000f))
+            // Plane at fixed height above water (very reliable)
+            Plane plane = new Plane(Vector3.up, new Vector3(0, 0.4f, 0));
+
+            if (plane.Raycast(ray, out float distance))
             {
-                int cellIndex = tgs.CellGetIndex(hit.point);
-
-                if (cellIndex >= 0)
-                {
-                    Vector3 cellCenter = tgs.CellGetPosition(cellIndex);
-                    cellCenter.y = previewHeight;
-                    currentPreview.transform.position = cellCenter;
-                }
+                Vector3 pos = ray.GetPoint(distance);
+                currentPreview.transform.position = pos;
             }
-        }
-
-        private void PlaceTile()
-        {
-            // ... (same as before)
-            if (currentPreview == null || tgs == null) return;
-
-            int cellIndex = tgs.CellGetIndex(currentPreview.transform.position);
-            Vector3 placePos = (cellIndex >= 0) ? tgs.CellGetPosition(cellIndex) : currentPreview.transform.position;
-            placePos.y = previewHeight;
-
-            if (testTilePrefab != null)
-            {
-                GameObject placed = Instantiate(testTilePrefab, placePos, Quaternion.identity);
-                placed.name = "Placed_LandTile";
-                Debug.Log($"<color=green>Tile placed at {placePos}</color>");
-            }
-
-            Destroy(currentPreview);
-            currentPreview = null;
-            isPreviewActive = false;
         }
 
         private void CancelPreview()

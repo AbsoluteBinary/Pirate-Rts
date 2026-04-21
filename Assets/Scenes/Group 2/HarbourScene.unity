@@ -333,9 +333,7 @@ MonoBehaviour:
   playerBuildGO: {fileID: 6687760166003687934}
   tgsGridObject: {fileID: 2018615746}
   harbourHUD: {fileID: 134604189}
-  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
   harbourBuilderManager: {fileID: 189772808}
-  testTile: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
 --- !u!1 &189772805
 GameObject:
   m_ObjectHideFlags: 0
@@ -381,9 +379,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   harbourBuildCamera: {fileID: 603085192}
-  tgs: {fileID: 2018615748}
   testTilePrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
-  previewHeight: 0.35
+  tgs: {fileID: 2018615748}
 --- !u!1 &580345371
 GameObject:
   m_ObjectHideFlags: 0
