@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus;
 using _Project.Scripts.Harbour.Data;
+using _Project.Scripts.Harbour.UIControllers;
 
 // For EventBus
 

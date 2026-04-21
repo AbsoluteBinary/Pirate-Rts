@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace _Project.Scripts.UI.Harbour
 {
-    public class HarbourHUD : MonoBehaviour
+    public class HarbourDisplayHUD : MonoBehaviour
     {
         [Header("Player Profile")]
         [SerializeField] private Texture2D playerPicture;  // Drag your player image here

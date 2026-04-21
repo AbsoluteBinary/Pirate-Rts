@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace _Project.Scripts.Harbour.Data
+namespace _Project.Scripts.Harbour.Data.SO
 {
     [CreateAssetMenu(fileName = "HarbourState", menuName = "Naval/Harbour/HarbourState", order = 1)]
     public class HarbourStateSO : ScriptableObject

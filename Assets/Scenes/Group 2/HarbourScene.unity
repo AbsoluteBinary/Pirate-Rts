@@ -244,66 +244,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &59906650
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 59906651}
-  - component: {fileID: 59906652}
-  m_Layer: 0
-  m_Name: HarbourController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &59906651
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 59906650}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.45596, y: -15.24438, z: 10.08068}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &59906652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 59906650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5c78db1263fa84fdbc1fcadab780a7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Harbour.Data.HarbourController
-  bootComponentIOBox: {fileID: 0}
-  harbourComponentIOBox: {fileID: 0}
-  state: {fileID: 11400000, guid: bf5fb2e15d8fea196a8088717c34cffc, type: 2}
-  harbourUIDocument: {fileID: 134604187}
-  idleCamera: {fileID: 2994700598635489540}
-  harbourBuildCamera: {fileID: 603085192}
-  tgsGridObject: {fileID: 2018615746}
-  resetOnEveryHarbourEntry: 1
-  panelsToHideOnReset: []
-  panelsToShowOnReset: []
-  objectsToEnableOnReset: []
-  objectsToDisableOnReset: []
-  playerBuildGO: {fileID: 6687760166003687934}
-  testTile: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
-  eventSystem: {fileID: 5705010333079632824}
-  tgs: {fileID: 2018615748}
 --- !u!1 &134604185
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,6 +254,8 @@ GameObject:
   m_Component:
   - component: {fileID: 134604188}
   - component: {fileID: 134604187}
+  - component: {fileID: 134604189}
+  - component: {fileID: 134604190}
   m_Layer: 0
   m_Name: HarbourHUD
   m_TagString: Untagged
@@ -359,6 +301,41 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &134604189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b212222390b70afd82a616d3c8b0ed5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Visuals.HarbourHud
+  harbourUIDocument: {fileID: 134604187}
+  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+--- !u!114 &134604190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5c78db1263fa84fdbc1fcadab780a7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.UIControllers.HarbourController
+  state: {fileID: 11400000, guid: bf5fb2e15d8fea196a8088717c34cffc, type: 2}
+  idleCamera: {fileID: 2994700598635489540}
+  harbourBuildCamera: {fileID: 603085192}
+  playerBuildGO: {fileID: 6687760166003687934}
+  tgsGridObject: {fileID: 2018615746}
+  harbourHUD: {fileID: 134604189}
+  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+  harbourBuilderManager: {fileID: 189772808}
+  testTile: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
 --- !u!1 &189772805
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,16 +380,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9adf05fd1b4e7851983b589e29765b6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabToInstantiate: {fileID: 5520676310122816940, guid: ef966914ca8839b118dd2f5447fc9c46, type: 3}
-  spawnButton: {fileID: 0}
-  terrainLayer:
-    serializedVersion: 2
-    m_Bits: 8
-  buildCamera: {fileID: 603085192}
-  ValueText: {fileID: 0}
-  tempPlacementcnt: 0
-  placementcnt: 0
-  buildLimtcnt: 5
+  harbourBuildCamera: {fileID: 603085192}
+  tgs: {fileID: 2018615748}
+  testTilePrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+  previewHeight: 0.35
 --- !u!1 &580345371
 GameObject:
   m_ObjectHideFlags: 0
@@ -1428,17 +1399,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
---- !u!114 &5705010333079632824 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1553655746808235726, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-  m_PrefabInstance: {fileID: 5705010333079632823}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6687760166003687934
 GameObject:
   m_ObjectHideFlags: 0
@@ -1500,5 +1460,4 @@ SceneRoots:
   - {fileID: 40176560}
   - {fileID: 5705010333079632823}
   - {fileID: 580345373}
-  - {fileID: 59906651}
   - {fileID: 134604188}

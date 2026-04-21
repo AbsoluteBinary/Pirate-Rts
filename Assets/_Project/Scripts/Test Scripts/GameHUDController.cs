@@ -1,4 +1,6 @@
 using _Project.Scripts.Harbour.Data;
+using _Project.Scripts.Harbour.Data.SO;
+using _Project.Scripts.Harbour.UIControllers;
 using UnityEngine;
 using UnityEngine.UIElements;
 
