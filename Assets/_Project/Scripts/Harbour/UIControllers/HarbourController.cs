@@ -55,7 +55,7 @@ namespace _Project.Scripts.Harbour.UIControllers
                 harbourHUD.OnLandTileSlotClicked += (tabName, slotIndex) =>
                 {
                     Debug.Log($"<color=orange>HarbourController: Received slot click event from HUD - forwarding to BuilderManager</color>");
-                    harbourBuilderManager.StartPreview();
+                    harbourBuilderManager.StartPreview(slotIndex);
                 };
 
                 Debug.Log("<color=lime>✅ All events wired successfully</color>");

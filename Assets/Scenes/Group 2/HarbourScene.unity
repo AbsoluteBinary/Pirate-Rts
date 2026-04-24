@@ -379,8 +379,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   harbourBuildCamera: {fileID: 603085192}
-  testTilePrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
   tgs: {fileID: 2018615748}
+  testTilePrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+  previewHeight: 0.35
+  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
 --- !u!1 &580345371
 GameObject:
   m_ObjectHideFlags: 0

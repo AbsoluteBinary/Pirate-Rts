@@ -8,7 +8,7 @@ namespace _Project.Scripts.Harbour.Data
     public class HarbourHUD : MonoBehaviour
     {
         [SerializeField] private UIDocument harbourUIDocument;
-
+        
         // Events for HarbourController to listen to
         public event Action OnBuildHarbourBaseClicked;
         public event Action OnExitBuildMode;
@@ -24,7 +24,38 @@ namespace _Project.Scripts.Harbour.Data
         {
             if (landTileInventory != null)
             {
+                landTileInventory.OnCountChanged += RefreshSlotCount;
                 // Optional: Listen for future changes if you want live updates
+            }
+        }
+
+        private void OnDisable()
+        {
+            if  (landTileInventory != null)
+            {
+                landTileInventory.OnCountChanged -= RefreshSlotCount;
+            }
+        }
+
+        /// <summary>
+        /// Call this after placing a tile so the count label updates immediately (MVVM View refresh)
+        /// </summary>
+        public void RefreshSlotCount(int index)
+        {
+            if (_currentBuildPanel == null || landTileInventory == null) return;
+
+            var contentArea = _currentBuildPanel.Q<VisualElement>("ContentArea");
+            if (contentArea == null) return;
+
+            // Find the slot at this index and update its count label
+            var slots = contentArea.Query<VisualElement>().ToList();
+            if (index < 0 || index >= slots.Count) return;
+
+            var slot = slots[index];
+            var countLabel = slot.Q<Label>();
+            if (countLabel != null)
+            {
+                countLabel.text = landTileInventory.GetCount(index).ToString();
             }
         }
 
@@ -43,7 +74,7 @@ namespace _Project.Scripts.Harbour.Data
         // ===================================================================
         // IDLE HUD
         // ===================================================================
-                public void BuildIdleHUD()
+        public void BuildIdleHUD()
         {
             if (harbourUIDocument?.rootVisualElement == null) return;
 
@@ -319,7 +350,7 @@ namespace _Project.Scripts.Harbour.Data
             }
         }
 
-        private void ShowTabContent(string tabName)
+                private void ShowTabContent(string tabName)
         {
             var contentArea = _currentBuildPanel?.Q<VisualElement>("ContentArea");
             if (contentArea == null) return;
@@ -348,7 +379,10 @@ namespace _Project.Scripts.Harbour.Data
                 slot.style.marginRight = 12;
                 slot.style.marginBottom = 12;
 
-                if (tabName == "Land Tiles" && i < landTileInventory.tiles.Count)
+                int index = i;
+
+                // Only fill slots that have data in the SO
+                if (tabName == "Land Tiles" && landTileInventory != null && i < landTileInventory.tiles.Count)
                 {
                     var entry = landTileInventory.tiles[i];
 
@@ -361,19 +395,28 @@ namespace _Project.Scripts.Harbour.Data
                         slot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                     }
 
-                    // Count text (bottom right)
-                    var countLabel = new Label(entry.count.ToString());
+                    // Count Label (MVVM View)
+                    var countLabel = new Label();
+                    countLabel.text = landTileInventory.GetCount(index).ToString();
                     countLabel.style.position = Position.Absolute;
-                    countLabel.style.bottom = 4;
-                    countLabel.style.right = 6;
+                    countLabel.style.right = 4;
+                    countLabel.style.bottom = 2;
                     countLabel.style.fontSize = 14;
                     countLabel.style.color = Color.white;
                     countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-                    slot.Add(countLabel);
-                }
+                    countLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.6f);
+                    countLabel.style.paddingLeft = 4;
+                    countLabel.style.paddingRight = 4;
+                    countLabel.style.borderTopLeftRadius = 3;
+                    countLabel.style.borderTopRightRadius = 3;
+                    countLabel.style.borderBottomLeftRadius = 3;
+                    countLabel.style.borderBottomRightRadius = 3;
 
-                int index = i;
-                slot.RegisterCallback<ClickEvent>(evt => OnLandTileSlotClicked?.Invoke(tabName, index));
+                    slot.Add(countLabel);
+
+                    // Click handler only for valid slots
+                    slot.RegisterCallback<ClickEvent>(evt => OnLandTileSlotClicked?.Invoke(tabName, index));
+                }
 
                 grid.Add(slot);
             }
