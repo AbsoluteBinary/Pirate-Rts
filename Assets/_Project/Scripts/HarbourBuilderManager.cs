@@ -34,35 +34,21 @@ namespace _Project.Scripts
         public void StartPreview(int slotIndex)
         {
             _currentSlotIndex = slotIndex;
+
             Debug.Log($"<color=magenta>StartPreview() called for slot {slotIndex}</color>");
 
-            if (landTileInventory == null || landTileInventory.tiles == null)
+            if (testTilePrefab == null)
             {
-                Debug.LogError("LandTileInventorySO or tiles list is not assigned!");
-                return;
-            }
-
-            if (slotIndex < 0 || slotIndex >= landTileInventory.tiles.Count)
-            {
-                Debug.LogError($"Slot index {slotIndex} is out of range in LandTileInventorySO!");
-                return;
-            }
-
-            LandTileInventorySO.TileEntry entry = landTileInventory.tiles[slotIndex];
-
-            if (entry == null || entry.prefab == null)   // ← Change "prefab" if your field name is different
-            {
-                Debug.LogError($"No prefab found at index {slotIndex} in TileEntry!");
+                Debug.LogError("testTilePrefab is NOT assigned!");
                 return;
             }
 
             if (currentPreview != null)
                 Destroy(currentPreview);
 
-            currentPreview = Instantiate(entry.prefab);
+            currentPreview = Instantiate(testTilePrefab);
             currentPreview.name = "Preview_Tile";
 
-            // Force visible
             currentPreview.transform.localScale = new Vector3(2.5f, 0.8f, 2.5f);
             currentPreview.transform.position = new Vector3(0, 15, 0);
 
@@ -71,49 +57,18 @@ namespace _Project.Scripts
             {
                 Color c = rend.material.color;
                 c.a = 0.9f;
-                rend.material.color = new Color(0f, 1f, 0.3f, 0.9f); // bright green for testing
+                rend.material.color = new Color(0f, 1f, 0.3f, 0.9f);
             }
 
             isPreviewActive = true;
-            Debug.Log($"<color=green>✅ Pulled tile from SO index {slotIndex} and attached to cursor</color>");
+            Debug.Log($"<color=green>✅ Preview attached to cursor for slot {slotIndex}</color>");
         }
-
-        // public void StartPreview()
-        // {
-        //     Debug.Log("<color=magenta>StartPreview() called from slot click</color>");
-        //
-        //     if (testTilePrefab == null)
-        //     {
-        //         Debug.LogError("testTilePrefab is NOT assigned!");
-        //         return;
-        //     }
-        //
-        //     if (currentPreview != null)
-        //         Destroy(currentPreview);
-        //
-        //     currentPreview = Instantiate(testTilePrefab);
-        //     currentPreview.name = "Preview_Tile";
-        //
-        //     currentPreview.transform.localScale = new Vector3(2.5f, 0.8f, 2.5f);
-        //     currentPreview.transform.position = new Vector3(0, 15, 0);
-        //
-        //     var rend = currentPreview.GetComponentInChildren<Renderer>(true);
-        //     if (rend != null)
-        //     {
-        //         Color c = rend.material.color;
-        //         c.a = 0.9f;
-        //         rend.material.color = new Color(0f, 1f, 0.3f, 0.9f);
-        //     }
-        //
-        //     isPreviewActive = true;
-        //     Debug.Log("<color=green>✅ TestTile instantiated - following mouse + TGS centering</color>");
-        // }
 
         private void Update()
         {
             if (!isPreviewActive || currentPreview == null) return;
 
-            UpdatePreviewPosition();
+            UpdatePreviewPosition();     // <--- This must be called
 
             if (Mouse.current.rightButton.wasPressedThisFrame)
                 PlaceTile();
@@ -122,33 +77,30 @@ namespace _Project.Scripts
                 CancelPreview();
         }
 
-        private void UpdatePreviewPosition()
+                private void UpdatePreviewPosition()
         {
-            if (harbourBuildCamera == null) return;
+            if (harbourBuildCamera == null || tgs == null) return;
 
             Ray ray = harbourBuildCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-            // Reliable plane for mouse following
-            Plane plane = new Plane(Vector3.up, new Vector3(0, previewHeight, 0));
+            if (Physics.Raycast(ray, out RaycastHit hit, 3000f))
+            {
+                Cell cell = tgs.CellGetAtPosition(hit.point, true);
+
+                if (cell != null)
+                {
+                    Vector3 cellCenter = tgs.CellGetPosition(cell.index);
+                    cellCenter.y = previewHeight;
+                    currentPreview.transform.position = cellCenter;
+                    return;
+                }
+            }
+
+            // Fallback to flat plane
+            Plane plane = new Plane(Vector3.up, previewHeight);
             if (plane.Raycast(ray, out float distance))
             {
-                Vector3 worldPos = ray.GetPoint(distance);
-
-                // Snap to nearest TGS cell center
-                if (tgs != null)
-                {
-                    int cellIndex = tgs.CellGetIndex(worldPos);
-                    if (cellIndex >= 0)
-                    {
-                        Vector3 cellCenter = tgs.CellGetPosition(cellIndex);
-                        cellCenter.y = previewHeight;
-                        currentPreview.transform.position = cellCenter;
-                        return;
-                    }
-                }
-
-                // Fallback if TGS fails
-                currentPreview.transform.position = worldPos;
+                currentPreview.transform.position = ray.GetPoint(distance);
             }
         }
 
@@ -160,10 +112,10 @@ namespace _Project.Scripts
 
             if (tgs != null)
             {
-                int cellIndex = tgs.CellGetIndex(placePos);
-                if (cellIndex >= 0)
+                Cell cell = tgs.CellGetAtPosition(placePos, true);
+                if (cell != null)
                 {
-                    placePos = tgs.CellGetPosition(cellIndex);
+                    placePos = tgs.CellGetPosition(cell.index);
                     placePos.y = previewHeight;
                 }
             }
@@ -180,26 +132,22 @@ namespace _Project.Scripts
                     c.a = 1f;
                     rend.material.color = c;
                 }
-
-                Debug.Log($"<color=green>Land Tile placed centered on TGS cell at {placePos}</color>");
             }
 
-            // === CORRECTED MVVM LOGIC ===
+            // MVVM Counter Update
             if (landTileInventory != null && _currentSlotIndex >= 0)
             {
                 if (landTileInventory.ConsumeTile(_currentSlotIndex))
                 {
                     if (_harbourHUD != null)
                         _harbourHUD.RefreshSlotCount(_currentSlotIndex);
-
-                    Debug.Log($"<color=green>MVVM: Tile consumed from slot {_currentSlotIndex}. Remaining: {landTileInventory.GetCount(_currentSlotIndex)}</color>");
                 }
             }
 
             Destroy(currentPreview);
             currentPreview = null;
             isPreviewActive = false;
-            _currentSlotIndex = -1;   // reset
+            _currentSlotIndex = -1;
         }
 
         private void CancelPreview()
