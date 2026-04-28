@@ -9,7 +9,7 @@ namespace _Project.Scripts.Harbour.Data.SO
         {
             Idle,
             HarbourBuild,
-            ShipBuild
+            ShipBuilding
         }
 
         [Header("Current Mode")]

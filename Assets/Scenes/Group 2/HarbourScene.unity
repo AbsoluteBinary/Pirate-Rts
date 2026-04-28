@@ -256,6 +256,8 @@ GameObject:
   - component: {fileID: 134604187}
   - component: {fileID: 134604189}
   - component: {fileID: 134604190}
+  - component: {fileID: 134604191}
+  - component: {fileID: 134604192}
   m_Layer: 0
   m_Name: HarbourHUD
   m_TagString: Untagged
@@ -315,6 +317,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Visuals.HarbourHud
   harbourUIDocument: {fileID: 134604187}
   landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+  shipBuilderHUD: {fileID: 134604191}
 --- !u!114 &134604190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,6 +337,34 @@ MonoBehaviour:
   tgsGridObject: {fileID: 2018615746}
   harbourHUD: {fileID: 134604189}
   harbourBuilderManager: {fileID: 189772808}
+  shipBuilderHUD: {fileID: 134604191}
+--- !u!114 &134604191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 222ce011f59ec1f34a5cae4d3ca020f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ShipBuilderHUD
+  harbourUIDocument: {fileID: 134604187}
+  hullSelectionHUD: {fileID: 134604192}
+--- !u!114 &134604192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 617f957db8c939ec7b449979de244827, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.HullSelectionHUD
+  harbourUIDocument: {fileID: 134604187}
 --- !u!1 &189772805
 GameObject:
   m_ObjectHideFlags: 0

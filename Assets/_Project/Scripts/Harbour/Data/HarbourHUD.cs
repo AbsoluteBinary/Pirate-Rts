@@ -1,5 +1,6 @@
 using System;
 using _Project.Scripts.Harbour.Data.SO;
+using _Project.Scripts.Harbour.ShipBuilder;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,12 +13,14 @@ namespace _Project.Scripts.Harbour.Data
         // Events for HarbourController to listen to
         public event Action OnBuildHarbourBaseClicked;
         public event Action OnExitBuildMode;
+        public event Action OnBuildShipClicked;
         public event Action<string, int> OnLandTileSlotClicked;
 
         private VisualElement _currentBuildPanel;
         
         // Reference to the inventory data
         [SerializeField] private LandTileInventorySO landTileInventory;
+        [SerializeField] private ShipBuilderHUD shipBuilderHUD;
 
         // Event from inventory (so UI can refresh when count changes)
         private void OnEnable()
@@ -63,13 +66,28 @@ namespace _Project.Scripts.Harbour.Data
         {
             if (harbourUIDocument?.rootVisualElement == null) return;
 
-            harbourUIDocument.rootVisualElement.Clear();
+            // Close any open ship panel when changing modes
+            if (mode != HarbourStateSO.HarbourMode.ShipBuilding && shipBuilderHUD != null)
+                shipBuilderHUD.CloseShipBuilder();
 
             if (mode == HarbourStateSO.HarbourMode.Idle)
                 BuildIdleHUD();
-            else
+            else if (mode == HarbourStateSO.HarbourMode.HarbourBuild)
                 BuildHarbourBuildHUD();
+            else if (mode == HarbourStateSO.HarbourMode.ShipBuilding)
+                shipBuilderHUD?.OpenShipBuilder();
         }
+        // public void RefreshUI(HarbourStateSO.HarbourMode mode)
+        // {
+        //     if (harbourUIDocument?.rootVisualElement == null) return;
+        //
+        //     harbourUIDocument.rootVisualElement.Clear();
+        //
+        //     if (mode == HarbourStateSO.HarbourMode.Idle)
+        //         BuildIdleHUD();
+        //     else
+        //         BuildHarbourBuildHUD();
+        // }
 
         // ===================================================================
         // IDLE HUD
@@ -110,7 +128,7 @@ namespace _Project.Scripts.Harbour.Data
             buildDropdown.style.position = Position.Absolute;
             buildDropdown.style.top = 60;
             buildDropdown.style.right = 20;
-            buildDropdown.style.width = 240;
+            buildDropdown.style.width = 260;
             buildDropdown.style.backgroundColor = new StyleColor(new Color(0.10f, 0.15f, 0.32f, 0.94f));
             buildDropdown.style.borderTopLeftRadius = 6;
             buildDropdown.style.borderTopRightRadius = 6;
@@ -130,8 +148,10 @@ namespace _Project.Scripts.Harbour.Data
             buildDropdown.style.paddingRight = 8;
             buildDropdown.style.display = DisplayStyle.None;
 
-            AddDropdownItem(buildDropdown, "Edit Harbour", () => OnBuildHarbourBaseClicked?.Invoke());
-            AddDropdownItem(buildDropdown, "Save and Exit", () => Debug.Log("Save and Exit clicked"));
+            // Updated dropdown items
+            AddDropdownItem(buildDropdown, "Edit Harbour",     () => OnBuildHarbourBaseClicked?.Invoke());
+            AddDropdownItem(buildDropdown, "Build a Ship",     () => OnBuildShipClicked?.Invoke());
+            AddDropdownItem(buildDropdown, "Save and Exit",    () => Debug.Log("Save and Exit clicked"));
             AddDropdownItem(buildDropdown, "Exit Without Saving", () => Debug.Log("Exit Without Saving clicked"));
 
             bool dropdownVisible = false;
@@ -149,7 +169,7 @@ namespace _Project.Scripts.Harbour.Data
             topBar.Add(buildDropdown);
             root.Add(topBar);
 
-            Debug.Log("<color=lime>HarbourHUD: Idle HUD with working Build dropdown restored</color>");
+            Debug.Log("<color=lime>HarbourHUD: Idle HUD updated with 'Build a Ship' option</color>");
         }
 
         // ===================================================================
@@ -350,7 +370,7 @@ namespace _Project.Scripts.Harbour.Data
             }
         }
 
-                private void ShowTabContent(string tabName)
+        private void ShowTabContent(string tabName)
         {
             var contentArea = _currentBuildPanel?.Q<VisualElement>("ContentArea");
             if (contentArea == null) return;

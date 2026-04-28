@@ -1,5 +1,6 @@
 using _Project.Scripts.Harbour.Data;
 using _Project.Scripts.Harbour.Data.SO;
+using _Project.Scripts.Harbour.ShipBuilder;
 using UnityEngine;
 
 namespace _Project.Scripts.Harbour.UIControllers
@@ -18,6 +19,7 @@ namespace _Project.Scripts.Harbour.UIControllers
 
         [SerializeField] private HarbourHUD harbourHUD;
         [SerializeField] private HarbourBuilderManager harbourBuilderManager;
+        [SerializeField] private ShipBuilderHUD shipBuilderHUD;
 
         private void Awake()
         {
@@ -49,20 +51,20 @@ namespace _Project.Scripts.Harbour.UIControllers
             if (harbourBuilderManager == null)
                 harbourBuilderManager = FindObjectOfType<HarbourBuilderManager>();
 
-            if (harbourHUD != null && harbourBuilderManager != null)
+            if (shipBuilderHUD == null)
+                shipBuilderHUD = GetComponent<ShipBuilderHUD>();   // ← Add this
+
+            // === EVENT WIRING ===
+            if (harbourHUD != null)
             {
                 harbourHUD.OnBuildHarbourBaseClicked += () => SetMode(HarbourStateSO.HarbourMode.HarbourBuild);
+                harbourHUD.OnBuildShipClicked += () => SetMode(HarbourStateSO.HarbourMode.ShipBuilding);
+                harbourHUD.OnExitBuildMode += () => SetMode(HarbourStateSO.HarbourMode.Idle);
+                
                 harbourHUD.OnLandTileSlotClicked += (tabName, slotIndex) =>
-                {
-                    Debug.Log($"<color=orange>HarbourController: Received slot click event from HUD - forwarding to BuilderManager</color>");
-                    harbourBuilderManager.StartPreview(slotIndex);
-                };
+                    harbourBuilderManager?.StartPreview(slotIndex);
 
-                Debug.Log("<color=lime>✅ All events wired successfully</color>");
-            }
-            else
-            {
-                Debug.LogError("HarbourHUD or HarbourBuilderManager reference is missing in Inspector!");
+                Debug.Log("<color=lime>✅ All events wired (including Build a Ship)</color>");
             }
 
             ApplyHarbourState();
@@ -80,6 +82,7 @@ namespace _Project.Scripts.Harbour.UIControllers
                     SetCamera(idleCamera, true);
                     SetCamera(harbourBuildCamera, false);
                     SetTGSGrid(false);
+                    shipBuilderHUD?.CloseShipBuilder();   // Close ship panel if open
                     break;
 
                 case HarbourStateSO.HarbourMode.HarbourBuild:
@@ -88,6 +91,14 @@ namespace _Project.Scripts.Harbour.UIControllers
                     SetCamera(harbourBuildCamera, true);
                     SetTGSGrid(true);
                     if (playerBuildGO != null) playerBuildGO.SetActive(true);
+                    shipBuilderHUD?.CloseShipBuilder();
+                    break;
+
+                case HarbourStateSO.HarbourMode.ShipBuilding:
+                    if (harbourHUD != null) harbourHUD.RefreshUI(HarbourStateSO.HarbourMode.ShipBuilding);
+                    SetCamera(idleCamera, true);           // Usually keep player camera for now
+                    SetCamera(harbourBuildCamera, false);
+                    SetTGSGrid(false);
                     break;
             }
 
