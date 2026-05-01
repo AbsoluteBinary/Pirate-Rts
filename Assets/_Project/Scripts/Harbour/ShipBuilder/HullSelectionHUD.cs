@@ -12,7 +12,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private VisualElement _hullPanel;
 
-                public void OpenHullSelection()
+        public void OpenHullSelection()
         {
             if (harbourUIDocument?.rootVisualElement == null) 
             {
@@ -68,34 +68,41 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             content.name = "HullContent";
 
             // Add Hull Cards
+            // Add Hull Cards
             AddHullCard(content, "Gun Boat Hull", "1 Weapon • 1 Armour • 1 Engine", "Small agile hull",
-                () => SelectHull("Gunboat_Hull", "Gun Boat Hull"));
+                "Sprites/Hulls/Gunboat_Hull", 
+                () => SelectHull("Sprites/Hulls/Gunboat_Hull", "Gun Boat Hull"));
 
             AddHullCard(content, "Skirmisher Hull", "3 Weapon • 1 Armour • 1 Engine", "Fast attack hull",
-                () => SelectHull("Skirmisher_Hull", "Skirmisher Hull"));
+                "Sprites/Hulls/Skirmisher_Hull", 
+                () => SelectHull("Sprites/Hulls/Skirmisher_Hull", "Skirmisher Hull"));
 
             AddHullCard(content, "HammerHead Hull", "3 Weapon • 2 Armour • 1 Engine", "Heavy combat hull",
-                () => SelectHull("HammerHead_Hull", "HammerHead Hull"));
+                "Sprites/Hulls/HammerHead_Hull", 
+                () => SelectHull("Sprites/Hulls/HammerHead_Hull", "HammerHead Hull"));
 
             _hullPanel.Add(content);
             root.Add(_hullPanel);
 
             Debug.Log("<color=green>Hull Selection Panel Opened with 3 cards</color>");
         }
-        private void SelectHull(string spriteName, string hullName)
+        private void SelectHull(string spritePath, string hullName)
         {
-            // Find the ShipBuilderHUD and tell it which hull was selected
             var shipBuilder = FindObjectOfType<ShipBuilderHUD>();
-            
             if (shipBuilder != null)
             {
-                shipBuilder.SetSelectedHull(spriteName, hullName);
+                shipBuilder.SetSelectedHull(spritePath, hullName);
+            }
+            else
+            {
+                Debug.LogError("ShipBuilderHUD not found in scene!");
             }
 
             CloseHullSelection();
         }
 
-        private void AddHullCard(VisualElement parent, string name, string slots, string description, Action onSelect = null)
+        private void AddHullCard(VisualElement parent, string hullName, string slots, string description, 
+                        string spritePath, Action onSelect = null)
         {
             var card = new VisualElement();
             card.style.flexDirection = FlexDirection.Row;
@@ -111,7 +118,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             card.style.paddingBottom = 12;
             card.style.marginBottom = 10;
 
-            // Hexagonal Hull Preview
+            // === HEXAGONAL HULL PREVIEW ===
             var hullSlot = new VisualElement();
             hullSlot.style.width = 95;
             hullSlot.style.height = 95;
@@ -127,15 +134,31 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             hullSlot.style.borderTopColor = new Color(0.5f, 0.8f, 1f);
             hullSlot.style.marginRight = 20;
             hullSlot.style.alignSelf = Align.Center;
+
+            // ←←← LOAD PREVIEW IMAGE ←←←
+            Sprite hullSprite = Resources.Load<Sprite>(spritePath);
+            if (hullSprite != null)
+            {
+                hullSlot.style.backgroundImage = new StyleBackground(hullSprite);
+                hullSlot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                hullSlot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                hullSlot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                Debug.Log($"<color=green>Loaded preview: {spritePath}</color>");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Could not load hull preview: {spritePath}");
+            }
+
             card.Add(hullSlot);
 
-            // Info
+            // Info section
             var info = new VisualElement();
             info.style.flexGrow = 1;
             info.style.flexDirection = FlexDirection.Column;
             info.style.justifyContent = Justify.Center;
 
-            var nameLabel = new Label(name);
+            var nameLabel = new Label(hullName);
             nameLabel.style.fontSize = 19;
             nameLabel.style.color = Color.white;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -161,10 +184,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             selectBtn.style.height = 55;
             selectBtn.style.alignSelf = Align.Center;
             selectBtn.style.backgroundColor = new Color(0.25f, 0.6f, 0.95f);
-            selectBtn.clicked += () =>
-            {
-                onSelect?.Invoke();
-            };
+            selectBtn.clicked += () => onSelect?.Invoke();
             card.Add(selectBtn);
 
             parent.Add(card);
