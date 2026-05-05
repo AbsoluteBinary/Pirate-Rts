@@ -8,7 +8,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
     {
         [SerializeField] private UIDocument harbourUIDocument;
 
-        public event Action<HullData> OnHullSelected;   // ← Key event
+        // Reference to the actual HullData assets (drag them in Inspector)
+        [SerializeField] private HullData gunboatHull;
+        [SerializeField] private HullData skirmisherHull;
+        [SerializeField] private HullData hammerHeadHull;
+
+        public event Action<HullData> OnHullSelected;   // ← Now properly sends HullData
 
         private VisualElement _hullPanel;
 
@@ -67,42 +72,24 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             content.style.paddingRight = 15;
             content.name = "HullContent";
 
-            // Add Hull Cards
-            // Add Hull Cards
-            AddHullCard(content, "Gun Boat Hull", "1 Weapon • 1 Armour • 1 Engine", "Small agile hull",
-                "Sprites/Hulls/Gunboat_Hull", 
-                () => SelectHull("Sprites/Hulls/Gunboat_Hull", "Gun Boat Hull"));
+            // === Add Hull Cards using real HullData assets ===
+            if (gunboatHull != null)
+                AddHullCard(content, gunboatHull);
 
-            AddHullCard(content, "Skirmisher Hull", "3 Weapon • 1 Armour • 1 Engine", "Fast attack hull",
-                "Sprites/Hulls/Skirmisher_Hull", 
-                () => SelectHull("Sprites/Hulls/Skirmisher_Hull", "Skirmisher Hull"));
+            if (skirmisherHull != null)
+                AddHullCard(content, skirmisherHull);
 
-            AddHullCard(content, "HammerHead Hull", "3 Weapon • 2 Armour • 1 Engine", "Heavy combat hull",
-                "Sprites/Hulls/HammerHead_Hull", 
-                () => SelectHull("Sprites/Hulls/HammerHead_Hull", "HammerHead Hull"));
+            if (hammerHeadHull != null)
+                AddHullCard(content, hammerHeadHull);
 
             _hullPanel.Add(content);
             root.Add(_hullPanel);
 
-            Debug.Log("<color=green>Hull Selection Panel Opened with 3 cards</color>");
-        }
-        private void SelectHull(string spritePath, string hullName)
-        {
-            var shipBuilder = FindObjectOfType<ShipBuilderHUD>();
-            if (shipBuilder != null)
-            {
-                shipBuilder.SetSelectedHull(spritePath, hullName);
-            }
-            else
-            {
-                Debug.LogError("ShipBuilderHUD not found in scene!");
-            }
-
-            CloseHullSelection();
+            Debug.Log("<color=green>Hull Selection Panel Opened with real HullData</color>");
         }
 
-        private void AddHullCard(VisualElement parent, string hullName, string slots, string description, 
-                        string spritePath, Action onSelect = null)
+        // Updated AddHullCard - now takes HullData
+        private void AddHullCard(VisualElement parent, HullData hull)
         {
             var card = new VisualElement();
             card.style.flexDirection = FlexDirection.Row;
@@ -118,7 +105,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             card.style.paddingBottom = 12;
             card.style.marginBottom = 10;
 
-            // === HEXAGONAL HULL PREVIEW ===
+            // Hull Preview
             var hullSlot = new VisualElement();
             hullSlot.style.width = 95;
             hullSlot.style.height = 95;
@@ -135,41 +122,34 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             hullSlot.style.marginRight = 20;
             hullSlot.style.alignSelf = Align.Center;
 
-            // ←←← LOAD PREVIEW IMAGE ←←←
-            Sprite hullSprite = Resources.Load<Sprite>(spritePath);
-            if (hullSprite != null)
+            if (hull.hullImage != null)
             {
-                hullSlot.style.backgroundImage = new StyleBackground(hullSprite);
+                hullSlot.style.backgroundImage = new StyleBackground(hull.hullImage);
                 hullSlot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                 hullSlot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
                 hullSlot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
-                Debug.Log($"<color=green>Loaded preview: {spritePath}</color>");
-            }
-            else
-            {
-                Debug.LogWarning($"⚠️ Could not load hull preview: {spritePath}");
             }
 
             card.Add(hullSlot);
 
-            // Info section
+            // Info
             var info = new VisualElement();
             info.style.flexGrow = 1;
             info.style.flexDirection = FlexDirection.Column;
             info.style.justifyContent = Justify.Center;
 
-            var nameLabel = new Label(hullName);
+            var nameLabel = new Label(hull.hullName);
             nameLabel.style.fontSize = 19;
             nameLabel.style.color = Color.white;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             nameLabel.style.marginBottom = 4;
 
-            var slotsLabel = new Label(slots);
+            var slotsLabel = new Label(hull.slotInfo);
             slotsLabel.style.fontSize = 14;
             slotsLabel.style.color = new Color(0.6f, 0.9f, 1f);
             slotsLabel.style.marginBottom = 6;
 
-            var descLabel = new Label(description);
+            var descLabel = new Label(hull.description);
             descLabel.style.fontSize = 13;
             descLabel.style.color = new Color(0.8f, 0.8f, 0.85f);
 
@@ -184,20 +164,26 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             selectBtn.style.height = 55;
             selectBtn.style.alignSelf = Align.Center;
             selectBtn.style.backgroundColor = new Color(0.25f, 0.6f, 0.95f);
-            selectBtn.clicked += () => onSelect?.Invoke();
+            selectBtn.clicked += () => SelectHull(hull);
             card.Add(selectBtn);
 
             parent.Add(card);
         }
-        
 
-        private HullData CreateTempHullData(string name, string slots, string desc)
+        // Updated SelectHull - now passes full HullData
+        private void SelectHull(HullData selectedHull)
         {
-            var temp = ScriptableObject.CreateInstance<HullData>();
-            temp.hullName = name;
-            temp.slotInfo = slots;
-            temp.description = desc;
-            return temp;
+            var shipBuilder = FindObjectOfType<ShipBuilderHUD>();
+            if (shipBuilder != null)
+            {
+                shipBuilder.SetSelectedHull(selectedHull);   // ← Now sends HullData
+            }
+            else
+            {
+                Debug.LogError("ShipBuilderHUD not found in scene!");
+            }
+
+            CloseHullSelection();
         }
 
         public void CloseHullSelection()

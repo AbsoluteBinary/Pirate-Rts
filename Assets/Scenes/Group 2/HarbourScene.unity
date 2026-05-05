@@ -258,6 +258,7 @@ GameObject:
   - component: {fileID: 134604190}
   - component: {fileID: 134604191}
   - component: {fileID: 134604192}
+  - component: {fileID: 134604193}
   m_Layer: 0
   m_Name: HarbourHUD
   m_TagString: Untagged
@@ -352,6 +353,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ShipBuilderHUD
   harbourUIDocument: {fileID: 134604187}
   hullSelectionHUD: {fileID: 134604192}
+  weaponSelectionHUD: {fileID: 134604193}
 --- !u!114 &134604192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,6 +366,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 617f957db8c939ec7b449979de244827, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.HullSelectionHUD
+  harbourUIDocument: {fileID: 134604187}
+  gunboatHull: {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
+  skirmisherHull: {fileID: 0}
+  hammerHeadHull: {fileID: 0}
+--- !u!114 &134604193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f875a8d444467459c9b7a5dec5e1a9e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.WeaponSelectionHUD
   harbourUIDocument: {fileID: 134604187}
 --- !u!1 &189772805
 GameObject:

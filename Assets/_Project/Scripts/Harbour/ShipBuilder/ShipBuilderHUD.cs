@@ -20,6 +20,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         // Reference to child panels
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
+        [SerializeField] private WeaponSelectionHUD weaponSelectionHUD;
+        
+        private HullData _lastSelectedHull;
+
+        private VisualElement _selectedWeaponSlot;   // ← Remembers which slot was clicked
         
         private void OnEnable()
         {
@@ -38,17 +43,22 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             if (_shipBuilderPanel == null) return;
 
-            // Close and reopen
+            // Close and reopen the panel
             CloseShipBuilder();
             OpenShipBuilder();
+            
+            RefreshCurrentHull();
 
-            // Re-apply the last selected hull
-            if (!string.IsNullOrEmpty(lastSpritePath))
+            // Re-apply the last selected hull (if any)
+            if (_lastSelectedHull != null)
             {
-                SetSelectedHull(lastSpritePath, lastHullName);
+                SetSelectedHull(_lastSelectedHull);
+                Debug.Log($"<color=cyan>🔄 Refreshed Ship Builder with: {_lastSelectedHull.hullName}</color>");
             }
-
-            Debug.Log("<color=cyan>🔄 Ship Builder UI Refreshed (R key)</color>");
+            else
+            {
+                Debug.Log("<color=cyan>🔄 Ship Builder UI Refreshed (no previous hull)</color>");
+            }
         }
         
         public void OpenShipBuilder()
@@ -200,63 +210,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             return center;
         }
 
-        private void CreateModuleSlots()
-        {
-            if (_mainHullSlot == null) return;
-
-            // Clear any old slots
-            _mainHullSlot.Clear();
-
-            // Example slot data (we'll move this to HullData later)
-            // Format: (Type, Relative X%, Relative Y%)
-            var slots = new (string type, float xPercent, float yPercent)[]
-            {
-                ("Weapon",  0.15f, 0.25f),   // top-left weapon
-                ("Weapon",  0.85f, 0.25f),   // top-right weapon
-                ("Armour",  0.15f, 0.65f),   // bottom-left armour
-                ("Engine",  0.85f, 0.65f)    // bottom-right engine
-            };
-
-            foreach (var slotData in slots)
-            {
-                var slot = new VisualElement();
-                slot.style.position = Position.Absolute;
-                slot.style.width = 68;
-                slot.style.height = 68;
-                slot.style.left = Length.Percent(slotData.xPercent * 100 - 5);   // centered
-                slot.style.top = Length.Percent(slotData.yPercent * 100 - 5);
-                slot.style.backgroundColor = new Color(0.1f, 0.1f, 0.3f, 0.9f);
-                slot.style.borderTopLeftRadius = 8;
-                slot.style.borderTopRightRadius = 8;
-                slot.style.borderBottomLeftRadius = 8;
-                slot.style.borderBottomRightRadius = 8;
-                slot.style.borderTopWidth = 3;
-                slot.style.borderRightWidth = 3;
-                slot.style.borderBottomWidth = 3;
-                slot.style.borderLeftWidth = 3;
-                slot.style.borderTopColor = Color.cyan;
-                slot.style.borderRightColor = Color.cyan;
-                slot.style.borderBottomColor = Color.cyan;
-                slot.style.borderLeftColor = Color.cyan;
-
-                // Label inside slot
-                var label = new Label(slotData.type[0].ToString()); // W / A / E
-                label.style.fontSize = 28;
-                label.style.color = Color.white;
-                label.style.unityTextAlign = TextAnchor.MiddleCenter;
-                label.style.flexGrow = 1;
-                slot.Add(label);
-
-                // Clickable
-                slot.RegisterCallback<ClickEvent>(evt =>
-                {
-                    Debug.Log($"<color=yellow>Clicked {slotData.type} slot!</color>");
-                    // Later: open module selection menu
-                });
-
-                _mainHullSlot.Add(slot);
-            }
-        }
+        
 
         private VisualElement CreateRightPanel()
         {
@@ -350,29 +304,114 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             Debug.Log($"<color=cyan>Hull Selected: {selectedHull.hullName}</color>");
         }
         
-        public void SetSelectedHull(string spritePath, string hullName)
+        public void SetSelectedHull(HullData selectedHull)
         {
+            _lastSelectedHull = selectedHull;        // ← Important: Remember it for refresh
+
+            if (selectedHull == null) return;
+
+            // Update name and description
             if (_selectedHullNameLabel != null)
-                _selectedHullNameLabel.text = hullName;
+                _selectedHullNameLabel.text = selectedHull.hullName;
 
             var descLabel = _shipBuilderPanel?.Q<Label>("HullDescriptionLabel");
             if (descLabel != null)
-                descLabel.text = GetHullDescription(hullName);
+                descLabel.text = selectedHull.description;
 
-            if (_mainHullSlot != null && !string.IsNullOrEmpty(spritePath))
+            // Load baked hull sprite + create slots
+            if (_mainHullSlot != null && selectedHull.hullImage != null)
             {
-                Sprite hullSprite = Resources.Load<Sprite>(spritePath);
+                _mainHullSlot.style.backgroundImage = new StyleBackground(selectedHull.hullImage);
+                _mainHullSlot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                _mainHullSlot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                _mainHullSlot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
 
-                if (hullSprite != null)
+                CreateModuleSlots(selectedHull);
+        
+                Debug.Log($"<color=green>✅ Applied Hull: {selectedHull.hullName}</color>");
+            }
+        }
+
+        private void CreateModuleSlots(HullData hull)
+        {
+            if (_mainHullSlot == null || hull?.slots == null) return;
+
+            _mainHullSlot.Clear();
+
+            foreach (var slotData in hull.slots)
+            {
+                var hitbox = new VisualElement();
+                hitbox.name = $"{slotData.type}Slot";
+                hitbox.style.position = Position.Absolute;
+                hitbox.style.width = new Length(82, LengthUnit.Pixel);
+                hitbox.style.height = new Length(82, LengthUnit.Pixel);
+
+                hitbox.style.left = Length.Percent(slotData.xPercent * 100 - 4.1f);
+                hitbox.style.top  = Length.Percent(slotData.yPercent * 100 - 4.1f);
+
+                hitbox.style.backgroundColor = new Color(0, 0, 0, 0f);
+
+                // === MAIN INTERACTIVITY ===
+                hitbox.RegisterCallback<ClickEvent>(evt =>
                 {
-                    _mainHullSlot.style.backgroundImage = new StyleBackground(hullSprite);
-                    _mainHullSlot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                    if (slotData.type == "Weapon")
+                    {
+                        _selectedWeaponSlot = hitbox;                    // Remember which slot was clicked
+                        weaponSelectionHUD?.OpenWeaponSelection();
+                        Debug.Log("<color=cyan>🔫 Weapon menu opened for this slot</color>");
+                    }
+                    else
+                    {
+                        Debug.Log($"<color=yellow>{slotData.type} slot clicked (coming soon)</color>");
+                    }
+                });
 
-                    // ←←← Create slots on top of the new hull ←←←
-                    CreateModuleSlots();
+                // Hover feedback
+                hitbox.RegisterCallback<MouseEnterEvent>(evt => hitbox.style.backgroundColor = new Color(1f, 1f, 1f, 0.12f));
+                hitbox.RegisterCallback<MouseLeaveEvent>(evt => hitbox.style.backgroundColor = new Color(0, 0, 0, 0f));
 
-                    Debug.Log($"<color=green>✅ Hull + Module Slots loaded: {hullName}</color>");
-                }
+                _mainHullSlot.Add(hitbox);
+            }
+        }
+        
+        public bool HasPendingWeaponSlot() => _selectedWeaponSlot != null;
+
+        public void EquipWeaponToSlot(string weaponName, Color weaponColor)
+        {
+            if (_selectedWeaponSlot == null) return;
+
+            // Clear previous content
+            _selectedWeaponSlot.Clear();
+
+            // Create weapon visual
+            var weaponVisual = new VisualElement();
+            weaponVisual.style.width = new Length(68, LengthUnit.Pixel);
+            weaponVisual.style.height = new Length(68, LengthUnit.Pixel);
+            weaponVisual.style.backgroundColor = weaponColor;
+            weaponVisual.style.borderTopLeftRadius = 8;
+            weaponVisual.style.borderTopRightRadius = 8;
+            weaponVisual.style.borderBottomLeftRadius = 8;
+            weaponVisual.style.borderBottomRightRadius = 8;
+
+            var label = new Label(weaponName.Substring(0, 1)); // First letter
+            label.style.fontSize = 28;
+            label.style.color = Color.white;
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            weaponVisual.Add(label);
+
+            _selectedWeaponSlot.Add(weaponVisual);
+
+            // Clear pending slot
+            _selectedWeaponSlot = null;
+
+            Debug.Log($"<color=green>Weapon '{weaponName}' equipped!</color>");
+        }
+        
+        public void RefreshCurrentHull()
+        {
+            if (_currentSelectedHull != null)
+            {
+                SetSelectedHull(_currentSelectedHull);
             }
         }
 
