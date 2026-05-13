@@ -1,27 +1,36 @@
 using UnityEngine;
+using _Project.Scripts.Harbour.Modules;
+using System.Linq;                    // ← Make sure this is present
 
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
     [CreateAssetMenu(menuName = "Harbour/Hull Data")]
     public class HullData : ScriptableObject
     {
+        [Header("Mask System")]
+        public HullSlotMask slotMask;
+        
+        [Header("Hull Info")]
         public string hullName;
-        public Sprite hullImage;           // ← Your baked sprite (with slot visuals drawn on it)
-        public string slotInfo;
+        public Sprite hullImage;
         public string description;
 
-        [Header("Interactive Slot Positions")]
-        public ModuleSlot[] slots;
+        [Header("Module Slots")]
+        public ModuleSlot[] moduleSlots;
 
-        [System.Serializable]
-        public class ModuleSlot
+        public string slotInfo => GetSlotSummary();
+
+        private string GetSlotSummary()
         {
-            public string type = "Weapon";        // Weapon, Armour, Engine, Special
-            [Range(0f, 1f)] public float xPercent = 0.5f;
-            [Range(0f, 1f)] public float yPercent = 0.5f;
-            public int capacity = 1;
+            if (moduleSlots == null || moduleSlots.Length == 0)
+                return "No slots";
 
-            public string GetShortLabel() => type.Length > 0 ? type.Substring(0, 1) : "?";
+            // Fixed version - cast to IEnumerable to avoid explicit ICollection.Count conflict
+            int weaponCount = moduleSlots.Count(s => s.acceptedType == ModuleType.Weapon);
+            int armourCount = moduleSlots.Count(s => s.acceptedType == ModuleType.Armour);
+            int engineCount = moduleSlots.Count(s => s.acceptedType == ModuleType.Engine);
+
+            return $"{weaponCount} Weapon • {armourCount} Armour • {engineCount} Engine";
         }
     }
 }

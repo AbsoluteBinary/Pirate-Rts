@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eaeeb2ecdecfba9b89662feff183f0f, type: 3}
+  m_Name: Gunboat_Hull_SlotMask
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.HullSlotMask
+  hullData: {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
+  maskTexture: {fileID: 2800000, guid: 0a6f2b2c1c7e4b35fbc9f889369cd0fd, type: 3}
+  mappings:
+  - colorKey: {r: 1, g: 0, b: 0, a: 0}
+    slotData:
+      slotId: Weapon_Slot_1
+      acceptedType: 0
+      pixelPosition: {x: 0, y: 0}
+      maxCapacity: 1
+      equippedModule: {fileID: 0}
+  - colorKey: {r: 0, g: 1, b: 0, a: 0}
+    slotData:
+      slotId: Armour_Slot_1
+      acceptedType: 1
+      pixelPosition: {x: 0, y: 0}
+      maxCapacity: 1
+      equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}
+  - colorKey: {r: 0, g: 0, b: 1, a: 0}
+    slotData:
+      slotId: Engine_Slot_1
+      acceptedType: 2
+      pixelPosition: {x: 0, y: 0}
+      maxCapacity: 1
+      equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}

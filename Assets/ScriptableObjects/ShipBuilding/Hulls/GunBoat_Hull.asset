@@ -12,20 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8df1baf243556a5908d092e61a4e7743, type: 3}
   m_Name: GunBoat_Hull
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.HullData
+  slotMask: {fileID: 0}
   hullName: GunBoat
-  hullImage: {fileID: 21300000, guid: 6e9b9761705c00b04ad0621bbfed4f53, type: 3}
-  slotInfo: 
+  hullImage: {fileID: 21300000, guid: 4a35bc736c7e061688513eff9a6ba4f3, type: 3}
   description: 
-  slots:
-  - type: Weapon
-    xPercent: 0.208
-    yPercent: 0.3
-    capacity: 1
-  - type: Armour
-    xPercent: 0.389
-    yPercent: 0.3
-    capacity: 1
-  - type: Engine
-    xPercent: 0.708
-    yPercent: 0.3
-    capacity: 1
+  moduleSlots:
+  - slotId: Weapon_1
+    acceptedType: 0
+    pixelPosition: {x: 114, y: 205}
+    maxCapacity: 1
+    equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}
+  - slotId: Armour_1
+    acceptedType: 1
+    pixelPosition: {x: 374, y: 205}
+    maxCapacity: 1
+    equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}
+  - slotId: Engine_1
+    acceptedType: 2
+    pixelPosition: {x: 629, y: 205}
+    maxCapacity: 1
+    equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}

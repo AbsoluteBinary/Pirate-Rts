@@ -367,9 +367,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.HullSelectionHUD
   harbourUIDocument: {fileID: 134604187}
-  gunboatHull: {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
-  skirmisherHull: {fileID: 0}
-  hammerHeadHull: {fileID: 0}
+  shipBuilderHUD: {fileID: 134604191}
+  availableHulls:
+  - {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
+  mask: {fileID: 11400000, guid: 2ba9de62445d86e34b083ae8f09713af, type: 2}
 --- !u!114 &134604193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +384,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.WeaponSelectionHUD
   harbourUIDocument: {fileID: 134604187}
+  moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
 --- !u!1 &189772805
 GameObject:
   m_ObjectHideFlags: 0

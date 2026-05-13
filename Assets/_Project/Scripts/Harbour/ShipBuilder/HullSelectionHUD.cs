@@ -1,29 +1,23 @@
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
+using _Project.Scripts.Harbour.Modules;
 
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
     public class HullSelectionHUD : MonoBehaviour
     {
         [SerializeField] private UIDocument harbourUIDocument;
+        [SerializeField] private ShipBuilderHUD shipBuilderHUD;   // ← Direct reference (best)
 
-        // Reference to the actual HullData assets (drag them in Inspector)
-        [SerializeField] private HullData gunboatHull;
-        [SerializeField] private HullData skirmisherHull;
-        [SerializeField] private HullData hammerHeadHull;
-
-        public event Action<HullData> OnHullSelected;   // ← Now properly sends HullData
-
+        // Optional: Reference to database if you want to load hulls dynamically later
+        [SerializeField] private HullData[] availableHulls;       // Drag your HullData assets here in Inspector
+        [SerializeField] private HullSlotMask mask;
         private VisualElement _hullPanel;
 
         public void OpenHullSelection()
         {
-            if (harbourUIDocument?.rootVisualElement == null) 
-            {
-                Debug.LogError("HullSelectionHUD: UIDocument is missing!");
-                return;
-            }
+            if (harbourUIDocument?.rootVisualElement == null) return;
 
             var root = harbourUIDocument.rootVisualElement;
             if (_hullPanel != null) _hullPanel.RemoveFromHierarchy();
@@ -37,8 +31,6 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _hullPanel.style.backgroundColor = new Color(0.08f, 0.12f, 0.28f, 0.98f);
             _hullPanel.style.borderTopLeftRadius = 12;
             _hullPanel.style.borderTopRightRadius = 12;
-            _hullPanel.style.borderBottomLeftRadius = 12;
-            _hullPanel.style.borderBottomRightRadius = 12;
             _hullPanel.style.paddingLeft = 25;
             _hullPanel.style.paddingRight = 25;
             _hullPanel.style.paddingTop = 25;
@@ -65,72 +57,50 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
             _hullPanel.Add(header);
 
-            // Content Container
+            // Hull Cards
             var content = new VisualElement();
             content.style.flexDirection = FlexDirection.Column;
-            content.style.paddingLeft = 15;
-            content.style.paddingRight = 15;
-            content.name = "HullContent";
+            //content.style.gap = 12;
 
-            // === Add Hull Cards using real HullData assets ===
-            if (gunboatHull != null)
-                AddHullCard(content, gunboatHull);
-
-            if (skirmisherHull != null)
-                AddHullCard(content, skirmisherHull);
-
-            if (hammerHeadHull != null)
-                AddHullCard(content, hammerHeadHull);
+            foreach (var hull in availableHulls)
+            {
+                if (hull == null) continue;
+                var card = CreateHullCard(hull);
+                content.Add(card);
+            }
 
             _hullPanel.Add(content);
             root.Add(_hullPanel);
 
-            Debug.Log("<color=green>Hull Selection Panel Opened with real HullData</color>");
+            Debug.Log("<color=green>Hull Selection Opened with real HullData assets</color>");
         }
 
-        // Updated AddHullCard - now takes HullData
-        private void AddHullCard(VisualElement parent, HullData hull)
+        private VisualElement CreateHullCard(HullData hull)
         {
             var card = new VisualElement();
             card.style.flexDirection = FlexDirection.Row;
-            card.style.height = 120;
+            card.style.height = 130;
             card.style.backgroundColor = new Color(0.15f, 0.22f, 0.38f);
             card.style.borderTopLeftRadius = 10;
             card.style.borderTopRightRadius = 10;
-            card.style.borderBottomLeftRadius = 10;
-            card.style.borderBottomRightRadius = 10;
             card.style.paddingLeft = 12;
             card.style.paddingRight = 12;
             card.style.paddingTop = 12;
             card.style.paddingBottom = 12;
-            card.style.marginBottom = 10;
+            card.style.marginBottom = 8;
 
             // Hull Preview
-            var hullSlot = new VisualElement();
-            hullSlot.style.width = 95;
-            hullSlot.style.height = 95;
-            hullSlot.style.backgroundColor = new Color(0.25f, 0.3f, 0.45f);
-            hullSlot.style.borderTopLeftRadius = 48;
-            hullSlot.style.borderTopRightRadius = 48;
-            hullSlot.style.borderBottomLeftRadius = 48;
-            hullSlot.style.borderBottomRightRadius = 48;
-            hullSlot.style.borderTopWidth = 5;
-            hullSlot.style.borderRightWidth = 5;
-            hullSlot.style.borderBottomWidth = 5;
-            hullSlot.style.borderLeftWidth = 5;
-            hullSlot.style.borderTopColor = new Color(0.5f, 0.8f, 1f);
-            hullSlot.style.marginRight = 20;
-            hullSlot.style.alignSelf = Align.Center;
-
+            var preview = new VisualElement();
+            preview.style.width = 110;
+            preview.style.height = 110;
+            preview.style.marginRight = 20;
+            preview.style.alignSelf = Align.Center;
             if (hull.hullImage != null)
             {
-                hullSlot.style.backgroundImage = new StyleBackground(hull.hullImage);
-                hullSlot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
-                hullSlot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
-                hullSlot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                preview.style.backgroundImage = new StyleBackground(hull.hullImage);
+                preview.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
             }
-
-            card.Add(hullSlot);
+            card.Add(preview);
 
             // Info
             var info = new VisualElement();
@@ -139,15 +109,13 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             info.style.justifyContent = Justify.Center;
 
             var nameLabel = new Label(hull.hullName);
-            nameLabel.style.fontSize = 19;
+            nameLabel.style.fontSize = 20;
             nameLabel.style.color = Color.white;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            nameLabel.style.marginBottom = 4;
 
             var slotsLabel = new Label(hull.slotInfo);
             slotsLabel.style.fontSize = 14;
             slotsLabel.style.color = new Color(0.6f, 0.9f, 1f);
-            slotsLabel.style.marginBottom = 6;
 
             var descLabel = new Label(hull.description);
             descLabel.style.fontSize = 13;
@@ -160,27 +128,26 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
             // Select Button
             var selectBtn = new Button { text = "Select" };
-            selectBtn.style.width = 130;
-            selectBtn.style.height = 55;
+            selectBtn.style.width = 140;
+            selectBtn.style.height = 60;
             selectBtn.style.alignSelf = Align.Center;
             selectBtn.style.backgroundColor = new Color(0.25f, 0.6f, 0.95f);
             selectBtn.clicked += () => SelectHull(hull);
             card.Add(selectBtn);
 
-            parent.Add(card);
+            return card;
         }
 
-        // Updated SelectHull - now passes full HullData
         private void SelectHull(HullData selectedHull)
         {
-            var shipBuilder = FindObjectOfType<ShipBuilderHUD>();
-            if (shipBuilder != null)
+            if (shipBuilderHUD != null)
             {
-                shipBuilder.SetSelectedHull(selectedHull);   // ← Now sends HullData
+                shipBuilderHUD.SetSelectedHull(selectedHull);
+                Debug.Log($"<color=cyan>Hull Selected: {selectedHull.hullName}</color>");
             }
             else
             {
-                Debug.LogError("ShipBuilderHUD not found in scene!");
+                Debug.LogError("ShipBuilderHUD reference is missing on HullSelectionHUD!");
             }
 
             CloseHullSelection();
