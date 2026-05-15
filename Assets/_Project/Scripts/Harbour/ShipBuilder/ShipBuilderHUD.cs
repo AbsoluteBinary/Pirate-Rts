@@ -10,16 +10,25 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         
         [Header("References")]
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
+        
+        [Header("Selection HUDs")]
         [SerializeField] private WeaponSelectionHUD weaponSelectionHUD;
+        [SerializeField] private ArmourSelectionHUD armourSelectionHUD;
+        [SerializeField] private EngineSelectionHUD engineSelectionHUD;
+        [SerializeField] private ComponentSelectionHUD componentSelectionHUD;
+
+        [Header("Visuals")]
+        [SerializeField] private bool showSlotVisuals = true;
 
         private VisualElement _shipBuilderPanel;
+        private VisualElement _hullCanvas;
         private VisualElement _hullImageElement;
+        private VisualElement _slotOverlay;
         private Label _hullNameLabel;
         private Label _statsLabel;
 
         private HullData _currentHull;
         private ShipLoadout _currentLoadout;
-        private VisualElement _hullContainer;
 
         public void OpenShipBuilder()
         {
@@ -37,8 +46,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _shipBuilderPanel.style.backgroundColor = new Color(0.05f, 0.08f, 0.22f, 0.98f);
             _shipBuilderPanel.style.borderTopLeftRadius = 12;
             _shipBuilderPanel.style.borderTopRightRadius = 12;
+            _shipBuilderPanel.style.borderBottomLeftRadius = 12;
+            _shipBuilderPanel.style.borderBottomRightRadius = 12;
             _shipBuilderPanel.style.paddingLeft = 20;
             _shipBuilderPanel.style.paddingRight = 20;
+            _shipBuilderPanel.style.paddingTop = 20;
+            _shipBuilderPanel.style.paddingBottom = 20;
 
             var header = CreateHeader();
             _shipBuilderPanel.Add(header);
@@ -91,94 +104,201 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             inner.style.justifyContent = Justify.Center;
             inner.style.paddingTop = 30;
 
-            _hullContainer = new VisualElement();
-            _hullContainer.style.position = Position.Relative;
+            _hullCanvas = new VisualElement();
+            _hullCanvas.style.position = Position.Relative;
+            _hullCanvas.style.flexShrink = 0;
+            _hullCanvas.style.flexGrow = 0;
 
             _hullImageElement = new VisualElement();
-            // Do NOT set backgroundSize → we control size manually for 1:1
-            _hullImageElement.RegisterCallback<ClickEvent>(OnHullClicked);
 
-            _hullContainer.Add(_hullImageElement);
-            inner.Add(_hullContainer);
+            _slotOverlay = new VisualElement();
+            _slotOverlay.style.position = Position.Absolute;
+            _slotOverlay.style.width = Length.Percent(100);
+            _slotOverlay.style.height = Length.Percent(100);
+
+            _hullCanvas.Add(_hullImageElement);
+            _hullCanvas.Add(_slotOverlay);
+
+            inner.Add(_hullCanvas);
             return inner;
         }
 
         public void SetSelectedHull(HullData hull)
         {
             _currentHull = hull;
-            _currentLoadout = new ShipLoadout { hull = hull };
+            _currentLoadout = new ShipLoadout { hull = hull };   // Fresh loadout every time
 
             if (hull?.hullImage == null) return;
 
             _hullNameLabel.text = hull.hullName;
 
             var tex = hull.hullImage.texture;
+            _hullCanvas.style.width = tex.width;
+            _hullCanvas.style.height = tex.height;
 
-            // === THIS IS THE KEY FOR TRUE 1:1 ===
-            _hullContainer.style.width = tex.width;
-            _hullContainer.style.height = tex.height;
-
-            _hullImageElement.style.width = tex.width;
-            _hullImageElement.style.height = tex.height;
+            _hullImageElement.style.width = Length.Percent(100);
+            _hullImageElement.style.height = Length.Percent(100);
             _hullImageElement.style.backgroundImage = new StyleBackground(hull.hullImage);
 
+            DrawSlotVisuals();        // Will now correctly show default icons
             UpdateStatsDisplay();
         }
 
-        private void OnHullClicked(ClickEvent evt)
+        private void DrawSlotVisuals()
         {
-            if (_currentHull?.moduleSlots == null) return;
-
-            Vector2 localPos = evt.localPosition;
-            Vector2 size = _hullImageElement.contentRect.size;
-
-            float scaleX = _currentHull.hullImage.texture.width / size.x;
-            float scaleY = _currentHull.hullImage.texture.height / size.y;
-
-            int clickX = Mathf.FloorToInt(localPos.x * scaleX);
-            int clickY = Mathf.FloorToInt((size.y - localPos.y) * scaleY);
-
-            Debug.Log($"Clicked raw pixel: ({clickX}, {clickY})");
-
-            ModuleSlot bestSlot = null;
-            float bestDistance = float.MaxValue;
+            _slotOverlay.Clear();
+            if (!showSlotVisuals || _currentHull?.moduleSlots == null) return;
 
             foreach (var slot in _currentHull.moduleSlots)
             {
-                float dx = clickX - slot.pixelPosition.x;
-                float dy = clickY - slot.pixelPosition.y;
-                float distSq = dx * dx + dy * dy;
+                var slotBtn = new Button();
+                slotBtn.style.position = Position.Absolute;
+                slotBtn.style.left = slot.pixelPosition.x - 36;
+                slotBtn.style.top = slot.pixelPosition.y - 36;
+                slotBtn.style.width = 72;
+                slotBtn.style.height = 72;
 
-                if (distSq < bestDistance)
+                // Frame styling
+                slotBtn.style.backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.18f);
+                slotBtn.style.borderTopWidth = 3;
+                slotBtn.style.borderRightWidth = 3;
+                slotBtn.style.borderBottomWidth = 3;
+                slotBtn.style.borderLeftWidth = 3;
+                slotBtn.style.borderTopColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                slotBtn.style.borderRightColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                slotBtn.style.borderBottomColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                slotBtn.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                slotBtn.style.borderTopLeftRadius = 10;
+                slotBtn.style.borderTopRightRadius = 10;
+                slotBtn.style.borderBottomLeftRadius = 10;
+                slotBtn.style.borderBottomRightRadius = 10;
+
+                // Hover
+                slotBtn.RegisterCallback<MouseEnterEvent>(_ => slotBtn.style.backgroundColor = new Color(0.3f, 0.6f, 1f, 0.35f));
+                slotBtn.RegisterCallback<MouseLeaveEvent>(_ => slotBtn.style.backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.18f));
+
+                // === ICON LOGIC ===
+                var icon = new VisualElement();
+                icon.style.width = 48;
+                icon.style.height = 48;
+                icon.style.alignSelf = Align.Center;
+                icon.style.marginTop = 8;
+                icon.style.borderTopLeftRadius = 6;
+
+                Sprite displayIcon = null;
+                Color tint = Color.white;
+
+                if (slot.equippedModule != null && slot.equippedModule.icon != null)
                 {
-                    bestDistance = distSq;
-                    bestSlot = slot;
+                    displayIcon = slot.equippedModule.icon;
+                    tint = Color.white;
+                    // Highlight equipped slot
+                    slotBtn.style.backgroundColor = new Color(0.1f, 0.35f, 0.7f, 0.45f);
                 }
-            }
-
-            if (bestSlot != null)
-            {
-                float distance = Mathf.Sqrt(bestDistance);
-                Debug.Log($"<color=yellow>Closest: {bestSlot.slotId} | Distance: {distance:F1} px</color>");
-
-                if (distance < 20000) // Very loose for now
+                else if (slot.slotIcon != null)
                 {
-                    Debug.Log($"<color=lime>✓ REGISTERED HIT → {bestSlot.slotId}</color>");
-
-                    if (bestSlot.acceptedType == ModuleType.Weapon && weaponSelectionHUD != null)
+                    displayIcon = slot.slotIcon;
+                    tint = new Color(0.65f, 0.65f, 0.65f, 0.75f);   // Greyed out
+                }
+                else
+                {
+                    // Fallback colored box
+                    Color fallback = slot.acceptedType switch
                     {
-                        weaponSelectionHUD.OnWeaponEquipped += OnWeaponEquipped;
-                        weaponSelectionHUD.OpenWeaponSelection(bestSlot);
-                    }
+                        ModuleType.Weapon => new Color(0.6f, 0.2f, 0.2f, 0.6f),
+                        ModuleType.Armour => new Color(0.4f, 0.4f, 0.6f, 0.6f),
+                        ModuleType.Engine => new Color(0.3f, 0.5f, 0.3f, 0.6f),
+                        _ => new Color(0.5f, 0.5f, 0.5f, 0.6f)
+                    };
+                    icon.style.backgroundColor = fallback;
                 }
+
+                if (displayIcon != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(displayIcon);
+                    icon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                    icon.style.unityBackgroundImageTintColor = tint;
+                }
+
+                slotBtn.Add(icon);
+
+                // Click handler
+                slotBtn.clicked += () => HandleSlotClick(slot);
+
+                _slotOverlay.Add(slotBtn);
             }
         }
 
+        private void HandleSlotClick(ModuleSlot slot)
+        {
+            Debug.Log($"<color=lime>Slot clicked: {slot.slotId} ({slot.acceptedType})</color>");
+
+            switch (slot.acceptedType)
+            {
+                case ModuleType.Weapon:
+                    if (weaponSelectionHUD != null)
+                    {
+                        weaponSelectionHUD.OnWeaponEquipped += OnWeaponEquipped;
+                        weaponSelectionHUD.OpenWeaponSelection(slot);
+                    }
+                    break;
+
+                case ModuleType.Armour:
+                    if (armourSelectionHUD != null)
+                    {
+                        armourSelectionHUD.OnArmourEquipped += OnArmourEquipped;
+                        armourSelectionHUD.OpenArmourSelection(slot);
+                    }
+                    break;
+
+                case ModuleType.Engine:
+                    if (engineSelectionHUD != null)
+                    {
+                        engineSelectionHUD.OnEngineEquipped += OnEngineEquipped;
+                        engineSelectionHUD.OpenEngineSelection(slot);
+                    }
+                    break;
+
+                case ModuleType.Component:
+                    if (componentSelectionHUD != null)
+                    {
+                        componentSelectionHUD.OnComponentEquipped += OnComponentEquipped;
+                        componentSelectionHUD.OpenComponentSelection(slot);
+                    }
+                    break;
+            }
+        }
+
+        // Event Handlers
         private void OnWeaponEquipped(WeaponData weapon, ModuleSlot slot)
         {
             weaponSelectionHUD.OnWeaponEquipped -= OnWeaponEquipped;
-            if (_currentLoadout != null)
-                _currentLoadout.EquipModule(slot, weapon);
+            if (_currentLoadout != null) _currentLoadout.EquipModule(slot, weapon);
+            DrawSlotVisuals();   // Refresh visuals after equipping
+            UpdateStatsDisplay();
+        }
+
+        private void OnArmourEquipped(ArmourData armour, ModuleSlot slot)
+        {
+            armourSelectionHUD.OnArmourEquipped -= OnArmourEquipped;
+            if (_currentLoadout != null) _currentLoadout.EquipModule(slot, armour);
+            DrawSlotVisuals();   // Refresh visuals after equipping
+            UpdateStatsDisplay();
+        }
+
+        private void OnEngineEquipped(EngineData engine, ModuleSlot slot)
+        {
+            engineSelectionHUD.OnEngineEquipped -= OnEngineEquipped;
+            if (_currentLoadout != null) _currentLoadout.EquipModule(slot, engine);
+            DrawSlotVisuals();   // Refresh visuals after equipping
+            UpdateStatsDisplay();
+        }
+
+        private void OnComponentEquipped(ComponentData component, ModuleSlot slot)
+        {
+            componentSelectionHUD.OnComponentEquipped -= OnComponentEquipped;
+            if (_currentLoadout != null) _currentLoadout.EquipModule(slot, component);
+            DrawSlotVisuals();   // Refresh visuals after equipping
             UpdateStatsDisplay();
         }
 
@@ -194,8 +314,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             panel.style.backgroundColor = new Color(0.08f, 0.12f, 0.25f, 0.95f);
             panel.style.borderTopLeftRadius = 8;
             panel.style.borderTopRightRadius = 8;
+            panel.style.borderBottomLeftRadius = 8;
+            panel.style.borderBottomRightRadius = 8;
             panel.style.paddingLeft = 15;
             panel.style.paddingRight = 15;
+            panel.style.marginTop = 15;
             panel.style.marginTop = 15;
 
             _statsLabel = new Label("Select a hull...");
@@ -208,11 +331,27 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         public void CloseShipBuilder()
         {
+            ResetAllSlotsToDefault();           // ← New: Clear equipped modules
+
             if (_shipBuilderPanel != null)
             {
                 _shipBuilderPanel.RemoveFromHierarchy();
                 _shipBuilderPanel = null;
             }
+
+            _currentHull = null;
+            _currentLoadout = null;
+        }
+        private void ResetAllSlotsToDefault()
+        {
+            if (_currentHull?.moduleSlots == null) return;
+
+            foreach (var slot in _currentHull.moduleSlots)
+            {
+                slot.equippedModule = null;     // Clear equipped module
+            }
+
+            Debug.Log("<color=yellow>ShipBuilder closed - All slots reset to default</color>");
         }
     }
 }

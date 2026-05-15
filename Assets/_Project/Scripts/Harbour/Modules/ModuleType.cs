@@ -7,7 +7,7 @@ namespace _Project.Scripts.Harbour.Modules
         Weapon,
         Armour,
         Engine,
-        Special,
+        Component,
         Utility
     }
 
@@ -18,6 +18,27 @@ namespace _Project.Scripts.Harbour.Modules
         Laser,
         Torpedo,
         Railgun,
+        None
+    }
+    
+    public enum ArmourCategory
+    {
+        Light,
+        Medium,
+        Heavy,
+        None
+    }
+    
+    public enum EngineCategory
+    {
+        Standard,
+        Advanced,
+        None
+    }
+    
+    public enum ComponentCategory
+    {
+        Utility,
         None
     }
 

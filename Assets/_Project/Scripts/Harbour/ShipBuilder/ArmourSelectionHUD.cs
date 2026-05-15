@@ -6,69 +6,64 @@ using _Project.Scripts.Harbour.Modules;
 
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
-    public class WeaponSelectionHUD : MonoBehaviour
+    public class ArmourSelectionHUD : MonoBehaviour
     {
         [SerializeField] private UIDocument harbourUIDocument;
         [SerializeField] private ModuleDatabase moduleDatabase;
 
-        // Event fired when a weapon is selected
-        public event Action<WeaponData, ModuleSlot> OnWeaponEquipped;
+        public event Action<ArmourData, ModuleSlot> OnArmourEquipped;
 
-        private VisualElement _weaponPanel;
-        private ModuleSlot _targetSlot;           // The slot that was clicked
+        private VisualElement _armourPanel;
+        private ModuleSlot _targetSlot;
         private VisualElement _currentTabContent;
 
         private const string ALL_TAB = "All";
 
-        public void OpenWeaponSelection(ModuleSlot targetSlot)
+        public void OpenArmourSelection(ModuleSlot targetSlot)
         {
             if (harbourUIDocument?.rootVisualElement == null || moduleDatabase == null)
             {
-                Debug.LogError("WeaponSelectionHUD: Missing UIDocument or ModuleDatabase!");
+                Debug.LogError("ArmourSelectionHUD: Missing UIDocument or ModuleDatabase!");
                 return;
             }
 
             _targetSlot = targetSlot;
 
             var root = harbourUIDocument.rootVisualElement;
-            if (_weaponPanel != null) _weaponPanel.RemoveFromHierarchy();
+            if (_armourPanel != null) _armourPanel.RemoveFromHierarchy();
 
-            _weaponPanel = new VisualElement { name = "WeaponSelectionPanel" };
-            _weaponPanel.style.position = Position.Absolute;
-            _weaponPanel.style.top = 80;
-            _weaponPanel.style.left = 80;
-            _weaponPanel.style.right = 80;
-            _weaponPanel.style.bottom = 80;
-            _weaponPanel.style.backgroundColor = new Color(0.08f, 0.12f, 0.28f, 0.98f);
-            _weaponPanel.style.borderTopLeftRadius = 12;
-            _weaponPanel.style.borderTopRightRadius = 12;
-            _weaponPanel.style.borderBottomLeftRadius = 12;
-            _weaponPanel.style.borderBottomRightRadius = 12;
-            _weaponPanel.style.paddingLeft = 25;
-            _weaponPanel.style.paddingRight = 25;
-            _weaponPanel.style.paddingTop = 25;
-            _weaponPanel.style.paddingBottom = 25;
+            _armourPanel = new VisualElement { name = "ArmourSelectionPanel" };
+            _armourPanel.style.position = Position.Absolute;
+            _armourPanel.style.top = 80;
+            _armourPanel.style.left = 80;
+            _armourPanel.style.right = 80;
+            _armourPanel.style.bottom = 80;
+            _armourPanel.style.backgroundColor = new Color(0.08f, 0.12f, 0.28f, 0.98f);
+            _armourPanel.style.borderTopLeftRadius = 12;
+            _armourPanel.style.borderTopRightRadius = 12;
+            _armourPanel.style.borderBottomLeftRadius = 12;
+            _armourPanel.style.borderBottomRightRadius = 12;
+            _armourPanel.style.paddingLeft = 25;
+            _armourPanel.style.paddingRight = 25;
+            _armourPanel.style.paddingTop = 25;
+            _armourPanel.style.paddingBottom = 25;
 
-            // Header
             var header = CreateHeader();
-            _weaponPanel.Add(header);
+            _armourPanel.Add(header);
 
-            // Tabs
             var tabContainer = CreateTabContainer();
-            _weaponPanel.Add(tabContainer);
+            _armourPanel.Add(tabContainer);
 
-            // Content Area
-            _currentTabContent = new VisualElement { name = "WeaponGridContent" };
+            _currentTabContent = new VisualElement { name = "ArmourGridContent" };
             _currentTabContent.style.flexGrow = 1;
             _currentTabContent.style.marginTop = 15;
-            _weaponPanel.Add(_currentTabContent);
+            _armourPanel.Add(_currentTabContent);
 
-            root.Add(_weaponPanel);
+            root.Add(_armourPanel);
 
-            // Show "All" by default
-            ShowWeaponsByCategory(WeaponCategory.None);
+            ShowArmourByCategory(ArmourCategory.Light);
 
-            Debug.Log("<color=green>Weapon Selection HUD Opened</color>");
+            Debug.Log("<color=green>Armour Selection HUD Opened</color>");
         }
 
         private VisualElement CreateHeader()
@@ -79,7 +74,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             header.style.alignItems = Align.Center;
             header.style.marginBottom = 15;
 
-            var title = new Label("Select Weapon");
+            var title = new Label("Select Armour");
             title.style.fontSize = 26;
             title.style.color = Color.cyan;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -95,7 +90,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             closeBtn.style.borderTopRightRadius = 25;
             closeBtn.style.borderBottomLeftRadius = 25;
             closeBtn.style.borderBottomRightRadius = 25;
-            closeBtn.clicked += CloseWeaponSelection;
+            closeBtn.clicked += CloseArmourSelection;
             header.Add(closeBtn);
 
             return header;
@@ -108,14 +103,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             tabRow.style.marginBottom = 10;
             tabRow.style.flexWrap = Wrap.Wrap;
 
-            // All Tab
-            tabRow.Add(CreateTabButton(ALL_TAB, () => ShowWeaponsByCategory(WeaponCategory.None)));
+            tabRow.Add(CreateTabButton(ALL_TAB, () => ShowArmourByCategory(ArmourCategory.None)));
 
-            // Category Tabs
-            foreach (WeaponCategory cat in Enum.GetValues(typeof(WeaponCategory)))
+            foreach (ArmourCategory cat in Enum.GetValues(typeof(ArmourCategory)))
             {
-                if (cat == WeaponCategory.None) continue;
-                tabRow.Add(CreateTabButton(cat.ToString(), () => ShowWeaponsByCategory(cat)));
+                if (cat == ArmourCategory.None) continue;
+                tabRow.Add(CreateTabButton(cat.ToString(), () => ShowArmourByCategory(cat)));
             }
 
             return tabRow;
@@ -139,7 +132,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             return btn;
         }
 
-        private void ShowWeaponsByCategory(WeaponCategory category)
+        private void ShowArmourByCategory(ArmourCategory category)
         {
             if (_currentTabContent == null) return;
 
@@ -149,20 +142,19 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             grid.style.flexDirection = FlexDirection.Row;
             grid.style.flexWrap = Wrap.Wrap;
             grid.style.justifyContent = Justify.FlexStart;
-            //grid.style.gap = 12;
 
-            List<WeaponData> weapons = moduleDatabase.GetFilteredWeapons(category);
+            List<ArmourData> armourList = moduleDatabase.GetFilteredArmour(category);
 
-            foreach (var weapon in weapons)
+            foreach (var armour in armourList)
             {
-                var card = CreateWeaponCard(weapon);
+                var card = CreateArmourCard(armour);
                 grid.Add(card);
             }
 
             _currentTabContent.Add(grid);
         }
 
-        private VisualElement CreateWeaponCard(WeaponData weapon)
+        private VisualElement CreateArmourCard(ArmourData armour)
         {
             var card = new VisualElement();
             card.style.width = 160;
@@ -176,13 +168,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             card.style.paddingBottom = 10;
             card.style.alignItems = Align.Center;
 
-            // Icon
             var icon = new VisualElement();
             icon.style.width = 100;
             icon.style.height = 100;
-            if (weapon.icon != null)
+            if (armour.icon != null)
             {
-                icon.style.backgroundImage = new StyleBackground(weapon.icon);
+                icon.style.backgroundImage = new StyleBackground(armour.icon);
                 icon.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
             }
             else
@@ -191,31 +182,24 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             }
             card.Add(icon);
 
-            // Name
-            var nameLabel = new Label(weapon.moduleName);
+            var nameLabel = new Label(armour.moduleName);
             nameLabel.style.fontSize = 16;
             nameLabel.style.color = Color.white;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             nameLabel.style.marginTop = 8;
             card.Add(nameLabel);
 
-            // Stats
-            var statsLabel = new Label(weapon.GetStatsSummary());
+            var statsLabel = new Label(armour.GetStatsSummary());
             statsLabel.style.fontSize = 12;
             statsLabel.style.color = new Color(0.7f, 0.85f, 1f);
             statsLabel.style.marginTop = 4;
             statsLabel.style.whiteSpace = WhiteSpace.Normal;
             card.Add(statsLabel);
 
-            // Rarity color accent
             card.style.borderTopWidth = 4;
-            card.style.borderTopColor = GetRarityColor(weapon.rarity);
+            card.style.borderTopColor = GetRarityColor(armour.rarity);
 
-            // Click to equip
-            card.RegisterCallback<ClickEvent>(evt =>
-            {
-                EquipWeaponToSlot(weapon);
-            });
+            card.RegisterCallback<ClickEvent>(evt => EquipArmourToSlot(armour));
 
             return card;
         }
@@ -233,25 +217,23 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             };
         }
 
-        private void EquipWeaponToSlot(WeaponData weapon)
+        private void EquipArmourToSlot(ArmourData armour)
         {
-            if (_targetSlot == null || weapon == null) return;
+            if (_targetSlot == null || armour == null) return;
 
-            _targetSlot.equippedModule = weapon;
+            _targetSlot.equippedModule = armour;
+            OnArmourEquipped?.Invoke(armour, _targetSlot);
+            CloseArmourSelection();
 
-            OnWeaponEquipped?.Invoke(weapon, _targetSlot);
-
-            CloseWeaponSelection();
-
-            Debug.Log($"<color=cyan>✅ Equipped {weapon.moduleName} to slot {_targetSlot.slotId}</color>");
+            Debug.Log($"<color=cyan>✅ Equipped {armour.moduleName} to slot {_targetSlot.slotId}</color>");
         }
 
-        public void CloseWeaponSelection()
+        public void CloseArmourSelection()
         {
-            if (_weaponPanel != null)
+            if (_armourPanel != null)
             {
-                _weaponPanel.RemoveFromHierarchy();
-                _weaponPanel = null;
+                _armourPanel.RemoveFromHierarchy();
+                _armourPanel = null;
             }
             _targetSlot = null;
         }

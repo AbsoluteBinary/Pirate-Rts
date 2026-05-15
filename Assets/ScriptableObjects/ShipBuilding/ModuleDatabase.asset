@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Modules.ModuleDatabase
   weapons:
   - {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}
-  armours: []
-  engines: []
-  specials: []
+  armours:
+  - {fileID: 11400000, guid: 8cd7bda75f787bb1eb322a924809011a, type: 2}
+  engines:
+  - {fileID: 11400000, guid: 77d00e068a879fe12b98e734068e602f, type: 2}
+  components: []

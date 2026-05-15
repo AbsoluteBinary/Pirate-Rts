@@ -9,22 +9,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5391467c2b0dcaa2888bc7318cccc34, type: 3}
-  m_Name: Cannon
-  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Modules.WeaponData
-  moduleName: Cannon Type A
-  icon: {fileID: 21300000, guid: 03a5bfe111bc46c398b830151cf92a68, type: 3}
+  m_Script: {fileID: 11500000, guid: 095587348c48623d1b0e9b4fdf226de7, type: 3}
+  m_Name: Engine 1
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Modules.EngineData
+  moduleName: Engine 1
+  icon: {fileID: 21300000, guid: 9a41ecfd5714d6249b6c29087e0e744e, type: 3}
   description: 
   moduleSlots: []
-  type: 0
+  type: 2
   rarity: 0
   cost: 100
   weight: 10
   powerDraw: 5
   tooltip: 
   category: 0
-  damage: 25
-  fireRate: 1.5
-  range: 120
-  ammoPerShot: 1
-  accuracy: 0.85
+  thrustPower: 450
+  fuelEfficiency: 1.8
+  maxSpeedBonus: 35
+  acceleration: 2.4

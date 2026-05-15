@@ -8,6 +8,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
     {
         public string slotId = "Slot_1";
         public ModuleType acceptedType = ModuleType.Weapon;
+        [Header("Visual")]
+        public Sprite slotIcon;                    // ← Assign per-slot icon in Inspector
+        public Color iconTint = Color.white;       // Optional tint
         
         [Header("Pixel Position (from top-left of sprite)")]
         public Vector2Int pixelPosition;     // ← This is what we'll fill from GIMP

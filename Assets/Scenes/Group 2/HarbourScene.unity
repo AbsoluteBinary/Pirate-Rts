@@ -259,6 +259,9 @@ GameObject:
   - component: {fileID: 134604191}
   - component: {fileID: 134604192}
   - component: {fileID: 134604193}
+  - component: {fileID: 134604196}
+  - component: {fileID: 134604195}
+  - component: {fileID: 134604194}
   m_Layer: 0
   m_Name: HarbourHUD
   m_TagString: Untagged
@@ -354,6 +357,10 @@ MonoBehaviour:
   harbourUIDocument: {fileID: 134604187}
   hullSelectionHUD: {fileID: 134604192}
   weaponSelectionHUD: {fileID: 134604193}
+  armourSelectionHUD: {fileID: 134604196}
+  engineSelectionHUD: {fileID: 134604195}
+  componentSelectionHUD: {fileID: 134604194}
+  showSlotVisuals: 1
 --- !u!114 &134604192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +390,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f875a8d444467459c9b7a5dec5e1a9e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.WeaponSelectionHUD
+  harbourUIDocument: {fileID: 134604187}
+  moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
+--- !u!114 &134604194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 357847197dbbeffa4afc94d732b10cb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ComponentSelectionHUD
+  harbourUIDocument: {fileID: 134604187}
+  moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
+--- !u!114 &134604195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25fdd9f7ac6102387ab20bd4dacce88f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.EngineSelectionHUD
+  harbourUIDocument: {fileID: 134604187}
+  moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
+--- !u!114 &134604196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134604185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad2ff9e701a9e6285b74b7692d9245b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ArmourSelectionHUD
   harbourUIDocument: {fileID: 134604187}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
 --- !u!1 &189772805
