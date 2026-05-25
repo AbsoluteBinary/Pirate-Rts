@@ -131,12 +131,12 @@ namespace _Project.Scripts.UI.IMGUI
                 GUI.DrawTexture(logoRect, logoSprite.texture);
             }
 
-            // Text - Legend Nation Gaming
-            // GUI.Label(
-            //     new Rect(0, Screen.height * 0.68f, Screen.width, 80),
-            //     "Legend Nation Gaming",
-            //     GetTitleStyle()
-            // );
+            //Text - Legend Nation Gaming
+            GUI.Label(
+                new Rect(0, Screen.height * 0.68f, Screen.width, 80),
+                "Legend Nation Gaming",
+                GetTitleStyle()
+            );
 
             // Text - Developed by Conchobar
             GUI.Label(

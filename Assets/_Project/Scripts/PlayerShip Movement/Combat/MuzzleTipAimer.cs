@@ -21,18 +21,19 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
             }
         }
 
-        private void LateUpdate()  // Beats all other rotations!
+        private void LateUpdate()
         {
             if (!facePlayer || playerTarget == null) return;
 
-            // Face player
-            transform.LookAt(playerTarget);
+            Vector3 toTarget = playerTarget.position - transform.position;
+    
+            transform.rotation = Quaternion.LookRotation(toTarget, Vector3.up) 
+                                 * Quaternion.Euler(90f, 0f, 0f);  // ← Compensation for downward forward
 
-            // Optional: Keep upright (no roll/tilt — perfect for muzzles)
             if (keepUpright)
             {
                 Vector3 euler = transform.rotation.eulerAngles;
-                transform.rotation = Quaternion.Euler(0, euler.y, 0);
+                transform.rotation = Quaternion.Euler(0, euler.y, 0); // or remove this if you want pitch
             }
         }
     }

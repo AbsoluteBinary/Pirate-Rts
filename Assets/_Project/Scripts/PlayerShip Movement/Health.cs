@@ -8,13 +8,16 @@ namespace _Project.Scripts.PlayerShip_Movement
         [SerializeField] private float maxHealth = 100f;
         private float currentHealth;
 
-        private void Awake() => currentHealth = maxHealth;
+        public event System.Action<float, float> OnHealthChanged;
 
         public void TakeDamage(float amount)
         {
-            FindFirstObjectByType<NavalCombatHUD>()?.OnDamageTaken(amount);  // ← UI feedback
-            currentHealth -= amount;
-            // ... rest unchanged
+            currentHealth = Mathf.Max(0, currentHealth - amount);
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    
+            FindFirstObjectByType<NavalCombatHUD>()?.OnDamageTaken(amount);
+    
+            if (currentHealth <= 0) Die();
         }
 
         private void Die()

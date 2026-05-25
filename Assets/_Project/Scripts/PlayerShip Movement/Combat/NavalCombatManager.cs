@@ -1,200 +1,108 @@
-using System.Collections.Generic;
 using UnityEngine;
+using _Project.Scripts.PlayerShip_Movement;
 
 namespace _Project.Scripts.PlayerShip_Movement.Combat
 {
     public class NavalCombatManager : MonoBehaviour
     {
-        [Header("Player")]
-        [SerializeField] private Transform player;
-        [SerializeField] private float playerHealth = 100f;
-        private float currentHealth;
-        [SerializeField] GameObject shipGameObject;
+        [Header("Player Reference")]
+        [SerializeField] private Transform playerTransform;
+        [SerializeField] private Health playerHealth;
 
         [Header("Turrets")]
-        [SerializeField] private Transform[] turretBarrels;
-        [SerializeField] private float turretRange = 20f;
-        [SerializeField] private float damage = 25f;
-        [SerializeField] private float fireRate = 1.5f;
-        [SerializeField] private GameObject trailPrefab;
+        [SerializeField] private Transform[] turretBarrelPivots;   
+        [SerializeField] private Transform[] muzzleTips;           
+        [SerializeField] private GameObject bulletPrefab;
 
-        [Header("UI")]
-        [SerializeField] private float flashDuration = 0.5f;
-        [SerializeField] private float damageFadeSpeed = 2f;
-        private readonly List<DamagePopup> _damagePopups;
-        private readonly GUIStyle damageStyle = new GUIStyle();
+        [Header("Combat Settings")]
+        [SerializeField] private float turretRange = 60f;
+        [SerializeField] private float fireRate = 2.5f;      // Slow for testing
+        [SerializeField] private float bulletSpeed = 15f;    // Slow for testing
+        [SerializeField] private float damagePerShot = 25f;
+
         private float[] nextFireTimes;
-
-        public NavalCombatManager(List<DamagePopup> damagePopups)
-        {
-            _damagePopups = damagePopups;
-        }
-
-        [System.Serializable]
-        public class DamagePopup
-        {
-            public float amount;
-            public float timer;
-        }
 
         private void Awake()
         {
-            currentHealth = playerHealth;
-            damageStyle.fontSize = 48;
-            damageStyle.alignment = TextAnchor.MiddleCenter;
-            damageStyle.richText = true;
+            if (playerTransform == null)
+                playerTransform = GameObject.FindWithTag("Player")?.transform;
 
-            if (player == null) player = GameObject.FindWithTag("Player")?.transform;
-            nextFireTimes = new float[turretBarrels.Length];
+            if (playerHealth == null && playerTransform != null)
+                playerHealth = playerTransform.GetComponent<Health>();
+
+            nextFireTimes = new float[turretBarrelPivots.Length];
         }
 
         private void Update()
         {
-            for (int i = 0; i < turretBarrels.Length; i++)
+            if (playerTransform == null) return;
+
+            for (int i = 0; i < turretBarrelPivots.Length; i++)
             {
-                Transform barrel = turretBarrels[i];
-                if (barrel == null) continue;
+                Transform pivot = turretBarrelPivots[i];
+                if (pivot == null) continue;
 
-                float sqrDist = (player.position - barrel.position).sqrMagnitude;
-                bool inRange = sqrDist <= turretRange * turretRange;
+                Vector3 toPlayer = playerTransform.position - pivot.position;
+                float sqrDist = toPlayer.sqrMagnitude;
 
-                if (inRange)
+                if (sqrDist <= turretRange * turretRange && sqrDist > 0.01f)
                 {
-                    // Aim
-                    Vector3 toPlayer = player.position - barrel.position;
-                    toPlayer.y = 0;
-                    if (toPlayer.sqrMagnitude > 0.001f)
-                    {
-                        Quaternion rot = Quaternion.LookRotation(toPlayer, Vector3.up);
-                        barrel.rotation = Quaternion.Euler(90f, rot.eulerAngles.y, 0f);
-                    }
-
-                    // Fire
+                    AimAtPlayer(pivot, toPlayer);
+                    
                     if (Time.time >= nextFireTimes[i])
                     {
-                        Fire(barrel);
+                        Fire(i);
                         nextFireTimes[i] = Time.time + fireRate;
                     }
                 }
             }
-
-            // Fade popups
-            for (int i = _damagePopups.Count - 1; i >= 0; i--)
-            {
-                _damagePopups[i].timer -= Time.unscaledDeltaTime;
-                if (_damagePopups[i].timer <= 0f)
-                    _damagePopups.RemoveAt(i);
-            }
         }
 
-        private void Fire(Transform barrel)
+        private void AimAtPlayer(Transform barrelPivot, Vector3 toPlayer)
         {
-            currentHealth -= damage;
-           // OnDamageTaken(damage);
+            toPlayer.y = 0f;
+            if (toPlayer.sqrMagnitude < 0.01f) return;
 
-            if (currentHealth <= 0f)
-            {
-                OnShipDestroyed();
-            }
-
-            if (trailPrefab)
-            {
-                var trail = Instantiate(trailPrefab, barrel.position, Quaternion.identity);
-                var lr = trail.GetComponentInChildren<LineRenderer>();
-                if (lr)
-                {
-                    lr.SetPosition(0, barrel.position);
-                    lr.SetPosition(1, player.position);
-                }
-                Destroy(trail, 0.5f);
-            }
+            barrelPivot.rotation = Quaternion.LookRotation(toPlayer, Vector3.up);
         }
 
-        private void OnShipDestroyed()
+        private void Fire(int index)
         {
-            if (shipGameObject != null)
+            if (bulletPrefab == null) 
             {
-                shipGameObject.SetActive(false);  // ← Disables only the player ship
-                //Debug.Log("Player ship disabled – UI remains active");
+                Debug.LogWarning("Bullet Prefab not assigned!");
+                return;
             }
-            // Later: Add explosions, sinking, game over, etc.
+
+            Transform muzzle = (muzzleTips != null && index < muzzleTips.Length && muzzleTips[index] != null)
+                ? muzzleTips[index]
+                : turretBarrelPivots[index];
+
+            GameObject bulletGO = Instantiate(bulletPrefab, muzzle.position, muzzle.rotation);
+
+            Vector3 direction = (playerTransform.position - muzzle.position).normalized;
+            direction.y = 0f;
+
+            float currentSpeed = bulletSpeed > 5f ? bulletSpeed : 25f; // safety
+
+            if (bulletGO.TryGetComponent<BulletSelfDestruct>(out var bsd))
+            {
+                bsd.Initialize(direction * currentSpeed, 6f);   // 6 seconds lifetime
+            }
+            else
+            {
+                Debug.LogError("Bullet is missing BulletSelfDestruct component!");
+            }
+
+            if (bulletGO.TryGetComponent<BulletDamage>(out var dmg))
+                dmg.damageAmount = damagePerShot;
+
+            Debug.Log($"[Fire] Bullet spawned at {muzzle.position} towards player");
         }
 
-        private void OnGUI()
+        public void OnPlayerHit(float damage)
         {
-            // Status box
-            GUILayout.BeginArea(new Rect(20, 20, 300, 200), GUI.skin.box);
-            GUILayout.Label("<size=22><b>Ship Status</b></size>");
-            GUILayout.Label($"Health: {currentHealth:F0} / 100");
-            GUILayout.EndArea();
-
-            // Compass with player + turrets (fixed east/west)
-            GUILayout.BeginArea(new Rect(Screen.width - 220, 20, 200, 200));
-            DrawCompass();
-            GUILayout.EndArea();
-
-            // Minimap with player + turrets (fixed east/west)
-            GUILayout.BeginArea(new Rect(Screen.width - 220, Screen.height - 220, 200, 200));
-            DrawMinimap();
-            GUILayout.EndArea();
-
-            // Damage popups
-            for (int i = 0; i < _damagePopups.Count; i++)
-            {
-                float offsetX = (_damagePopups.Count - 1 - i) * 70f;
-                Rect r = new Rect(Screen.width * 0.5f - 150 + offsetX, Screen.height * 0.5f - 80, 300, 160);
-                GUI.Label(r, $"<color=red><size=60>-{_damagePopups[i].amount:F0}</size></color>", damageStyle);
-            }
-        }
-
-        private void DrawCompass()
-        {
-            GUILayout.Label("<b>Compass</b>");
-            Texture2D bg = MakeTex(180, 180, new Color(0f, 0f, 0f, 0.7f));
-            GUI.DrawTexture(GUILayoutUtility.GetRect(180, 180), bg);
-
-            Vector2 center = new Vector2(90, 90);
-            foreach (var turret in turretBarrels)
-            {
-                if (turret == null) continue;
-                Vector3 dir = turret.position - player.position;
-                dir.y = 0;
-                if (dir.sqrMagnitude < 0.1f) continue;
-
-                // FIXED: East/West correct (negate x)
-                Vector2 screenDir = new Vector2(-dir.x, dir.z).normalized * 60f;
-                GUI.DrawTexture(new Rect(center.x + screenDir.x - 5, center.y + screenDir.y - 5, 10, 10), MakeTex(10, 10, Color.red));
-            }
-        }
-
-        private void DrawMinimap()
-        {
-            GUILayout.Label("<b>Minimap</b>");
-            Texture2D bg = MakeTex(180, 180, new Color(0.1f, 0.2f, 0.4f, 0.8f));
-            GUI.DrawTexture(GUILayoutUtility.GetRect(180, 180), bg);
-
-            Vector2 center = new Vector2(90, 90);
-            GUI.DrawTexture(new Rect(center.x - 5, center.y - 5, 10, 10), MakeTex(10, 10, Color.green));
-
-            foreach (var turret in turretBarrels)
-            {
-                if (turret == null) continue;
-                Vector2 rel = new Vector2(turret.position.x - player.position.x, turret.position.z - player.position.z);
-                rel *= 2f;
-                // FIXED: East/West correct (negate x)
-                Vector2 pos = center + new Vector2(-rel.x, rel.y);
-                GUI.DrawTexture(new Rect(pos.x - 4, pos.y - 4, 8, 8), MakeTex(8, 8, Color.red));
-            }
-        }
-
-        private Texture2D MakeTex(int w, int h, Color col)
-        {
-            Color[] pix = new Color[w * h];
-            for (int i = 0; i < pix.Length; i++) pix[i] = col;
-            Texture2D tex = new Texture2D(w, h);
-            tex.SetPixels(pix);
-            tex.Apply();
-            return tex;
+            playerHealth?.TakeDamage(damage);
         }
     }
 }

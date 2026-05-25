@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="CombatScene" style="flex-grow: 1;">
-        <ui:Button text="Button" name="LeaveBattle" style="align-items: flex-end; justify-content: flex-start; align-self: flex-end; align-content: auto;"/>
+        <ui:Button text="Exit Battle" name="LeaveBattle" style="align-items: flex-end; justify-content: flex-start; align-self: flex-end; align-content: auto;"/>
     </ui:VisualElement>
 </ui:UXML>

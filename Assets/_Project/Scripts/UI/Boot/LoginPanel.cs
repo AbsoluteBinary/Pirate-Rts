@@ -10,6 +10,7 @@ namespace _Project.Scripts.UI.Boot
     public class LoginPanel : MonoBehaviour
     {
         [SerializeField] private int targetSceneGroupIndex = 2;
+        [SerializeField] private int combatSceneIndex = 3;
         
         private void Awake()
         {
@@ -66,6 +67,7 @@ namespace _Project.Scripts.UI.Boot
 
             AddLoginButton(container, "Start Game");
             AddLoginButton(container, "Enter Harbour");
+            AddLoginButton(container, "Load Combat Scene");   // ← NEW BUTTON
             AddLoginButton(container, "Close Game");
 
             root.Add(container);
@@ -79,9 +81,10 @@ namespace _Project.Scripts.UI.Boot
             {
                 switch (text)
                 {
-                    case "Start Game":      OnStartGameClicked();       break;
-                    case "Enter Harbour":   OnEnterHarbourClicked();    break;
-                    case "Close Game":      OnCloseGameClicked();       break;
+                    case "Start Game":          OnStartGameClicked();           break;
+                    case "Enter Harbour":       OnEnterHarbourClicked();        break;
+                    case "Load Combat Scene":   OnLoadCombatSceneClicked();     break;   // ← NEW
+                    case "Close Game":          OnCloseGameClicked();           break;
                 }
             };
 
@@ -132,6 +135,26 @@ namespace _Project.Scripts.UI.Boot
             }
             else
                 Debug.LogError("SceneLoader.Instance is null");
+        }
+
+        /// <summary>
+        /// NEW: Load Combat Scene button handler
+        /// Put your combat scene loading logic here
+        /// </summary>
+        private void OnLoadCombatSceneClicked()
+        {
+            Debug.Log("Load Combat Scene button clicked - ready for logic!");
+
+            if (IMGUILoadingOverlay.Instance != null)
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+
+            // TODO: Add your combat scene loading logic here
+            //Example:
+            if (SceneLoader.Instance != null)
+            {
+                _ = SceneLoader.Instance.BeginSceneTransition(combatSceneIndex);    
+            }
+            
         }
 
         private void OnCloseGameClicked()
