@@ -243,6 +243,7 @@ GameObject:
   - component: {fileID: 4928512912706217630}
   - component: {fileID: 1854264259996111346}
   - component: {fileID: 4614890114588200914}
+  - component: {fileID: 7982718918922209795}
   m_Layer: 7
   m_Name: Turret
   m_TagString: Untagged
@@ -344,6 +345,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7982718918922209795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5831220954132295707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824cb689df534e2c8c7b7f246c339c5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.TurretController
+  barrelPivot: {fileID: 6993582587996254776}
+  muzzleTip: {fileID: 7292200459672543530}
+  bulletPrefab: {fileID: 1153557873438720694, guid: ecd9bbbc3611a20c3aa167cffa7eb058, type: 3}
+  range: 60
+  fireRate: 1.8
+  bulletSpeed: 30
+  damagePerShot: 25
 --- !u!1 &7236898607231355145
 GameObject:
   m_ObjectHideFlags: 0

@@ -137,7 +137,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -33.1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
       propertyPath: m_LocalPosition.y
@@ -145,7 +145,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.6125
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5297235620881492429, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
       propertyPath: m_LocalRotation.w
@@ -180,17 +180,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
---- !u!1 &285410214 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5297235620881004013, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
-  m_PrefabInstance: {fileID: 285410213}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &285410220 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1215149158835569592, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
   m_PrefabInstance: {fileID: 285410213}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 285410214}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e289130af0cb5104a93203a0f69bde0, type: 3}
@@ -551,7 +546,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCellsSqrt: 100
   _isDirty: 0
-  mouseIsOver: 0
+  mouseIsOver: 1
   newInHierarchy: 0
   territoryThicknessSettingMigrated: 1
   _numCells: 262144
@@ -923,7 +918,7 @@ MonoBehaviour:
   dropHeight: 15
   dropDuration: 0.8
   dropEase: 30
-  shipController: {fileID: 1725493543}
+  playerMovement: {fileID: 1725493543}
 --- !u!114 &1278554387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1012,6 +1007,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faa25b14e9e01b4e398dbf786985e7e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.Combat.SceneTransition
+--- !u!114 &1682335593 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7982718918922209795, guid: f246e4babdac65810bac0d97f303844b, type: 3}
+  m_PrefabInstance: {fileID: 8028541789134799564}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824cb689df534e2c8c7b7f246c339c5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.TurretController
 --- !u!1 &1703750324
 GameObject:
   m_ObjectHideFlags: 0
@@ -1044,6 +1050,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.BulletDamage
   damageAmount: 25
   playerTag: PlayerShip
+  destroyOnAnyHit: 1
 --- !u!114 &1703750326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1057,16 +1064,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.NavalCombatManager
   playerTransform: {fileID: 285410223}
-  playerHealth: {fileID: 285410220}
-  turretBarrelPivots:
-  - {fileID: 1037286378705907956}
-  muzzleTips:
-  - {fileID: 745351884167619558}
-  bulletPrefab: {fileID: 1153557873438720694, guid: ecd9bbbc3611a20c3aa167cffa7eb058, type: 3}
-  turretRange: 15
-  fireRate: 0.5
-  bulletSpeed: 0.5
-  damagePerShot: 5
+  turrets:
+  - {fileID: 1682335593}
 --- !u!4 &1703750327
 Transform:
   m_ObjectHideFlags: 0
@@ -1156,15 +1155,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 1725493540}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfad821843d3187a0a99feb288c17dab, type: 3}
+  m_Script: {fileID: 11500000, guid: c72eda9bac08442e88d9df786e014caf, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.PlayerShipController
-  doTweenType: 0
-  ship: {fileID: 285410214}
-  moveDuration: 1
-  frButton: {fileID: 0}
-  ClickBehavior: 0
-  timeRemaining: 0
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.PlayerCombatMovementController
+  shipVisual: {fileID: 0}
+  maxSpeed: 14
+  acceleration: 1
+  deceleration: 44
+  turnSpeed: 65
+  heightOffset: 1.2
+  stopDistance: 12
+  rollAmount: 5
+  bobAmount: 1
+  bobSpeed: 2
 --- !u!1 &1738415926
 GameObject:
   m_ObjectHideFlags: 0
@@ -1261,16 +1264,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 10
   isInverted: 0
---- !u!4 &745351884167619558 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7292200459672543530, guid: f246e4babdac65810bac0d97f303844b, type: 3}
-  m_PrefabInstance: {fileID: 8028541789134799564}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1037286378705907956 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6993582587996254776, guid: f246e4babdac65810bac0d97f303844b, type: 3}
-  m_PrefabInstance: {fileID: 8028541789134799564}
-  m_PrefabAsset: {fileID: 0}
 --- !u!81 &1218488053702203125
 AudioListener:
   m_ObjectHideFlags: 0
@@ -1427,7 +1420,7 @@ Transform:
   m_GameObject: {fileID: 2882241516638155476}
   serializedVersion: 2
   m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 0, y: 15, z: 0}
+  m_LocalPosition: {x: 0, y: 31, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1536,7 +1529,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4531720483115632374, guid: f246e4babdac65810bac0d97f303844b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 4531720483115632374, guid: f246e4babdac65810bac0d97f303844b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1577,6 +1570,10 @@ PrefabInstance:
     - target: {fileID: 7292200459672543530, guid: f246e4babdac65810bac0d97f303844b, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7982718918922209795, guid: f246e4babdac65810bac0d97f303844b, type: 3}
+      propertyPath: range
+      value: 20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

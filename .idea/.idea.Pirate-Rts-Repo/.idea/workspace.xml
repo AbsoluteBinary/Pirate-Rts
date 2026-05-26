@@ -11,23 +11,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/CombatPointerController.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/CombatScene.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/CombatScene.uxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Bullet.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Bullet.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Turret.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Turret.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletSelfDestruct.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletSelfDestruct.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/MuzzleTipAimer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/MuzzleTipAimer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/NavalCombatManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/NavalCombatManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/CombatPointerController.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/CombatPointerController.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/CombatPointerController.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Health.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Health.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Boot/LoginPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Boot/LoginPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/IMGUI/BootSplashIMGUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/IMGUI/BootSplashIMGUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,6 +53,9 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/WeaponSelectionHUD.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/Editor/SceneLoaderEditor.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" root0="FORCE_HIGHLIGHTING" />
@@ -65,6 +67,65 @@
     <urls />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0476800848915717" />
+      <entry key="MS500" value="2.392137506904867" />
+      <entry key="S2" value="4.507569659856381" />
+      <entry key="S5" value="5.325688487428029" />
+      <entry key="S10" value="5.65443582717519" />
+      <entry key="S30" value="6.231051887899121" />
+      <entry key="S60" value="6.951021933800155" />
+      <entry key="M2" value="7.704535298089001" />
+      <entry key="M5" value="8.395158411583957" />
+      <entry key="M10" value="8.680815426559533" />
+      <entry key="M15" value="8.783290052176344" />
+      <entry key="M30" value="8.88963369897211" />
+      <entry key="H1" value="8.944304173065785" />
+      <entry key="H2" value="8.972022665138073" />
+      <entry key="H4" value="8.985978819306208" />
+      <entry key="D1" value="8.997658607352317" />
+      <entry key="W1" value="8.999665404240837" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9512465902126965" />
+      <entry key="MS500" value="2.3470927158668795" />
+      <entry key="S2" value="4.485749712672022" />
+      <entry key="S5" value="5.315285723078652" />
+      <entry key="S10" value="5.647911244997611" />
+      <entry key="S30" value="6.210732711946192" />
+      <entry key="S60" value="6.924199777395083" />
+      <entry key="M2" value="7.6822190695373616" />
+      <entry key="M5" value="8.382972758656784" />
+      <entry key="M10" value="8.67405074287293" />
+      <entry key="M15" value="8.77861981425169" />
+      <entry key="M30" value="8.887215391751074" />
+      <entry key="H1" value="8.943073649177819" />
+      <entry key="H2" value="8.971401987402094" />
+      <entry key="H4" value="8.985667117237426" />
+      <entry key="D1" value="8.997606466884042" />
+      <entry key="W1" value="8.999657950936093" />
+    </decayedShown>
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -281,6 +342,8 @@
       <workItem from="1778840073460" duration="657000" />
       <workItem from="1779182243951" duration="7616000" />
       <workItem from="1779704577302" duration="5194000" />
+      <workItem from="1779785560089" duration="7807000" />
+      <workItem from="1779804124956" duration="3274000" />
     </task>
     <servers />
   </component>

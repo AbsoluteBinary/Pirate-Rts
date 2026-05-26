@@ -1,8 +1,10 @@
 using System.Threading;
+using _Project.Scripts.PlayerShip_Movement.Combat;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TGS;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 namespace _Project.Scripts.PlayerShip_Movement
@@ -12,7 +14,7 @@ namespace _Project.Scripts.PlayerShip_Movement
         [SerializeField] private TerrainGridSystem tgs;
         [SerializeField] private GameObject markerPrefab; // Prefab for placement
         [SerializeField, Range(1, 10)] private int timeRemaining = 2;
-        [SerializeField] private PlayerShipController shipController; // Reference to PlayerShipController
+        [SerializeField] private PlayerShipController combatMovementController; // Reference to PlayerShipController
 
         private GameObject activeMarker; // Instance of the prefab
         private Tween moveTween;
@@ -69,9 +71,9 @@ namespace _Project.Scripts.PlayerShip_Movement
             //Debug.Log($"PlayerFRBtnControl: Spawned new marker at cell {cellIndex}. InstanceID: {activeMarker.GetInstanceID()}");
 
             // Update PlayerShipController's frButton
-            if (shipController != null)
+            if (combatMovementController != null)
             {
-                shipController.SetFrButton(activeMarker);
+                combatMovementController.SetFrButton(activeMarker);
             }
             else
             {
