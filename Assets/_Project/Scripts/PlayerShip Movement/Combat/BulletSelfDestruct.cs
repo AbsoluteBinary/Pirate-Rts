@@ -1,3 +1,4 @@
+using _Project.Scripts.PlayerShip_Movement.Combat.ObjectPooling;
 using UnityEngine;
 
 namespace _Project.Scripts.PlayerShip_Movement.Combat
@@ -5,31 +6,36 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
     public class BulletSelfDestruct : MonoBehaviour
     {
         private Vector3 velocity;
+        private string poolTag = "Bullet";
 
-        public void Initialize(Vector3 vel, float lifetime)
+        public void Initialize(Vector3 vel, float lifetime, string poolTag = "Bullet")
         {
-            velocity = vel;
-            Debug.Log($"Bullet Initialized → Speed: {vel.magnitude:F1} | Lifetime: {lifetime}s");
-            
-            // Make sure we don't destroy too fast
-            Destroy(gameObject, Mathf.Max(lifetime, 3f)); // minimum 3 seconds
+            this.velocity = vel;
+            this.poolTag = poolTag;
+
+            Invoke(nameof(Deactivate), Mathf.Max(lifetime, 3f));
         }
 
         private void Update()
         {
-            if (velocity != Vector3.zero)
-            {
-                transform.position += velocity * Time.deltaTime;
-            }
-            else
-            {
-                Debug.LogWarning("Bullet has zero velocity!");
-            }
+            transform.position += velocity * Time.deltaTime;
         }
 
-        private void OnDestroy()
+        private void Deactivate()
         {
-            Debug.Log($"Bullet destroyed at position: {transform.position}");
+            ObjectPooler.Instance?.ReturnToPool(poolTag, gameObject);
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            ObjectPooler.Instance?.ReturnToPool(poolTag, gameObject);
+
+            // Handle damage
+            if (collision.transform.TryGetComponent<Health>(out var health))
+            {
+                var combatManager = FindFirstObjectByType<NavalCombatManager>();
+                combatManager?.OnPlayerHit(GetComponent<BulletDamage>().damageAmount);
+            }
         }
     }
 }
