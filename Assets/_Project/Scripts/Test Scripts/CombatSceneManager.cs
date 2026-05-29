@@ -3,7 +3,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace _Project.Scripts.CombatScenes
+namespace _Project.Scripts.Test_Scripts
 {
     public class CombatSceneManager : MonoBehaviour
     {

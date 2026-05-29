@@ -34,7 +34,7 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
 
                 if (Time.time >= nextFireTime)
                 {
-                    Fire(playerTransform);
+                   // Fire(playerTransform);
                     nextFireTime = Time.time + fireRate;
                 }
             }
@@ -50,23 +50,23 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
             barrelPivot.rotation = Quaternion.LookRotation(toPlayer, Vector3.up);
         }
 
-        private void Fire(Transform playerTransform)
-        {
-            if (bulletPrefab == null || muzzleTip == null) return;
-
-            GameObject bulletGO = Instantiate(bulletPrefab, muzzleTip.position, muzzleTip.rotation);
-
-            Vector3 direction = (playerTransform.position - muzzleTip.position).normalized;
-            direction.y = 0f;
-
-            if (bulletGO.TryGetComponent<BulletSelfDestruct>(out var bsd))
-            {
-                bsd.Initialize(direction * bulletSpeed, 8f);
-            }
-
-            if (bulletGO.TryGetComponent<BulletDamage>(out var dmg))
-                dmg.damageAmount = damagePerShot;
-        }
+        // private void Fire(Transform playerTransform)
+        // {
+        //     if (bulletPrefab == null || muzzleTip == null) return;
+        //
+        //     GameObject bulletGO = Instantiate(bulletPrefab, muzzleTip.position, muzzleTip.rotation);
+        //
+        //     Vector3 direction = (playerTransform.position - muzzleTip.position).normalized;
+        //     direction.y = 0f;
+        //
+        //     if (bulletGO.TryGetComponent<BulletSelfDestruct>(out var bsd))
+        //     {
+        //         bsd.Initialize(direction * bulletSpeed, 8f);
+        //     }
+        //
+        //     if (bulletGO.TryGetComponent<BulletDamage>(out var dmg))
+        //         dmg.damageAmount = damagePerShot;
+        // }
 
         // Getters for NavalCombatManager if needed
         public float Range => range;

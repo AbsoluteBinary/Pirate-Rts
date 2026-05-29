@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 192963328}
-  - component: {fileID: 192963327}
+  - component: {fileID: 192963329}
   m_Layer: 0
   m_Name: ObjectPool
   m_TagString: Untagged
@@ -136,22 +136,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &192963327
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 192963326}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32b42406e3bca70a2b78138727716750, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.ObjectPooling.ObjectPooler
-  pools:
-  - tag: Bullet
-    prefab: {fileID: 1153557873438720694, guid: ecd9bbbc3611a20c3aa167cffa7eb058, type: 3}
-    size: 20
 --- !u!4 &192963328
 Transform:
   m_ObjectHideFlags: 0
@@ -167,6 +151,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &192963329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 192963326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c189d41a3004094eb998522234a88326, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Combat.Managers.BulletPoolManager
+  showPoolDebugLogs: 1
 --- !u!1001 &285410213
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -233,7 +230,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1215149158835569592, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
   m_PrefabInstance: {fileID: 285410213}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1164661626}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e289130af0cb5104a93203a0f69bde0, type: 3}
@@ -916,6 +913,11 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
+--- !u!1 &1164661626 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5297235620881004013, guid: 5e317cce22bb22a28b14994a4f951746, type: 3}
+  m_PrefabInstance: {fileID: 285410213}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1181221113
 GameObject:
   m_ObjectHideFlags: 0
@@ -1084,11 +1086,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf988e0a6a78293b9b403975b8714492, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.Combat.NavalCombatManager
-  playerTransform: {fileID: 285410223}
-  playerHealth: {fileID: 0}
+  player: {fileID: 285410223}
+  playerHealth: 100
+  shipGameObject: {fileID: 1164661626}
   turrets:
   - {fileID: 8028541789134799565}
-  weaponData: {fileID: 11400000, guid: 2d4b3638c952217c5839e5b70abb365c, type: 2}
+  turretWeaponData:
+  - {fileID: 11400000, guid: 14a18a8ead078b97c9395f4ff5ac0687, type: 2}
+  trailPrefab: {fileID: 0}
 --- !u!4 &1703750327
 Transform:
   m_ObjectHideFlags: 0

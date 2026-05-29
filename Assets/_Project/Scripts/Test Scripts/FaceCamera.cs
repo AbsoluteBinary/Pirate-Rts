@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace _Project.Scripts.CombatScenes
+namespace _Project.Scripts.Test_Scripts
 {
     [RequireComponent(typeof(TextMeshPro))]
     public class FaceCamera : MonoBehaviour
