@@ -12,24 +12,15 @@
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ScriptableObjects/Combat/TurretA01.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ScriptableObjects/Combat/TurretA01.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ScriptableObjects/Combat/TurretWeaponData.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ScriptableObjects/Combat/TurretWeaponData.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/CombatScenes.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/CombatScenes/CombatSceneManager.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/CombatScenes/CombatSceneManager.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/CombatScenes/FaceCamera.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/CombatScenes/FaceCamera.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletDamage.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletSelfDestruct.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/BulletSelfDestruct.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/NavalCombatManager.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/NavalCombatManager.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/Turret.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/Turret.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/navalFleetShipA002_3DModel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/navalFleetShipA002_3DModel.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Combat/Managers/BulletPoolManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Combat/Managers/BulletPoolManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Combat/Managers/NavalCombatManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Combat/Managers/NavalCombatManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Health.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Health.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -74,61 +65,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0476800848915717" />
-      <entry key="MS500" value="2.392137506904867" />
-      <entry key="S2" value="4.507569659856381" />
-      <entry key="S5" value="5.325688487428029" />
-      <entry key="S10" value="5.65443582717519" />
-      <entry key="S30" value="6.231051887899121" />
-      <entry key="S60" value="6.951021933800155" />
-      <entry key="M2" value="7.704535298089001" />
-      <entry key="M5" value="8.395158411583957" />
-      <entry key="M10" value="8.680815426559533" />
-      <entry key="M15" value="8.783290052176344" />
-      <entry key="M30" value="8.88963369897211" />
-      <entry key="H1" value="8.944304173065785" />
-      <entry key="H2" value="8.972022665138073" />
-      <entry key="H4" value="8.985978819306208" />
-      <entry key="D1" value="8.997658607352317" />
-      <entry key="W1" value="8.999665404240837" />
+      <entry key="MS100" value="3.547588619046436E-5" />
+      <entry key="MS500" value="0.3053001751136055" />
+      <entry key="S2" value="2.694186621549072" />
+      <entry key="S5" value="4.334807850150115" />
+      <entry key="S10" value="5.10136414292278" />
+      <entry key="S30" value="6.020885704360415" />
+      <entry key="S60" value="6.832791467431211" />
+      <entry key="M2" value="7.6387307628465235" />
+      <entry key="M5" value="8.366403322380657" />
+      <entry key="M10" value="8.665935913626964" />
+      <entry key="M15" value="8.773250408391174" />
+      <entry key="M30" value="8.88455164694615" />
+      <entry key="H1" value="8.941747154460593" />
+      <entry key="H2" value="8.970740102049707" />
+      <entry key="H4" value="8.985336517280912" />
+      <entry key="D1" value="8.997551414680448" />
+      <entry key="W1" value="8.9996500875084" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="0.0" />
-      <entry key="S30" value="0.0" />
-      <entry key="S60" value="0.0" />
-      <entry key="M2" value="0.0" />
-      <entry key="M5" value="0.0" />
-      <entry key="M10" value="0.0" />
-      <entry key="M15" value="0.0" />
-      <entry key="M30" value="0.0" />
-      <entry key="H1" value="0.0" />
-      <entry key="H2" value="0.0" />
-      <entry key="H4" value="0.0" />
-      <entry key="D1" value="0.0" />
-      <entry key="W1" value="0.0" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.0" />
+      <entry key="M10" value="1.0" />
+      <entry key="M15" value="1.0" />
+      <entry key="M30" value="1.0" />
+      <entry key="H1" value="1.0" />
+      <entry key="H2" value="1.0" />
+      <entry key="H4" value="1.0" />
+      <entry key="D1" value="1.0" />
+      <entry key="W1" value="1.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9512465902126965" />
-      <entry key="MS500" value="2.3470927158668795" />
-      <entry key="S2" value="4.485749712672022" />
-      <entry key="S5" value="5.315285723078652" />
-      <entry key="S10" value="5.647911244997611" />
-      <entry key="S30" value="6.210732711946192" />
-      <entry key="S60" value="6.924199777395083" />
-      <entry key="M2" value="7.6822190695373616" />
-      <entry key="M5" value="8.382972758656784" />
-      <entry key="M10" value="8.67405074287293" />
-      <entry key="M15" value="8.77861981425169" />
-      <entry key="M30" value="8.887215391751074" />
-      <entry key="H1" value="8.943073649177819" />
-      <entry key="H2" value="8.971401987402094" />
-      <entry key="H4" value="8.985667117237426" />
-      <entry key="D1" value="8.997606466884042" />
-      <entry key="W1" value="8.999657950936093" />
+      <entry key="MS100" value="6.607188870167494E-5" />
+      <entry key="MS500" value="0.4271777810957882" />
+      <entry key="S2" value="3.2788474943986845" />
+      <entry key="S5" value="5.140283776072481" />
+      <entry key="S10" value="5.9976657419253465" />
+      <entry key="S30" value="6.9675230257083856" />
+      <entry key="S60" value="7.78941645428019" />
+      <entry key="M2" value="8.608064124606939" />
+      <entry key="M5" value="9.350834208621205" />
+      <entry key="M10" value="9.657468756496568" />
+      <entry key="M15" value="9.767442469650463" />
+      <entry key="M30" value="9.881563039279163" />
+      <entry key="H1" value="9.94023110001784" />
+      <entry key="H2" value="9.969976561653004" />
+      <entry key="H4" value="9.984953359243743" />
+      <entry key="D1" value="9.997487361437143" />
+      <entry key="W1" value="9.999640932293909" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -351,7 +342,8 @@
       <workItem from="1779804124956" duration="3274000" />
       <workItem from="1779879619846" duration="1294000" />
       <workItem from="1780048988119" duration="58000" />
-      <workItem from="1780049100331" duration="3527000" />
+      <workItem from="1780049100331" duration="4239000" />
+      <workItem from="1780303828417" duration="11905000" />
     </task>
     <servers />
   </component>

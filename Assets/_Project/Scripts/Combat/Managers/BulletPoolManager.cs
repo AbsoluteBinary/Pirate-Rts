@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 using _Project.Scripts.Combat.Data;
+using _Project.Scripts.Combat.Projectiles;
 
 namespace _Project.Scripts.Combat.Managers
 {
@@ -71,7 +72,7 @@ namespace _Project.Scripts.Combat.Managers
             if (data == null || _pools.ContainsKey(data)) return;
 
             var pool = new ObjectPool<GameObject>(
-                createFunc: () => CreateBullet(data),
+                createFunc: () => CreatePooledBullet(data),
                 actionOnGet: OnBulletTakenFromPool,
                 actionOnRelease: OnBulletReturnedToPool,
                 actionOnDestroy: OnBulletDestroyed,
@@ -116,15 +117,27 @@ namespace _Project.Scripts.Combat.Managers
 
         // ==================== INTERNAL ====================
 
-        private GameObject CreateBullet(TurretWeaponData data)
+        private GameObject CreatePooledBullet(TurretWeaponData data)
         {
-            if (data == null || data.bulletPrefab == null)
+            if (data.bulletPrefab == null)
             {
-                Debug.LogError($"[BulletPoolManager] bulletPrefab is missing on TurretWeaponData: {data?.name}");
-                return new GameObject("MissingBulletPrefab");
+                Debug.LogError($"[BulletPoolManager] bulletPrefab is NULL on TurretWeaponData: {data.name}");
+                return new GameObject("MissingBulletPrefab_Error");
             }
 
             GameObject bullet = Instantiate(data.bulletPrefab);
+
+            // Auto-add required components if missing
+            if (!bullet.TryGetComponent<BulletSelfDestruct>(out _))
+            {
+                bullet.AddComponent<BulletSelfDestruct>();
+            }
+
+            if (!bullet.TryGetComponent<BulletDamage>(out _))
+            {
+                bullet.AddComponent<BulletDamage>();
+            }
+
             bullet.SetActive(false);
             return bullet;
         }
