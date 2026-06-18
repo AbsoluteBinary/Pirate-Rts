@@ -2,34 +2,83 @@ using UnityEngine;
 using _Project.Scripts.Combat.Data;
 using _Project.Scripts.Combat.Managers;
 using _Project.Scripts.Combat.Projectiles;
+using _Project.Scripts.Fleet;
 
 namespace _Project.Scripts.Combat.Turrets
 {
-    /// <summary>
-    /// Controls individual turret behavior: aiming and firing.
-    /// Uses the new BulletPoolManager for high-performance bullet spawning.
-    /// </summary>
     public class Turret : MonoBehaviour
     {
         [Header("Transforms")]
         [SerializeField] private Transform barrelPivot;
         [SerializeField] private Transform muzzleTip;
 
-        private float nextFireTime = 0f;
+        [Header("VFX & Audio")]
+        [SerializeField] private TurretVFX turretVFX;
 
-        /// <summary>
-        /// Called every frame by NavalCombatManager (or similar).
-        /// Handles aiming + firing decisions.
-        /// </summary>
-        public void UpdateTurret(Transform target, TurretWeaponData data)
+        [Header("Targeting")]
+        [Tooltip("How often the turret updates its target (in seconds)")]
+        [SerializeField] private float targetUpdateInterval = 1.5f;
+        
+        [Header("Weapon Data")]
+        [SerializeField] private TurretWeaponData data;
+
+        private float nextFireTime = 0f;
+        private float nextTargetUpdateTime = 0f;
+        private Transform currentTarget;
+
+        private void Awake()
         {
-            if (target == null || barrelPivot == null || data == null) return;
+            if (turretVFX == null)
+                turretVFX = GetComponentInChildren<TurretVFX>();
+        }
+
+        public void Update()
+        {
+            // Update target periodically
+            if (Time.time >= nextTargetUpdateTime)
+            {
+                UpdateTarget();
+                nextTargetUpdateTime = Time.time + targetUpdateInterval;
+            }
+
+            if (currentTarget != null)
+            {
+                UpdateTurret(currentTarget);
+            }
+        }
+
+        private void UpdateTarget()
+        {
+            if (FleetManager.Instance == null || FleetManager.Instance.activeShips == null)
+                return;
+
+            Transform bestTarget = null;
+            float bestDistance = float.MaxValue;
+
+            foreach (var ship in FleetManager.Instance.activeShips)
+            {
+                if (ship == null) continue;
+
+                float dist = Vector3.Distance(transform.position, ship.transform.position);
+                if (dist < bestDistance)
+                {
+                    bestDistance = dist;
+                    bestTarget = ship.transform;
+                }
+            }
+
+            currentTarget = bestTarget;
+        }
+
+        public void UpdateTurret(Transform target)
+        {
+            if (target == null || barrelPivot == null) return;
 
             // Range check
             Vector3 toTarget = target.position - barrelPivot.position;
-            if (toTarget.sqrMagnitude > data.range * data.range) return;
+            if (toTarget.sqrMagnitude > data.range * data.range) return;   // Note: 'data' needs to be assigned
 
-            // Aim (keep turret level for naval feel)
+            // Aim (naval style)
             Vector3 aimDirection = toTarget;
             aimDirection.y = 0f;
 
@@ -42,46 +91,36 @@ namespace _Project.Scripts.Combat.Turrets
             // Fire
             if (Time.time >= nextFireTime)
             {
-                Fire(target, data);
-                nextFireTime = Time.time + data.fireRate;
+                Fire(target);
+                nextFireTime = Time.time + data.fireRate;   // 'data' needs to be assigned per turret
             }
         }
 
-        private void Fire(Transform target, TurretWeaponData data)
+        private void Fire(Transform target)
         {
-            if (muzzleTip == null || data == null || data.bulletPrefab == null) return;
+            if (muzzleTip == null || data == null) return;
 
-            // 1. Muzzle Flash
-            if (data.muzzleFlashPrefab != null)
-            {
-                Instantiate(data.muzzleFlashPrefab, muzzleTip.position, muzzleTip.rotation);
-            }
+            turretVFX?.PlayFireEffects(muzzleTip, data);
 
-            // 2. Get bullet from the new pooling system
             GameObject bullet = BulletPoolManager.Instance?.GetBullet(data);
-
             if (bullet == null) return;
 
-            // Position & rotate bullet
             bullet.transform.position = muzzleTip.position;
             bullet.transform.rotation = muzzleTip.rotation;
 
-            // Calculate direction
-            Vector3 direction = target != null
-                ? (target.position - muzzleTip.position).normalized
-                : muzzleTip.forward;
+            Vector3 direction = (target.position - muzzleTip.position).normalized;
             direction.y = 0f;
 
-            // 3. Initialize BulletSelfDestruct
+            // Clean Initialize call
             if (bullet.TryGetComponent<BulletSelfDestruct>(out var bsd))
             {
                 bsd.Initialize(direction * data.bulletSpeed, 6f, data);
             }
 
-            // 4. Setup BulletDamage
             if (bullet.TryGetComponent<BulletDamage>(out var damageComp))
             {
                 damageComp.weaponData = data;
+                damageComp.turretVFX = turretVFX;
             }
         }
     }

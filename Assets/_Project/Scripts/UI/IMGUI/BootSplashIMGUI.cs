@@ -132,18 +132,18 @@ namespace _Project.Scripts.UI.IMGUI
             }
 
             //Text - Legend Nation Gaming
-            GUI.Label(
-                new Rect(0, Screen.height * 0.68f, Screen.width, 80),
-                "Legend Nation Gaming",
-                GetTitleStyle()
-            );
-
-            // Text - Developed by Conchobar
-            GUI.Label(
-                new Rect(0, Screen.height * 0.94f, Screen.width, 50),
-                "Developed by Conchobar",
-                GetSubtitleStyle()
-            );
+            // GUI.Label(
+            //     new Rect(0, Screen.height * 0.68f, Screen.width, 80),
+            //     "Legend Nation Gaming",
+            //     GetTitleStyle()
+            // );
+            //
+            // // Text - Developed by Conchobar
+            // GUI.Label(
+            //     new Rect(0, Screen.height * 0.94f, Screen.width, 50),
+            //     "Developed by Conchobar",
+            //     GetSubtitleStyle()
+            // );
 
             GUI.color = Color.white;
         }

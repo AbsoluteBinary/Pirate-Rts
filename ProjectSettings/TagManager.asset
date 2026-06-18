@@ -20,7 +20,7 @@ TagManager:
   - Login Background
   - Turret
   - Player
-  - 
+  - Fleet
   - 
   - 
   - 
@@ -52,3 +52,4 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
+  m_MigratedRenderPipelines: []

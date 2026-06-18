@@ -56,11 +56,23 @@ namespace _Project.Scripts.Combat.Managers
         private void Awake()
         {
             InitializeReferences();
+            
+            if (playerHealth == null && player != null)
+                playerHealth = player.GetComponent<Health>();
+
+            if (playerHealth != null)
+                playerHealth.OnPlayerDeath.AddListener(OnPlayerDestroyed);
         }
 
         private void Update()
         {
             UpdateAllTurrets();
+        }
+        
+        private void OnPlayerDestroyed()
+        {
+            player = null;                    // Stop all turrets from targeting
+            Debug.Log("[NavalCombatManager] Player destroyed - turrets disengaged.");
         }
 
         private void InitializeReferences()
@@ -85,18 +97,14 @@ namespace _Project.Scripts.Combat.Managers
             }
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         private void UpdateAllTurrets()
         {
-            if (turrets == null || turretWeaponData == null) return;
+            if (turrets == null) return;
 
-            int count = Mathf.Min(turrets.Length, turretWeaponData.Length);
-
-            for (int i = 0; i < count; i++)
+            foreach (var turret in turrets)
             {
-                if (turrets[i] != null && turretWeaponData[i] != null)
-                {
-                    turrets[i].UpdateTurret(player, turretWeaponData[i]);
-                }
+                turret?.Update();        // Let each turret manage itself
             }
         }
 

@@ -7,16 +7,15 @@ using _Project.Scripts.Combat.Projectiles;
 namespace _Project.Scripts.Combat.Managers
 {
     /// <summary>
-    /// Central manager for all projectile/bullet pools.
-    /// Uses Unity's ObjectPool<T> with pre-warming per TurretWeaponData.
-    /// Optimized for large-scale naval combat and barrage fire.
+    /// Central manager for bullet pooling.
+    /// Uses Unity's ObjectPool for high performance in large-scale naval combat.
     /// </summary>
     public class BulletPoolManager : MonoBehaviour
     {
         public static BulletPoolManager Instance { get; private set; }
 
         [Header("Debug")]
-        [SerializeField] private bool showPoolDebugLogs = false;
+        [SerializeField] private bool showDebugLogs = false;
 
         private readonly Dictionary<TurretWeaponData, ObjectPool<GameObject>> _pools = new();
         private readonly Dictionary<GameObject, TurretWeaponData> _bulletToDataMap = new();
@@ -33,35 +32,36 @@ namespace _Project.Scripts.Combat.Managers
 
         private void Start()
         {
-            PrewarmAllPools();
+            PrewarmPools();
         }
 
-        public void PrewarmAllPools()
+        /// <summary>
+        /// Pre-warms pools that have prewarmOnStart enabled in their TurretWeaponData.
+        /// </summary>
+        public void PrewarmPools()
         {
-            foreach (var kvp in _pools)
+            foreach (var data in _pools.Keys)
             {
-                if (kvp.Key.prewarmOnStart)
-                    PrewarmPool(kvp.Key);
+                if (data.prewarmOnStart)
+                    PrewarmPool(data);
             }
 
-            if (showPoolDebugLogs)
-                Debug.Log($"[BulletPoolManager] Pre-warming complete. Pools: {_pools.Count}");
+            if (showDebugLogs)
+                Debug.Log($"[BulletPoolManager] Pre-warming complete. Active pools: {_pools.Count}");
         }
 
         private void PrewarmPool(TurretWeaponData data)
         {
-            if (!_pools.ContainsKey(data)) return;
+            if (!_pools.TryGetValue(data, out var pool)) return;
 
-            var pool = _pools[data];
-            var prewarmList = new List<GameObject>();
+            var tempList = new List<GameObject>();
 
             for (int i = 0; i < data.initialPoolSize; i++)
             {
-                GameObject bullet = pool.Get();
-                prewarmList.Add(bullet);
+                tempList.Add(pool.Get());
             }
 
-            foreach (var bullet in prewarmList)
+            foreach (var bullet in tempList)
             {
                 pool.Release(bullet);
             }
@@ -72,10 +72,10 @@ namespace _Project.Scripts.Combat.Managers
             if (data == null || _pools.ContainsKey(data)) return;
 
             var pool = new ObjectPool<GameObject>(
-                createFunc: () => CreatePooledBullet(data),
-                actionOnGet: OnBulletTakenFromPool,
-                actionOnRelease: OnBulletReturnedToPool,
-                actionOnDestroy: OnBulletDestroyed,
+                createFunc: () => CreateBullet(data),
+                actionOnGet: bullet => bullet.SetActive(true),
+                actionOnRelease: bullet => bullet.SetActive(false),
+                actionOnDestroy: DestroyBullet,
                 collectionCheck: false,
                 defaultCapacity: data.initialPoolSize,
                 maxSize: data.maxPoolSize
@@ -83,7 +83,7 @@ namespace _Project.Scripts.Combat.Managers
 
             _pools.Add(data, pool);
 
-            if (showPoolDebugLogs)
+            if (showDebugLogs)
                 Debug.Log($"[BulletPoolManager] Registered pool for: {data.name}");
         }
 
@@ -103,8 +103,8 @@ namespace _Project.Scripts.Combat.Managers
         {
             if (bullet == null) return;
 
-            if (_bulletToDataMap.TryGetValue(bullet, out TurretWeaponData data) &&
-                _pools.TryGetValue(data, out ObjectPool<GameObject> pool))
+            if (_bulletToDataMap.TryGetValue(bullet, out var data) &&
+                _pools.TryGetValue(data, out var pool))
             {
                 pool.Release(bullet);
                 _bulletToDataMap.Remove(bullet);
@@ -117,35 +117,28 @@ namespace _Project.Scripts.Combat.Managers
 
         // ==================== INTERNAL ====================
 
-        private GameObject CreatePooledBullet(TurretWeaponData data)
+        private GameObject CreateBullet(TurretWeaponData data)
         {
             if (data.bulletPrefab == null)
             {
-                Debug.LogError($"[BulletPoolManager] bulletPrefab is NULL on TurretWeaponData: {data.name}");
-                return new GameObject("MissingBulletPrefab_Error");
+                Debug.LogError($"[BulletPoolManager] Missing bulletPrefab on {data.name}");
+                return new GameObject("MissingBulletPrefab");
             }
 
             GameObject bullet = Instantiate(data.bulletPrefab);
 
-            // Auto-add required components if missing
+            // Ensure required components exist
             if (!bullet.TryGetComponent<BulletSelfDestruct>(out _))
-            {
                 bullet.AddComponent<BulletSelfDestruct>();
-            }
 
             if (!bullet.TryGetComponent<BulletDamage>(out _))
-            {
                 bullet.AddComponent<BulletDamage>();
-            }
 
             bullet.SetActive(false);
             return bullet;
         }
 
-        private void OnBulletTakenFromPool(GameObject bullet) => bullet.SetActive(true);
-        private void OnBulletReturnedToPool(GameObject bullet) => bullet.SetActive(false);
-
-        private void OnBulletDestroyed(GameObject bullet)
+        private void DestroyBullet(GameObject bullet)
         {
             _bulletToDataMap.Remove(bullet);
             Destroy(bullet);

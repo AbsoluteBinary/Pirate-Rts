@@ -1,6 +1,7 @@
 using DG.Tweening;
 using TGS;
 using UnityEngine;
+using _Project.Scripts.Fleet;
 
 namespace _Project.Scripts.PlayerShip_Movement.Combat
 {
@@ -16,23 +17,16 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         [SerializeField] private float dropDuration = 0.8f;
         [SerializeField] private Ease dropEase = Ease.OutBounce;
 
-        [Header("References")]
-        [SerializeField] private PlayerCombatMovementController playerMovement;
-
         private GameObject currentPointer;
 
         private void Awake()
         {
             if (pointerPrefab == null)
                 Debug.LogError("CombatPointerController: pointerPrefab is missing!");
-
-            if (playerMovement == null)
-                Debug.LogWarning("CombatPointerController: PlayerMovement not assigned - will try to find automatically.");
         }
 
         private void Start()
         {
-            // Auto-find TGS if not assigned
             if (tgs == null)
                 tgs = TerrainGridSystem.instance;
 
@@ -69,11 +63,16 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
                 .SetEase(dropEase)
                 .OnComplete(() =>
                 {
-                    // Tell the ship to move
-                    if (playerMovement != null)
-                        playerMovement.MoveToLocation(targetPos);
+                    // === UPDATED: Use Fleet System instead of single ship ===
+                    if (FleetManager.Instance != null)
+                    {
+                        FleetManager.Instance.MoveFleetToLocation(targetPos);
+                        Debug.Log($"[CombatPointer] Fleet moving to: {targetPos}");
+                    }
                     else
-                        Debug.LogError("No PlayerCombatMovementController assigned!");
+                    {
+                        Debug.LogWarning("[CombatPointer] FleetManager not found!");
+                    }
 
                     // Fade out and destroy pointer
                     var rend = currentPointer.GetComponentInChildren<Renderer>();

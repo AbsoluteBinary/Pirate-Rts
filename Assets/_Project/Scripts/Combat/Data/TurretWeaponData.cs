@@ -11,18 +11,14 @@ namespace _Project.Scripts.Combat.Data
         public float bulletSpeed = 35f;
         public float range = 60f;
 
-        [Header("Visuals")]
-        public GameObject bulletPrefab;          // ← Main bullet prefab (used for pooling)
-        public GameObject muzzleFlashPrefab;
-        public GameObject impactPrefab;
-        public GameObject bulletTrailPrefab;     // Optional tracer
-        public ParticleSystem shellEjectionPrefab;
+        [Header("Core Assets")]
+        public GameObject bulletPrefab;
 
-        [Header("Audio")]
-        public AudioClip fireSound;
-        public AudioClip hitSound;
+        [Header("Visual & Audio Effects")]
+        [Tooltip("Reference to the VFX/Audio profile this weapon uses")]
+        public VFXProfile vfxProfile;        // ← New main reference
 
-        [Header("Pooling (Bullet Pool Settings)")]
+        [Header("Pooling")]
         [Tooltip("How many bullets to pre-warm for this weapon type at scene start.")]
         public int initialPoolSize = 80;
 

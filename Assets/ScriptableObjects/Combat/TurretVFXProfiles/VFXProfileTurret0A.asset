@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 636b0447cfec46e38c5487ac9c671e68, type: 3}
+  m_Name: VFXProfileTurret0A
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Combat.Data.VFXProfile
+  muzzleFlashVFX: {fileID: 3070518327953465789, guid: 433b6e2242d295e46998fa898ff277a4, type: 3}
+  bulletTrailVFX: {fileID: 5083330694576680963, guid: 0c71fb8cd325fd042bda66dcc706e170, type: 3}
+  shellEjectionVFX: {fileID: 0}
+  impactVFX: {fileID: 100002, guid: 07ed67d00b853b3488d253b0ad752dd7, type: 3}
+  fireSounds:
+  - {fileID: 8300000, guid: db5feb2a8c0610f43b1d9a0314aa03a5, type: 3}
+  hitSounds:
+  - {fileID: 8300000, guid: a260837287bd6004187ff002b498ed5c, type: 3}
+  largeExplosionVFX: {fileID: 100004, guid: 084c6a87873fd6e4da7978a01aa18b34, type: 3}
+  fireLoopVFX: {fileID: 100002, guid: 2522b91780559a44794173d3dae9723b, type: 3}

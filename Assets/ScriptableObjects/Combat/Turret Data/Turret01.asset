@@ -12,17 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c96ff7f05dfde08c9ce0fd51839faba, type: 3}
   m_Name: Turret01
   m_EditorClassIdentifier: Assembly-CSharp::ScriptableObjects.Combat.TurretWeaponData
-  damage: 25
-  fireRate: 1.8
-  bulletSpeed: 35
-  range: 60
+  damage: 10
+  fireRate: 1.1
+  bulletSpeed: 20
+  range: 15
   bulletPrefab: {fileID: 1153557873438720694, guid: ecd9bbbc3611a20c3aa167cffa7eb058, type: 3}
-  muzzleFlashPrefab: {fileID: 0}
-  impactPrefab: {fileID: 0}
-  bulletTrailPrefab: {fileID: 0}
-  shellEjectionPrefab: {fileID: 0}
-  fireSound: {fileID: 0}
-  hitSound: {fileID: 0}
+  vfxProfile: {fileID: 11400000, guid: 4c940b61c4219b60c8cc62830e93ec9d, type: 2}
   initialPoolSize: 80
   maxPoolSize: 400
   prewarmOnStart: 1

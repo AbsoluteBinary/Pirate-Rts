@@ -12,9 +12,14 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         [SerializeField] private float maxSpeed = 18f;
         [SerializeField] private float acceleration = 12f;
         [SerializeField] private float deceleration = 18f;
-        [SerializeField] private float turnSpeed = 85f;
-        [SerializeField] private float heightOffset = 1.5f;        // Slightly increased
-        [SerializeField] private float stopDistance = 3f;
+        [SerializeField] private float inertiaFactor = 0.92f;      // ← New: Momentum feel
+        [SerializeField] private float turnSpeed = 110f;
+        [SerializeField] private float heightOffset = 1.5f;
+        [SerializeField] private float stopDistance = 4f;
+
+        [Header("Arrival Settings")]
+        [SerializeField] private float arrivalThreshold = 1.2f;
+        [SerializeField] private float finalRotationDuration = 0.6f;
 
         [Header("Realism")]
         [SerializeField] private float rollAmount = 7f;
@@ -26,6 +31,7 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         private float currentSpeed = 0f;
 
         private Tween bobTween;
+        private Tween finalRotationTween;
 
         private void Awake()
         {
@@ -36,16 +42,13 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         private void LateUpdate()
         {
             if (shipVisual == null) return;
-
-            // === CRITICAL FIX: Keep ship level at all times ===
             Vector3 euler = shipVisual.eulerAngles;
-            shipVisual.rotation = Quaternion.Euler(0f, euler.y, euler.z); // Lock pitch (X) to 0
+            shipVisual.rotation = Quaternion.Euler(0f, euler.y, euler.z);
         }
 
         private void Update()
         {
             if (!hasTarget) return;
-
             MoveAndSteer();
         }
 
@@ -53,7 +56,7 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         {
             targetPosition = new Vector3(worldPosition.x, worldPosition.y + heightOffset, worldPosition.z);
             hasTarget = true;
-            currentSpeed = Mathf.Max(currentSpeed, 4f);
+            currentSpeed = Mathf.Max(currentSpeed, 5f);
         }
 
         private void MoveAndSteer()
@@ -61,36 +64,39 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
             Vector3 toTarget = targetPosition - shipVisual.position;
             float distance = toTarget.magnitude;
 
-            if (distance <= 0.6f)
+            if (distance <= arrivalThreshold)
             {
                 ArriveAtDestination();
                 return;
             }
 
-            // === IMPROVED: Only rotate on Y axis (no nose dive) ===
+            // Aim
             Vector3 desiredDirection = toTarget.normalized;
-            desiredDirection.y = 0f;                    // Remove vertical component
+            desiredDirection.y = 0f;
 
             if (desiredDirection.sqrMagnitude > 0.001f)
             {
                 Quaternion targetRot = Quaternion.LookRotation(desiredDirection, Vector3.up);
-                
                 shipVisual.rotation = Quaternion.RotateTowards(
                     shipVisual.rotation, targetRot, turnSpeed * Time.deltaTime);
             }
 
-            // Speed control
+            // Speed Control with Inertia
             bool isClose = distance < stopDistance;
-            float targetSpeed = isClose ? 
-                Mathf.Lerp(2f, maxSpeed * 0.6f, distance / stopDistance) : maxSpeed;
+            float targetSpeed = isClose 
+                ? Mathf.Lerp(1f, maxSpeed * 0.35f, distance / stopDistance) 
+                : maxSpeed;
 
-            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, 
+            // Apply acceleration / deceleration
+            float smoothSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, 
                 (isClose ? deceleration : acceleration) * Time.deltaTime);
+
+            // Add inertia (feels much more boat-like)
+            currentSpeed = Mathf.Lerp(currentSpeed, smoothSpeed, 1f - inertiaFactor);
 
             // Move forward
             shipVisual.position += shipVisual.forward * currentSpeed * Time.deltaTime;
 
-            // Dynamic roll
             ApplyTurningRoll(desiredDirection);
         }
 
@@ -100,20 +106,22 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
             float targetRoll = Mathf.Clamp(angleDiff * -0.18f, -rollAmount, rollAmount);
 
             Vector3 currentEuler = shipVisual.localEulerAngles;
-            currentEuler.z = Mathf.LerpAngle(currentEuler.z, targetRoll, Time.deltaTime * 6f);
+            currentEuler.z = Mathf.LerpAngle(currentEuler.z, targetRoll, Time.deltaTime * 8f);
             shipVisual.localEulerAngles = currentEuler;
         }
 
         private void ArriveAtDestination()
         {
             hasTarget = false;
-            currentSpeed = 0f;
 
-            // Smoothly level the ship
-            shipVisual.DOLocalRotate(new Vector3(0, shipVisual.localEulerAngles.y, 0), 0.8f)
+            // Final gentle slowdown + leveling
+            finalRotationTween?.Kill();
+            finalRotationTween = shipVisual.DOLocalRotate(
+                new Vector3(0, shipVisual.localEulerAngles.y, 0), 
+                finalRotationDuration)
                 .SetEase(Ease.OutSine);
 
-            Debug.Log("[Combat] Ship arrived");
+            Debug.Log("[Combat] Ship arrived with momentum.");
         }
 
         private void StartGentleBob()
@@ -126,6 +134,7 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         private void OnDestroy()
         {
             bobTween?.Kill();
+            finalRotationTween?.Kill();
         }
     }
 }

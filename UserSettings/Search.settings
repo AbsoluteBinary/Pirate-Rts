@@ -2,7 +2,7 @@ trackSelection = true
 refreshSearchWindowsInPlayMode = false
 pickerAdvancedUI = false
 fetchPreview = true
-defaultFlags = 0
+defaultFlags = 264
 keepOpen = true
 queryFolder = "Assets"
 onBoardingDoNotAskAgain = true
@@ -22,12 +22,12 @@ providers = {
 		defaultAction = null
 	}
 	adb = {
-		active = false
+		active = true
 		priority = 2500
 		defaultAction = null
 	}
 	presets_provider = {
-		active = false
+		active = true
 		priority = -10
 		defaultAction = null
 	}
@@ -75,7 +75,7 @@ indexOnEditorStartup = true
 logIndexingPerformanceReport = false
 expandedQueries = [
 ]
-queryBuilder = true
+queryBuilder = false
 ignoredProperties = "addedobjectfileids;classname;correspondingsourceobject;editorclassidentifier;editorhideflags;fileid;gameobject;id;imagecontentshash;isprefabvariant;name;objecthideflags;pathid;prefabasset;prefabinstance;script"
 helperWidgetCurrentArea = "all"
 disabledIndexers = ""

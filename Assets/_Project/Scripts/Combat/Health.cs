@@ -1,3 +1,4 @@
+using _Project.Scripts.Combat.Ship;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,10 +17,15 @@ namespace _Project.Scripts.Combat
         
         [Header("Health Settings")]
         [SerializeField] private float maxHealth = 100f;
+        
+        public UnityEvent OnPlayerDeath;
 
         [Header("Events")]
         public UnityEvent<float> OnHealthChanged;
         public UnityEvent OnDeath;
+        
+        [Header("VFX")]
+        [SerializeField] private ShipVFX shipVFX;
 
         private float currentHealth;
         private bool isDead;
@@ -45,10 +51,38 @@ namespace _Project.Scripts.Combat
 
             OnHealthChanged?.Invoke(currentHealth);
 
+            // Only play damage hit VFX (not death)
+            if (shipVFX != null)
+            {
+                shipVFX.PlayDamageHitVFX();   // ← Changed to damage hit only
+            }
+
             if (currentHealth <= 0f)
             {
                 Die();
             }
+        }
+        
+        /// <summary>
+        /// Sets a new maximum health value and optionally resets current health.
+        /// </summary>
+        /// <summary>
+        /// Sets a new maximum health and optionally resets current health
+        /// </summary>
+        public void SetMaxHealth(float newMaxHealth, bool resetCurrentHealth = true)
+        {
+            if (newMaxHealth <= 0f)
+            {
+                Debug.LogWarning("SetMaxHealth: newMaxHealth must be > 0");
+                return;
+            }
+
+            maxHealth = newMaxHealth;
+
+            if (resetCurrentHealth || currentHealth > maxHealth)
+                currentHealth = maxHealth;
+
+            OnHealthChanged?.Invoke(currentHealth);
         }
 
         /// <summary>
@@ -81,20 +115,21 @@ namespace _Project.Scripts.Combat
             if (isDead) return;
 
             isDead = true;
-            OnDeath?.Invoke();
 
-            // Play destruction effects
+            Debug.Log($"[Health] 🔥 OnDeath event being invoked on {gameObject.name}");
+
+            OnDeath?.Invoke();
+            OnPlayerDeath?.Invoke();
+
+            // Let ShipVFX handle the death explosion (via event)
+            // We removed the direct call here
+
             if (destructionVFX != null)
-            {
                 Instantiate(destructionVFX, transform.position, Quaternion.identity);
-            }
 
             if (destructionSound != null)
-            {
                 AudioSource.PlayClipAtPoint(destructionSound, transform.position);
-            }
 
-            // Disable ship after short delay (so effects can play)
             StartCoroutine(DisableAfterDelay(destructionDelay));
         }
 
