@@ -1,4 +1,4 @@
-using Packages.Crest.Crest.Scripts;
+using Crest;
 using UnityEngine;
 
 namespace _Project.Scripts.Ocean

@@ -10,20 +10,19 @@
 #pragma warning disable
 #endif
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.Validation;
-using Sirenix.OdinValidator.Editor;
-using Sirenix.Utilities;
-using Sirenix.Utilities.Editor;
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
+using Sirenix.OdinInspector.Editor.Validation;
+using Sirenix.Utilities;
+using Sirenix.Utilities.Editor;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEngine;
+using System.Collections;
+using System;
+using Sirenix.OdinValidator.Editor;
+using Sirenix.OdinInspector.Modules.Addressables.Editor;
 
 [assembly: RegisterValidationRule(typeof(CheckDuplicateBundleDependenciesValidator),
 	Description = "This validator detects potential duplicate asset dependencies in an addressable group, without the need for a build. " +
@@ -35,7 +34,7 @@ using UnityEngine;
 	"never accessed by the same user group, such as region-specific assets, these duplications might be desired or at least inconsequential. " +
 	"As every project is unique, decisions concerning duplicate asset dependencies should be considered on a case-by-case basis.")]
 
-namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators
+namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 {
 	public class CheckDuplicateBundleDependenciesValidator : GlobalValidator
 	{

@@ -13,7 +13,7 @@
 using System.Reflection;
 using UnityEditor.AddressableAssets.Settings;
 
-namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Internal
+namespace Sirenix.OdinInspector.Modules.Addressables.Editor.Internal
 {
 	internal static class OdinAddressableReflection
 	{

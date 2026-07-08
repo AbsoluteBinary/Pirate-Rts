@@ -1,6 +1,6 @@
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
-using Packages.Crest.Crest.Scripts;
+using Crest;
 using UnityEngine;
 
 namespace _Project.Scripts.UI.WorldMap.ObjectInteractions

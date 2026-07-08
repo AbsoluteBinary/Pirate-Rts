@@ -10,19 +10,18 @@
 #pragma warning disable
 #endif
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.Validation;
-using Sirenix.OdinValidator.Editor;
-using Sirenix.Utilities.Editor;
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
-using UnityEngine;
+using Sirenix.OdinInspector.Editor.Validation;
+using Sirenix.Utilities.Editor;
+using System.Collections;
+using System;
+using System.IO;
+using Sirenix.OdinValidator.Editor;
+using Sirenix.OdinInspector.Modules.Addressables.Editor;
 
 [assembly: RegisterValidationRule(typeof(CheckResourcesToAddressableDuplicateDependenciesValidator),
 	Description = "This validator identifies dependencies that are duplicated in both addressable groups and the \"Resources\" folder.\n\n" +
@@ -30,7 +29,7 @@ using UnityEngine;
 				"You can decide to simply ignore these duplicated dependencies if this behavior is desired, or use the provided fix " +
 				"to move the asset outside of the \"Resources\" folder.")]
 
-namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators
+namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 {
 	public class CheckResourcesToAddressableDuplicateDependenciesValidator : GlobalValidator
 	{

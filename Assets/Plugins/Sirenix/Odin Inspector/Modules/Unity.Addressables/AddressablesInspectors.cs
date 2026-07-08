@@ -7,36 +7,17 @@
 #if !SIRENIX_INTERNAL
 #pragma warning disable
 #endif
+
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables;
-using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Internal;
 using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Reflection.Editor;
-using Sirenix.Serialization;
-using Sirenix.Utilities;
-using Sirenix.Utilities.Editor;
-using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.GUI;
-using UnityEditor.AddressableAssets.Settings;
-using UnityEditor.U2D;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.U2D;
-using Object = UnityEngine.Object;
 
 [assembly: RegisterAssetReferenceAttributeForwardToChild(typeof(InlineEditorAttribute))]
 [assembly: RegisterAssetReferenceAttributeForwardToChild(typeof(PreviewFieldAttribute))]
 
-namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
+namespace Sirenix.OdinInspector
 {
+    using System.Diagnostics;
+
     /// <summary>
     /// <para>DisallowAddressableSubAssetField is used on AssetReference properties, and disallows and prevents assigned sub-assets to the asset reference.</para>
     /// </summary>
@@ -84,8 +65,32 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
             this.AttributeType = attributeType;
         }
     }
+}
 
 #if UNITY_EDITOR
+namespace Sirenix.OdinInspector.Modules.Addressables.Editor
+{
+    using Sirenix.OdinInspector.Editor;
+    using Sirenix.Serialization;
+    using Sirenix.Utilities;
+    using Sirenix.Utilities.Editor;
+    using Sirenix.OdinInspector.Modules.Addressables.Editor.Internal;
+    using Sirenix.Reflection.Editor;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using UnityEditor;
+    using UnityEditor.AddressableAssets;
+    using UnityEditor.AddressableAssets.Settings;
+    using UnityEditor.AddressableAssets.GUI;
+    using UnityEngine;
+    using UnityEngine.AddressableAssets;
+	using System.Runtime.Serialization;
+    using UnityEngine.U2D;
+    using UnityEditor.U2D;
+    using System.IO;
+
     /// <summary>
     /// Draws an AssetReference property.
     /// </summary>
@@ -502,14 +507,14 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
             if (mainAsset != null && mainAsset is SpriteAtlas)
             {
                 subAssets = OdinAddressableUtility.EnumerateAllActualAndVirtualSubAssets(mainAsset, path)
-                    .Where(val => val != null && (val is Sprite || val is Texture2D))
-                    .ToList();
+                                                  .Where(val => val != null && (val is Sprite || val is Texture2D))
+                                                  .ToList();
             }
             else
             {
                 subAssets = OdinAddressableUtility.EnumerateAllActualAndVirtualSubAssets(mainAsset, path)
-                    .Where(val => val != null && this.targetType.IsInstanceOfType(val))
-                    .ToList();
+                                                  .Where(val => val != null && this.targetType.IsInstanceOfType(val))
+                                                  .ToList();
             }
 
             var items = new GenericSelectorItem<UnityEngine.Object>[subAssets.Count + 1];
@@ -981,9 +986,9 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
                     searchFilter += $"t:{filterType.Name} ";
                 }
 
-                IEnumerator<HierarchyProperty> enumerator = AssetDatabase_Internals.EnumerateAllAssets(searchFilter, false, AssetDatabaseSearchArea.InAssetsOnly);
+                IEnumerator enumerator = EnumerateAllAssets(searchFilter, false, AssetDatabaseSearchArea.InAssetsOnly);
 
-                if (enumerator.MoveNext())
+                if (enumerator != null && enumerator.MoveNext())
                 {
                     var addedGuids = new HashSet<string>();
 
@@ -1003,9 +1008,9 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
 
                     do
                     {
-                        HierarchyProperty current = enumerator.Current;
+                        EnumeratedAssetInfo current;
 
-                        if (addedGuids.Contains(current.guid) || !current.isMainRepresentation)
+                        if (!TryGetEnumeratedAssetInfo(enumerator.Current, out current) || addedGuids.Contains(current.guid) || !current.isMainRepresentation)
                         {
                             continue;
                         }
@@ -1020,7 +1025,7 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
                         }
                         else
                         {
-                            string path = AssetDatabase.GetAssetPath(current.instanceID);
+                            string path = current.assetPath;
 
                             if (!current.isFolder)
                             {
@@ -1066,6 +1071,100 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
 
             noneItem.SdfIcon = SdfIconType.X;
             tree.MenuItems.Insert(0, noneItem);
+        }
+
+        private static IEnumerator EnumerateAllAssets(string filter, bool includeHidden, AssetDatabaseSearchArea searchArea)
+        {
+            MethodInfo method = typeof(AssetDatabase_Internals).GetMethod(
+                "EnumerateAllAssets",
+                BindingFlags.Static | BindingFlags.Public,
+                null,
+                new Type[] { typeof(string), typeof(bool), typeof(AssetDatabaseSearchArea) },
+                null);
+
+            return method == null ? null : method.Invoke(null, new object[] { filter, includeHidden, searchArea }) as IEnumerator;
+        }
+
+        private static bool TryGetEnumeratedAssetInfo(object value, out EnumeratedAssetInfo info)
+        {
+            info = default;
+
+            if (value == null)
+            {
+                return false;
+            }
+
+            info.guid = GetReflectedValue<string>(value, "guid");
+
+            if (string.IsNullOrEmpty(info.guid))
+            {
+                return false;
+            }
+
+            info.assetPath = GetReflectedValue<string>(value, "assetPath");
+
+            if (string.IsNullOrEmpty(info.assetPath))
+            {
+                info.assetPath = AssetDatabase.GUIDToAssetPath(info.guid);
+            }
+
+            if (string.IsNullOrEmpty(info.assetPath))
+            {
+                return false;
+            }
+
+            info.name = GetReflectedValue<string>(value, "name");
+
+            if (string.IsNullOrEmpty(info.name))
+            {
+                info.name = Path.GetFileNameWithoutExtension(info.assetPath);
+            }
+
+            info.icon = GetReflectedValue<Texture>(value, "icon");
+            info.isFolder = GetReflectedValue<bool>(value, "isFolder", false);
+            info.isMainRepresentation = GetReflectedValue<bool>(value, "isMainRepresentation", true);
+
+            return true;
+        }
+
+        private static T GetReflectedValue<T>(object target, string memberName, T defaultValue = default)
+        {
+            Type type = target.GetType();
+            FieldInfo field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (field != null)
+            {
+                object fieldValue = field.GetValue(target);
+
+                if (fieldValue is T fieldResult)
+                {
+                    return fieldResult;
+                }
+            }
+
+            PropertyInfo property = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (property != null)
+            {
+                object propertyValue = property.GetValue(target, null);
+
+                if (propertyValue is T propertyResult)
+                {
+                    return propertyResult;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        private struct EnumeratedAssetInfo
+        {
+            public string guid;
+            public string assetPath;
+            public string name;
+            public Texture icon;
+            public bool isFolder;
+            public bool isMainRepresentation;
         }
 
         private static int GetExtensionsEndingIndex(string path)
@@ -1463,12 +1562,12 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
                 {
                     if (to.InheritsFrom(typeof(AssetReferenceT<>)))
                     {
-                        var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
+						var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
 
-                        var targetType = baseType.GetGenericArguments()[0];
+						var targetType = baseType.GetGenericArguments()[0];
 
-                        return from.InheritsFrom(targetType);
-                    }
+						return from.InheritsFrom(targetType);
+					}
                     else
                     {
                         return true;
@@ -1513,12 +1612,12 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
             if (to.InheritsFrom(typeof(AssetReference)))
             {
                 Type assetType;
-                if (to.InheritsFrom(typeof(AssetReferenceT<>)))
-                {
-                    var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
-                    assetType = baseType.GetGenericArguments()[0];
-                }
-                else
+				if (to.InheritsFrom(typeof(AssetReferenceT<>)))
+				{
+					var baseType = to.GetGenericBaseType(typeof(AssetReferenceT<>));
+					assetType = baseType.GetGenericArguments()[0];
+				}
+				else
                 {
                     assetType = typeof(UnityEngine.Object);
                 }
@@ -1811,15 +1910,15 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
         {
             if (assetReferenceType == null) throw new ArgumentNullException(nameof(assetReferenceType));
 
-            if (assetReferenceType.InheritsFrom(typeof(AssetReferenceT<>)))
+			if (assetReferenceType.InheritsFrom(typeof(AssetReferenceT<>)))
             {
-                var genericBase = assetReferenceType.GetGenericBaseType(typeof(AssetReferenceT<>));
-                return genericBase.GetGenericArguments()[0];
-            }
+			    var genericBase = assetReferenceType.GetGenericBaseType(typeof(AssetReferenceT<>));
+				return genericBase.GetGenericArguments()[0];
+			}
             else
-            {
-                return typeof(UnityEngine.Object);
-            }
+			{
+				return typeof(UnityEngine.Object);
+			}
         }
 
         public static Type[] GetAssetReferenceValidMainAssetTypes(Type assetReferenceType)
@@ -1926,6 +2025,5 @@ namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables
             return entry;
         }
     }
-
-#endif
 }
+#endif

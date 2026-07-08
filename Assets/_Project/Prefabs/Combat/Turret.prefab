@@ -361,6 +361,8 @@ MonoBehaviour:
   barrelPivot: {fileID: 6993582587996254776}
   muzzleTip: {fileID: 7292200459672543530}
   turretVFX: {fileID: 4661466480729388648}
+  targetUpdateInterval: 1.5
+  data: {fileID: 11400000, guid: 14a18a8ead078b97c9395f4ff5ac0687, type: 2}
 --- !u!114 &4661466480729388648
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -373,16 +375,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0527765c9f624d079491d763b58e3ad9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Combat.Turrets.TurretVFX
-  turret: {fileID: 2523995453141049438}
-  muzzleFlashVFX: {fileID: 7634420434017284396, guid: b9ed127bfed05be4db493ca51e744a76, type: 3}
-  bulletTrailVFX: {fileID: 6191541304733331936, guid: 4a40a5abca12a70f5b1cea2d7f054f71, type: 3}
-  shellEjectionVFX: {fileID: 0}
-  impactVFX: {fileID: 7634420434017284396, guid: b9ed127bfed05be4db493ca51e744a76, type: 3}
-  fireSounds:
-  - {fileID: 8300000, guid: d047614f826bd5b439d5a7c1df578d97, type: 3}
-  fireVolume: 0.85
-  minPitch: 0.9
-  maxPitch: 1.15
 --- !u!1 &7236898607231355145
 GameObject:
   m_ObjectHideFlags: 0

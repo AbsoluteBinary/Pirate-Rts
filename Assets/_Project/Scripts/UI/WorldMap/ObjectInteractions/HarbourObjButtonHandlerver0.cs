@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,6 +7,7 @@ namespace _Project.Scripts.UI.WorldMap.ObjectInteractions
     public class HarbourObjButtonHandlerver0 : MonoBehaviour
     {
         
+        [Obsolete("Obsolete")]
         private void Awake()
         {
             Debug.Log($"BaseButtonHandler: Awake called on {gameObject.name}. InstanceID: {gameObject.GetInstanceID()}");

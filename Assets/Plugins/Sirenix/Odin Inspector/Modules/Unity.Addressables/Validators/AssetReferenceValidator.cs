@@ -12,16 +12,15 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators;
-using Sirenix.OdinInspector;
+using UnityEngine;
+using UnityEditor;
+using UnityEditor.AddressableAssets;
 using Sirenix.OdinInspector.Editor.Validation;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
-using UnityEditor;
-using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Sirenix.OdinInspector.Modules.Addressables.Editor;
 
 #if ODIN_VALIDATOR_3_1
 [assembly: RegisterValidationRule(typeof(AssetReferenceValidator), Description =
@@ -38,7 +37,7 @@ using UnityEngine.AddressableAssets;
 [assembly: RegisterValidator(typeof(AssetReferenceValidator))]
 #endif
 
-namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators
+namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 {
 	public class AssetReferenceValidator : ValueValidator<AssetReference>
     {

@@ -10,12 +10,11 @@
 #pragma warning disable
 #endif
 
-using Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.Validation;
-using UnityEditor.AddressableAssets;
 using UnityEngine;
+using UnityEditor.AddressableAssets;
+using Sirenix.OdinInspector.Editor.Validation;
 using UnityEngine.AddressableAssets;
+using Sirenix.OdinInspector.Modules.Addressables.Editor;
 
 #if ODIN_VALIDATOR_3_1
 [assembly: RegisterValidationRule(typeof(AssetLabelReferenceValidator), Description =
@@ -27,7 +26,7 @@ using UnityEngine.AddressableAssets;
 [assembly: RegisterValidator(typeof(AssetLabelReferenceValidator))]
 #endif
 
-namespace Plugins.Sirenix.Odin_Inspector.Modules.Unity.Addressables.Validators
+namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 {
 	/// <summary>
 	/// Validator for AssetLabelReference values.

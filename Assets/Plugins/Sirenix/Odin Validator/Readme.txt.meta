@@ -6,3 +6,10 @@ TextScriptImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227861
+  packageName: Odin Validator
+  packageVersion: 4.0.2.0
+  assetPath: Assets/Plugins/Sirenix/Odin Validator/Readme.txt
+  uploadId: 925670

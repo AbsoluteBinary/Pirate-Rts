@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using _Project.Scripts.Fleet.Data;           // FleetData + ShipBlueprint
 using _Project.Scripts.Fleet;
-using _Project.Scripts.Harbour.ShipBuilder.Data;
+using _Project.Scripts.PlayerShip_Movement.Combat;
 
 namespace _Project.Scripts.UI.Combat
 {
@@ -12,23 +11,10 @@ namespace _Project.Scripts.UI.Combat
     {
         private UIDocument uiDocument;
         private VisualElement root;
-
-        // === NEW: Fleet HUD ===
         private VisualElement fleetContainer;
         private readonly List<VisualElement> shipBars = new List<VisualElement>();
+        private VisualElement selectedBar;
 
-        private void OnEnable()
-        {
-            if (FleetManager.Instance != null)
-                FleetManager.Instance.OnFleetChanged += RefreshFleetHUD;
-        }
-
-        private void OnDisable()
-        {
-            if (FleetManager.Instance != null)
-                FleetManager.Instance.OnFleetChanged -= RefreshFleetHUD;
-        }
-        
         private void Awake()
         {
             uiDocument = GetComponent<UIDocument>();
@@ -36,20 +22,10 @@ namespace _Project.Scripts.UI.Combat
 
             BuildHUD();
         }
-        
-        
 
         private void BuildHUD()
         {
-            root.Clear();
-
-            // ... your existing top HUD, health bar, resources, etc. ...
-
             CreateFleetHUD();
-
-            // Optional: Refresh when fleet changes
-            //if (FleetManager.Instance != null)
-                //FleetManager.Instance.OnFleetChanged += RefreshFleetHUD;   // You can add this event later
         }
 
         private void CreateFleetHUD()
@@ -59,8 +35,7 @@ namespace _Project.Scripts.UI.Combat
             fleetContainer.style.bottom = 25;
             fleetContainer.style.left = 25;
             fleetContainer.style.flexDirection = FlexDirection.Column;
-            //fleetContainer.style.gap = 6;
-            fleetContainer.style.backgroundColor = new Color(0.04f, 0.08f, 0.18f, 0.92f); // Dark Blue
+            fleetContainer.style.backgroundColor = new Color(0.04f, 0.08f, 0.18f, 0.92f);
             fleetContainer.style.paddingTop = 10;
             fleetContainer.style.paddingBottom = 10;
             fleetContainer.style.paddingLeft = 12;
@@ -71,13 +46,20 @@ namespace _Project.Scripts.UI.Combat
             fleetContainer.style.borderBottomRightRadius = 8;
             fleetContainer.style.width = 220;
 
+            // === Clickable "FLEET" Title (Select All) ===
             var title = new Label("FLEET");
             title.style.fontSize = 15;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.color = new Color(1f, 0.55f, 0.1f); // Orange accent
+            title.style.color = new Color(1f, 0.55f, 0.1f);
             title.style.marginBottom = 8;
-            fleetContainer.Add(title);
+            title.style.unityTextAlign = TextAnchor.MiddleLeft;
 
+            title.RegisterCallback<ClickEvent>(evt =>
+            {
+                SelectAllShips();
+            });
+
+            fleetContainer.Add(title);
             root.Add(fleetContainer);
 
             RefreshFleetHUD();
@@ -85,28 +67,26 @@ namespace _Project.Scripts.UI.Combat
 
         public void RefreshFleetHUD()
         {
-            // Clear previous bars
             foreach (var bar in shipBars)
                 fleetContainer.Remove(bar);
             shipBars.Clear();
+            selectedBar = null;
 
-            if (FleetManager.Instance == null || FleetManager.Instance.currentFleetData == null)
+            if (FleetManager.Instance?.activeShips == null)
                 return;
 
-            var fleetData = FleetManager.Instance.currentFleetData;
-
-            for (int i = 0; i < fleetData.ships.Count; i++)
+            foreach (var ship in FleetManager.Instance.activeShips)
             {
-                ShipBlueprint blueprint = fleetData.ships[i];
-                if (blueprint == null) continue;
-            
-                var bar = CreateShipBar(blueprint, i == 0); // First ship = flagship
+                if (ship == null) continue;
+
+                bool isFlagship = FleetManager.Instance.flagship == ship;
+                var bar = CreateShipBar(ship, isFlagship);
                 fleetContainer.Add(bar);
                 shipBars.Add(bar);
             }
         }
 
-        private VisualElement CreateShipBar(ShipBlueprint blueprint, bool isFlagship)
+        private VisualElement CreateShipBar(PlayerCombatMovementController shipController, bool isFlagship)
         {
             var bar = new VisualElement();
             bar.style.flexDirection = FlexDirection.Row;
@@ -119,21 +99,89 @@ namespace _Project.Scripts.UI.Combat
             bar.style.borderTopRightRadius = 5;
             bar.style.borderBottomLeftRadius = 5;
             bar.style.borderBottomRightRadius = 5;
+            bar.style.marginBottom = 6; // Spacing between bars
 
-            // Ship Name
-            var nameLabel = new Label(blueprint.shipName);
+            bar.userData = shipController;
+
+            var nameLabel = new Label(shipController.gameObject.name);
             nameLabel.style.flexGrow = 1;
             nameLabel.style.color = Color.white;
             nameLabel.style.fontSize = 13;
             nameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
 
             if (isFlagship)
-                nameLabel.text = "★ " + blueprint.shipName;
+                nameLabel.text = "★ " + shipController.gameObject.name;
 
             bar.Add(nameLabel);
 
-            // Optional: Health or status indicator later
+            // === Click to select ship ===
+            bar.RegisterCallback<ClickEvent>(evt =>
+            {
+                SelectShip(bar, shipController);
+            });
+
+            // Hover effect
+            bar.RegisterCallback<MouseEnterEvent>(evt =>
+            {
+                if (bar != selectedBar)
+                    bar.style.backgroundColor = new Color(0.12f, 0.22f, 0.45f, 0.95f);
+            });
+
+            bar.RegisterCallback<MouseLeaveEvent>(evt =>
+            {
+                if (bar != selectedBar)
+                    bar.style.backgroundColor = new Color(0.08f, 0.15f, 0.3f, 0.95f);
+            });
+
             return bar;
+        }
+
+        private void SelectShip(VisualElement bar, PlayerCombatMovementController shipController)
+        {
+            // Deselect previous bar
+            if (selectedBar != null && selectedBar != bar)
+            {
+                selectedBar.style.backgroundColor = new Color(0.08f, 0.15f, 0.3f, 0.95f);
+            }
+
+            // Select new bar
+            selectedBar = bar;
+            bar.style.backgroundColor = new Color(0.2f, 0.35f, 0.65f, 0.95f);
+
+            FleetManager.Instance?.SelectSingle(shipController);
+        }
+
+        private void SelectAllShips()
+        {
+            if (FleetManager.Instance == null) return;
+
+            FleetManager.Instance.SelectAll();
+
+            // Highlight all bars
+            foreach (var bar in shipBars)
+            {
+                bar.style.backgroundColor = new Color(0.2f, 0.35f, 0.65f, 0.95f);
+            }
+
+            selectedBar = null;
+        }
+
+        // Call this if selection changes from outside the UI
+        public void UpdateSelectionVisuals()
+        {
+            if (FleetManager.Instance == null) return;
+
+            foreach (var bar in shipBars)
+            {
+                if (bar.userData is PlayerCombatMovementController controller)
+                {
+                    bool isSelected = FleetManager.Instance.selectedShips.Contains(controller);
+
+                    bar.style.backgroundColor = isSelected
+                        ? new Color(0.2f, 0.35f, 0.65f, 0.95f)
+                        : new Color(0.08f, 0.15f, 0.3f, 0.95f);
+                }
+            }
         }
     }
 }

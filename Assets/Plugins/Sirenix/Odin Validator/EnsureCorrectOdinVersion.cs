@@ -3,20 +3,19 @@
 // Copyright (c) Sirenix ApS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
-
-using System;
-using System.IO;
-using System.Reflection;
-using UnityEditor;
-using UnityEngine;
-
 #if UNITY_EDITOR
 
-namespace Plugins.Sirenix.Odin_Validator
+namespace Sirenix.OdinValidator.Editor
 {
+    using System;
+    using System.IO;
+    using System.Reflection;
+    using UnityEditor;
+    using UnityEngine;
+
     internal static class EnsureCorrectOdinVersion
     {
-        private const string validatorVersion = "4.0.1.4";
+        private const string validatorVersion = "4.0.2.0";
 
         private static bool IsHeadlessOrBatchMode { get { return SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null || UnityEditorInternal.InternalEditorUtility.inBatchMode; } }
 
@@ -134,10 +133,10 @@ namespace Plugins.Sirenix.Odin_Validator
                     EditorPrefs.SetBool("ODIN_VALIDATOR_SHOW_GETTING_STARTED", false);
                     EditorApplication.delayCall += () =>
                     {
-                        var t = global::Sirenix.Serialization.TwoWaySerializationBinder.Default.BindToType("Sirenix.OdinInspector.Editor.GettingStarted.GettingStartedWindow");
+                        var t = Sirenix.Serialization.TwoWaySerializationBinder.Default.BindToType("Sirenix.OdinInspector.Editor.GettingStarted.GettingStartedWindow");
                         if (t != null)
                         {
-                            var action = global::Sirenix.Utilities.Editor.Expressions.ExpressionUtility.ParseAction<bool, bool>("ShowWindow(false, true)", true, t, out var _);
+                            var action = Utilities.Editor.Expressions.ExpressionUtility.ParseAction<bool, bool>("ShowWindow(false, true)", true, t, out var _);
                             action.Invoke(false, true);
                         }
                     };

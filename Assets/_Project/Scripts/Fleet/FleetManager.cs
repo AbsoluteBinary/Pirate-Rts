@@ -22,7 +22,7 @@ namespace _Project.Scripts.Fleet
         public List<PlayerCombatMovementController> activeShips = new List<PlayerCombatMovementController>();
         public PlayerCombatMovementController flagship;
 
-        private readonly List<PlayerCombatMovementController> selectedShips = new List<PlayerCombatMovementController>();
+        public readonly List<PlayerCombatMovementController> selectedShips = new List<PlayerCombatMovementController>();
 
         // === NEW: Event for HUD refresh ===
         public event System.Action OnFleetChanged;
