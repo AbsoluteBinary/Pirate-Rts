@@ -8,20 +8,26 @@ namespace _Project.Scripts.LevelEditor.Editor
 {
     public class CombatSceneBuilderWindow : EditorWindow
     {
-        // === Core References ===
-        private TerrainGridSystem tgs;
+        #region Core References
+        private TerrainGridSystem landGrid;
+        private TerrainGridSystem objectGrid;
+        private TerrainGridSystem activeGrid;
         private CombatLayoutDatabase layoutDatabase;
+        #endregion
 
-        // === Placement ===
+        #region Placement & Tracking
         private GameObject selectedPrefab;
         private GameObject currentPreview;
         private bool isPreviewActive = false;
 
-        // === Tracking ===
         private List<GameObject> placedObjects = new List<GameObject>();
-        private HashSet<int> occupiedCells = new HashSet<int>();
 
-        // === Categories ===
+        // Separate occupation tracking per grid
+        private HashSet<int> occupiedLandCells = new HashSet<int>();
+        private HashSet<int> occupiedObjectCells = new HashSet<int>();
+        #endregion
+
+        #region Categories
         private bool showLandTiles = true;
         private bool showTurrets = true;
         private bool showWalls = true;
@@ -33,9 +39,16 @@ namespace _Project.Scripts.LevelEditor.Editor
         private List<GameObject> walls = new List<GameObject>();
         private List<GameObject> buildings = new List<GameObject>();
         private List<GameObject> combatShips = new List<GameObject>();
+        #endregion
 
-        // === Save/Load ===
+        #region Grid Selection
+        private enum GridType { Land, Objects }
+        private GridType currentGridType = GridType.Land;
+        #endregion
+
+        #region Save / Load
         private int selectedSlot = 0;
+        #endregion
 
         [MenuItem("Tools/Combat Scene Builder")]
         public static void ShowWindow()
@@ -45,9 +58,11 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void OnEnable()
         {
-            if (tgs == null)
-                tgs = TerrainGridSystem.instance;
+            // Try to auto-find if not assigned
+            if (landGrid == null)
+                landGrid = Object.FindObjectOfType<TerrainGridSystem>();
 
+            activeGrid = landGrid;
             SceneView.duringSceneGui += OnSceneGUI;
         }
 
@@ -56,38 +71,48 @@ namespace _Project.Scripts.LevelEditor.Editor
             SceneView.duringSceneGui -= OnSceneGUI;
             DestroyPreview();
         }
-        
-        private Dictionary<string, int> GetCategoryCounts(CombatLayout layout)
-        {
-            var counts = new Dictionary<string, int>
-            {
-                { "Land Tiles", 0 },
-                { "Turrets", 0 },
-                { "Walls", 0 },
-                { "Buildings", 0 },
-                { "Combat Ships", 0 }
-            };
 
-            if (layout == null) return counts;
-
-            foreach (var data in layout.PlacedObjects)
-            {
-                if (data.Prefab == null) continue;
-
-                if (landTiles.Contains(data.Prefab)) counts["Land Tiles"]++;
-                else if (turrets.Contains(data.Prefab)) counts["Turrets"]++;
-                else if (walls.Contains(data.Prefab)) counts["Walls"]++;
-                else if (buildings.Contains(data.Prefab)) counts["Buildings"]++;
-                else if (combatShips.Contains(data.Prefab)) counts["Combat Ships"]++;
-            }
-
-            return counts;
-        }
-
+        #region GUI
         private void OnGUI()
         {
             GUILayout.Label("Combat Scene Builder", EditorStyles.boldLabel);
             EditorGUILayout.Space();
+
+            // === Grid Assignment ===
+            GUILayout.Label("Grid References", EditorStyles.boldLabel);
+
+            landGrid = (TerrainGridSystem)EditorGUILayout.ObjectField(
+                "Land Grid", landGrid, typeof(TerrainGridSystem), true);
+
+            objectGrid = (TerrainGridSystem)EditorGUILayout.ObjectField(
+                "Object Grid", objectGrid, typeof(TerrainGridSystem), true);
+
+            EditorGUILayout.Space(8);
+
+            // === Active Grid Toggle ===
+            GUILayout.Label("Active Grid for Placement:", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+
+            if (GUILayout.Toggle(currentGridType == GridType.Land, "Land Grid", "Button"))
+            {
+                currentGridType = GridType.Land;
+                activeGrid = landGrid;
+            }
+
+            if (GUILayout.Toggle(currentGridType == GridType.Objects, "Object Grid", "Button"))
+            {
+                currentGridType = GridType.Objects;
+                activeGrid = objectGrid;
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            if (activeGrid == null)
+            {
+                EditorGUILayout.HelpBox("Please assign the active grid above.", MessageType.Warning);
+            }
+
+            EditorGUILayout.Space(10);
 
             // === Layout Database ===
             layoutDatabase = (CombatLayoutDatabase)EditorGUILayout.ObjectField(
@@ -116,6 +141,18 @@ namespace _Project.Scripts.LevelEditor.Editor
                 DestroyPreview();
             }
 
+            // === Clear Scene ===
+            EditorGUILayout.Space(15);
+            if (GUILayout.Button("Clear Scene", GUILayout.Height(28)))
+            {
+                if (EditorUtility.DisplayDialog("Clear Scene",
+                    "This will delete all placed objects and reset occupation tracking.\nAre you sure?",
+                    "Clear Scene", "Cancel"))
+                {
+                    ClearAllPlacedObjects();
+                }
+            }
+
             // === Save / Load Section ===
             EditorGUILayout.Space(15);
             GUILayout.Label("Layout Save / Load", EditorStyles.boldLabel);
@@ -126,18 +163,13 @@ namespace _Project.Scripts.LevelEditor.Editor
             GUILayout.Label($"Slot {selectedSlot + 1}", GUILayout.Width(60));
             EditorGUILayout.EndHorizontal();
 
-// Show breakdown for selected slot
             if (layoutDatabase != null)
             {
                 CombatLayout layout = layoutDatabase.GetLayout(selectedSlot);
-
                 if (layout != null && layout.PlacedObjects.Count > 0)
                 {
                     var counts = GetCategoryCounts(layout);
-                    int totalObjects = layout.PlacedObjects.Count;
-
-                    EditorGUILayout.LabelField($"Total Objects: {totalObjects}", EditorStyles.miniBoldLabel);
-
+                    EditorGUILayout.LabelField($"Total Objects: {layout.PlacedObjects.Count}", EditorStyles.miniBoldLabel);
                     foreach (var kvp in counts)
                     {
                         if (kvp.Value > 0)
@@ -151,48 +183,21 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
 
             EditorGUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Save Layout", GUILayout.Height(25)))
-            {
-                SaveCurrentLayout();
-            }
-
-            if (GUILayout.Button("Load Layout", GUILayout.Height(25)))
-            {
-                LoadLayout();
-            }
-
+            if (GUILayout.Button("Save Layout", GUILayout.Height(25))) SaveCurrentLayout();
+            if (GUILayout.Button("Load Layout", GUILayout.Height(25))) LoadLayout();
             if (GUILayout.Button("Delete Slot", GUILayout.Height(25)))
             {
                 if (EditorUtility.DisplayDialog("Delete Layout",
-                        $"Are you sure you want to delete the layout in Slot {selectedSlot + 1}?",
-                        "Delete", "Cancel"))
+                    $"Delete layout in Slot {selectedSlot + 1}?", "Delete", "Cancel"))
                 {
                     DeleteCurrentSlot();
                 }
             }
-
             EditorGUILayout.EndHorizontal();
         }
-        
-        private void DeleteCurrentSlot()
-        {
-            if (layoutDatabase == null) return;
+        #endregion
 
-            CombatLayout layout = layoutDatabase.GetLayout(selectedSlot);
-
-            if (layout != null)
-            {
-                layout.PlacedObjects.Clear();
-                layout.LayoutName = "New Layout";
-
-                EditorUtility.SetDirty(layoutDatabase);
-                AssetDatabase.SaveAssets();
-
-                Debug.Log($"<color=red>Deleted layout in Slot {selectedSlot + 1}</color>");
-            }
-        }
-
+        #region Category UI
         private void DrawCategory(string title, ref bool foldout, List<GameObject> prefabs)
         {
             foldout = EditorGUILayout.Foldout(foldout, title, true);
@@ -218,23 +223,23 @@ namespace _Project.Scripts.LevelEditor.Editor
                 }
 
                 if (GUILayout.Button("+ Add", GUILayout.Width(50)))
-                {
                     prefabs.Add(null);
-                }
 
                 EditorGUI.indentLevel--;
                 EditorGUILayout.Space(5);
             }
         }
+        #endregion
 
-        // ==================== SCENE GUI ====================
+        #region Scene GUI & Placement
         private void OnSceneGUI(SceneView sceneView)
         {
-            if (selectedPrefab == null) return;
+            if (selectedPrefab == null || activeGrid == null) return;
 
             Event e = Event.current;
             UpdatePreviewPosition();
 
+            // Left Click = Place
             if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
             {
                 Vector3 placePos = GetSnappedWorldPosition();
@@ -250,6 +255,7 @@ namespace _Project.Scripts.LevelEditor.Editor
                 }
             }
 
+            // Right Click = Cancel Preview
             if (e.type == EventType.MouseDown && e.button == 1)
             {
                 DestroyPreview();
@@ -257,20 +263,59 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
         }
 
-        // ==================== PREVIEW & PLACEMENT ====================
         private void UpdatePreviewPosition()
         {
-            if (selectedPrefab == null || tgs == null || !isPreviewActive || currentPreview == null) return;
+            if (selectedPrefab == null || activeGrid == null || !isPreviewActive || currentPreview == null) 
+                return;
 
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, 5000f))
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f)) return;
+
+            Cell cell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
+            if (cell == null) return;
+
+            // Move preview to correct cell center
+            Vector3 cellCenter = activeGrid.CellGetPosition(cell.index);
+            currentPreview.transform.position = cellCenter;
+
+            // === Visual Feedback ===
+            bool isValid = IsPlacementValid(cell);
+            Color targetColor = isValid 
+                ? GetPreviewColorForPrefab(selectedPrefab) 
+                : new Color(1f, 0.15f, 0.15f); // Bright red for invalid
+
+            targetColor.a = 0.55f;
+            SetPreviewColor(targetColor);
+        }
+
+        // Helper method
+        private bool IsPlacementValid(Cell cell)
+        {
+            if (cell == null) return false;
+
+            if (currentGridType == GridType.Land)
             {
-                Cell cell = tgs.CellGetAtWorldPosition(hit.point, 0);
-                if (cell != null)
+                // Land only cares if the land cell is free
+                return !occupiedLandCells.Contains(cell.index);
+            }
+            else // Object Grid
+            {
+                // Must have land underneath AND object cell free
+                bool hasLand = occupiedLandCells.Contains(cell.index);
+                bool objectFree = !occupiedObjectCells.Contains(cell.index);
+                return hasLand && objectFree;
+            }
+        }
+        
+        private void SetPreviewColor(Color color)
+        {
+            if (currentPreview == null) return;
+
+            foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
+            {
+                if (rend.material != null)
                 {
-                    Vector3 cellCenter = tgs.CellGetPosition(cell.index);
-                    cellCenter.y = 0.35f;
-                    currentPreview.transform.position = cellCenter;
+                    rend.material.color = color;
                 }
             }
         }
@@ -280,12 +325,11 @@ namespace _Project.Scripts.LevelEditor.Editor
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, 5000f))
             {
-                Cell cell = tgs.CellGetAtWorldPosition(hit.point, 0);
+                Cell cell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
                 if (cell != null)
                 {
-                    Vector3 pos = tgs.CellGetPosition(cell.index);
-                    pos.y = 0.35f;
-                    return pos;
+                    // Use the real cell center from the active grid (includes correct Y)
+                    return activeGrid.CellGetPosition(cell.index);
                 }
             }
             return Vector3.zero;
@@ -293,29 +337,77 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void PlaceObjectAtPosition(Vector3 position)
         {
-            if (selectedPrefab == null || tgs == null) return;
+            if (selectedPrefab == null || activeGrid == null) return;
 
-            Cell cell = tgs.CellGetAtWorldPosition(position, 0);
-            if (cell == null || occupiedCells.Contains(cell.index)) return;
+            Cell cell = activeGrid.CellGetAtWorldPosition(position, 0);
+            if (cell == null) return;
 
+            // === Special check for Object Grid ===
+            if (currentGridType == GridType.Objects)
+            {
+                if (!occupiedLandCells.Contains(cell.index))
+                {
+                    Debug.LogWarning("<color=orange>Cannot place object here — no Land Tile underneath!</color>");
+                    return;
+                }
+
+                if (occupiedObjectCells.Contains(cell.index))
+                {
+                    Debug.LogWarning("<color=orange>This object cell is already occupied!</color>");
+                    return;
+                }
+            }
+            else // Land Grid
+            {
+                if (occupiedLandCells.Contains(cell.index))
+                {
+                    Debug.LogWarning("<color=orange>Land cell is already occupied!</color>");
+                    return;
+                }
+            }
+
+            // === Place the object ===
             GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
             placed.transform.position = position;
             placed.name = selectedPrefab.name;
 
             placedObjects.Add(placed);
-            occupiedCells.Add(cell.index);
+
+            // Register occupation on the correct list
+            if (currentGridType == GridType.Land)
+                occupiedLandCells.Add(cell.index);
+            else
+                occupiedObjectCells.Add(cell.index);
 
             Undo.RegisterCreatedObjectUndo(placed, "Place Object");
+            Debug.Log($"<color=green>Placed {selectedPrefab.name} on {currentGridType} Grid - Cell {cell.index}</color>");
         }
 
         private bool IsCellOccupied(Vector3 position)
         {
-            if (tgs == null) return false;
-            Cell cell = tgs.CellGetAtWorldPosition(position, 0);
-            return cell != null && occupiedCells.Contains(cell.index);
-        }
+            if (activeGrid == null) return true; // Safety
 
-        // ==================== PREVIEW ====================
+            Cell cell = activeGrid.CellGetAtWorldPosition(position, 0);
+            if (cell == null) return true;
+
+            if (currentGridType == GridType.Land)
+            {
+                // Land tiles only care about other land tiles
+                return occupiedLandCells.Contains(cell.index);
+            }
+            else // Object Grid
+            {
+                // 1. Must have a Land Tile underneath
+                if (!occupiedLandCells.Contains(cell.index))
+                    return true; // Treat as "occupied" so placement is blocked
+
+                // 2. The Object cell itself must be free
+                return occupiedObjectCells.Contains(cell.index);
+            }
+        }
+        #endregion
+
+        #region Preview System
         private void CreatePreview(Vector3 position)
         {
             DestroyPreview();
@@ -325,29 +417,36 @@ namespace _Project.Scripts.LevelEditor.Editor
             currentPreview.name = "Preview_" + selectedPrefab.name;
             currentPreview.transform.position = position;
 
-            foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
-            {
-                if (rend.material != null)
-                {
-                    Color c = rend.material.color;
-                    c.a = 0.5f;
-                    rend.material.color = c;
-                }
-            }
+            // Start with normal category color
+            Color previewColor = GetPreviewColorForPrefab(selectedPrefab);
+            previewColor.a = 0.55f;
+            SetPreviewColor(previewColor);
+        }
+
+        private Color GetPreviewColorForPrefab(GameObject prefab)
+        {
+            if (landTiles.Contains(prefab)) return new Color(0.2f, 0.85f, 0.35f);     // Green
+            if (turrets.Contains(prefab)) return new Color(0.95f, 0.3f, 0.3f);        // Red
+            if (walls.Contains(prefab)) return new Color(0.35f, 0.55f, 0.95f);        // Blue
+            if (buildings.Contains(prefab)) return new Color(0.95f, 0.65f, 0.2f);     // Orange
+            if (combatShips.Contains(prefab)) return new Color(0.7f, 0.3f, 0.9f);     // Purple
+
+            return new Color(0.75f, 0.75f, 0.75f); // Default gray
         }
 
         private void ForceCreatePreviewAtMouse()
         {
-            if (selectedPrefab == null || tgs == null) return;
+            if (selectedPrefab == null || activeGrid == null) return;
 
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
             Cell cell = null;
 
             if (Physics.Raycast(ray, out RaycastHit hit, 5000f))
-                cell = tgs.CellGetAtWorldPosition(hit.point, 0);
+                cell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
 
-            Vector3 pos = (cell != null) ? tgs.CellGetPosition(cell.index) : new Vector3(0, 0.35f, 0);
-            pos.y = 0.35f;
+            Vector3 pos = (cell != null)
+                ? activeGrid.CellGetPosition(cell.index)
+                : Vector3.zero;
 
             CreatePreview(pos);
         }
@@ -356,13 +455,21 @@ namespace _Project.Scripts.LevelEditor.Editor
         {
             if (currentPreview != null)
             {
+                // Clean up temporary materials
+                foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
+                {
+                    if (rend.material != null)
+                        DestroyImmediate(rend.material);
+                }
+
                 DestroyImmediate(currentPreview);
                 currentPreview = null;
             }
             isPreviewActive = false;
         }
+        #endregion
 
-        // ==================== SAVE / LOAD ====================
+        #region Save / Load
         private void SaveCurrentLayout()
         {
             if (layoutDatabase == null)
@@ -397,7 +504,11 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void LoadLayout()
         {
-            if (layoutDatabase == null) return;
+            if (layoutDatabase == null)
+            {
+                Debug.LogError("No Layout Database assigned!");
+                return;
+            }
 
             CombatLayout layout = layoutDatabase.GetLayout(selectedSlot);
             if (layout == null || layout.PlacedObjects.Count == 0)
@@ -406,12 +517,14 @@ namespace _Project.Scripts.LevelEditor.Editor
                 return;
             }
 
+            // Clear current scene first
             ClearAllPlacedObjects();
 
             foreach (PlacedObjectData data in layout.PlacedObjects)
             {
                 if (data.Prefab == null) continue;
 
+                // Instantiate the object
                 GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(data.Prefab);
                 placed.transform.position = data.Position;
                 placed.transform.rotation = data.Rotation;
@@ -420,15 +533,76 @@ namespace _Project.Scripts.LevelEditor.Editor
 
                 placedObjects.Add(placed);
 
-                Cell cell = tgs.CellGetAtWorldPosition(data.Position, 0);
-                if (cell != null)
-                    occupiedCells.Add(cell.index);
+                // === Determine which grid this object belongs to ===
+                // We check against the category lists
+                bool isLandTile = landTiles.Contains(data.Prefab);
+
+                // Get the correct cell based on which grid it should use
+                TerrainGridSystem targetGrid = isLandTile ? landGrid : objectGrid;
+
+                if (targetGrid != null)
+                {
+                    Cell cell = targetGrid.CellGetAtWorldPosition(data.Position, 0);
+
+                    if (cell != null)
+                    {
+                        if (isLandTile)
+                        {
+                            occupiedLandCells.Add(cell.index);
+                        }
+                        else
+                        {
+                            occupiedObjectCells.Add(cell.index);
+                        }
+                    }
+                }
             }
 
-            Debug.Log($"<color=cyan>Loaded layout from Slot {selectedSlot + 1}</color>");
+            Debug.Log($"<color=cyan>Loaded layout from Slot {selectedSlot + 1} " +
+                      $"(Land cells: {occupiedLandCells.Count}, Object cells: {occupiedObjectCells.Count})</color>");
         }
 
-        // ==================== CLEAR ====================
+        private void DeleteCurrentSlot()
+        {
+            if (layoutDatabase == null) return;
+
+            CombatLayout layout = layoutDatabase.GetLayout(selectedSlot);
+            if (layout != null)
+            {
+                layout.PlacedObjects.Clear();
+                layout.LayoutName = "New Layout";
+
+                EditorUtility.SetDirty(layoutDatabase);
+                AssetDatabase.SaveAssets();
+                Debug.Log($"<color=red>Deleted layout in Slot {selectedSlot + 1}</color>");
+            }
+        }
+
+        private Dictionary<string, int> GetCategoryCounts(CombatLayout layout)
+        {
+            var counts = new Dictionary<string, int>
+            {
+                { "Land Tiles", 0 }, { "Turrets", 0 }, { "Walls", 0 },
+                { "Buildings", 0 }, { "Combat Ships", 0 }
+            };
+
+            if (layout == null) return counts;
+
+            foreach (var data in layout.PlacedObjects)
+            {
+                if (data.Prefab == null) continue;
+
+                if (landTiles.Contains(data.Prefab)) counts["Land Tiles"]++;
+                else if (turrets.Contains(data.Prefab)) counts["Turrets"]++;
+                else if (walls.Contains(data.Prefab)) counts["Walls"]++;
+                else if (buildings.Contains(data.Prefab)) counts["Buildings"]++;
+                else if (combatShips.Contains(data.Prefab)) counts["Combat Ships"]++;
+            }
+            return counts;
+        }
+        #endregion
+
+        #region Clear Scene
         private void ClearAllPlacedObjects()
         {
             foreach (GameObject obj in placedObjects)
@@ -438,8 +612,12 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
 
             placedObjects.Clear();
-            occupiedCells.Clear();
+            occupiedLandCells.Clear();
+            occupiedObjectCells.Clear();
             DestroyPreview();
+
+            Debug.Log("<color=yellow>Scene cleared. Both grids reset.</color>");
         }
+        #endregion
     }
 }

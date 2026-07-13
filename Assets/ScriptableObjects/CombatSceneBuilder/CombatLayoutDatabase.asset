@@ -16,7 +16,39 @@ MonoBehaviour:
   - LayoutName: New Layout
     PlacedObjects: []
   - LayoutName: New Layout
-    PlacedObjects: []
+    PlacedObjects:
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 5.76923, y: 0.35, z: 12.179489}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 5.76923, y: 0.35, z: 10.897438}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 4.487179, y: 0.35, z: 10.897438}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 4.487179, y: 0.35, z: 12.179489}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 3.2051277, y: 0.35, z: 12.179489}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 3.2051277, y: 0.35, z: 10.897438}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 1.9230766, y: 0.35, z: 10.897438}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
+    - Prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+      Position: {x: 1.9230766, y: 0.35, z: 12.179489}
+      Rotation: {x: 0, y: 0, z: 0, w: 1}
+      Scale: {x: 1, y: 1, z: 1}
   - LayoutName: New Layout
     PlacedObjects: []
   - LayoutName: New Layout
