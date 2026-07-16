@@ -21,8 +21,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         private bool isPreviewActive = false;
 
         private List<GameObject> placedObjects = new List<GameObject>();
-
-        // Separate occupation tracking per grid
         private HashSet<int> occupiedLandCells = new HashSet<int>();
         private HashSet<int> occupiedObjectCells = new HashSet<int>();
         #endregion
@@ -58,7 +56,6 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void OnEnable()
         {
-            // Try to auto-find if not assigned
             if (landGrid == null)
                 landGrid = Object.FindObjectOfType<TerrainGridSystem>();
 
@@ -108,9 +105,7 @@ namespace _Project.Scripts.LevelEditor.Editor
             EditorGUILayout.EndHorizontal();
 
             if (activeGrid == null)
-            {
                 EditorGUILayout.HelpBox("Please assign the active grid above.", MessageType.Warning);
-            }
 
             EditorGUILayout.Space(10);
 
@@ -265,7 +260,7 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void UpdatePreviewPosition()
         {
-            if (selectedPrefab == null || activeGrid == null || !isPreviewActive || currentPreview == null) 
+            if (selectedPrefab == null || activeGrid == null || !isPreviewActive || currentPreview == null)
                 return;
 
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
@@ -274,50 +269,18 @@ namespace _Project.Scripts.LevelEditor.Editor
             Cell cell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
             if (cell == null) return;
 
-            // Move preview to correct cell center
+            // Move preview
             Vector3 cellCenter = activeGrid.CellGetPosition(cell.index);
             currentPreview.transform.position = cellCenter;
 
             // === Visual Feedback ===
-            bool isValid = IsPlacementValid(cell);
-            Color targetColor = isValid 
-                ? GetPreviewColorForPrefab(selectedPrefab) 
-                : new Color(1f, 0.15f, 0.15f); // Bright red for invalid
+            bool isValid = IsPlacementValid(cellCenter);
+            Color targetColor = isValid
+                ? GetPreviewColorForPrefab(selectedPrefab)
+                : new Color(1f, 0.15f, 0.15f); // Bright red
 
             targetColor.a = 0.55f;
             SetPreviewColor(targetColor);
-        }
-
-        // Helper method
-        private bool IsPlacementValid(Cell cell)
-        {
-            if (cell == null) return false;
-
-            if (currentGridType == GridType.Land)
-            {
-                // Land only cares if the land cell is free
-                return !occupiedLandCells.Contains(cell.index);
-            }
-            else // Object Grid
-            {
-                // Must have land underneath AND object cell free
-                bool hasLand = occupiedLandCells.Contains(cell.index);
-                bool objectFree = !occupiedObjectCells.Contains(cell.index);
-                return hasLand && objectFree;
-            }
-        }
-        
-        private void SetPreviewColor(Color color)
-        {
-            if (currentPreview == null) return;
-
-            foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
-            {
-                if (rend.material != null)
-                {
-                    rend.material.color = color;
-                }
-            }
         }
 
         private Vector3 GetSnappedWorldPosition()
@@ -328,7 +291,6 @@ namespace _Project.Scripts.LevelEditor.Editor
                 Cell cell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
                 if (cell != null)
                 {
-                    // Use the real cell center from the active grid (includes correct Y)
                     return activeGrid.CellGetPosition(cell.index);
                 }
             }
@@ -342,12 +304,11 @@ namespace _Project.Scripts.LevelEditor.Editor
             Cell cell = activeGrid.CellGetAtWorldPosition(position, 0);
             if (cell == null) return;
 
-            // === Special check for Object Grid ===
             if (currentGridType == GridType.Objects)
             {
-                if (!occupiedLandCells.Contains(cell.index))
+                if (!HasLandTileUnderneath(position))
                 {
-                    Debug.LogWarning("<color=orange>Cannot place object here — no Land Tile underneath!</color>");
+                    Debug.LogWarning("<color=orange>Cannot place object — no Land Tile underneath!</color>");
                     return;
                 }
 
@@ -366,14 +327,13 @@ namespace _Project.Scripts.LevelEditor.Editor
                 }
             }
 
-            // === Place the object ===
+            // Place
             GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
             placed.transform.position = position;
             placed.name = selectedPrefab.name;
 
             placedObjects.Add(placed);
 
-            // Register occupation on the correct list
             if (currentGridType == GridType.Land)
                 occupiedLandCells.Add(cell.index);
             else
@@ -385,25 +345,55 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private bool IsCellOccupied(Vector3 position)
         {
-            if (activeGrid == null) return true; // Safety
+            if (activeGrid == null) return true;
 
             Cell cell = activeGrid.CellGetAtWorldPosition(position, 0);
             if (cell == null) return true;
 
             if (currentGridType == GridType.Land)
-            {
-                // Land tiles only care about other land tiles
                 return occupiedLandCells.Contains(cell.index);
-            }
-            else // Object Grid
-            {
-                // 1. Must have a Land Tile underneath
-                if (!occupiedLandCells.Contains(cell.index))
-                    return true; // Treat as "occupied" so placement is blocked
 
-                // 2. The Object cell itself must be free
-                return occupiedObjectCells.Contains(cell.index);
+            // Object Grid
+            if (!HasLandTileUnderneath(position)) return true;
+            return occupiedObjectCells.Contains(cell.index);
+        }
+
+        private bool IsPlacementValid(Vector3 position)
+        {
+            if (activeGrid == null) return false;
+
+            Cell cell = activeGrid.CellGetAtWorldPosition(position, 0);
+            if (cell == null) return false;
+
+            if (currentGridType == GridType.Land)
+                return !occupiedLandCells.Contains(cell.index);
+
+            // Object Grid
+            return HasLandTileUnderneath(position) && !occupiedObjectCells.Contains(cell.index);
+        }
+
+        /// <summary>
+        /// Checks if there is a Land Tile under the given world position.
+        /// Projects the position down to the Land Grid height.
+        /// </summary>
+        private bool HasLandTileUnderneath(Vector3 worldPosition)
+        {
+            if (landGrid == null) return false;
+
+            Vector3 landPos = worldPosition;
+            landPos.y = landGrid.transform.position.y + 0.1f;
+
+            Cell landCell = landGrid.CellGetAtWorldPosition(landPos, 0);
+
+            if (landCell == null)
+            {
+                landPos.y += 0.5f;
+                landCell = landGrid.CellGetAtWorldPosition(landPos, 0);
             }
+
+            if (landCell == null) return false;
+
+            return occupiedLandCells.Contains(landCell.index);
         }
         #endregion
 
@@ -417,10 +407,24 @@ namespace _Project.Scripts.LevelEditor.Editor
             currentPreview.name = "Preview_" + selectedPrefab.name;
             currentPreview.transform.position = position;
 
-            // Start with normal category color
             Color previewColor = GetPreviewColorForPrefab(selectedPrefab);
             previewColor.a = 0.55f;
             SetPreviewColor(previewColor);
+        }
+
+        private void SetPreviewColor(Color color)
+        {
+            if (currentPreview == null) return;
+
+            foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
+            {
+                if (rend.sharedMaterial != null)
+                {
+                    Material tempMat = new Material(rend.sharedMaterial);
+                    tempMat.color = color;
+                    rend.material = tempMat;
+                }
+            }
         }
 
         private Color GetPreviewColorForPrefab(GameObject prefab)
@@ -455,7 +459,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         {
             if (currentPreview != null)
             {
-                // Clean up temporary materials
                 foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
                 {
                     if (rend.material != null)
@@ -504,11 +507,7 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void LoadLayout()
         {
-            if (layoutDatabase == null)
-            {
-                Debug.LogError("No Layout Database assigned!");
-                return;
-            }
+            if (layoutDatabase == null) return;
 
             CombatLayout layout = layoutDatabase.GetLayout(selectedSlot);
             if (layout == null || layout.PlacedObjects.Count == 0)
@@ -517,14 +516,12 @@ namespace _Project.Scripts.LevelEditor.Editor
                 return;
             }
 
-            // Clear current scene first
             ClearAllPlacedObjects();
 
             foreach (PlacedObjectData data in layout.PlacedObjects)
             {
                 if (data.Prefab == null) continue;
 
-                // Instantiate the object
                 GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(data.Prefab);
                 placed.transform.position = data.Position;
                 placed.transform.rotation = data.Rotation;
@@ -533,33 +530,24 @@ namespace _Project.Scripts.LevelEditor.Editor
 
                 placedObjects.Add(placed);
 
-                // === Determine which grid this object belongs to ===
-                // We check against the category lists
                 bool isLandTile = landTiles.Contains(data.Prefab);
-
-                // Get the correct cell based on which grid it should use
                 TerrainGridSystem targetGrid = isLandTile ? landGrid : objectGrid;
 
                 if (targetGrid != null)
                 {
                     Cell cell = targetGrid.CellGetAtWorldPosition(data.Position, 0);
-
                     if (cell != null)
                     {
                         if (isLandTile)
-                        {
                             occupiedLandCells.Add(cell.index);
-                        }
                         else
-                        {
                             occupiedObjectCells.Add(cell.index);
-                        }
                     }
                 }
             }
 
             Debug.Log($"<color=cyan>Loaded layout from Slot {selectedSlot + 1} " +
-                      $"(Land cells: {occupiedLandCells.Count}, Object cells: {occupiedObjectCells.Count})</color>");
+                      $"(Land: {occupiedLandCells.Count}, Objects: {occupiedObjectCells.Count})</color>");
         }
 
         private void DeleteCurrentSlot()
