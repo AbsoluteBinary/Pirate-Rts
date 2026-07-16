@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 1006617822}
   - component: {fileID: 1006617821}
   - component: {fileID: 1006617820}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Terrain_Land
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -572,7 +572,7 @@ GameObject:
   - component: {fileID: 1314685557}
   - component: {fileID: 1314685556}
   - component: {fileID: 1314685555}
-  m_Layer: 5
+  m_Layer: 11
   m_Name: Grid_Land
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -860,7 +860,7 @@ GameObject:
   - component: {fileID: 1357902164}
   - component: {fileID: 1357902163}
   - component: {fileID: 1357902162}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Terrain_Objects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1538,7 +1538,7 @@ GameObject:
   - component: {fileID: 2113164209}
   - component: {fileID: 2113164208}
   - component: {fileID: 2113164207}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Grid_Objects
   m_TagString: Untagged
   m_Icon: {fileID: 0}

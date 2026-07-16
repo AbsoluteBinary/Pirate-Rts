@@ -21,9 +21,9 @@ TagManager:
   - Turret
   - Player
   - Fleet
-  - 
-  - 
-  - 
+  - ObjectGrid
+  - LandGrid
+  - PlacedObjects
   - 
   - 
   - 

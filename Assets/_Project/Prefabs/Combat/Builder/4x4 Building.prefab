@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2744555209105663350}
   - component: {fileID: 2248320232102592432}
   - component: {fileID: 6141578265900748896}
+  - component: {fileID: -2550909621052547192}
   m_Layer: 0
   m_Name: 4x4 Building
   m_TagString: Untagged
@@ -112,3 +113,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-2550909621052547192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219891228768175825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 513fa09d37b47af2b83137f17d2c099e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.LevelEditor.PlaceableObject
+  sizeInCells: {x: 2, y: 2}
+  requiresLandTile: 1
