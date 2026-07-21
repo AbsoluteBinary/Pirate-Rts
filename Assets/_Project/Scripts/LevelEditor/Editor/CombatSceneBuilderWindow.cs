@@ -13,45 +13,42 @@ namespace _Project.Scripts.LevelEditor.Editor
         private TerrainGridSystem objectGrid;
         private TerrainGridSystem activeGrid;
         private CombatLayoutDatabase layoutDatabase;
+        
+        private bool needsSceneFocus = false;
         #endregion
 
-        #region Move and Rotate Objects
-        // === Move / Rotate Selected ===
+        #region Move / Rotate
         private bool isMovingSelection = false;
         private List<GameObject> movingObjects = new List<GameObject>();
         private List<Vector3> originalPositions = new List<Vector3>();
         private List<Quaternion> originalRotations = new List<Quaternion>();
-        private Vector3 moveOffset;
-        private int currentRotationSteps = 0; // 0, 1, 2, 3 (90 degree steps)
+        private int currentRotationSteps = 0;
+        private Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
         #endregion
 
-        #region Rectangle / Box Fill
-        // === Rectangle / Box Fill ===
+        #region Rectangle Fill
         private bool isDrawingRect = false;
         private Cell rectStartCell = null;
         private Cell rectEndCell = null;
         #endregion
 
         #region Marquee
-        // === Marquee / Box Select ===
         private bool isMarqueeSelecting = false;
         private Vector2 marqueeStartGUI;
         private Vector2 marqueeEndGUI;
         #endregion
 
-        #region CopyPaste
-        // === Copy / Paste ===
+        #region Copy / Paste
         private List<GameObject> copiedObjects = new List<GameObject>();
         private List<Vector3> copiedPositions = new List<Vector3>();
         private List<Quaternion> copiedRotations = new List<Quaternion>();
         private Vector3 copyCenter;
         #endregion
-        
+
         #region Placement & Tracking
         private GameObject selectedPrefab;
         private GameObject currentPreview;
         private bool isPreviewActive = false;
-        // === Paint / Continuous Place ===
         private bool isPainting = false;
         private Cell lastPaintedCell = null;
 
@@ -91,6 +88,10 @@ namespace _Project.Scripts.LevelEditor.Editor
         private Color selectionColor = new Color(0.2f, 0.6f, 1f, 0.85f);
         #endregion
 
+        #region Hover Highlight
+        private Cell hoveredLandCell = null;
+        #endregion
+
         [MenuItem("Tools/Combat Scene Builder")]
         public static void ShowWindow()
         {
@@ -104,6 +105,7 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             activeGrid = landGrid;
             SceneView.duringSceneGui += OnSceneGUI;
+            UpdateGridVisibility();
         }
 
         private void OnDisable()
@@ -111,89 +113,63 @@ namespace _Project.Scripts.LevelEditor.Editor
             SceneView.duringSceneGui -= OnSceneGUI;
             DestroyPreview();
         }
-
+        
         #region GUI
         private void OnGUI()
         {
-            GUI.enabled = selectedObjects.Count > 0 && !isMovingSelection;
-
-            if (GUILayout.Button("Select Same Type", GUILayout.Height(26)))
-            {
-                SelectSameType();
-            }
-
-            GUI.enabled = true;
-            
-            EditorGUILayout.Space(8);
-
-            GUI.backgroundColor = new Color(1f, 0.6f, 0.1f); // Orange
-            if (GUILayout.Button("DEBUG: Clear All Occupation Data", GUILayout.Height(24)))
-            {
-                occupiedLandCells.Clear();
-                occupiedObjectCells.Clear();
-                Debug.Log("<color=orange>All occupation data has been cleared</color>");
-            }
-            GUI.backgroundColor = Color.white;
-            
-            GUI.enabled = true;
-            
             GUILayout.Label("Combat Scene Builder", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
-            // === Tools ===
+            // ===== Tools =====
             GUILayout.Label("Tools", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
-            
+
             GUI.enabled = selectedObjects.Count > 0 && !isMovingSelection;
-
             if (GUILayout.Button($"Pick Up Selected ({selectedObjects.Count})", GUILayout.Height(28)))
-            {
                 StartMovingSelection();
-            }
-
             GUI.enabled = true;
 
-            // Delete Selected
             GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
             if (GUILayout.Button($"Delete Selected ({selectedObjects.Count})", GUILayout.Height(28)))
-            {
                 DeleteSelectedObjects();
-            }
             GUI.backgroundColor = Color.white;
 
-            // Store Selected (placeholder)
             if (GUILayout.Button($"Store Selected ({selectedObjects.Count})", GUILayout.Height(28)))
-            {
-                // Placeholder for future logic
                 Debug.Log($"<color=yellow>Stored {selectedObjects.Count} object(s) — logic coming later</color>");
-            }
 
             EditorGUILayout.EndHorizontal();
 
+            GUI.enabled = selectedObjects.Count > 0 && !isMovingSelection;
+            if (GUILayout.Button("Select Same Type", GUILayout.Height(26)))
+                SelectSameType();
+            GUI.enabled = true;
+
             EditorGUILayout.Space(10);
 
-            // Grid References
+            // ===== Grid References =====
             GUILayout.Label("Grid References", EditorStyles.boldLabel);
             landGrid = (TerrainGridSystem)EditorGUILayout.ObjectField("Land Grid", landGrid, typeof(TerrainGridSystem), true);
             objectGrid = (TerrainGridSystem)EditorGUILayout.ObjectField("Object Grid", objectGrid, typeof(TerrainGridSystem), true);
 
-            EditorGUILayout.Space(8);
+            EditorGUILayout.Space(6);
 
-            // Active Grid
-            GUILayout.Label("Active Grid for Placement:", EditorStyles.boldLabel);
+            // ===== Active Grid =====
+            GUILayout.Label("Active Grid:", EditorStyles.boldLabel);
             EditorGUILayout.BeginHorizontal();
 
             if (GUILayout.Toggle(currentGridType == GridType.Land, "Land Grid", "Button"))
             {
                 currentGridType = GridType.Land;
                 activeGrid = landGrid;
+                UpdateGridVisibility();
             }
 
             if (GUILayout.Toggle(currentGridType == GridType.Objects, "Object Grid", "Button"))
             {
                 currentGridType = GridType.Objects;
                 activeGrid = objectGrid;
+                UpdateGridVisibility();
             }
 
             EditorGUILayout.EndHorizontal();
@@ -202,28 +178,24 @@ namespace _Project.Scripts.LevelEditor.Editor
                 EditorGUILayout.HelpBox("Please assign the active grid above.", MessageType.Warning);
 
             EditorGUILayout.Space(10);
-            
-            // Copy / Paste
+
+            // ===== Copy / Paste =====
             GUI.enabled = selectedObjects.Count > 0;
             if (GUILayout.Button($"Copy Selected ({selectedObjects.Count})", GUILayout.Height(28)))
-            {
                 CopySelectedObjects();
-            }
             GUI.enabled = true;
 
-            GUI.enabled = copiedObjects.Count > 0;
+            GUI.enabled = copiedObjects.Count > 0 && !isMovingSelection;
             if (GUILayout.Button($"Paste ({copiedObjects.Count})", GUILayout.Height(28)))
-            {
                 StartPasteMode();
-            }
             GUI.enabled = true;
 
-            // Layout Database
+            EditorGUILayout.Space(8);
             layoutDatabase = (CombatLayoutDatabase)EditorGUILayout.ObjectField("Layout Database", layoutDatabase, typeof(CombatLayoutDatabase), false);
 
             EditorGUILayout.Space(10);
 
-            // Categories
+            // ===== Categories =====
             DrawCategory("Land Tiles", ref showLandTiles, landTiles);
             DrawCategory("Turrets", ref showTurrets, turrets);
             DrawCategory("Walls", ref showWalls, walls);
@@ -232,7 +204,7 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             EditorGUILayout.Space(10);
 
-            // Currently Selected Prefab
+            // ===== Currently Selected Prefab =====
             GUILayout.Label("Currently Selected Prefab:", EditorStyles.boldLabel);
             selectedPrefab = (GameObject)EditorGUILayout.ObjectField(selectedPrefab, typeof(GameObject), false);
 
@@ -242,13 +214,13 @@ namespace _Project.Scripts.LevelEditor.Editor
                 DestroyPreview();
             }
 
-            EditorGUILayout.Space(8);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField($"Selected Objects: {selectedObjects.Count}", EditorStyles.miniBoldLabel);
 
             if (GUILayout.Button("Clear Selection"))
                 selectedObjects.Clear();
 
-            EditorGUILayout.Space(15);
+            EditorGUILayout.Space(12);
 
             if (GUILayout.Button("Clear Scene", GUILayout.Height(28)))
             {
@@ -260,8 +232,8 @@ namespace _Project.Scripts.LevelEditor.Editor
                 }
             }
 
-            // Save / Load
-            EditorGUILayout.Space(15);
+            // ===== Save / Load =====
+            EditorGUILayout.Space(12);
             GUILayout.Label("Layout Save / Load", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
@@ -279,6 +251,17 @@ namespace _Project.Scripts.LevelEditor.Editor
                     DeleteCurrentSlot();
             }
             EditorGUILayout.EndHorizontal();
+
+            // ===== Debug =====
+            EditorGUILayout.Space(10);
+            GUI.backgroundColor = new Color(1f, 0.6f, 0.1f);
+            if (GUILayout.Button("DEBUG: Clear All Occupation Data", GUILayout.Height(22)))
+            {
+                occupiedLandCells.Clear();
+                occupiedObjectCells.Clear();
+                Debug.Log("<color=orange>All occupation data cleared</color>");
+            }
+            GUI.backgroundColor = Color.white;
         }
         #endregion
 
@@ -309,49 +292,95 @@ namespace _Project.Scripts.LevelEditor.Editor
                 prefabs.Add(null);
 
             EditorGUI.indentLevel--;
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(4);
         }
         #endregion
-
+        
         #region Scene GUI
         private void OnSceneGUI(SceneView sceneView)
         {
             Event e = Event.current;
-            
+
+            // Always update hover highlight
+            UpdateLandTileHoverHighlight();
+
             // ===== MOVING SELECTION =====
             if (isMovingSelection)
             {
+                if (needsSceneFocus && SceneView.lastActiveSceneView != null)
+                {
+                    SceneView.lastActiveSceneView.Focus();
+                    needsSceneFocus = false;
+                }
+
                 UpdateMovingSelection();
+                DrawMovingHighlight();
+                DrawLandTileHighlight(true);
 
-                Event e1 = Event.current;
-
-                // Rotate
-                if (e1.type == EventType.KeyDown && e1.keyCode == KeyCode.R)
+                // ----- Keyboard -----
+                if (e.type == EventType.KeyDown)
                 {
-                    RotateMovingSelection();
-                    e1.Use();
+                    Debug.Log($"Key pressed while moving: {e.keyCode}"); // temporary debug
+
+                    if (e.keyCode == KeyCode.R)
+                    {
+                        RotateMovingSelection();
+                        e.Use();
+                        sceneView.Repaint();
+                        return;
+                    }
+
+                    if (e.keyCode == KeyCode.Escape)
+                    {
+                        CancelMovingSelection();
+                        e.Use();
+                        return;
+                    }
                 }
 
-                // Place
-                if (e1.type == EventType.MouseDown && e1.button == 0 && !e1.alt)
+                // ----- Left Click = Place (with debug) -----
+                if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
                 {
-                    TryPlaceMovingSelection();
-                    e1.Use();
+                    Cell cell = GetCellUnderMouse();
+                    Debug.Log($"Left click while moving. Cell found: {(cell != null ? cell.index.ToString() : "NULL")}");
+
+                    if (cell != null)
+                    {
+                        Vector3 cellPos = activeGrid.CellGetPosition(cell.index);
+                        bool hasLand = HasLandTileUnderneath(cellPos);
+                        Debug.Log($"Has Land Tile underneath: {hasLand}");
+
+                        if (hasLand)
+                        {
+                            Debug.Log("Attempting to place...");
+                            TryPlaceMovingSelection();
+                            e.Use();
+                            return;
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Place blocked – no Land Tile underneath");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Place blocked – no cell under mouse");
+                    }
                 }
 
-                // Cancel
-                if (e1.type == EventType.MouseDown && e1.button == 1 || 
-                    (e1.type == EventType.KeyDown && e1.keyCode == KeyCode.Escape))
+                // ----- Right Click = Cancel -----
+                if (e.type == EventType.MouseDown && e.button == 1)
                 {
                     CancelMovingSelection();
-                    e1.Use();
+                    e.Use();
+                    return;
                 }
 
                 sceneView.Repaint();
                 return;
             }
-            
-            // ===== PLACEMENT + PAINT + RECTANGLE + LINE MODE =====
+
+            // ===== PLACEMENT / PAINT / RECTANGLE / LINE =====
             if (selectedPrefab != null)
             {
                 Vector2Int size = GetSelectedObjectSize();
@@ -360,10 +389,11 @@ namespace _Project.Scripts.LevelEditor.Editor
                 if (!isDragging && !isPainting && !isDrawingRect)
                     UpdatePreviewPosition();
 
-                
+                DrawLandTileHighlight(true); // darker cyan while placing
+
                 bool ctrlHeld = e.control;
 
-                // ----- Mouse Down -----
+                // Mouse Down
                 if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
                 {
                     Cell cell = GetCellUnderMouse();
@@ -371,21 +401,18 @@ namespace _Project.Scripts.LevelEditor.Editor
                     {
                         if (ctrlHeld)
                         {
-                            // Start Rectangle Fill
                             isDrawingRect = true;
                             rectStartCell = cell;
                             rectEndCell = cell;
                         }
                         else if (isOneByOne)
                         {
-                            // Start Paint mode
                             isPainting = true;
                             lastPaintedCell = null;
                             TryPaintAtMouse();
                         }
                         else
                         {
-                            // Start Line Drag (for multi-cell objects)
                             isDragging = true;
                             dragStartCell = cell;
                             dragPreviewCells.Clear();
@@ -395,18 +422,14 @@ namespace _Project.Scripts.LevelEditor.Editor
                     }
                 }
 
-                // ----- Mouse Drag -----
+                // Mouse Drag
                 if (e.type == EventType.MouseDrag && e.button == 0)
                 {
                     if (isDrawingRect)
                     {
                         Cell current = GetCellUnderMouse();
-                        if (current != null)
-                        {
-                            rectEndCell = current;
-                        }
+                        if (current != null) rectEndCell = current;
                         e.Use();
-                        sceneView.Repaint(); // Force continuous update
                     }
                     else if (isPainting)
                     {
@@ -417,14 +440,12 @@ namespace _Project.Scripts.LevelEditor.Editor
                     {
                         Cell currentCell = GetCellUnderMouse();
                         if (currentCell != null && dragStartCell != null)
-                        {
                             dragPreviewCells = GetCellsInLine(dragStartCell, currentCell);
-                            e.Use();
-                        }
+                        e.Use();
                     }
                 }
 
-                // ----- Mouse Up -----
+                // Mouse Up
                 if (e.type == EventType.MouseUp && e.button == 0)
                 {
                     if (isDrawingRect)
@@ -451,7 +472,7 @@ namespace _Project.Scripts.LevelEditor.Editor
                     }
                 }
 
-                // ----- Right Click = Cancel everything -----
+                // Right click cancel
                 if (e.type == EventType.MouseDown && e.button == 1)
                 {
                     isPainting = false;
@@ -466,19 +487,15 @@ namespace _Project.Scripts.LevelEditor.Editor
                     e.Use();
                 }
 
-                // Draw previews
-                if (isDrawingRect)
-                    DrawRectanglePreview();
-
-                if (isDragging)
-                    DrawDragPreview();
+                if (isDrawingRect) DrawRectanglePreview();
+                if (isDragging) DrawDragPreview();
 
                 sceneView.Repaint();
                 return;
             }
 
             // ===== SELECTION MODE =====
-            //Event e = Event.current;
+            DrawLandTileHighlight(false); // light cyan on hover
 
             if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
             {
@@ -490,378 +507,112 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             if (isMarqueeSelecting)
             {
-                UpdateMarqueeSelection();          // call every time so Repaint can draw
-                sceneView.Repaint();
+                marqueeEndGUI = e.mousePosition;
+                float dragDistance = Vector2.Distance(marqueeStartGUI, marqueeEndGUI);
 
-                if (e.type == EventType.MouseDrag)
+                if (e.type == EventType.MouseDrag && dragDistance > 5f)
+                {
+                    UpdateMarqueeSelection();
                     e.Use();
+                }
 
                 if (e.type == EventType.MouseUp && e.button == 0)
                 {
-                    FinishMarqueeSelection(e.shift);
+                    if (dragDistance > 5f)
+                        FinishMarqueeSelection(e.shift);
+                    else
+                    {
+                        isMarqueeSelecting = false;
+                        HandleSelectionClick(e.shift);
+                    }
                     e.Use();
                 }
+
+                sceneView.Repaint();
             }
 
-            // Always draw selection highlights
             DrawSelectionHighlights();
-            sceneView.Repaint();
         }
         #endregion
-
-        #region Copy/Paste
-
-        private void StartPasteMode()
-        {
-            if (copiedObjects.Count == 0) return;
-
-            // Create real instances (not previews)
-            List<GameObject> newObjects = new List<GameObject>();
-
-            for (int i = 0; i < copiedObjects.Count; i++)
-            {
-                GameObject prefab = copiedObjects[i];
-                if (prefab == null) continue;
-
-                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-                instance.name = prefab.name + "_Pasted";
-                instance.transform.position = copiedPositions[i];
-                instance.transform.rotation = copiedRotations[i];
-
-                int placedLayer = LayerMask.NameToLayer("PlacedObjects");
-                if (placedLayer != -1)
-                    SetLayerRecursively(instance, placedLayer);
-
-                newObjects.Add(instance);
-                placedObjects.Add(instance); // temporarily add so the move system can track them
-            }
-
-            if (newObjects.Count == 0) return;
-
-            // Now hand them over to the existing Move system
-            isMovingSelection = true;
-            movingObjects.Clear();
-            originalPositions.Clear();
-            originalRotations.Clear();
-            currentRotationSteps = 0;
-
-            foreach (GameObject obj in newObjects)
-            {
-                movingObjects.Add(obj);
-                originalPositions.Add(obj.transform.position);
-                originalRotations.Add(obj.transform.rotation);
-                // Note: we do NOT free cells here because these are brand new objects
-            }
-
-            // Clear the copy cache
-            copiedObjects.Clear();
-            copiedPositions.Clear();
-            copiedRotations.Clear();
-
-            Debug.Log($"<color=cyan>Paste → moved into Pick Up mode ({movingObjects.Count} objects). Move, then Left Click to place.</color>");
-        }
         
-        
-        private void CopySelectedObjects()
+        #region Grid Visibility & Highlight
+
+        private void UpdateGridVisibility()
         {
-            if (selectedObjects.Count == 0)
-            {
-                Debug.LogWarning("No objects selected to copy.");
-                return;
-            }
+            if (landGrid != null)
+                landGrid.gameObject.SetActive(currentGridType == GridType.Land);
 
-            copiedObjects.Clear();
-            copiedPositions.Clear();
-            copiedRotations.Clear();
-
-            // Calculate center of selection
-            copyCenter = Vector3.zero;
-            int count = 0;
-
-            foreach (GameObject obj in selectedObjects)
-            {
-                if (obj == null) continue;
-
-                // Store the original prefab (not the instance)
-                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
-                if (prefab == null) prefab = obj; // fallback
-
-                copiedObjects.Add(prefab);
-                copiedPositions.Add(obj.transform.position);
-                copiedRotations.Add(obj.transform.rotation);
-
-                copyCenter += obj.transform.position;
-                count++;
-            }
-
-            if (count > 0)
-                copyCenter /= count;
-
-            Debug.Log($"<color=cyan>Copied {copiedObjects.Count} object(s)</color>");
-        }
-        
-
-        #endregion
-
-        #region Marquee
-
-        private void UpdateMarqueeSelection()
-        {
-            Event e = Event.current;
-            marqueeEndGUI = e.mousePosition;
-
-            // Only draw during Repaint
-            if (e.type != EventType.Repaint) return;
-
-            Rect rect = GetMarqueeRect();
-
-            Handles.BeginGUI();
-
-            // Semi-transparent fill
-            Color oldColor = GUI.color;
-            GUI.color = new Color(0.2f, 0.6f, 1f, 0.2f);
-            GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture);
-
-            // Border
-            GUI.color = new Color(0.2f, 0.6f, 1f, 0.95f);
-            Handles.DrawSolidRectangleWithOutline(rect, Color.clear, new Color(0.2f, 0.6f, 1f, 0.95f));
-
-            GUI.color = oldColor;
-            Handles.EndGUI();
+            if (objectGrid != null)
+                objectGrid.gameObject.SetActive(currentGridType == GridType.Objects);
         }
 
-        private Rect GetMarqueeRect()
+        private void UpdateLandTileHoverHighlight()
         {
-            float x = Mathf.Min(marqueeStartGUI.x, marqueeEndGUI.x);
-            float y = Mathf.Min(marqueeStartGUI.y, marqueeEndGUI.y);
-            float w = Mathf.Abs(marqueeEndGUI.x - marqueeStartGUI.x);
-            float h = Mathf.Abs(marqueeEndGUI.y - marqueeStartGUI.y);
-            return new Rect(x, y, w, h);
+            hoveredLandCell = null;
+            if (objectGrid == null) return;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+
+            // Use a broader mask so we still hit the grid even if objects are in the way
+            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, LayerMask.GetMask("ObjectGrid", "LandGrid", "Default")))
+            {
+                hoveredLandCell = objectGrid.CellGetAtWorldPosition(hit.point, 0);
+            }
         }
 
-        private void FinishMarqueeSelection(bool addToSelection)
+        private void DrawLandTileHighlight(bool objectAttached)
         {
-            Rect guiRect = GetMarqueeRect();
+            if (objectGrid == null) return;
 
-            // Ignore tiny drags (treated as normal click)
-            if (guiRect.width < 5f && guiRect.height < 5f)
+            Color col = objectAttached
+                ? new Color(0.1f, 0.75f, 1f, 0.65f)   // stronger cyan when objects are attached
+                : new Color(0.3f, 0.85f, 1f, 0.4f);   // lighter cyan on normal hover
+
+            // When objects are attached to the mouse → highlight under every object
+            if (objectAttached && isMovingSelection && movingObjects.Count > 0)
             {
-                isMarqueeSelecting = false;
-                return;
-            }
-
-            if (!addToSelection)
-                selectedObjects.Clear();
-
-            Camera cam = SceneView.lastActiveSceneView?.camera;
-            if (cam == null)
-            {
-                isMarqueeSelecting = false;
-                return;
-            }
-
-            foreach (GameObject obj in placedObjects)
-            {
-                if (obj == null) continue;
-
-                // Project object position to GUI space
-                Vector3 screenPos = cam.WorldToScreenPoint(obj.transform.position);
-                // Unity GUI has Y flipped compared to screen
-                Vector2 guiPos = new Vector2(screenPos.x, cam.pixelHeight - screenPos.y);
-
-                if (guiRect.Contains(guiPos))
+                foreach (GameObject obj in movingObjects)
                 {
-                    if (!selectedObjects.Contains(obj))
-                        selectedObjects.Add(obj);
+                    if (obj == null) continue;
+
+                    Cell cell = objectGrid.CellGetAtWorldPosition(obj.transform.position, 0);
+                    if (cell == null) continue;
+
+                    DrawSingleCellHighlight(cell, col);
                 }
-            }
-
-            isMarqueeSelecting = false;
-            Debug.Log($"<color=cyan>Marquee selected {selectedObjects.Count} object(s)</color>");
-        }
-
-        #endregion
-        
-        #region Helpers
-        
-        private List<Cell> GetCellsInRectangle(Cell start, Cell end)
-        {
-            List<Cell> cells = new List<Cell>();
-            if (start == null || end == null || activeGrid == null) return cells;
-
-            int minCol = Mathf.Min(start.column, end.column);
-            int maxCol = Mathf.Max(start.column, end.column);
-            int minRow = Mathf.Min(start.row, end.row);
-            int maxRow = Mathf.Max(start.row, end.row);
-
-            for (int row = minRow; row <= maxRow; row++)
-            {
-                for (int col = minCol; col <= maxCol; col++)
-                {
-                    int index = row * activeGrid.columnCount + col;
-                    if (index >= 0 && index < activeGrid.numCells)
-                        cells.Add(activeGrid.cells[index]);
-                }
-            }
-            return cells;
-        }
-
-        private void DrawRectanglePreview()
-        {
-            if (!isDrawingRect || rectStartCell == null || rectEndCell == null || activeGrid == null)
                 return;
+            }
 
-            Vector3 startPos = activeGrid.CellGetPosition(rectStartCell.index);
-            Vector3 endPos = activeGrid.CellGetPosition(rectEndCell.index);
+            // Normal hover (single cell)
+            if (hoveredLandCell != null)
+            {
+                DrawSingleCellHighlight(hoveredLandCell, col);
+            }
+        }
 
-            float cellSize = activeGrid.cellSize.x * 0.5f;
+        private void DrawSingleCellHighlight(Cell cell, Color col)
+        {
+            if (cell == null || objectGrid == null) return;
 
-            float minX = Mathf.Min(startPos.x, endPos.x) - cellSize;
-            float maxX = Mathf.Max(startPos.x, endPos.x) + cellSize;
-            float minZ = Mathf.Min(startPos.z, endPos.z) - cellSize;
-            float maxZ = Mathf.Max(startPos.z, endPos.z) + cellSize;
-            float y = startPos.y + 0.2f;
+            Vector3 pos = objectGrid.CellGetPosition(cell.index);
+            float size = objectGrid.cellSize.x * 0.92f;
+            pos.y += 0.15f;
+
+            Handles.color = col;
 
             Vector3[] corners = new Vector3[]
             {
-                new Vector3(minX, y, minZ),
-                new Vector3(maxX, y, minZ),
-                new Vector3(maxX, y, maxZ),
-                new Vector3(minX, y, maxZ)
+                pos + new Vector3(-size, 0f, -size) * 0.5f,
+                pos + new Vector3( size, 0f, -size) * 0.5f,
+                pos + new Vector3( size, 0f,  size) * 0.5f,
+                pos + new Vector3(-size, 0f,  size) * 0.5f
             };
 
-            Handles.color = new Color(0.1f, 1f, 0.3f, 1f);
-            Handles.DrawAAPolyLine(6f, corners[0], corners[1], corners[2], corners[3], corners[0]);
-
-            // Also draw a semi-transparent fill so it’s easier to see
-            Handles.color = new Color(0.1f, 1f, 0.3f, 0.15f);
-            Handles.DrawSolidRectangleWithOutline(corners, new Color(0.1f, 1f, 0.3f, 0.15f), new Color(0.1f, 1f, 0.3f, 0.8f));
+            Handles.DrawSolidRectangleWithOutline(corners, col, new Color(col.r, col.g, col.b, 0.95f));
         }
-
-        private void FillRectangle()
-        {
-            if (rectStartCell == null || rectEndCell == null || selectedPrefab == null) return;
-
-            List<Cell> cells = GetCellsInRectangle(rectStartCell, rectEndCell);
-            Vector2Int size = GetSelectedObjectSize();
-            int placedCount = 0;
-
-            foreach (Cell cell in cells)
-            {
-                if (cell == null || !IsFootprintValid(cell, size)) continue;
-
-                Vector3 pos = activeGrid.CellGetPosition(cell.index);
-
-                // For multi-cell objects we still place at the cell center for now
-                GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
-                placed.transform.position = pos;
-                placed.name = selectedPrefab.name;
-
-                int placedLayer = LayerMask.NameToLayer("PlacedObjects");
-                if (placedLayer != -1)
-                    SetLayerRecursively(placed, placedLayer);
-
-                placedObjects.Add(placed);
-                MarkFootprintOccupied(cell, size);
-                Undo.RegisterCreatedObjectUndo(placed, "Fill Rectangle");
-                placedCount++;
-            }
-
-            if (placedCount > 0)
-                Debug.Log($"<color=green>Filled rectangle with {placedCount} objects</color>");
-        }
+        #endregion
         
-        private void TryPaintAtMouse()
-        {
-            if (selectedPrefab == null || activeGrid == null) return;
-
-            // Only allow painting with 1x1 objects for now
-            Vector2Int size = GetSelectedObjectSize();
-            if (size != Vector2Int.one) return;
-
-            Cell cell = GetCellUnderMouse();
-            if (cell == null) return;
-
-            // Don't place on the same cell repeatedly
-            if (lastPaintedCell != null && lastPaintedCell.index == cell.index)
-                return;
-
-            // Check if the cell is valid
-            if (!IsFootprintValid(cell, size))
-                return;
-
-            // Place the object
-            Vector3 pos = activeGrid.CellGetPosition(cell.index);
-
-            GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
-            placed.transform.position = pos;
-            placed.name = selectedPrefab.name;
-
-            int placedLayer = LayerMask.NameToLayer("PlacedObjects");
-            if (placedLayer != -1)
-                SetLayerRecursively(placed, placedLayer);
-
-            placedObjects.Add(placed);
-            MarkFootprintOccupied(cell, size);
-            Undo.RegisterCreatedObjectUndo(placed, "Paint Object");
-
-            lastPaintedCell = cell;
-        }
-        
-        private void DeleteSelectedObjects()
-        {
-            if (selectedObjects.Count == 0)
-            {
-                Debug.LogWarning("No objects selected to delete.");
-                return;
-            }
-
-            // Work on a copy so we can safely modify the list
-            List<GameObject> toDelete = new List<GameObject>(selectedObjects);
-
-            foreach (GameObject obj in toDelete)
-            {
-                if (obj == null) continue;
-
-                // Re-use the same logic we had for single delete
-                PlaceableObject placeable = obj.GetComponent<PlaceableObject>();
-                Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
-
-                bool isLandObject = landTiles.Contains(PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject);
-                TerrainGridSystem targetGrid = isLandObject ? landGrid : objectGrid;
-                HashSet<int> targetOccupied = isLandObject ? occupiedLandCells : occupiedObjectCells;
-
-                if (targetGrid != null)
-                {
-                    float cellSize = targetGrid.cellSize.x;
-                    Vector3 objPos = obj.transform.position;
-
-                    Vector3 originPos = objPos;
-                    originPos.x -= (size.x - 1) * cellSize * 0.5f;
-                    originPos.z -= (size.y - 1) * cellSize * 0.5f;
-
-                    Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
-                    if (originCell != null)
-                    {
-                        for (int x = 0; x < size.x; x++)
-                        {
-                            for (int y = 0; y < size.y; y++)
-                            {
-                                int index = originCell.index + x + (y * targetGrid.columnCount);
-                                targetOccupied.Remove(index);
-                            }
-                        }
-                    }
-                }
-
-                placedObjects.Remove(obj);
-                Undo.DestroyObjectImmediate(obj);
-            }
-
-            selectedObjects.Clear();
-            Debug.Log($"<color=red>Deleted {toDelete.Count} selected object(s)</color>");
-        }
-        
+        #region Helpers
         private int GetCurrentLayerMask()
         {
             return currentGridType == GridType.Land
@@ -882,6 +633,13 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (selectedPrefab == null) return Vector2Int.one;
             PlaceableObject placeable = selectedPrefab.GetComponent<PlaceableObject>();
             return placeable != null ? placeable.sizeInCells : Vector2Int.one;
+        }
+
+        private bool IsLandObject(GameObject obj)
+        {
+            if (obj == null) return false;
+            GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
+            return landTiles.Contains(prefab) || landTiles.Contains(obj);
         }
 
         private bool IsFootprintValid(Cell originCell, Vector2Int size)
@@ -948,6 +706,502 @@ namespace _Project.Scripts.LevelEditor.Editor
             obj.layer = layer;
             foreach (Transform child in obj.transform)
                 SetLayerRecursively(child.gameObject, layer);
+        }
+        #endregion
+
+        #region Selection
+        private void HandleSelectionClick(bool shiftHeld)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            int layerMask = LayerMask.GetMask("PlacedObjects");
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, layerMask))
+            {
+                Transform current = hit.collider.transform;
+                GameObject found = null;
+
+                while (current != null)
+                {
+                    if (placedObjects.Contains(current.gameObject))
+                    {
+                        found = current.gameObject;
+                        break;
+                    }
+                    current = current.parent;
+                }
+
+                if (found == null)
+                {
+                    GameObject root = hit.collider.transform.root.gameObject;
+                    if (placedObjects.Contains(root))
+                        found = root;
+                }
+
+                if (found != null)
+                {
+                    // Filter by active grid
+                    bool isLand = IsLandObject(found);
+                    if ((currentGridType == GridType.Land && !isLand) ||
+                        (currentGridType == GridType.Objects && isLand))
+                    {
+                        return;
+                    }
+
+                    if (shiftHeld)
+                    {
+                        if (selectedObjects.Contains(found))
+                            selectedObjects.Remove(found);
+                        else
+                            selectedObjects.Add(found);
+                    }
+                    else
+                    {
+                        selectedObjects.Clear();
+                        selectedObjects.Add(found);
+                    }
+                    return;
+                }
+            }
+
+            if (!shiftHeld)
+                selectedObjects.Clear();
+        }
+
+        private void SelectSameType()
+        {
+            if (selectedObjects.Count == 0) return;
+
+            GameObject reference = selectedObjects[0];
+            if (reference == null) return;
+
+            GameObject referencePrefab = PrefabUtility.GetCorrespondingObjectFromSource(reference) as GameObject;
+            if (referencePrefab == null) referencePrefab = reference;
+
+            selectedObjects.Clear();
+
+            foreach (GameObject obj in placedObjects)
+            {
+                if (obj == null) continue;
+
+                GameObject objPrefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
+                if (objPrefab == null) objPrefab = obj;
+
+                if (objPrefab == referencePrefab)
+                    selectedObjects.Add(obj);
+            }
+
+            Debug.Log($"<color=cyan>Selected {selectedObjects.Count} object(s) of the same type</color>");
+        }
+
+        private void DrawSelectionHighlights()
+        {
+            if (selectedObjects.Count == 0) return;
+
+            Handles.color = selectionColor;
+
+            foreach (GameObject obj in selectedObjects)
+            {
+                if (obj == null) continue;
+                Bounds bounds = GetObjectBounds(obj);
+                Handles.DrawWireCube(bounds.center, bounds.size * 1.08f);
+            }
+        }
+
+        private Bounds GetObjectBounds(GameObject obj)
+        {
+            Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0)
+                return new Bounds(obj.transform.position, Vector3.one);
+
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+                bounds.Encapsulate(renderers[i].bounds);
+
+            return bounds;
+        }
+        #endregion
+
+        #region Move / Rotate System
+        private void StartMovingSelection()
+        {
+            if (selectedObjects.Count == 0) return;
+
+            isMovingSelection = true;
+            movingObjects.Clear();
+            originalPositions.Clear();
+            originalRotations.Clear();
+            currentRotationSteps = 0;
+
+            foreach (GameObject obj in selectedObjects)
+            {
+                if (obj == null) continue;
+
+                movingObjects.Add(obj);
+                originalPositions.Add(obj.transform.position);
+                originalRotations.Add(obj.transform.rotation);
+                FreeObjectCells(obj);
+            }
+
+            MakeObjectsTransparent(movingObjects);
+            selectedObjects.Clear();
+            
+            // Force Scene view to take keyboard focus so R works immediately
+            if (SceneView.lastActiveSceneView != null)
+            {
+                SceneView.lastActiveSceneView.Focus();
+            }
+
+            needsSceneFocus = true;
+            
+            Debug.Log($"<color=cyan>Picked up {movingObjects.Count} object(s). R = Rotate | Space = Place | Right Click / Esc = Cancel</color>");
+        }
+
+        private void UpdateMovingSelection()
+        {
+            if (movingObjects.Count == 0 || activeGrid == null) return;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, LayerMask.GetMask("ObjectGrid", "LandGrid")))
+                return;
+
+            Cell targetCell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
+            if (targetCell == null) return;
+
+            Vector3 targetCenter = activeGrid.CellGetPosition(targetCell.index);
+
+            // Current group center
+            Vector3 currentCenter = Vector3.zero;
+            int count = 0;
+            foreach (var obj in movingObjects)
+            {
+                if (obj == null) continue;
+                currentCenter += obj.transform.position;
+                count++;
+            }
+            if (count == 0) return;
+            currentCenter /= count;
+
+            Vector3 delta = targetCenter - currentCenter;
+            delta.y = 0;
+
+            // Move group
+            foreach (var obj in movingObjects)
+            {
+                if (obj != null)
+                    obj.transform.position += delta;
+            }
+
+            // Force every object onto exact cell center (prevents 50% offset after rotation)
+            foreach (var obj in movingObjects)
+            {
+                if (obj == null) continue;
+
+                Cell nearest = activeGrid.CellGetAtWorldPosition(obj.transform.position, 0);
+                if (nearest != null)
+                {
+                    Vector3 cellCenter = activeGrid.CellGetPosition(nearest.index);
+                    cellCenter.y = obj.transform.position.y;
+                    obj.transform.position = cellCenter;
+                }
+            }
+        }
+
+        private void RotateMovingSelection()
+        {
+            if (movingObjects.Count == 0) return;
+
+            currentRotationSteps = (currentRotationSteps + 1) % 4;
+
+            Vector3 center = Vector3.zero;
+            foreach (GameObject obj in movingObjects)
+                center += obj.transform.position;
+            center /= movingObjects.Count;
+
+            foreach (GameObject obj in movingObjects)
+            {
+                Vector3 dir = obj.transform.position - center;
+                dir = Quaternion.Euler(0, 90, 0) * dir;
+                obj.transform.position = center + dir;
+                obj.transform.Rotate(0, 90, 0);
+            }
+        }
+
+        private void TryPlaceMovingSelection()
+        {
+            RestoreOriginalMaterials();
+            if (movingObjects.Count == 0) return;
+
+            foreach (GameObject obj in movingObjects)
+            {
+                if (obj == null) continue;
+
+                PlaceableObject placeable = obj.GetComponent<PlaceableObject>();
+                Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
+
+                bool isLand = IsLandObject(obj);
+                TerrainGridSystem targetGrid = isLand ? landGrid : objectGrid;
+                HashSet<int> targetOccupied = isLand ? occupiedLandCells : occupiedObjectCells;
+
+                if (targetGrid == null) continue;
+
+                float cellSize = targetGrid.cellSize.x;
+                Vector3 objPos = obj.transform.position;
+
+                Vector3 originPos = objPos;
+                originPos.x -= (size.x - 1) * cellSize * 0.5f;
+                originPos.z -= (size.y - 1) * cellSize * 0.5f;
+
+                Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
+                if (originCell != null)
+                {
+                    for (int x = 0; x < size.x; x++)
+                    {
+                        for (int y = 0; y < size.y; y++)
+                        {
+                            int index = originCell.index + x + (y * targetGrid.columnCount);
+                            targetOccupied.Add(index);
+                        }
+                    }
+                }
+            }
+            
+            movingObjects.Clear();
+            isMovingSelection = false;
+            Debug.Log("<color=green>Placed moved selection</color>");
+        }
+
+        private void CancelMovingSelection()
+        {
+            RestoreOriginalMaterials();
+            UpdateLandTileHoverHighlight();
+            if (movingObjects.Count == 0)
+            {
+                isMovingSelection = false;
+                return;
+            }
+
+            bool cameFromPaste = movingObjects[0] != null && movingObjects[0].name.Contains("_Pasted");
+
+            if (cameFromPaste)
+            {
+                foreach (GameObject obj in movingObjects)
+                {
+                    if (obj != null)
+                    {
+                        placedObjects.Remove(obj);
+                        Undo.DestroyObjectImmediate(obj);
+                    }
+                }
+                Debug.Log("<color=orange>Paste cancelled — temporary objects destroyed</color>");
+            }
+            else
+            {
+                for (int i = 0; i < movingObjects.Count; i++)
+                {
+                    if (movingObjects[i] == null) continue;
+                    movingObjects[i].transform.position = originalPositions[i];
+                    movingObjects[i].transform.rotation = originalRotations[i];
+                }
+                Debug.Log("<color=orange>Move cancelled — objects restored</color>");
+            }
+
+            movingObjects.Clear();
+            originalPositions.Clear();
+            originalRotations.Clear();
+            isMovingSelection = false;
+        }
+
+        private void FreeObjectCells(GameObject obj)
+        {
+            PlaceableObject placeable = obj.GetComponent<PlaceableObject>();
+            Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
+
+            bool isLand = IsLandObject(obj);
+            TerrainGridSystem targetGrid = isLand ? landGrid : objectGrid;
+            HashSet<int> targetOccupied = isLand ? occupiedLandCells : occupiedObjectCells;
+
+            if (targetGrid == null) return;
+
+            float cellSize = targetGrid.cellSize.x;
+            Vector3 objPos = obj.transform.position;
+
+            Vector3 originPos = objPos;
+            originPos.x -= (size.x - 1) * cellSize * 0.5f;
+            originPos.z -= (size.y - 1) * cellSize * 0.5f;
+
+            Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
+            if (originCell == null) return;
+
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    int index = originCell.index + x + (y * targetGrid.columnCount);
+                    targetOccupied.Remove(index);
+                }
+            }
+        }
+
+        private void MakeObjectsTransparent(List<GameObject> objects)
+        {
+            originalMaterials.Clear(); // we reuse this dictionary just to track which renderers we disabled
+
+            foreach (GameObject obj in objects)
+            {
+                if (obj == null) continue;
+
+                foreach (Renderer rend in obj.GetComponentsInChildren<Renderer>())
+                {
+                    if (rend == null) continue;
+
+                    // Store that this renderer was enabled
+                    originalMaterials[rend] = null; // we only need the key
+                    rend.enabled = false;           // fully hide it
+                }
+            }
+        }
+
+        private void RestoreOriginalMaterials()
+        {
+            foreach (var kvp in originalMaterials)
+            {
+                if (kvp.Key != null)
+                    kvp.Key.enabled = true; // turn renderers back on
+            }
+            originalMaterials.Clear();
+        }
+
+        private void DrawMovingHighlight()
+        {
+            if (!isMovingSelection || movingObjects.Count == 0) return;
+
+            Handles.color = new Color(0.2f, 0.9f, 1f, 0.9f);
+
+            foreach (GameObject obj in movingObjects)
+            {
+                if (obj == null) continue;
+                Bounds bounds = GetObjectBounds(obj);
+                Handles.DrawWireCube(bounds.center, bounds.size * 1.08f);
+            }
+        }
+        #endregion
+        
+        #region Paint / Continuous Place
+        private void TryPaintAtMouse()
+        {
+            if (selectedPrefab == null || activeGrid == null) return;
+
+            Vector2Int size = GetSelectedObjectSize();
+            if (size != Vector2Int.one) return;
+
+            Cell cell = GetCellUnderMouse();
+            if (cell == null) return;
+
+            if (lastPaintedCell != null && lastPaintedCell.index == cell.index)
+                return;
+
+            if (!IsFootprintValid(cell, size)) return;
+
+            Vector3 pos = activeGrid.CellGetPosition(cell.index);
+
+            GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
+            placed.transform.position = pos;
+            placed.name = selectedPrefab.name;
+
+            int placedLayer = LayerMask.NameToLayer("PlacedObjects");
+            if (placedLayer != -1)
+                SetLayerRecursively(placed, placedLayer);
+
+            placedObjects.Add(placed);
+            MarkFootprintOccupied(cell, size);
+            Undo.RegisterCreatedObjectUndo(placed, "Paint Object");
+
+            lastPaintedCell = cell;
+        }
+        #endregion
+
+        #region Rectangle / Box Fill
+        private List<Cell> GetCellsInRectangle(Cell start, Cell end)
+        {
+            List<Cell> cells = new List<Cell>();
+            if (start == null || end == null || activeGrid == null) return cells;
+
+            int minCol = Mathf.Min(start.column, end.column);
+            int maxCol = Mathf.Max(start.column, end.column);
+            int minRow = Mathf.Min(start.row, end.row);
+            int maxRow = Mathf.Max(start.row, end.row);
+
+            for (int row = minRow; row <= maxRow; row++)
+            {
+                for (int col = minCol; col <= maxCol; col++)
+                {
+                    int index = row * activeGrid.columnCount + col;
+                    if (index >= 0 && index < activeGrid.numCells)
+                        cells.Add(activeGrid.cells[index]);
+                }
+            }
+            return cells;
+        }
+
+        private void DrawRectanglePreview()
+        {
+            if (!isDrawingRect || rectStartCell == null || rectEndCell == null || activeGrid == null)
+                return;
+
+            Vector3 startPos = activeGrid.CellGetPosition(rectStartCell.index);
+            Vector3 endPos = activeGrid.CellGetPosition(rectEndCell.index);
+            float cellSize = activeGrid.cellSize.x * 0.5f;
+
+            float minX = Mathf.Min(startPos.x, endPos.x) - cellSize;
+            float maxX = Mathf.Max(startPos.x, endPos.x) + cellSize;
+            float minZ = Mathf.Min(startPos.z, endPos.z) - cellSize;
+            float maxZ = Mathf.Max(startPos.z, endPos.z) + cellSize;
+            float y = startPos.y + 0.2f;
+
+            Vector3[] corners = new Vector3[]
+            {
+                new Vector3(minX, y, minZ),
+                new Vector3(maxX, y, minZ),
+                new Vector3(maxX, y, maxZ),
+                new Vector3(minX, y, maxZ)
+            };
+
+            Handles.color = new Color(0.1f, 1f, 0.3f, 1f);
+            Handles.DrawAAPolyLine(6f, corners[0], corners[1], corners[2], corners[3], corners[0]);
+            Handles.color = new Color(0.1f, 1f, 0.3f, 0.15f);
+            Handles.DrawSolidRectangleWithOutline(corners, new Color(0.1f, 1f, 0.3f, 0.15f), new Color(0.1f, 1f, 0.3f, 0.8f));
+        }
+
+        private void FillRectangle()
+        {
+            if (rectStartCell == null || rectEndCell == null || selectedPrefab == null) return;
+
+            List<Cell> cells = GetCellsInRectangle(rectStartCell, rectEndCell);
+            Vector2Int size = GetSelectedObjectSize();
+            int placedCount = 0;
+
+            foreach (Cell cell in cells)
+            {
+                if (cell == null || !IsFootprintValid(cell, size)) continue;
+
+                Vector3 pos = activeGrid.CellGetPosition(cell.index);
+
+                GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
+                placed.transform.position = pos;
+                placed.name = selectedPrefab.name;
+
+                int placedLayer = LayerMask.NameToLayer("PlacedObjects");
+                if (placedLayer != -1)
+                    SetLayerRecursively(placed, placedLayer);
+
+                placedObjects.Add(placed);
+                MarkFootprintOccupied(cell, size);
+                Undo.RegisterCreatedObjectUndo(placed, "Fill Rectangle");
+                placedCount++;
+            }
+
+            if (placedCount > 0)
+                Debug.Log($"<color=green>Filled rectangle with {placedCount} objects</color>");
         }
         #endregion
 
@@ -1046,93 +1300,142 @@ namespace _Project.Scripts.LevelEditor.Editor
         }
         #endregion
 
-        #region SelectionType
-        private void SelectSameType()
+        #region Marquee
+        private void UpdateMarqueeSelection()
         {
-            if (selectedObjects.Count == 0) return;
+            Event e = Event.current;
+            marqueeEndGUI = e.mousePosition;
 
-            // Use the first selected object as the reference
-            GameObject reference = selectedObjects[0];
-            if (reference == null) return;
+            if (e.type != EventType.Repaint) return;
 
-            // Get the prefab of the reference object
-            GameObject referencePrefab = PrefabUtility.GetCorrespondingObjectFromSource(reference) as GameObject;
-            if (referencePrefab == null)
-                referencePrefab = reference;
+            Rect rect = GetMarqueeRect();
 
-            selectedObjects.Clear();
+            Handles.BeginGUI();
+            Color oldColor = GUI.color;
+            GUI.color = new Color(0.2f, 0.6f, 1f, 0.2f);
+            GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture);
+            GUI.color = new Color(0.2f, 0.6f, 1f, 0.95f);
+            Handles.DrawSolidRectangleWithOutline(rect, Color.clear, new Color(0.2f, 0.6f, 1f, 0.95f));
+            GUI.color = oldColor;
+            Handles.EndGUI();
+        }
+
+        private Rect GetMarqueeRect()
+        {
+            float x = Mathf.Min(marqueeStartGUI.x, marqueeEndGUI.x);
+            float y = Mathf.Min(marqueeStartGUI.y, marqueeEndGUI.y);
+            float w = Mathf.Abs(marqueeEndGUI.x - marqueeStartGUI.x);
+            float h = Mathf.Abs(marqueeEndGUI.y - marqueeStartGUI.y);
+            return new Rect(x, y, w, h);
+        }
+
+        private void FinishMarqueeSelection(bool addToSelection)
+        {
+            Rect guiRect = GetMarqueeRect();
+
+            if (guiRect.width < 5f && guiRect.height < 5f)
+            {
+                isMarqueeSelecting = false;
+                return;
+            }
+
+            if (!addToSelection)
+                selectedObjects.Clear();
+
+            Camera cam = SceneView.lastActiveSceneView?.camera;
+            if (cam == null)
+            {
+                isMarqueeSelecting = false;
+                return;
+            }
 
             foreach (GameObject obj in placedObjects)
             {
                 if (obj == null) continue;
 
-                GameObject objPrefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
-                if (objPrefab == null)
-                    objPrefab = obj;
+                // Filter by active grid
+                bool isLand = IsLandObject(obj);
+                if ((currentGridType == GridType.Land && !isLand) ||
+                    (currentGridType == GridType.Objects && isLand))
+                    continue;
 
-                if (objPrefab == referencePrefab)
+                Vector3 screenPos = cam.WorldToScreenPoint(obj.transform.position);
+                Vector2 guiPos = new Vector2(screenPos.x, cam.pixelHeight - screenPos.y);
+
+                if (guiRect.Contains(guiPos))
                 {
-                    selectedObjects.Add(obj);
+                    if (!selectedObjects.Contains(obj))
+                        selectedObjects.Add(obj);
                 }
             }
 
-            Debug.Log($"<color=cyan>Selected {selectedObjects.Count} object(s) of the same type</color>");
+            isMarqueeSelecting = false;
+            Debug.Log($"<color=cyan>Marquee selected {selectedObjects.Count} object(s)</color>");
         }
         #endregion
-        
-        #region Selection
-        private void HandleSelectionClick(bool shiftHeld)
+
+        #region Copy / Paste
+        private void CopySelectedObjects()
         {
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            int layerMask = LayerMask.GetMask("PlacedObjects");
-
-            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, layerMask))
+            if (selectedObjects.Count == 0)
             {
-                Transform current = hit.collider.transform;
-                GameObject found = null;
-
-                while (current != null)
-                {
-                    if (placedObjects.Contains(current.gameObject))
-                    {
-                        found = current.gameObject;
-                        break;
-                    }
-                    current = current.parent;
-                }
-
-                if (found == null)
-                {
-                    GameObject root = hit.collider.transform.root.gameObject;
-                    if (placedObjects.Contains(root))
-                        found = root;
-                }
-
-                if (found != null)
-                {
-                    if (shiftHeld)
-                    {
-                        if (selectedObjects.Contains(found))
-                            selectedObjects.Remove(found);
-                        else
-                            selectedObjects.Add(found);
-                    }
-                    else
-                    {
-                        selectedObjects.Clear();
-                        selectedObjects.Add(found);
-                    }
-                    return;
-                }
+                Debug.LogWarning("No objects selected to copy.");
+                return;
             }
 
-            if (!shiftHeld)
-                selectedObjects.Clear();
+            copiedObjects.Clear();
+            copiedPositions.Clear();
+            copiedRotations.Clear();
+
+            copyCenter = Vector3.zero;
+            int count = 0;
+
+            foreach (GameObject obj in selectedObjects)
+            {
+                if (obj == null) continue;
+
+                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
+                if (prefab == null) prefab = obj;
+
+                copiedObjects.Add(prefab);
+                copiedPositions.Add(obj.transform.position);
+                copiedRotations.Add(obj.transform.rotation);
+
+                copyCenter += obj.transform.position;
+                count++;
+            }
+
+            if (count > 0)
+                copyCenter /= count;
+
+            Debug.Log($"<color=cyan>Copied {copiedObjects.Count} object(s)</color>");
         }
-        
-        private void StartMovingSelection()
+
+        private void StartPasteMode()
         {
-            if (selectedObjects.Count == 0) return;
+            if (copiedObjects.Count == 0) return;
+
+            List<GameObject> newObjects = new List<GameObject>();
+
+            for (int i = 0; i < copiedObjects.Count; i++)
+            {
+                GameObject prefab = copiedObjects[i];
+                if (prefab == null) continue;
+
+                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                instance.name = prefab.name + "_Pasted";
+                instance.transform.position = copiedPositions[i];
+                instance.transform.rotation = copiedRotations[i];
+
+                int placedLayer = LayerMask.NameToLayer("PlacedObjects");
+                if (placedLayer != -1)
+                    SetLayerRecursively(instance, placedLayer);
+
+                newObjects.Add(instance);
+                placedObjects.Add(instance);
+            }
+
+            if (newObjects.Count == 0) return;
 
             isMovingSelection = true;
             movingObjects.Clear();
@@ -1140,237 +1443,27 @@ namespace _Project.Scripts.LevelEditor.Editor
             originalRotations.Clear();
             currentRotationSteps = 0;
 
-            // Record original data and free the cells
-            foreach (GameObject obj in selectedObjects)
+            foreach (GameObject obj in newObjects)
             {
-                if (obj == null) continue;
-
                 movingObjects.Add(obj);
                 originalPositions.Add(obj.transform.position);
                 originalRotations.Add(obj.transform.rotation);
-
-                FreeObjectCells(obj);
             }
 
-            selectedObjects.Clear();
-            Debug.Log($"<color=cyan>Picked up {movingObjects.Count} object(s). Press R to rotate, Left Click to place, Right Click to cancel.</color>");
-        }
+            copiedObjects.Clear();
+            copiedPositions.Clear();
+            copiedRotations.Clear();
+            
+            if (SceneView.lastActiveSceneView != null)
+                SceneView.lastActiveSceneView.Focus();
+            
+            needsSceneFocus = true;
 
-        private void UpdateMovingSelection()
-        {
-            if (movingObjects.Count == 0 || activeGrid == null) return;
-
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, LayerMask.GetMask("ObjectGrid", "LandGrid")))
-                return;
-
-            Cell targetCell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
-            if (targetCell == null) return;
-
-            Vector3 targetCellCenter = activeGrid.CellGetPosition(targetCell.index);
-
-            // Use the first object as the reference point (more stable than average for rows)
-            GameObject referenceObj = null;
-            foreach (var obj in movingObjects)
-            {
-                if (obj != null)
-                {
-                    referenceObj = obj;
-                    break;
-                }
-            }
-            if (referenceObj == null) return;
-
-            Vector3 referencePos = referenceObj.transform.position;
-            targetCellCenter.y = referencePos.y;
-
-            Vector3 delta = targetCellCenter - referencePos;
-
-            // Snap the delta to whole cells to avoid sub-cell drift
-            float cellSize = activeGrid.cellSize.x;
-            delta.x = Mathf.Round(delta.x / cellSize) * cellSize;
-            delta.z = Mathf.Round(delta.z / cellSize) * cellSize;
-
-            foreach (GameObject obj in movingObjects)
-            {
-                if (obj != null)
-                    obj.transform.position += delta;
-            }
-        }
-
-        private void RotateMovingSelection()
-        {
-            if (movingObjects.Count == 0) return;
-
-            currentRotationSteps = (currentRotationSteps + 1) % 4;
-
-            // Find center of the group
-            Vector3 center = Vector3.zero;
-            foreach (GameObject obj in movingObjects)
-                center += obj.transform.position;
-            center /= movingObjects.Count;
-
-            foreach (GameObject obj in movingObjects)
-            {
-                // Rotate position around center
-                Vector3 dir = obj.transform.position - center;
-                dir = Quaternion.Euler(0, 90, 0) * dir;
-                obj.transform.position = center + dir;
-
-                // Rotate the object itself
-                obj.transform.Rotate(0, 90, 0);
-            }
-        }
-
-        private void TryPlaceMovingSelection()
-        {
-            if (movingObjects.Count == 0) return;
-
-            foreach (GameObject obj in movingObjects)
-            {
-                if (obj == null) continue;
-
-                PlaceableObject placeable = obj.GetComponent<PlaceableObject>();
-                Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
-
-                bool isLandObject = landTiles.Contains(PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject);
-                TerrainGridSystem targetGrid = isLandObject ? landGrid : objectGrid;
-                HashSet<int> targetOccupied = isLandObject ? occupiedLandCells : occupiedObjectCells;
-
-                if (targetGrid == null) continue;
-
-                // Find the origin cell for this object (reverse the centering)
-                float cellSize = targetGrid.cellSize.x;
-                Vector3 objPos = obj.transform.position;
-
-                Vector3 originPos = objPos;
-                originPos.x -= (size.x - 1) * cellSize * 0.5f;
-                originPos.z -= (size.y - 1) * cellSize * 0.5f;
-
-                Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
-                if (originCell != null)
-                {
-                    // Mark the full footprint as occupied again
-                    for (int x = 0; x < size.x; x++)
-                    {
-                        for (int y = 0; y < size.y; y++)
-                        {
-                            int index = originCell.index + x + (y * targetGrid.columnCount);
-                            targetOccupied.Add(index);
-                        }
-                    }
-                }
-            }
-
-            movingObjects.Clear();
-            isMovingSelection = false;
-            Debug.Log("<color=green>Placed moved selection (snapped + cells re-occupied)</color>");
-        }
-
-        private void CancelMovingSelection()
-        {
-            if (movingObjects.Count == 0)
-            {
-                isMovingSelection = false;
-                return;
-            }
-
-            // Check if these objects were newly created by Paste
-            // (they have "_Pasted" in the name from StartPasteMode)
-            bool cameFromPaste = movingObjects[0] != null && movingObjects[0].name.Contains("_Pasted");
-
-            if (cameFromPaste)
-            {
-                // Destroy the temporary pasted objects
-                foreach (GameObject obj in movingObjects)
-                {
-                    if (obj != null)
-                    {
-                        placedObjects.Remove(obj);
-                        Undo.DestroyObjectImmediate(obj);
-                    }
-                }
-                Debug.Log("<color=orange>Paste cancelled — temporary objects destroyed</color>");
-            }
-            else
-            {
-                // Normal Pick Up cancel → restore original positions
-                for (int i = 0; i < movingObjects.Count; i++)
-                {
-                    if (movingObjects[i] == null) continue;
-
-                    movingObjects[i].transform.position = originalPositions[i];
-                    movingObjects[i].transform.rotation = originalRotations[i];
-                }
-                Debug.Log("<color=orange>Move cancelled — objects restored</color>");
-            }
-
-            movingObjects.Clear();
-            originalPositions.Clear();
-            originalRotations.Clear();
-            isMovingSelection = false;
-        }
-
-        private void FreeObjectCells(GameObject obj)
-        {
-            PlaceableObject placeable = obj.GetComponent<PlaceableObject>();
-            Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
-
-            bool isLandObject = landTiles.Contains(PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject);
-            TerrainGridSystem targetGrid = isLandObject ? landGrid : objectGrid;
-            HashSet<int> targetOccupied = isLandObject ? occupiedLandCells : occupiedObjectCells;
-
-            if (targetGrid == null) return;
-
-            float cellSize = targetGrid.cellSize.x;
-            Vector3 objPos = obj.transform.position;
-
-            Vector3 originPos = objPos;
-            originPos.x -= (size.x - 1) * cellSize * 0.5f;
-            originPos.z -= (size.y - 1) * cellSize * 0.5f;
-
-            Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
-            if (originCell == null) return;
-
-            for (int x = 0; x < size.x; x++)
-            {
-                for (int y = 0; y < size.y; y++)
-                {
-                    int index = originCell.index + x + (y * targetGrid.columnCount);
-                    targetOccupied.Remove(index);
-                }
-            }
-        }
-
-        private void DrawSelectionHighlights()
-        {
-            if (selectedObjects.Count == 0) return;
-
-            Handles.color = selectionColor;
-
-            foreach (GameObject obj in selectedObjects)
-            {
-                if (obj == null) continue;
-                Bounds bounds = GetObjectBounds(obj);
-                Handles.DrawWireCube(bounds.center, bounds.size * 1.08f);
-            }
-        }
-
-        private Bounds GetObjectBounds(GameObject obj)
-        {
-            Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
-            if (renderers.Length == 0)
-                return new Bounds(obj.transform.position, Vector3.one);
-
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++)
-                bounds.Encapsulate(renderers[i].bounds);
-
-            return bounds;
+            Debug.Log($"<color=cyan>Paste → moved into Pick Up mode ({movingObjects.Count} objects). R = Rotate | Space = Place | Right Click / Esc = Cancel</color>");
         }
         #endregion
 
-        #region Placement Core
+        #region Preview System
         private void UpdatePreviewPosition()
         {
             if (selectedPrefab == null || activeGrid == null || !isPreviewActive || currentPreview == null)
@@ -1398,57 +1491,14 @@ namespace _Project.Scripts.LevelEditor.Editor
             SetPreviewColor(targetColor);
         }
 
-        private Vector3 GetSnappedWorldPosition()
-        {
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, GetCurrentLayerMask()))
-            {
-                Cell cell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
-                if (cell != null) return activeGrid.CellGetPosition(cell.index);
-            }
-            return Vector3.zero;
-        }
-
-        private void PlaceObjectAtPosition(Vector3 position)
-        {
-            if (selectedPrefab == null || activeGrid == null) return;
-
-            Cell originCell = activeGrid.CellGetAtWorldPosition(position, 0);
-            if (originCell == null) return;
-
-            Vector2Int size = GetSelectedObjectSize();
-            if (!IsFootprintValid(originCell, size)) return;
-
-            Vector3 originPos = activeGrid.CellGetPosition(originCell.index);
-            float cellSize = activeGrid.cellSize.x;
-
-            Vector3 footprintCenter = originPos;
-            footprintCenter.x += (size.x - 1) * cellSize * 0.5f;
-            footprintCenter.z += (size.y - 1) * cellSize * 0.5f;
-
-            GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
-            placed.transform.position = footprintCenter;
-            placed.name = selectedPrefab.name;
-
-            int placedLayer = LayerMask.NameToLayer("PlacedObjects");
-            if (placedLayer != -1)
-                SetLayerRecursively(placed, placedLayer);
-
-            placedObjects.Add(placed);
-            MarkFootprintOccupied(originCell, size);
-            Undo.RegisterCreatedObjectUndo(placed, "Place Object");
-        }
-        #endregion
-
-        #region Preview System
-        private void CreatePreview(Vector3 position)
+        private void CreatePreview(Vector3 pos)
         {
             DestroyPreview();
             isPreviewActive = true;
 
             currentPreview = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
             currentPreview.name = "Preview_" + selectedPrefab.name;
-            currentPreview.transform.position = position;
+            currentPreview.transform.position = pos;
 
             Color c = GetPreviewColorForPrefab(selectedPrefab);
             c.a = 0.55f;
@@ -1507,71 +1557,56 @@ namespace _Project.Scripts.LevelEditor.Editor
         #endregion
 
         #region Delete
-        private void TryDeleteObjectAtMouse()
+        private void DeleteSelectedObjects()
         {
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            int layerMask = LayerMask.GetMask("PlacedObjects");
-
-            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, layerMask))
+            if (selectedObjects.Count == 0)
+            {
+                Debug.LogWarning("No objects selected to delete.");
                 return;
-
-            Transform current = hit.collider.transform;
-            GameObject foundObject = null;
-
-            while (current != null)
-            {
-                if (placedObjects.Contains(current.gameObject))
-                {
-                    foundObject = current.gameObject;
-                    break;
-                }
-                current = current.parent;
             }
 
-            if (foundObject == null)
+            List<GameObject> toDelete = new List<GameObject>(selectedObjects);
+
+            foreach (GameObject obj in toDelete)
             {
-                GameObject root = hit.collider.transform.root.gameObject;
-                if (placedObjects.Contains(root))
-                    foundObject = root;
-            }
+                if (obj == null) continue;
 
-            if (foundObject == null) return;
+                PlaceableObject placeable = obj.GetComponent<PlaceableObject>();
+                Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
 
-            PlaceableObject placeable = foundObject.GetComponent<PlaceableObject>();
-            Vector2Int size = placeable != null ? placeable.sizeInCells : Vector2Int.one;
+                bool isLand = IsLandObject(obj);
+                TerrainGridSystem targetGrid = isLand ? landGrid : objectGrid;
+                HashSet<int> targetOccupied = isLand ? occupiedLandCells : occupiedObjectCells;
 
-            bool isLandObject = landTiles.Contains(PrefabUtility.GetCorrespondingObjectFromSource(foundObject) as GameObject);
-            TerrainGridSystem targetGrid = isLandObject ? landGrid : objectGrid;
-            HashSet<int> targetOccupied = isLandObject ? occupiedLandCells : occupiedObjectCells;
-
-            if (targetGrid == null) return;
-
-            float cellSize = targetGrid.cellSize.x;
-            Vector3 objPos = foundObject.transform.position;
-
-            Vector3 originPos = objPos;
-            originPos.x -= (size.x - 1) * cellSize * 0.5f;
-            originPos.z -= (size.y - 1) * cellSize * 0.5f;
-
-            Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
-            if (originCell != null)
-            {
-                for (int x = 0; x < size.x; x++)
+                if (targetGrid != null)
                 {
-                    for (int y = 0; y < size.y; y++)
+                    float cellSize = targetGrid.cellSize.x;
+                    Vector3 objPos = obj.transform.position;
+
+                    Vector3 originPos = objPos;
+                    originPos.x -= (size.x - 1) * cellSize * 0.5f;
+                    originPos.z -= (size.y - 1) * cellSize * 0.5f;
+
+                    Cell originCell = targetGrid.CellGetAtWorldPosition(originPos, 0);
+                    if (originCell != null)
                     {
-                        int index = originCell.index + x + (y * targetGrid.columnCount);
-                        targetOccupied.Remove(index);
+                        for (int x = 0; x < size.x; x++)
+                        {
+                            for (int y = 0; y < size.y; y++)
+                            {
+                                int index = originCell.index + x + (y * targetGrid.columnCount);
+                                targetOccupied.Remove(index);
+                            }
+                        }
                     }
                 }
+
+                placedObjects.Remove(obj);
+                Undo.DestroyObjectImmediate(obj);
             }
 
-            string objectName = foundObject.name;
-            placedObjects.Remove(foundObject);
-            selectedObjects.Remove(foundObject);
-            Undo.DestroyObjectImmediate(foundObject);
-
-            Debug.Log($"<color=red>Deleted {objectName} ({size.x}x{size.y})</color>");
+            selectedObjects.Clear();
+            Debug.Log($"<color=red>Deleted {toDelete.Count} selected object(s)</color>");
         }
         #endregion
 
