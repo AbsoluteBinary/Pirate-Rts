@@ -26,6 +26,12 @@ namespace _Project.Scripts.LevelEditor.Editor
         private Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
         #endregion
 
+        #region Modes
+
+        private bool isSelectMode = false;
+
+        #endregion
+
         #region Rectangle Fill
         private bool isDrawingRect = false;
         private Cell rectStartCell = null;
@@ -117,6 +123,26 @@ namespace _Project.Scripts.LevelEditor.Editor
         #region GUI
         private void OnGUI()
         {
+            // Select Mode toggle
+            GUI.backgroundColor = isSelectMode ? new Color(0.3f, 0.7f, 1f) : Color.white;
+            if (GUILayout.Button(isSelectMode ? "● Select Mode (Active)" : "Select Mode", GUILayout.Height(28)))
+            {
+                isSelectMode = !isSelectMode;
+
+                if (isSelectMode)
+                {
+                    // Optional: clear other states when entering Select Mode
+                    selectedPrefab = null;
+                    DestroyPreview();
+                    isPainting = false;
+                    isDragging = false;
+                    isDrawingRect = false;
+                }
+
+                Debug.Log(isSelectMode ? "<color=cyan>Select Mode ON</color>" : "<color=grey>Select Mode OFF</color>");
+            }
+            GUI.backgroundColor = Color.white;
+            
             GUILayout.Label("Combat Scene Builder", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
@@ -495,8 +521,9 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
 
             // ===== SELECTION MODE =====
-            DrawLandTileHighlight(false); // light cyan on hover
+            //Event e = Event.current;
 
+            // Start marquee
             if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
             {
                 isMarqueeSelecting = true;
@@ -507,17 +534,21 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             if (isMarqueeSelecting)
             {
-                marqueeEndGUI = e.mousePosition;
-                float dragDistance = Vector2.Distance(marqueeStartGUI, marqueeEndGUI);
-
-                if (e.type == EventType.MouseDrag && dragDistance > 5f)
+                // Update end position while dragging
+                if (e.type == EventType.MouseDrag)
                 {
-                    UpdateMarqueeSelection();
+                    marqueeEndGUI = e.mousePosition;
                     e.Use();
                 }
 
+                // Always try to draw (UpdateMarqueeSelection only draws on Repaint)
+                UpdateMarqueeSelection();
+
+                // Finish on mouse up
                 if (e.type == EventType.MouseUp && e.button == 0)
                 {
+                    float dragDistance = Vector2.Distance(marqueeStartGUI, marqueeEndGUI);
+
                     if (dragDistance > 5f)
                         FinishMarqueeSelection(e.shift);
                     else
@@ -525,9 +556,11 @@ namespace _Project.Scripts.LevelEditor.Editor
                         isMarqueeSelecting = false;
                         HandleSelectionClick(e.shift);
                     }
+
                     e.Use();
                 }
 
+                // Keep repainting while dragging so the rectangle stays visible
                 sceneView.Repaint();
             }
 
@@ -552,8 +585,6 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (objectGrid == null) return;
 
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-
-            // Use a broader mask so we still hit the grid even if objects are in the way
             if (Physics.Raycast(ray, out RaycastHit hit, 5000f, LayerMask.GetMask("ObjectGrid", "LandGrid", "Default")))
             {
                 hoveredLandCell = objectGrid.CellGetAtWorldPosition(hit.point, 0);
@@ -563,10 +594,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         private void DrawLandTileHighlight(bool objectAttached)
         {
             if (objectGrid == null) return;
-
-            Color col = objectAttached
-                ? new Color(0.1f, 0.75f, 1f, 0.65f)   // stronger cyan when objects are attached
-                : new Color(0.3f, 0.85f, 1f, 0.4f);   // lighter cyan on normal hover
 
             // When objects are attached to the mouse → highlight under every object
             if (objectAttached && isMovingSelection && movingObjects.Count > 0)
@@ -578,6 +605,13 @@ namespace _Project.Scripts.LevelEditor.Editor
                     Cell cell = objectGrid.CellGetAtWorldPosition(obj.transform.position, 0);
                     if (cell == null) continue;
 
+                    Vector3 cellPos = objectGrid.CellGetPosition(cell.index);
+                    bool hasLand = HasLandTileUnderneath(cellPos);
+
+                    Color col = hasLand
+                        ? new Color(0.1f, 0.75f, 1f, 0.65f)   // Cyan = valid (on land)
+                        : new Color(1f, 0.2f, 0.2f, 0.65f);   // Red = invalid (water)
+
                     DrawSingleCellHighlight(cell, col);
                 }
                 return;
@@ -586,6 +620,13 @@ namespace _Project.Scripts.LevelEditor.Editor
             // Normal hover (single cell)
             if (hoveredLandCell != null)
             {
+                Vector3 cellPos = objectGrid.CellGetPosition(hoveredLandCell.index);
+                bool hasLand = HasLandTileUnderneath(cellPos);
+
+                Color col = hasLand
+                    ? new Color(0.3f, 0.85f, 1f, 0.4f)     // Light cyan
+                    : new Color(1f, 0.25f, 0.25f, 0.4f);   // Light red (water)
+
                 DrawSingleCellHighlight(hoveredLandCell, col);
             }
         }
@@ -928,9 +969,29 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private void TryPlaceMovingSelection()
         {
-            RestoreOriginalMaterials();
             if (movingObjects.Count == 0) return;
 
+            // First pass – check if EVERY object is valid
+            foreach (GameObject obj in movingObjects)
+            {
+                if (obj == null) continue;
+
+                Cell cell = activeGrid.CellGetAtWorldPosition(obj.transform.position, 0);
+                if (cell == null)
+                {
+                    Debug.LogWarning("Place cancelled – one or more objects are not on a valid cell.");
+                    return;
+                }
+
+                Vector3 cellPos = activeGrid.CellGetPosition(cell.index);
+                if (!HasLandTileUnderneath(cellPos))
+                {
+                    Debug.LogWarning("Place cancelled – one or more objects are over water.");
+                    return;
+                }
+            }
+
+            // Second pass – all objects are valid, so place them
             foreach (GameObject obj in movingObjects)
             {
                 if (obj == null) continue;
@@ -964,7 +1025,8 @@ namespace _Project.Scripts.LevelEditor.Editor
                     }
                 }
             }
-            
+
+            RestoreOriginalMaterials();
             movingObjects.Clear();
             isMovingSelection = false;
             Debug.Log("<color=green>Placed moved selection</color>");
@@ -1306,27 +1368,34 @@ namespace _Project.Scripts.LevelEditor.Editor
             Event e = Event.current;
             marqueeEndGUI = e.mousePosition;
 
+            // Only draw during Repaint
             if (e.type != EventType.Repaint) return;
 
             Rect rect = GetMarqueeRect();
 
             Handles.BeginGUI();
+
+            // Semi-transparent fill
             Color oldColor = GUI.color;
-            GUI.color = new Color(0.2f, 0.6f, 1f, 0.2f);
+            GUI.color = new Color(0.2f, 0.6f, 1f, 0.25f);
             GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture);
+
+            // Border
             GUI.color = new Color(0.2f, 0.6f, 1f, 0.95f);
             Handles.DrawSolidRectangleWithOutline(rect, Color.clear, new Color(0.2f, 0.6f, 1f, 0.95f));
+
             GUI.color = oldColor;
             Handles.EndGUI();
         }
 
         private Rect GetMarqueeRect()
         {
-            float x = Mathf.Min(marqueeStartGUI.x, marqueeEndGUI.x);
-            float y = Mathf.Min(marqueeStartGUI.y, marqueeEndGUI.y);
-            float w = Mathf.Abs(marqueeEndGUI.x - marqueeStartGUI.x);
-            float h = Mathf.Abs(marqueeEndGUI.y - marqueeStartGUI.y);
-            return new Rect(x, y, w, h);
+            float xMin = Mathf.Min(marqueeStartGUI.x, marqueeEndGUI.x);
+            float yMin = Mathf.Min(marqueeStartGUI.y, marqueeEndGUI.y);
+            float width = Mathf.Abs(marqueeEndGUI.x - marqueeStartGUI.x);
+            float height = Mathf.Abs(marqueeEndGUI.y - marqueeStartGUI.y);
+
+            return new Rect(xMin, yMin, width, height);
         }
 
         private void FinishMarqueeSelection(bool addToSelection)
