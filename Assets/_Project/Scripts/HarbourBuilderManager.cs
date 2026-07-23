@@ -77,7 +77,7 @@ namespace _Project.Scripts
                 CancelPreview();
         }
 
-                private void UpdatePreviewPosition()
+        private void UpdatePreviewPosition()
         {
             if (harbourBuildCamera == null || tgs == null) return;
 

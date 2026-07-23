@@ -63,6 +63,14 @@ namespace _Project.Scripts.LevelEditor.Editor
         private HashSet<int> occupiedObjectCells = new HashSet<int>();
         #endregion
 
+        #region DoubleClick
+
+        private double lastClickTime = 0;
+        private GameObject lastClickedObject = null;
+        private const float doubleClickThreshold = 0.3f; // seconds
+
+        #endregion
+
         #region Categories
         private bool showLandTiles = true;
         private bool showTurrets = true;
@@ -97,6 +105,9 @@ namespace _Project.Scripts.LevelEditor.Editor
         #region Hover Highlight
         private Cell hoveredLandCell = null;
         #endregion
+        
+        private HashSet<GameObject> lockedObjects = new HashSet<GameObject>();
+        private GameObject hoveredObject = null;
 
         [MenuItem("Tools/Combat Scene Builder")]
         public static void ShowWindow()
@@ -120,36 +131,91 @@ namespace _Project.Scripts.LevelEditor.Editor
             DestroyPreview();
         }
         
+        private enum BuilderMode
+        {
+            Select,
+            BuildOnWater,   // Land Grid + landTiles
+            BuildOnLand     // Object Grid + walls/buildings/etc.
+        }
+
+        private BuilderMode currentMode = BuilderMode.Select;
+        
+        private enum SelectFilter
+        {
+            All,
+            Walls,
+            Turrets,
+            Land
+        }
+
+        private SelectFilter currentSelectFilter = SelectFilter.All;
+        
         #region GUI
         private void OnGUI()
         {
-            // Select Mode toggle
-            GUI.backgroundColor = isSelectMode ? new Color(0.3f, 0.7f, 1f) : Color.white;
-            if (GUILayout.Button(isSelectMode ? "● Select Mode (Active)" : "Select Mode", GUILayout.Height(28)))
-            {
-                isSelectMode = !isSelectMode;
-
-                if (isSelectMode)
-                {
-                    // Optional: clear other states when entering Select Mode
-                    selectedPrefab = null;
-                    DestroyPreview();
-                    isPainting = false;
-                    isDragging = false;
-                    isDrawingRect = false;
-                }
-
-                Debug.Log(isSelectMode ? "<color=cyan>Select Mode ON</color>" : "<color=grey>Select Mode OFF</color>");
-            }
-            GUI.backgroundColor = Color.white;
-            
-            GUILayout.Label("Combat Scene Builder", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
-
             // ===== Tools =====
             GUILayout.Label("Tools", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
+            
+            EditorGUILayout.BeginHorizontal();
+
+            GUI.enabled = selectedObjects.Count > 0;
+            if (GUILayout.Button($"Lock Selected ({selectedObjects.Count})", GUILayout.Height(26)))
+            {
+                foreach (var obj in selectedObjects)
+                {
+                    if (obj != null)
+                        lockedObjects.Add(obj);
+                }
+                Debug.Log($"<color=orange>Locked {selectedObjects.Count} object(s)</color>");
+                selectedObjects.Clear();
+            }
+
+            if (GUILayout.Button($"Unlock Selected ({selectedObjects.Count})", GUILayout.Height(26)))
+            {
+                foreach (var obj in selectedObjects)
+                {
+                    if (obj != null)
+                        lockedObjects.Remove(obj);
+                }
+                Debug.Log($"<color=cyan>Unlocked {selectedObjects.Count} object(s)</color>");
+            }
+            GUI.enabled = true;
+
+            EditorGUILayout.EndHorizontal();
+            
+            // ===== Mode Selection =====
+            GUILayout.Label("Mode", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+
+            // Select Mode
+            GUI.backgroundColor = currentMode == BuilderMode.Select ? new Color(0.3f, 0.7f, 1f) : Color.white;
+            if (GUILayout.Button(currentMode == BuilderMode.Select ? "● Select" : "Select", GUILayout.Height(28)))
+            {
+                SetMode(BuilderMode.Select);
+            }
+            GUI.backgroundColor = Color.white;
+
+            // Build on Water (Land Tiles)
+            GUI.backgroundColor = currentMode == BuilderMode.BuildOnWater ? new Color(0.2f, 0.8f, 0.9f) : Color.white;
+            if (GUILayout.Button(currentMode == BuilderMode.BuildOnWater ? "● Build on Water" : "Build on Water", GUILayout.Height(28)))
+            {
+                SetMode(BuilderMode.BuildOnWater);
+            }
+            GUI.backgroundColor = Color.white;
+
+            // Build on Land (Objects)
+            GUI.backgroundColor = currentMode == BuilderMode.BuildOnLand ? new Color(0.3f, 0.9f, 0.4f) : Color.white;
+            if (GUILayout.Button(currentMode == BuilderMode.BuildOnLand ? "● Build on Land" : "Build on Land", GUILayout.Height(28)))
+            {
+                SetMode(BuilderMode.BuildOnLand);
+            }
+            GUI.backgroundColor = Color.white;
+
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(8);
+            
 
             GUI.enabled = selectedObjects.Count > 0 && !isMovingSelection;
             if (GUILayout.Button($"Pick Up Selected ({selectedObjects.Count})", GUILayout.Height(28)))
@@ -165,6 +231,58 @@ namespace _Project.Scripts.LevelEditor.Editor
                 Debug.Log($"<color=yellow>Stored {selectedObjects.Count} object(s) — logic coming later</color>");
 
             EditorGUILayout.EndHorizontal();
+            
+            // ===== Select Filters (always visible) =====
+            // ===== Select Filters (always visible) =====
+            GUILayout.Label("Select Filter", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+
+            GUI.backgroundColor = currentSelectFilter == SelectFilter.All ? new Color(0.3f, 0.7f, 1f) : Color.white;
+            if (GUILayout.Button(currentSelectFilter == SelectFilter.All ? "● All" : "All", GUILayout.Height(24)))
+            {
+                if (currentSelectFilter != SelectFilter.All)
+                {
+                    currentSelectFilter = SelectFilter.All;
+                    selectedObjects.Clear();
+                }
+            }
+            GUI.backgroundColor = Color.white;
+
+            GUI.backgroundColor = currentSelectFilter == SelectFilter.Walls ? new Color(0.3f, 0.7f, 1f) : Color.white;
+            if (GUILayout.Button(currentSelectFilter == SelectFilter.Walls ? "● Walls" : "Walls", GUILayout.Height(24)))
+            {
+                if (currentSelectFilter != SelectFilter.Walls)
+                {
+                    currentSelectFilter = SelectFilter.Walls;
+                    selectedObjects.Clear();
+                }
+            }
+            GUI.backgroundColor = Color.white;
+
+            GUI.backgroundColor = currentSelectFilter == SelectFilter.Turrets ? new Color(0.3f, 0.7f, 1f) : Color.white;
+            if (GUILayout.Button(currentSelectFilter == SelectFilter.Turrets ? "● Turrets" : "Turrets", GUILayout.Height(24)))
+            {
+                if (currentSelectFilter != SelectFilter.Turrets)
+                {
+                    currentSelectFilter = SelectFilter.Turrets;
+                    selectedObjects.Clear();
+                }
+            }
+            GUI.backgroundColor = Color.white;
+
+            GUI.backgroundColor = currentSelectFilter == SelectFilter.Land ? new Color(0.3f, 0.7f, 1f) : Color.white;
+            if (GUILayout.Button(currentSelectFilter == SelectFilter.Land ? "● Land" : "Land", GUILayout.Height(24)))
+            {
+                if (currentSelectFilter != SelectFilter.Land)
+                {
+                    currentSelectFilter = SelectFilter.Land;
+                    selectedObjects.Clear();
+                }
+            }
+            GUI.backgroundColor = Color.white;
+
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(8);
 
             GUI.enabled = selectedObjects.Count > 0 && !isMovingSelection;
             if (GUILayout.Button("Select Same Type", GUILayout.Height(26)))
@@ -222,13 +340,24 @@ namespace _Project.Scripts.LevelEditor.Editor
             EditorGUILayout.Space(10);
 
             // ===== Categories =====
-            DrawCategory("Land Tiles", ref showLandTiles, landTiles);
-            DrawCategory("Turrets", ref showTurrets, turrets);
-            DrawCategory("Walls", ref showWalls, walls);
-            DrawCategory("Buildings", ref showBuildings, buildings);
-            DrawCategory("Combat Ships", ref showCombatShips, combatShips);
-
             EditorGUILayout.Space(10);
+            GUILayout.Label("Categories", EditorStyles.boldLabel);
+
+            // Show categories based on current mode
+            if (currentMode == BuilderMode.BuildOnWater || currentMode == BuilderMode.Select)
+            {
+                DrawCategory("Land Tiles", ref showLandTiles, landTiles);
+                // Future: DrawCategory("Ships", ref showShips, ships);
+                // Future: DrawCategory("Traps", ref showTraps, traps);
+            }
+
+            if (currentMode == BuilderMode.BuildOnLand || currentMode == BuilderMode.Select)
+            {
+                DrawCategory("Walls", ref showWalls, walls);
+                DrawCategory("Turrets", ref showTurrets, turrets);
+                DrawCategory("Buildings", ref showBuildings, buildings);
+                DrawCategory("Combat Ships", ref showCombatShips, combatShips);
+            }
 
             // ===== Currently Selected Prefab =====
             GUILayout.Label("Currently Selected Prefab:", EditorStyles.boldLabel);
@@ -521,54 +650,150 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
 
             // ===== SELECTION MODE =====
-            //Event e = Event.current;
-
-            // Start marquee
-            if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
+            if (currentMode == BuilderMode.Select)
             {
-                isMarqueeSelecting = true;
-                marqueeStartGUI = e.mousePosition;
-                marqueeEndGUI = e.mousePosition;
-                e.Use();
-            }
+                UpdateHoveredObject();
+                DrawHoveredObjectHighlight();
 
-            if (isMarqueeSelecting)
-            {
-                // Update end position while dragging
-                if (e.type == EventType.MouseDrag)
+                // Start marquee
+                if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
                 {
+                    isMarqueeSelecting = true;
+                    marqueeStartGUI = e.mousePosition;
                     marqueeEndGUI = e.mousePosition;
                     e.Use();
                 }
 
-                // Always try to draw (UpdateMarqueeSelection only draws on Repaint)
-                UpdateMarqueeSelection();
-
-                // Finish on mouse up
-                if (e.type == EventType.MouseUp && e.button == 0)
+                if (isMarqueeSelecting)
                 {
-                    float dragDistance = Vector2.Distance(marqueeStartGUI, marqueeEndGUI);
-
-                    if (dragDistance > 5f)
-                        FinishMarqueeSelection(e.shift);
-                    else
+                    if (e.type == EventType.MouseDrag)
                     {
-                        isMarqueeSelecting = false;
-                        HandleSelectionClick(e.shift);
+                        marqueeEndGUI = e.mousePosition;
+                        e.Use();
                     }
 
-                    e.Use();
+                    UpdateMarqueeSelection();
+
+                    if (e.type == EventType.MouseUp && e.button == 0)
+                    {
+                        float dragDistance = Vector2.Distance(marqueeStartGUI, marqueeEndGUI);
+
+                        if (dragDistance > 5f)
+                            FinishMarqueeSelection(e.shift);
+                        else
+                        {
+                            isMarqueeSelecting = false;
+                            HandleSelectionClick(e.shift);
+                        }
+                        e.Use();
+                    }
+
+                    sceneView.Repaint();
                 }
 
-                // Keep repainting while dragging so the rectangle stays visible
-                sceneView.Repaint();
+                DrawSelectionHighlights();
             }
-
-            DrawSelectionHighlights();
+            else
+            {
+                // Make sure marquee is cancelled if we left Select Mode
+                isMarqueeSelecting = false;
+            }
         }
+        #endregion
+
+        #region SetMode
+
+        private void SetMode(BuilderMode newMode)
+        {
+            currentMode = newMode;
+
+            // Clear placement state when changing mode
+            selectedPrefab = null;
+            DestroyPreview();
+            isPainting = false;
+            isDragging = false;
+            isDrawingRect = false;
+            isMovingSelection = false;
+
+            switch (newMode)
+            {
+                case BuilderMode.Select:
+                    // No grid forced
+                    Debug.Log("<color=cyan>Mode → Select</color>");
+                    break;
+
+                case BuilderMode.BuildOnWater:
+                    currentGridType = GridType.Land;
+                    activeGrid = landGrid;
+                    UpdateGridVisibility();
+                    Debug.Log("<color=cyan>Mode → Build on Water (Land Grid)</color>");
+                    break;
+
+                case BuilderMode.BuildOnLand:
+                    currentGridType = GridType.Objects;
+                    activeGrid = objectGrid;
+                    UpdateGridVisibility();
+                    Debug.Log("<color=cyan>Mode → Build on Land (Object Grid)</color>");
+                    break;
+            }
+        }
+
         #endregion
         
         #region Grid Visibility & Highlight
+        private void UpdateHoveredObject()
+        {
+            hoveredObject = null;
+
+            if (currentMode != BuilderMode.Select) return;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            int layerMask = LayerMask.GetMask("PlacedObjects");
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, layerMask))
+            {
+                Transform current = hit.collider.transform;
+                GameObject found = null;
+
+                while (current != null)
+                {
+                    if (placedObjects.Contains(current.gameObject))
+                    {
+                        found = current.gameObject;
+                        break;
+                    }
+                    current = current.parent;
+                }
+
+                if (found == null)
+                {
+                    GameObject root = hit.collider.transform.root.gameObject;
+                    if (placedObjects.Contains(root))
+                        found = root;
+                }
+
+                // Respect filters + locked
+                if (found != null && !IsLocked(found) && MatchesSelectFilter(found))
+                {
+                    hoveredObject = found;
+                }
+            }
+        }
+
+        private void DrawHoveredObjectHighlight()
+        {
+            if (hoveredObject == null) return;
+
+            // Don’t draw hover if it’s already selected
+            if (selectedObjects.Contains(hoveredObject)) return;
+
+            Bounds bounds = GetObjectBounds(hoveredObject);
+            Vector3 size = bounds.size * 1.08f;
+
+            // Softer orange / yellow hover colour so it’s distinct from selection cyan
+            Handles.color = new Color(1f, 0.8f, 0.2f, 0.85f);
+            Handles.DrawWireCube(bounds.center, size);
+        }
 
         private void UpdateGridVisibility()
         {
@@ -654,6 +879,144 @@ namespace _Project.Scripts.LevelEditor.Editor
         #endregion
         
         #region Helpers
+        
+        private bool IsLocked(GameObject obj)
+        {
+            return obj != null && lockedObjects.Contains(obj);
+        }
+        private Vector3 GetFootprintCenter(Cell originCell, Vector2Int size)
+        {
+            Vector3 originPos = activeGrid.CellGetPosition(originCell.index);
+            float cellSize = activeGrid.cellSize.x;
+
+            Vector3 center = originPos;
+            center.x += (size.x - 1) * cellSize * 0.5f;
+            center.z += (size.y - 1) * cellSize * 0.5f;
+            return center;
+        }
+        
+        private bool IsWall(GameObject obj)
+        {
+            if (obj == null) return false;
+            GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
+            if (prefab == null) prefab = obj;
+            return walls.Contains(prefab) || walls.Contains(obj);
+        }
+
+        private void SelectConnectedWalls(GameObject startWall)
+        {
+            
+            if (startWall == null || objectGrid == null) return;
+
+            selectedObjects.Clear();
+
+            // Get starting cell
+            Cell startCell = objectGrid.CellGetAtWorldPosition(startWall.transform.position, 0);
+            if (startCell == null) return;
+
+            HashSet<int> visited = new HashSet<int>();
+            Queue<Cell> queue = new Queue<Cell>();
+
+            queue.Enqueue(startCell);
+            visited.Add(startCell.index);
+
+            // 4-directional offsets (N/S/E/W)
+            int[] dCol = { 0, 0, 1, -1 };
+            int[] dRow = { 1, -1, 0, 0 };
+
+            while (queue.Count > 0)
+            {
+                Cell current = queue.Dequeue();
+
+                // Find wall object on this cell
+                GameObject wallOnCell = FindWallOnCell(current);
+                if (wallOnCell != null && !selectedObjects.Contains(wallOnCell))
+                    selectedObjects.Add(wallOnCell);
+                
+                if (IsLocked(wallOnCell))
+                    continue;   // or continue
+
+                // Check 4 neighbours
+                for (int i = 0; i < 4; i++)
+                {
+                    int newCol = current.column + dCol[i];
+                    int newRow = current.row + dRow[i];
+
+                    if (newCol < 0 || newRow < 0 || newCol >= objectGrid.columnCount || newRow >= objectGrid.rowCount)
+                        continue;
+
+                    int neighbourIndex = newRow * objectGrid.columnCount + newCol;
+                    if (visited.Contains(neighbourIndex)) continue;
+
+                    Cell neighbour = objectGrid.cells[neighbourIndex];
+                    GameObject neighbourWall = FindWallOnCell(neighbour);
+
+                    if (neighbourWall != null)
+                    {
+                        visited.Add(neighbourIndex);
+                        queue.Enqueue(neighbour);
+                    }
+                }
+            }
+
+            Debug.Log($"<color=cyan>Select Connected → {selectedObjects.Count} wall(s)</color>");
+        }
+
+        private GameObject FindWallOnCell(Cell cell)
+        {
+            if (cell == null) return null;
+
+            Vector3 cellPos = objectGrid.CellGetPosition(cell.index);
+
+            foreach (GameObject obj in placedObjects)
+            {
+                if (obj == null || !IsWall(obj)) continue;
+
+                // Simple distance check (works well for 1x1 walls)
+                if (Vector3.Distance(obj.transform.position, cellPos) < objectGrid.cellSize.x * 0.6f)
+                    return obj;
+            }
+            return null;
+        }
+        
+        private bool MatchesSelectFilter(GameObject obj)
+        {
+            if (obj == null) return false;
+
+            // All → always true
+            if (currentSelectFilter == SelectFilter.All)
+                return true;
+
+            GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
+            if (prefab == null) prefab = obj;
+
+            switch (currentSelectFilter)
+            {
+                case SelectFilter.Walls:
+                    return walls.Contains(prefab) || walls.Contains(obj);
+
+                case SelectFilter.Turrets:
+                    return turrets.Contains(prefab) || turrets.Contains(obj);
+
+                case SelectFilter.Land:
+                    // More robust check for land tiles
+                    bool match = landTiles.Contains(prefab) || landTiles.Contains(obj);
+                    if (!match)
+                    {
+                        // Fallback: check by name (helps when prefab references differ)
+                        string objName = prefab != null ? prefab.name : obj.name;
+                        foreach (var tile in landTiles)
+                        {
+                            if (tile != null && tile.name == objName)
+                                return true;
+                        }
+                    }
+                    return match;
+
+                default:
+                    return true;
+            }
+        }
         private int GetCurrentLayerMask()
         {
             return currentGridType == GridType.Land
@@ -773,21 +1136,42 @@ namespace _Project.Scripts.LevelEditor.Editor
 
                 if (found == null)
                 {
+                    if (IsLocked(found))
+                        return;   
                     GameObject root = hit.collider.transform.root.gameObject;
                     if (placedObjects.Contains(root))
                         found = root;
                 }
+                
 
                 if (found != null)
                 {
-                    // Filter by active grid
-                    bool isLand = IsLandObject(found);
-                    if ((currentGridType == GridType.Land && !isLand) ||
-                        (currentGridType == GridType.Objects && isLand))
+                    // Mode + filter checks (keep your existing ones)
+                    if (currentMode != BuilderMode.Select)
                     {
+                        bool isLand = IsLandObject(found);
+                        if ((currentGridType == GridType.Land && !isLand) ||
+                            (currentGridType == GridType.Objects && isLand))
+                            return;
+                    }
+
+                    if (!MatchesSelectFilter(found))
+                        return;
+
+                    // ===== Double-click detection for Select Connected =====
+                    double timeSinceLast = EditorApplication.timeSinceStartup - lastClickTime;
+                    bool isDoubleClick = timeSinceLast < doubleClickThreshold && lastClickedObject == found;
+
+                    lastClickTime = EditorApplication.timeSinceStartup;
+                    lastClickedObject = found;
+
+                    if (isDoubleClick && IsWall(found))
+                    {
+                        SelectConnectedWalls(found);
                         return;
                     }
 
+                    // Normal single-click selection
                     if (shiftHeld)
                     {
                         if (selectedObjects.Contains(found))
@@ -822,6 +1206,8 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             foreach (GameObject obj in placedObjects)
             {
+                if (IsLocked(obj))
+                    continue;
                 if (obj == null) continue;
 
                 GameObject objPrefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
@@ -838,13 +1224,46 @@ namespace _Project.Scripts.LevelEditor.Editor
         {
             if (selectedObjects.Count == 0) return;
 
-            Handles.color = selectionColor;
+            // Bright cyan with good opacity
+            Color lineColor = new Color(0.1f, 0.85f, 1f, 0.95f);
+            Color fillColor = new Color(0.1f, 0.75f, 1f, 0.12f);
 
             foreach (GameObject obj in selectedObjects)
             {
                 if (obj == null) continue;
+
                 Bounds bounds = GetObjectBounds(obj);
-                Handles.DrawWireCube(bounds.center, bounds.size * 1.08f);
+
+                // Slightly expand so it’s clearly outside the object
+                Vector3 size = bounds.size * 1.12f;
+                Vector3 center = bounds.center;
+
+                // Soft fill
+                Handles.color = fillColor;
+                Handles.DrawSolidRectangleWithOutline(
+                    new Vector3[]
+                    {
+                        center + new Vector3(-size.x, 0, -size.z) * 0.5f,
+                        center + new Vector3( size.x, 0, -size.z) * 0.5f,
+                        center + new Vector3( size.x, 0,  size.z) * 0.5f,
+                        center + new Vector3(-size.x, 0,  size.z) * 0.5f
+                    },
+                    fillColor,
+                    Color.clear
+                );
+
+                // Strong outline
+                Handles.color = lineColor;
+                Handles.DrawWireCube(center, size);
+
+                // Extra thick top outline for better visibility
+                Handles.DrawAAPolyLine(5f,
+                    center + new Vector3(-size.x, size.y, -size.z) * 0.5f,
+                    center + new Vector3( size.x, size.y, -size.z) * 0.5f,
+                    center + new Vector3( size.x, size.y,  size.z) * 0.5f,
+                    center + new Vector3(-size.x, size.y,  size.z) * 0.5f,
+                    center + new Vector3(-size.x, size.y, -size.z) * 0.5f
+                );
             }
         }
 
@@ -1154,7 +1573,7 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (selectedPrefab == null || activeGrid == null) return;
 
             Vector2Int size = GetSelectedObjectSize();
-            if (size != Vector2Int.one) return;
+            if (size != Vector2Int.one) return; // paint is only for 1x1
 
             Cell cell = GetCellUnderMouse();
             if (cell == null) return;
@@ -1164,7 +1583,7 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             if (!IsFootprintValid(cell, size)) return;
 
-            Vector3 pos = activeGrid.CellGetPosition(cell.index);
+            Vector3 pos = GetFootprintCenter(cell, size);
 
             GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
             placed.transform.position = pos;
@@ -1246,7 +1665,7 @@ namespace _Project.Scripts.LevelEditor.Editor
             {
                 if (cell == null || !IsFootprintValid(cell, size)) continue;
 
-                Vector3 pos = activeGrid.CellGetPosition(cell.index);
+                Vector3 pos = GetFootprintCenter(cell, size);
 
                 GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
                 placed.transform.position = pos;
@@ -1319,7 +1738,7 @@ namespace _Project.Scripts.LevelEditor.Editor
             {
                 if (cell == null || !IsFootprintValid(cell, size)) continue;
 
-                Vector3 pos = activeGrid.CellGetPosition(cell.index);
+                Vector3 pos = GetFootprintCenter(cell, size);
 
                 GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
                 placed.transform.position = pos;
@@ -1336,7 +1755,7 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
 
             if (placedCount > 0)
-                Debug.Log($"<color=green>Placed {placedCount} walls in a line</color>");
+                Debug.Log($"<color=green>Placed {placedCount} objects in a line</color>");
         }
 
         private void DrawDragPreview()
@@ -1420,12 +1839,21 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             foreach (GameObject obj in placedObjects)
             {
+                if (IsLocked(obj))
+                    continue;
                 if (obj == null) continue;
 
-                // Filter by active grid
-                bool isLand = IsLandObject(obj);
-                if ((currentGridType == GridType.Land && !isLand) ||
-                    (currentGridType == GridType.Objects && isLand))
+                // Only apply grid filter when NOT in Select Mode
+                if (currentMode != BuilderMode.Select)
+                {
+                    bool isLand = IsLandObject(obj);
+                    if ((currentGridType == GridType.Land && !isLand) ||
+                        (currentGridType == GridType.Objects && isLand))
+                        continue;
+                }
+                
+                // NEW: Select Filter
+                if (!MatchesSelectFilter(obj))
                     continue;
 
                 Vector3 screenPos = cam.WorldToScreenPoint(obj.transform.position);
@@ -1539,18 +1967,24 @@ namespace _Project.Scripts.LevelEditor.Editor
                 return;
 
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, GetCurrentLayerMask())) return;
+            int mask = LayerMask.GetMask("LandGrid", "ObjectGrid", "Default");
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, mask))
+                return;
 
             Cell originCell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
             if (originCell == null) return;
 
             Vector2Int size = GetSelectedObjectSize();
-            Vector3 originPos = activeGrid.CellGetPosition(originCell.index);
             float cellSize = activeGrid.cellSize.x;
 
+            // Bottom-left (origin) cell position
+            Vector3 originPos = activeGrid.CellGetPosition(originCell.index);
+
+            // Correct center of the whole footprint
             Vector3 footprintCenter = originPos;
             footprintCenter.x += (size.x - 1) * cellSize * 0.5f;
             footprintCenter.z += (size.y - 1) * cellSize * 0.5f;
+            footprintCenter.y = originPos.y + 0.1f;
 
             currentPreview.transform.position = footprintCenter;
 
