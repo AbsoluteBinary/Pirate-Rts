@@ -25,6 +25,15 @@ namespace _Project.Scripts.LevelEditor.Editor
         private int currentRotationSteps = 0;
         private Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
         #endregion
+        
+        #region Minimap
+        private bool showMinimap = true;
+        private float minimapSize = 220f;          // width & height of the minimap
+        private Color landCellColor = new Color(0.2f, 0.7f, 0.3f, 0.85f);
+        private Color objectCellColor = new Color(0.3f, 0.55f, 0.95f, 0.9f);
+        private Color emptyCellColor = new Color(0.15f, 0.15f, 0.18f, 0.6f);
+        private Color borderColor = new Color(0.4f, 0.4f, 0.45f, 1f);
+        #endregion
 
         #region Modes
 
@@ -153,6 +162,15 @@ namespace _Project.Scripts.LevelEditor.Editor
         #region GUI
         private void OnGUI()
         {
+            // ===== Minimap =====
+            showMinimap = EditorGUILayout.Foldout(showMinimap, "Minimap", true);
+            if (showMinimap)
+            {
+                Rect minimapRect = GUILayoutUtility.GetRect(minimapSize, minimapSize, GUILayout.ExpandWidth(false));
+                DrawMinimap(minimapRect);
+                EditorGUILayout.Space(6);
+            }
+            
             // ===== Tools =====
             GUILayout.Label("Tools", EditorStyles.boldLabel);
 
@@ -2057,6 +2075,112 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
             isPreviewActive = false;
         }
+        #endregion
+
+        #region MiniMap
+
+        private void DrawMinimap(Rect rect)
+        {
+            if (landGrid == null && objectGrid == null) return;
+
+            EditorGUI.DrawRect(rect, new Color(0.12f, 0.12f, 0.14f, 1f));
+
+            List<Vector3> landWorld = new List<Vector3>();
+            List<Vector3> objectWorld = new List<Vector3>();
+
+            if (landGrid != null)
+            {
+                foreach (int index in occupiedLandCells)
+                    landWorld.Add(landGrid.CellGetPosition(index));
+            }
+
+            if (objectGrid != null)
+            {
+                foreach (int index in occupiedObjectCells)
+                    objectWorld.Add(objectGrid.CellGetPosition(index));
+            }
+
+            if (landWorld.Count == 0 && objectWorld.Count == 0)
+            {
+                GUI.Label(rect, "No objects placed", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
+            // World bounds
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minZ = float.MaxValue, maxZ = float.MinValue;
+
+            void Encapsulate(Vector3 p)
+            {
+                minX = Mathf.Min(minX, p.x);
+                maxX = Mathf.Max(maxX, p.x);
+                minZ = Mathf.Min(minZ, p.z);
+                maxZ = Mathf.Max(maxZ, p.z);
+            }
+
+            foreach (var p in landWorld) Encapsulate(p);
+            foreach (var p in objectWorld) Encapsulate(p);
+
+            // Padding so content isn’t stuck to the edge
+            float pad = 1.2f;
+            minX -= pad; maxX += pad;
+            minZ -= pad; maxZ += pad;
+
+            float worldW = Mathf.Max(0.01f, maxX - minX);
+            float worldH = Mathf.Max(0.01f, maxZ - minZ);
+
+            float cellPixelSize = Mathf.Min(rect.width / worldW, rect.height / worldH);
+            cellPixelSize = Mathf.Clamp(cellPixelSize * 1.05f, 5f, 20f);
+
+// Helper
+            Vector2 WorldToMinimap(Vector3 p)
+            {
+                float nx = (p.x - minX) / worldW;          // X stays X
+                float ny = (p.z - minZ) / worldH;          // Z becomes Y
+
+                float x = rect.x + (1f - nx) * rect.width;
+                float y = rect.y + ny * rect.height;        // no flip    // keep your current Y flip
+
+                return new Vector2(x, y);
+            }
+
+// Draw land (slightly larger so gaps are smaller)
+            float landSize = cellPixelSize * 1.05f;
+            foreach (var p in landWorld)
+            {
+                Vector2 mp = WorldToMinimap(p);
+                EditorGUI.DrawRect(new Rect(mp.x - landSize * 0.5f, mp.y - landSize * 0.5f, landSize, landSize), landCellColor);
+            }
+
+// Draw objects
+            float objSize = cellPixelSize * 0.82f;
+            foreach (var p in objectWorld)
+            {
+                Vector2 mp = WorldToMinimap(p);
+                EditorGUI.DrawRect(new Rect(mp.x - objSize * 0.5f, mp.y - objSize * 0.5f, objSize, objSize), objectCellColor);
+            }
+
+// Thin grid overlay
+            Handles.BeginGUI();
+            Handles.color = new Color(1f, 1f, 1f, 0.08f);
+            int gridLines = 12;
+            for (int i = 0; i <= gridLines; i++)
+            {
+                float t = i / (float)gridLines;
+                // vertical
+                float x = rect.x + t * rect.width;
+                Handles.DrawLine(new Vector3(x, rect.y), new Vector3(x, rect.yMax));
+                // horizontal
+                float y = rect.y + t * rect.height;
+                Handles.DrawLine(new Vector3(rect.x, y), new Vector3(rect.xMax, y));
+            }
+
+// Border
+            Handles.color = borderColor;
+            Handles.DrawSolidRectangleWithOutline(rect, Color.clear, borderColor);
+            Handles.EndGUI();
+        }
+
         #endregion
 
         #region Delete
