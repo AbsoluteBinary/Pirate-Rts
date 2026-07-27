@@ -1347,40 +1347,34 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             Vector3 targetCenter = activeGrid.CellGetPosition(targetCell.index);
 
-            // Current group center
-            Vector3 currentCenter = Vector3.zero;
-            int count = 0;
+            // Use the first object as the stable reference
+            GameObject reference = null;
             foreach (var obj in movingObjects)
             {
-                if (obj == null) continue;
-                currentCenter += obj.transform.position;
-                count++;
+                if (obj != null)
+                {
+                    reference = obj;
+                    break;
+                }
             }
-            if (count == 0) return;
-            currentCenter /= count;
+            if (reference == null) return;
 
-            Vector3 delta = targetCenter - currentCenter;
-            delta.y = 0;
+            Vector3 referencePos = reference.transform.position;
+            targetCenter.y = referencePos.y;
 
-            // Move group
+            // Delta from reference to target cell
+            Vector3 delta = targetCenter - referencePos;
+
+            // Snap the delta to whole cells so the whole group stays aligned
+            float cellSize = activeGrid.cellSize.x;
+            delta.x = Mathf.Round(delta.x / cellSize) * cellSize;
+            delta.z = Mathf.Round(delta.z / cellSize) * cellSize;
+
+            // Apply the same delta to every object (preserves relative spacing)
             foreach (var obj in movingObjects)
             {
                 if (obj != null)
                     obj.transform.position += delta;
-            }
-
-            // Force every object onto exact cell center (prevents 50% offset after rotation)
-            foreach (var obj in movingObjects)
-            {
-                if (obj == null) continue;
-
-                Cell nearest = activeGrid.CellGetAtWorldPosition(obj.transform.position, 0);
-                if (nearest != null)
-                {
-                    Vector3 cellCenter = activeGrid.CellGetPosition(nearest.index);
-                    cellCenter.y = obj.transform.position.y;
-                    obj.transform.position = cellCenter;
-                }
             }
         }
 
