@@ -19,48 +19,8 @@ namespace _Project.Scripts.Harbour.Data
         private VisualElement _currentBuildPanel;
         
         // Reference to the inventory data
-        [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
-
-        // Event from inventory (so UI can refresh when count changes)
-        private void OnEnable()
-        {
-            if (landTileInventory != null)
-            {
-                landTileInventory.OnCountChanged += RefreshSlotCount;
-                // Optional: Listen for future changes if you want live updates
-            }
-        }
-
-        private void OnDisable()
-        {
-            if  (landTileInventory != null)
-            {
-                landTileInventory.OnCountChanged -= RefreshSlotCount;
-            }
-        }
-
-        /// <summary>
-        /// Call this after placing a tile so the count label updates immediately (MVVM View refresh)
-        /// </summary>
-        public void RefreshSlotCount(int index)
-        {
-            if (_currentBuildPanel == null || landTileInventory == null) return;
-
-            var contentArea = _currentBuildPanel.Q<VisualElement>("ContentArea");
-            if (contentArea == null) return;
-
-            // Find the slot at this index and update its count label
-            var slots = contentArea.Query<VisualElement>().ToList();
-            if (index < 0 || index >= slots.Count) return;
-
-            var slot = slots[index];
-            var countLabel = slot.Q<Label>();
-            if (countLabel != null)
-            {
-                countLabel.text = landTileInventory.GetCount(index).ToString();
-            }
-        }
+        
 
         public void RefreshUI(HarbourStateSO.HarbourMode mode)
         {
@@ -77,17 +37,6 @@ namespace _Project.Scripts.Harbour.Data
             else if (mode == HarbourStateSO.HarbourMode.ShipBuilding)
                 shipBuilderHUD?.OpenShipBuilder();
         }
-        // public void RefreshUI(HarbourStateSO.HarbourMode mode)
-        // {
-        //     if (harbourUIDocument?.rootVisualElement == null) return;
-        //
-        //     harbourUIDocument.rootVisualElement.Clear();
-        //
-        //     if (mode == HarbourStateSO.HarbourMode.Idle)
-        //         BuildIdleHUD();
-        //     else
-        //         BuildHarbourBuildHUD();
-        // }
 
         // ===================================================================
         // IDLE HUD
@@ -229,8 +178,7 @@ namespace _Project.Scripts.Harbour.Data
             toolsDropdown.style.paddingLeft = 8;
             toolsDropdown.style.paddingRight = 8;
             toolsDropdown.style.display = DisplayStyle.None;
-
-            AddDropdownItem(toolsDropdown, "Build Harbour Base", () => OpenBuildPanel());
+            
             AddDropdownItem(toolsDropdown, "Save Build",         () => Debug.Log("Save Build clicked"));
             AddDropdownItem(toolsDropdown, "Load Saved Build",   () => Debug.Log("Load Saved Build clicked"));
 
@@ -267,198 +215,6 @@ namespace _Project.Scripts.Harbour.Data
             root.Add(buildBar);
 
             Debug.Log("<color=lime>HarbourHUD: Build HUD with Build Tools dropdown restored</color>");
-        }
-
-        // ===================================================================
-        // FLOATING BUILD PANEL
-        // ===================================================================
-        private void OpenBuildPanel()
-        {
-            if (harbourUIDocument?.rootVisualElement == null) return;
-
-            if (_currentBuildPanel != null)
-                _currentBuildPanel.RemoveFromHierarchy();
-
-            var root = harbourUIDocument.rootVisualElement;
-
-            _currentBuildPanel = new VisualElement { name = "HarbourBuildPanel" };
-            _currentBuildPanel.style.position = Position.Absolute;
-            _currentBuildPanel.style.top = 70;
-            _currentBuildPanel.style.right = 30;
-            _currentBuildPanel.style.width = Length.Percent(25);
-            _currentBuildPanel.style.height = Length.Percent(40);
-            _currentBuildPanel.style.backgroundColor = new Color(0.08f, 0.12f, 0.25f, 0.97f);
-            _currentBuildPanel.style.borderTopLeftRadius = 10;
-            _currentBuildPanel.style.borderTopRightRadius = 10;
-            _currentBuildPanel.style.borderBottomLeftRadius = 10;
-            _currentBuildPanel.style.borderBottomRightRadius = 10;
-            _currentBuildPanel.style.borderTopWidth = 2;
-            _currentBuildPanel.style.borderRightWidth = 2;
-            _currentBuildPanel.style.borderBottomWidth = 2;
-            _currentBuildPanel.style.borderLeftWidth = 2;
-            _currentBuildPanel.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
-            _currentBuildPanel.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
-            _currentBuildPanel.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
-            _currentBuildPanel.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
-            _currentBuildPanel.style.paddingTop = 15;
-            _currentBuildPanel.style.paddingRight = 15;
-            _currentBuildPanel.style.paddingBottom = 15;
-            _currentBuildPanel.style.paddingLeft = 15;
-            _currentBuildPanel.pickingMode = PickingMode.Position;
-
-            // Header
-            var header = new VisualElement();
-            header.style.flexDirection = FlexDirection.Row;
-            header.style.justifyContent = Justify.SpaceBetween;
-            header.style.alignItems = Align.Center;
-            header.style.marginBottom = 12;
-
-            var title = new Label("Harbour Build");
-            title.style.fontSize = 22;
-            title.style.color = Color.white;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.Add(title);
-
-            var closeBtn = new Button { text = "✕" };
-            closeBtn.style.fontSize = 20;
-            closeBtn.style.color = Color.white;
-            closeBtn.style.backgroundColor = new Color(0.7f, 0.15f, 0.15f);
-            closeBtn.style.width = 36;
-            closeBtn.style.height = 36;
-            closeBtn.style.borderTopLeftRadius = 18;
-            closeBtn.style.borderTopRightRadius = 18;
-            closeBtn.style.borderBottomLeftRadius = 18;
-            closeBtn.style.borderBottomRightRadius = 18;
-            closeBtn.clicked += CloseBuildPanel;
-            header.Add(closeBtn);
-
-            _currentBuildPanel.Add(header);
-
-            // Tabs
-            var tabContainer = new VisualElement();
-            tabContainer.style.flexDirection = FlexDirection.Row;
-            tabContainer.style.marginBottom = 15;
-
-            var landTab = CreateTabButton("Land Tiles", () => ShowTabContent("Land Tiles"));
-            tabContainer.Add(landTab);
-            _currentBuildPanel.Add(tabContainer);
-
-            // Content Area
-            var contentArea = new VisualElement { name = "ContentArea" };
-            contentArea.style.flexGrow = 1;
-            contentArea.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.97f);
-            contentArea.style.paddingTop = 12;
-            contentArea.style.paddingBottom = 12;
-            contentArea.style.paddingLeft = 12;
-            contentArea.style.paddingRight = 12;
-            contentArea.pickingMode = PickingMode.Position;
-
-            _currentBuildPanel.Add(contentArea);
-            root.Add(_currentBuildPanel);
-
-            ShowTabContent("Land Tiles");
-
-            Debug.Log("<color=green>Build Panel opened from 'Build Harbour Base'</color>");
-        }
-
-        private void CloseBuildPanel()
-        {
-            if (_currentBuildPanel != null)
-            {
-                _currentBuildPanel.RemoveFromHierarchy();
-                _currentBuildPanel = null;
-            }
-        }
-
-        private void ShowTabContent(string tabName)
-        {
-            var contentArea = _currentBuildPanel?.Q<VisualElement>("ContentArea");
-            if (contentArea == null) return;
-
-            contentArea.Clear();
-
-            var grid = new VisualElement();
-            grid.style.flexDirection = FlexDirection.Row;
-            grid.style.flexWrap = Wrap.Wrap;
-            grid.style.justifyContent = Justify.FlexStart;
-            grid.style.paddingTop = 8;
-            grid.style.paddingBottom = 8;
-            grid.style.paddingLeft = 8;
-            grid.style.paddingRight = 8;
-
-            for (int i = 0; i < 12; i++)
-            {
-                var slot = new VisualElement();
-                slot.style.width = 72;
-                slot.style.height = 72;
-                slot.style.backgroundColor = new Color(0.25f, 0.3f, 0.45f);
-                slot.style.borderTopLeftRadius = 6;
-                slot.style.borderTopRightRadius = 6;
-                slot.style.borderBottomLeftRadius = 6;
-                slot.style.borderBottomRightRadius = 6;
-                slot.style.marginRight = 12;
-                slot.style.marginBottom = 12;
-
-                int index = i;
-
-                // Only fill slots that have data in the SO
-                if (tabName == "Land Tiles" && landTileInventory != null && i < landTileInventory.tiles.Count)
-                {
-                    var entry = landTileInventory.tiles[i];
-
-                    // Icon
-                    if (entry.icon != null)
-                    {
-                        slot.style.backgroundImage = new StyleBackground(entry.icon);
-                        slot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
-                        slot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
-                        slot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
-                    }
-
-                    // Count Label (MVVM View)
-                    var countLabel = new Label();
-                    countLabel.text = landTileInventory.GetCount(index).ToString();
-                    countLabel.style.position = Position.Absolute;
-                    countLabel.style.right = 4;
-                    countLabel.style.bottom = 2;
-                    countLabel.style.fontSize = 14;
-                    countLabel.style.color = Color.white;
-                    countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-                    countLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.6f);
-                    countLabel.style.paddingLeft = 4;
-                    countLabel.style.paddingRight = 4;
-                    countLabel.style.borderTopLeftRadius = 3;
-                    countLabel.style.borderTopRightRadius = 3;
-                    countLabel.style.borderBottomLeftRadius = 3;
-                    countLabel.style.borderBottomRightRadius = 3;
-
-                    slot.Add(countLabel);
-
-                    // Click handler only for valid slots
-                    slot.RegisterCallback<ClickEvent>(evt => OnLandTileSlotClicked?.Invoke(tabName, index));
-                }
-
-                grid.Add(slot);
-            }
-
-            contentArea.Add(grid);
-        }
-
-        private Button CreateTabButton(string text, Action onClick)
-        {
-            var btn = new Button { text = text };
-            btn.style.flexGrow = 1;
-            btn.style.height = 42;
-            btn.style.fontSize = 16;
-            btn.style.marginRight = 6;
-            btn.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
-            btn.style.color = Color.white;
-            btn.style.borderTopLeftRadius = 6;
-            btn.style.borderTopRightRadius = 6;
-            btn.style.borderBottomLeftRadius = 6;
-            btn.style.borderBottomRightRadius = 6;
-            btn.clicked += onClick;
-            return btn;
         }
 
         private void AddDropdownItem(VisualElement dropdownParent, string text, Action action)
