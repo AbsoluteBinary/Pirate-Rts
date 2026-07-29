@@ -8,23 +8,48 @@ namespace _Project.Scripts.Harbour.Data
 {
     public class HarbourHUD : MonoBehaviour
     {
-        [SerializeField] private UIDocument harbourUIDocument;
-        
+        [SerializeField] private PanelRenderer panelRenderer;
+
         // Events for HarbourController to listen to
         public event Action OnBuildHarbourBaseClicked;
         public event Action OnExitBuildMode;
         public event Action OnBuildShipClicked;
         public event Action<string, int> OnLandTileSlotClicked;
 
+        private VisualElement root;
         private VisualElement _currentBuildPanel;
-        
-        // Reference to the inventory data
+
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
-        
+
+        private void OnEnable()
+        {
+            if (panelRenderer == null)
+                panelRenderer = GetComponent<PanelRenderer>();
+
+            panelRenderer.RegisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnDisable()
+        {
+            if (panelRenderer != null)
+                panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
+        {
+            root = rootElement;
+        }
 
         public void RefreshUI(HarbourStateSO.HarbourMode mode)
         {
-            if (harbourUIDocument?.rootVisualElement == null) return;
+            if (root == null)
+            {
+                Debug.LogWarning("HarbourHUD: root is still null – UI not ready yet");
+                return;
+            }
+            
+            
+            if (root == null) return;
 
             // Close any open ship panel when changing modes
             if (mode != HarbourStateSO.HarbourMode.ShipBuilding && shipBuilderHUD != null)
@@ -43,9 +68,8 @@ namespace _Project.Scripts.Harbour.Data
         // ===================================================================
         public void BuildIdleHUD()
         {
-            if (harbourUIDocument?.rootVisualElement == null) return;
+            if (root == null) return;
 
-            var root = harbourUIDocument.rootVisualElement;
             root.Clear();
 
             var topBar = new VisualElement { name = "TopBar" };
@@ -97,10 +121,9 @@ namespace _Project.Scripts.Harbour.Data
             buildDropdown.style.paddingRight = 8;
             buildDropdown.style.display = DisplayStyle.None;
 
-            // Updated dropdown items
-            AddDropdownItem(buildDropdown, "Edit Harbour",     () => OnBuildHarbourBaseClicked?.Invoke());
-            AddDropdownItem(buildDropdown, "Build a Ship",     () => OnBuildShipClicked?.Invoke());
-            AddDropdownItem(buildDropdown, "Save and Exit",    () => Debug.Log("Save and Exit clicked"));
+            AddDropdownItem(buildDropdown, "Edit Harbour", () => OnBuildHarbourBaseClicked?.Invoke());
+            AddDropdownItem(buildDropdown, "Build a Ship", () => OnBuildShipClicked?.Invoke());
+            AddDropdownItem(buildDropdown, "Save and Exit", () => Debug.Log("Save and Exit clicked"));
             AddDropdownItem(buildDropdown, "Exit Without Saving", () => Debug.Log("Exit Without Saving clicked"));
 
             bool dropdownVisible = false;
@@ -109,8 +132,8 @@ namespace _Project.Scripts.Harbour.Data
                 dropdownVisible = !dropdownVisible;
                 buildDropdown.style.display = dropdownVisible ? DisplayStyle.Flex : DisplayStyle.None;
 
-                buildTrigger.style.backgroundColor = dropdownVisible 
-                    ? new StyleColor(new Color(0.32f, 0.55f, 0.28f)) 
+                buildTrigger.style.backgroundColor = dropdownVisible
+                    ? new StyleColor(new Color(0.32f, 0.55f, 0.28f))
                     : new StyleColor(new Color(0.22f, 0.45f, 0.18f));
             };
 
@@ -118,7 +141,7 @@ namespace _Project.Scripts.Harbour.Data
             topBar.Add(buildDropdown);
             root.Add(topBar);
 
-            Debug.Log("<color=lime>HarbourHUD: Idle HUD updated with 'Build a Ship' option</color>");
+            Debug.Log("<color=lime>HarbourHUD: Idle HUD updated with PanelRenderer</color>");
         }
 
         // ===================================================================
@@ -126,9 +149,8 @@ namespace _Project.Scripts.Harbour.Data
         // ===================================================================
         public void BuildHarbourBuildHUD()
         {
-            if (harbourUIDocument?.rootVisualElement == null) return;
+            if (root == null) return;
 
-            var root = harbourUIDocument.rootVisualElement;
             root.Clear();
 
             var buildBar = new VisualElement { name = "BuildTopBar" };
@@ -178,9 +200,9 @@ namespace _Project.Scripts.Harbour.Data
             toolsDropdown.style.paddingLeft = 8;
             toolsDropdown.style.paddingRight = 8;
             toolsDropdown.style.display = DisplayStyle.None;
-            
-            AddDropdownItem(toolsDropdown, "Save Build",         () => Debug.Log("Save Build clicked"));
-            AddDropdownItem(toolsDropdown, "Load Saved Build",   () => Debug.Log("Load Saved Build clicked"));
+
+            AddDropdownItem(toolsDropdown, "Save Build", () => Debug.Log("Save Build clicked"));
+            AddDropdownItem(toolsDropdown, "Load Saved Build", () => Debug.Log("Load Saved Build clicked"));
 
             bool toolsVisible = false;
             toolsTrigger.clicked += () =>
@@ -188,8 +210,8 @@ namespace _Project.Scripts.Harbour.Data
                 toolsVisible = !toolsVisible;
                 toolsDropdown.style.display = toolsVisible ? DisplayStyle.Flex : DisplayStyle.None;
 
-                toolsTrigger.style.backgroundColor = toolsVisible 
-                    ? new StyleColor(new Color(0.32f, 0.55f, 0.28f)) 
+                toolsTrigger.style.backgroundColor = toolsVisible
+                    ? new StyleColor(new Color(0.32f, 0.55f, 0.28f))
                     : new StyleColor(new Color(0.22f, 0.45f, 0.18f));
             };
 
@@ -214,7 +236,7 @@ namespace _Project.Scripts.Harbour.Data
 
             root.Add(buildBar);
 
-            Debug.Log("<color=lime>HarbourHUD: Build HUD with Build Tools dropdown restored</color>");
+            Debug.Log("<color=lime>HarbourHUD: Build HUD with PanelRenderer</color>");
         }
 
         private void AddDropdownItem(VisualElement dropdownParent, string text, Action action)

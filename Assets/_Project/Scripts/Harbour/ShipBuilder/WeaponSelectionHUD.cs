@@ -8,7 +8,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 {
     public class WeaponSelectionHUD : MonoBehaviour
     {
-        [SerializeField] private UIDocument harbourUIDocument;
+        [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private ModuleDatabase moduleDatabase;
 
         // Event fired when a weapon is selected
@@ -20,9 +20,31 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private const string ALL_TAB = "All";
 
+        private VisualElement root;
+
+        private void OnEnable()
+        {
+            if (panelRenderer == null)
+                panelRenderer = GetComponent<PanelRenderer>();
+
+            panelRenderer.RegisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnDisable()
+        {
+            if (panelRenderer != null)
+                panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
+        {
+            root = rootElement;
+        }
         public void OpenWeaponSelection(ModuleSlot targetSlot)
         {
-            if (harbourUIDocument?.rootVisualElement == null || moduleDatabase == null)
+            if (root == null) return;
+            
+            if (moduleDatabase == null)
             {
                 Debug.LogError("WeaponSelectionHUD: Missing UIDocument or ModuleDatabase!");
                 return;
@@ -30,7 +52,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
             _targetSlot = targetSlot;
 
-            var root = harbourUIDocument.rootVisualElement;
+            
             if (_weaponPanel != null) _weaponPanel.RemoveFromHierarchy();
 
             _weaponPanel = new VisualElement { name = "WeaponSelectionPanel" };

@@ -7,19 +7,40 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 {
     public class HullSelectionHUD : MonoBehaviour
     {
-        [SerializeField] private UIDocument harbourUIDocument;
+        [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;   // ← Direct reference (best)
 
         // Optional: Reference to database if you want to load hulls dynamically later
         [SerializeField] private HullData[] availableHulls;       // Drag your HullData assets here in Inspector
         [SerializeField] private HullSlotMask mask;
         private VisualElement _hullPanel;
+        
+        private VisualElement root;
+
+        private void OnEnable()
+        {
+            if (panelRenderer == null)
+                panelRenderer = GetComponent<PanelRenderer>();
+
+            panelRenderer.RegisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnDisable()
+        {
+            if (panelRenderer != null)
+                panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
+        {
+            root = rootElement;
+        }
 
         public void OpenHullSelection()
         {
-            if (harbourUIDocument?.rootVisualElement == null) return;
-
-            var root = harbourUIDocument.rootVisualElement;
+            if (root == null) return;
+            //if (harbourUIDocument?.rootVisualElement == null) return;
+            
             if (_hullPanel != null) _hullPanel.RemoveFromHierarchy();
 
             _hullPanel = new VisualElement { name = "HullSelectionPanel" };

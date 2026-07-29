@@ -6,7 +6,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 {
     public class ShipBuilderHUD : MonoBehaviour
     {
-        [SerializeField] private UIDocument harbourUIDocument;
+        [SerializeField] private PanelRenderer panelRenderer;
         
         [Header("References")]
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
@@ -29,12 +29,34 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private HullData _currentHull;
         private ShipLoadout _currentLoadout;
+        
+        private VisualElement root;
+
+        private void OnEnable()
+        {
+            if (panelRenderer == null)
+                panelRenderer = GetComponent<PanelRenderer>();
+
+            panelRenderer.RegisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnDisable()
+        {
+            if (panelRenderer != null)
+                panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
+        {
+            root = rootElement;
+        }
 
         public void OpenShipBuilder()
         {
-            if (harbourUIDocument?.rootVisualElement == null) return;
-
-            var root = harbourUIDocument.rootVisualElement;
+            if (root == null) return;
+            
+            //if (harbourUIDocument?.rootVisualElement == null) return;
+            
             if (_shipBuilderPanel != null) _shipBuilderPanel.RemoveFromHierarchy();
 
             _shipBuilderPanel = new VisualElement { name = "ShipBuilderPanel" };

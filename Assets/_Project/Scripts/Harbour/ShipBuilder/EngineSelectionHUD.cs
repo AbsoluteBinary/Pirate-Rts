@@ -8,7 +8,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 {
     public class EngineSelectionHUD : MonoBehaviour
     {
-        [SerializeField] private UIDocument harbourUIDocument;
+        [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private ModuleDatabase moduleDatabase;
 
         public event Action<EngineData, ModuleSlot> OnEngineEquipped;
@@ -18,10 +18,32 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         private VisualElement _currentTabContent;
 
         private const string ALL_TAB = "All";
+        
+        private VisualElement root;
+
+        private void OnEnable()
+        {
+            if (panelRenderer == null)
+                panelRenderer = GetComponent<PanelRenderer>();
+
+            panelRenderer.RegisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnDisable()
+        {
+            if (panelRenderer != null)
+                panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
+        {
+            root = rootElement;
+        }
 
         public void OpenEngineSelection(ModuleSlot targetSlot)
         {
-            if (harbourUIDocument?.rootVisualElement == null || moduleDatabase == null)
+            if (root == null) return;
+            if (root == null || moduleDatabase == null)
             {
                 Debug.LogError("EngineSelectionHUD: Missing UIDocument or ModuleDatabase!");
                 return;
@@ -29,7 +51,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
             _targetSlot = targetSlot;
 
-            var root = harbourUIDocument.rootVisualElement;
+            
             if (_enginePanel != null) _enginePanel.RemoveFromHierarchy();
 
             _enginePanel = new VisualElement { name = "EngineSelectionPanel" };

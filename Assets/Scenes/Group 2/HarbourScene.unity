@@ -159,7 +159,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 134604188}
-  - component: {fileID: 134604187}
   - component: {fileID: 134604189}
   - component: {fileID: 134604190}
   - component: {fileID: 134604191}
@@ -176,29 +175,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &134604187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 134604185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: db2de7c37a94186d59e3584a8917bd92, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 0}
-  m_SortingOrder: 0
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
 --- !u!4 &134604188
 Transform:
   m_ObjectHideFlags: 0
@@ -226,8 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b212222390b70afd82a616d3c8b0ed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Visuals.HarbourHud
-  harbourUIDocument: {fileID: 134604187}
-  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+  panelRenderer: {fileID: 134604197}
   shipBuilderHUD: {fileID: 134604191}
 --- !u!114 &134604190
 MonoBehaviour:
@@ -246,6 +221,7 @@ MonoBehaviour:
   harbourBuildCamera: {fileID: 2025360598}
   playerBuildGO: {fileID: 892000890}
   tgsGridObject: {fileID: 1316261035}
+  baseBuilderHUD: {fileID: 1440541968}
   harbourHUD: {fileID: 134604189}
   harbourBuilderManager: {fileID: 189772808}
   shipBuilderHUD: {fileID: 134604191}
@@ -264,7 +240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 222ce011f59ec1f34a5cae4d3ca020f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ShipBuilderHUD
-  harbourUIDocument: {fileID: 134604187}
+  panelRenderer: {fileID: 134604197}
   hullSelectionHUD: {fileID: 134604192}
   weaponSelectionHUD: {fileID: 134604193}
   armourSelectionHUD: {fileID: 134604196}
@@ -283,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 617f957db8c939ec7b449979de244827, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.HullSelectionHUD
-  harbourUIDocument: {fileID: 134604187}
+  panelRenderer: {fileID: 134604197}
   shipBuilderHUD: {fileID: 134604191}
   availableHulls:
   - {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
@@ -300,7 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f875a8d444467459c9b7a5dec5e1a9e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.WeaponSelectionHUD
-  harbourUIDocument: {fileID: 134604187}
+  panelRenderer: {fileID: 134604197}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
 --- !u!114 &134604194
 MonoBehaviour:
@@ -314,7 +290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357847197dbbeffa4afc94d732b10cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ComponentSelectionHUD
-  harbourUIDocument: {fileID: 134604187}
+  panelRenderer: {fileID: 134604197}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
 --- !u!114 &134604195
 MonoBehaviour:
@@ -328,7 +304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25fdd9f7ac6102387ab20bd4dacce88f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.EngineSelectionHUD
-  harbourUIDocument: {fileID: 134604187}
+  panelRenderer: {fileID: 134604197}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
 --- !u!114 &134604196
 MonoBehaviour:
@@ -342,7 +318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad2ff9e701a9e6285b74b7692d9245b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.ArmourSelectionHUD
-  harbourUIDocument: {fileID: 134604187}
+  panelRenderer: {fileID: 134604197}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
 --- !u!1931382934 &134604197
 PanelRenderer:
@@ -413,12 +389,12 @@ GameObject:
   - component: {fileID: 189772807}
   - component: {fileID: 189772808}
   m_Layer: 0
-  m_Name: Building manager
+  m_Name: Harbour Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &189772807
 Transform:
   m_ObjectHideFlags: 0
@@ -441,16 +417,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 189772805}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9adf05fd1b4e7851983b589e29765b6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  harbourBuildCamera: {fileID: 0}
-  tgs: {fileID: 0}
-  testTilePrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+  harbourBuildCamera: {fileID: 2025360598}
+  tgs: {fileID: 1640162068}
+  testTilePrefab: {fileID: 0}
   previewHeight: 0.35
-  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+  landTileInventory: {fileID: 0}
 --- !u!1 &226015900
 GameObject:
   m_ObjectHideFlags: 0
@@ -1444,7 +1420,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1440541968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1508,7 +1484,7 @@ PanelRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   serializedVersion: 1
-  m_PanelSettings: {fileID: 11400000, guid: db2de7c37a94186d59e3584a8917bd92, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: f1694d1dded41553a9d84a3681c24721, type: 2}
   sourceAsset: {fileID: 0}
   m_ParentUI: {fileID: 0}
   m_WorldSpaceSizeMode: 1
