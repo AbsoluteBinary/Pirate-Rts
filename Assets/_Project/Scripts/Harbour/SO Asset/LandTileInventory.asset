@@ -16,4 +16,4 @@ MonoBehaviour:
   - tileName: DefaultTile
     prefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
     icon: {fileID: 21300000, guid: 45f9a13c7f5ac4ca2afcdafa4e3f8ceb, type: 3}
-    count: 10
+    count: 100

@@ -35,32 +35,65 @@ namespace _Project.Scripts.Harbour.Data
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
         }
 
+        private HarbourStateSO.HarbourMode? pendingMode = null;
+        private bool isUIReady = false;
+
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
         {
             root = rootElement;
+            isUIReady = true;
+
+            Debug.Log("<color=lime>HarbourHUD: root is now ready</color>");
+
+            // If something requested a UI before we were ready, do it now
+            if (pendingMode.HasValue)
+            {
+                var mode = pendingMode.Value;
+                pendingMode = null;
+                ForceRefreshUI(mode);
+            }
         }
 
         public void RefreshUI(HarbourStateSO.HarbourMode mode)
         {
-            if (root == null)
+            if (!isUIReady || root == null)
             {
-                Debug.LogWarning("HarbourHUD: root is still null – UI not ready yet");
+                // Queue the request
+                pendingMode = mode;
+                Debug.LogWarning($"HarbourHUD: UI not ready yet – queuing mode {mode}");
                 return;
             }
+
+            ForceRefreshUI(mode);
             
             
             if (root == null) return;
+        }
+        
+        /// Always rebuilds the UI for the given mode (safe to call multiple times)
+        /// </summary>
+        private void ForceRefreshUI(HarbourStateSO.HarbourMode mode)
+        {
+            if (root == null) return;
 
-            // Close any open ship panel when changing modes
+            // Close ship panel if needed
             if (mode != HarbourStateSO.HarbourMode.ShipBuilding && shipBuilderHUD != null)
                 shipBuilderHUD.CloseShipBuilder();
 
-            if (mode == HarbourStateSO.HarbourMode.Idle)
-                BuildIdleHUD();
-            else if (mode == HarbourStateSO.HarbourMode.HarbourBuild)
-                BuildHarbourBuildHUD();
-            else if (mode == HarbourStateSO.HarbourMode.ShipBuilding)
-                shipBuilderHUD?.OpenShipBuilder();
+            switch (mode)
+            {
+                case HarbourStateSO.HarbourMode.Idle:
+                    BuildIdleHUD();
+                    break;
+
+                case HarbourStateSO.HarbourMode.HarbourBuild:
+                    BuildHarbourBuildHUD();
+                    break;
+
+                case HarbourStateSO.HarbourMode.ShipBuilding:
+                    shipBuilderHUD?.OpenShipBuilder();
+                    break;
+            }
         }
 
         // ===================================================================

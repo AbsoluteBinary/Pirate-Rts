@@ -475,7 +475,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCellsSqrt: 100
   _isDirty: 0
-  mouseIsOver: 0
+  mouseIsOver: 1
   newInHierarchy: 0
   territoryThicknessSettingMigrated: 1
   _numCells: 24336
@@ -555,7 +555,7 @@ MonoBehaviour:
   _terrainObjectsSearchGlobal: 0
   _terrainMeshPivot: {x: 0.5, y: 0.5}
   canvasTexture: {fileID: 0}
-  _transparentBackground: 0
+  _transparentBackground: 1
   _useStencilBuffer: 0
   _disableMeshGeneration: 0
   _useGeometryShaders: 1
@@ -604,7 +604,7 @@ MonoBehaviour:
   _gridNormalOffset: 0
   _gridMeshDepthOffset: -1
   _gridSurfaceDepthOffset: -1
-  _gridSurfaceDepthOffsetTerritory: -1
+  _gridSurfaceDepthOffsetTerritory: 20
   _gridRoughness: 0.01
   _cellRowCount: 156
   _cellColumnCount: 156
@@ -747,6 +747,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.BaseBuilder.Runtime.Core.BaseBuilderController
   landGrid: {fileID: 1640162068}
   objectGrid: {fileID: 226015902}
+  selectedPrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
+  selectedSize: {x: 1, y: 1}
+  isLandObject: 1
+  selectedInventoryIndex: -1
+  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+  wallInventory: {fileID: 11400000, guid: 61162d85b338d9bc59ff0b94a7203fcb, type: 2}
+  buildCamera: {fileID: 2025360598}
 --- !u!4 &459898000
 Transform:
   m_ObjectHideFlags: 0
@@ -961,7 +968,6 @@ GameObject:
   - component: {fileID: 892000894}
   - component: {fileID: 892000893}
   - component: {fileID: 892000892}
-  - component: {fileID: 892000891}
   m_Layer: 0
   m_Name: Player Build Mode View - CameraRoot
   m_TagString: Untagged
@@ -969,20 +975,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &892000891
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 892000890}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2dcd41481c7d3847bcc74ba371a352e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Packages.ModularStrategyTopDownCameraController.Scripts.Components.ZoomComponent
-  speed: 10
-  isInverted: 0
 --- !u!114 &892000892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -997,6 +989,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Cam_System.OrthographicZoomComponent
   speed: 80
   isInverted: 0
+  minSize: 6
+  maxSize: 25
 --- !u!114 &892000893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1141,14 +1135,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 892000890}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 31, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2025360601}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1 &1316261035
 GameObject:
   m_ObjectHideFlags: 0
@@ -1208,13 +1202,13 @@ Terrain:
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 0
-  m_DrawHeightmap: 1
-  m_DrawInstanced: 0
-  m_DrawTreesAndFoliage: 1
+  m_DrawHeightmap: 0
+  m_DrawInstanced: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 0
-  m_MaterialTemplate: {fileID: 2100000, guid: 2ab8149ec4775284bada96c1b85b4a09, type: 2}
+  m_MaterialTemplate: {fileID: 0}
   m_BakeLightProbesForTrees: 0
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -1368,12 +1362,12 @@ Terrain:
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 0
   m_DrawHeightmap: 0
-  m_DrawInstanced: 0
-  m_DrawTreesAndFoliage: 1
+  m_DrawInstanced: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 0
-  m_MaterialTemplate: {fileID: 2100000, guid: 2ab8149ec4775284bada96c1b85b4a09, type: 2}
+  m_MaterialTemplate: {fileID: 0}
   m_BakeLightProbesForTrees: 0
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -1420,7 +1414,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1440541968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1435,6 +1429,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.BaseBuilder.UI.BaseBuilderHUD
   panelRenderer: {fileID: 1440541969}
   builderController: {fileID: 459897999}
+  landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
+  wallInventory: {fileID: 11400000, guid: 61162d85b338d9bc59ff0b94a7203fcb, type: 2}
 --- !u!1931382934 &1440541969
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -1572,7 +1568,7 @@ MonoBehaviour:
   _cellTileOffset: {x: 0, y: 0}
   _cellAlphaClipping: 0
   _cellHighlightUseCellColor: 0
-  _cellHighlightColor: {r: 0, g: 0, b: 1, a: 0.7}
+  _cellHighlightColor: {r: 0, g: 0, b: 1, a: 0}
   _cellHighlightColor2: {r: 0, g: 1, b: 0, a: 0.8}
   _cellHighlightBorderSize: 0
   _cellHighlightBorderColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1636,7 +1632,7 @@ MonoBehaviour:
   _terrainObjectsSearchGlobal: 0
   _terrainMeshPivot: {x: 0.5, y: 0.5}
   canvasTexture: {fileID: 0}
-  _transparentBackground: 0
+  _transparentBackground: 1
   _useStencilBuffer: 0
   _disableMeshGeneration: 0
   _useGeometryShaders: 1
@@ -1685,7 +1681,7 @@ MonoBehaviour:
   _gridNormalOffset: 0
   _gridMeshDepthOffset: -1
   _gridSurfaceDepthOffset: -1
-  _gridSurfaceDepthOffsetTerritory: -1
+  _gridSurfaceDepthOffsetTerritory: 20
   _gridRoughness: 0.01
   _cellRowCount: 78
   _cellColumnCount: 78
@@ -1851,7 +1847,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 20
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1927,13 +1923,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2025360597}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.23429382, y: 0, z: 0, w: 0.9721658}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 892000901}
-  m_LocalEulerAnglesHint: {x: 27.1, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2040264838
 GameObject:
   m_ObjectHideFlags: 0

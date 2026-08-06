@@ -74,6 +74,15 @@ namespace _Project.Scripts.Harbour.UIControllers
 
                 Debug.Log("<color=lime>✅ All events wired (including Build a Ship)</color>");
             }
+            
+            if (baseBuilderHUD != null)
+            {
+                baseBuilderHUD.OnExitClicked += () =>
+                {
+                    Debug.Log("<color=cyan>Exit Build Mode clicked</color>");
+                    SetMode(HarbourStateSO.HarbourMode.Idle);
+                };
+            }
 
             ApplyHarbourState();
         }
@@ -101,7 +110,7 @@ namespace _Project.Scripts.Harbour.UIControllers
             baseBuilderController?.SetBuilderActive(false);
 
             // Old grid
-            SetTGSGrid(false);
+            //SetTGSGrid(false);
 
             shipBuilderHUD?.CloseShipBuilder();
 
@@ -136,7 +145,7 @@ namespace _Project.Scripts.Harbour.UIControllers
             }
 
             // Old grid
-            SetTGSGrid(false);
+            //SetTGSGrid(false);
 
             if (playerBuildGO != null)
                 playerBuildGO.SetActive(true);

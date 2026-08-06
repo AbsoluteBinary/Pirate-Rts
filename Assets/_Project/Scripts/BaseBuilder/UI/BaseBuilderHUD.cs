@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using _Project.Scripts.BaseBuilder.Runtime.Core;
 using _Project.Scripts.BaseBuilder.Runtime.Data;
+using _Project.Scripts.Harbour.Data.SO;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,11 +10,19 @@ namespace _Project.Scripts.BaseBuilder.UI
 {
     public class BaseBuilderHUD : MonoBehaviour
     {
+        #region Inspector Fields
+
         [Header("References")]
         [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private BaseBuilderController builderController;
+        [SerializeField] private LandTileInventorySO landTileInventory;
+        [SerializeField] private WallInventorySO wallInventory;
 
-        // Events other systems can listen to
+        private readonly List<Label> wallCountLabels = new List<Label>();
+        #endregion
+
+        #region Events
+
         public event Action OnSelectModeClicked;
         public event Action OnBuildOnWaterClicked;
         public event Action OnBuildOnLandClicked;
@@ -22,9 +32,21 @@ namespace _Project.Scripts.BaseBuilder.UI
         public event Action OnLockClicked;
         public event Action OnUnlockClicked;
 
+        #endregion
+
+        #region Private State
+
         private VisualElement root;
         private VisualElement topBar;
         private VisualElement filterBar;
+        private VisualElement inventoryPanel;
+        private VisualElement wallsBuildingsPanel;
+        private VisualElement currentlySelectedSlot;
+        private readonly List<Label> slotCountLabels = new List<Label>();
+
+        #endregion
+
+        #region Unity Lifecycle
 
         private void OnEnable()
         {
@@ -32,12 +54,50 @@ namespace _Project.Scripts.BaseBuilder.UI
                 panelRenderer = GetComponent<PanelRenderer>();
 
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
+            TrySubscribe();
+        }
+
+        private void Start()
+        {
+            // Backup in case builderController was assigned after OnEnable
+            TrySubscribe();
+        }
+
+        private void TrySubscribe()
+        {
+            if (wallInventory != null)
+            {
+                wallInventory.OnCountChanged -= HandleWallCountChanged;
+                wallInventory.OnCountChanged += HandleWallCountChanged;
+            }
+            
+            if (builderController == null) return;
+
+            builderController.OnLandTilePlaced -= HandleLandTilePlaced; // avoid double subscribe
+            builderController.OnLandTilePlaced += HandleLandTilePlaced;
         }
 
         private void OnDisable()
         {
+            if (wallInventory != null)
+                wallInventory.OnCountChanged -= HandleWallCountChanged;
+            
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+
+            if (builderController != null)
+                builderController.OnLandTilePlaced -= HandleLandTilePlaced;
+
+            builderController?.SetPointerOverUI(false);
+        }
+        
+        private void HandleWallCountChanged(int index)
+        {
+            if (wallInventory == null) return;
+            if (index < 0 || index >= wallCountLabels.Count) return;
+
+            if (wallCountLabels[index] != null)
+                wallCountLabels[index].text = wallInventory.GetCount(index).ToString();
         }
 
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
@@ -46,12 +106,25 @@ namespace _Project.Scripts.BaseBuilder.UI
             BuildUI();
         }
 
+        #endregion
+
+        #region UI Build
+
         private void BuildUI()
         {
             root.Clear();
+            currentlySelectedSlot = null;
 
-            // ===================== TOP BAR =====================
+            BuildTopBar();
+            BuildFilterBar();
+            BuildInventoryPanel();
+            BuildWallsAndBuildingsPanel();
+        }
+
+        private void BuildTopBar()
+        {
             topBar = new VisualElement();
+            topBar.pickingMode = PickingMode.Position;
             topBar.style.position = Position.Absolute;
             topBar.style.top = 0;
             topBar.style.left = 0;
@@ -63,32 +136,32 @@ namespace _Project.Scripts.BaseBuilder.UI
             topBar.style.paddingLeft = 16;
             topBar.style.paddingRight = 16;
 
-            // Mode Buttons
             topBar.Add(CreateModeButton("Select", BuilderMode.Select));
             topBar.Add(CreateModeButton("Build on Water", BuilderMode.BuildOnWater));
             topBar.Add(CreateModeButton("Build on Land", BuilderMode.BuildOnLand));
 
-            // Spacer
             var spacer = new VisualElement();
             spacer.style.flexGrow = 1;
             topBar.Add(spacer);
 
-            // Action Buttons
             topBar.Add(CreateActionButton("Pick Up", () => OnPickUpClicked?.Invoke()));
             topBar.Add(CreateActionButton("Delete", () => OnDeleteClicked?.Invoke()));
             topBar.Add(CreateActionButton("Lock", () => OnLockClicked?.Invoke()));
             topBar.Add(CreateActionButton("Unlock", () => OnUnlockClicked?.Invoke()));
 
-            // Exit Button
             var exitBtn = new Button { text = "Exit Build Mode" };
             StyleButton(exitBtn, new Color(0.55f, 0.15f, 0.15f));
             exitBtn.clicked += () => OnExitClicked?.Invoke();
             topBar.Add(exitBtn);
 
             root.Add(topBar);
+            RegisterUIBlockers(topBar);
+        }
 
-            // ===================== FILTER BAR =====================
+        private void BuildFilterBar()
+        {
             filterBar = new VisualElement();
+            filterBar.pickingMode = PickingMode.Position;
             filterBar.style.position = Position.Absolute;
             filterBar.style.top = 56;
             filterBar.style.left = 0;
@@ -115,9 +188,526 @@ namespace _Project.Scripts.BaseBuilder.UI
             filterBar.Add(CreateFilterButton("Land", SelectFilter.Land));
 
             root.Add(filterBar);
+            RegisterUIBlockers(filterBar);
         }
 
-        // ==================== BUTTON HELPERS ====================
+        private void BuildInventoryPanel()
+        {
+            slotCountLabels.Clear();
+
+            inventoryPanel = new VisualElement { name = "LandTileInventory" };
+            inventoryPanel.pickingMode = PickingMode.Position;
+            inventoryPanel.style.position = Position.Absolute;
+            inventoryPanel.style.top = 110;
+            inventoryPanel.style.right = 20;
+            inventoryPanel.style.width = 320;
+            inventoryPanel.style.maxHeight = 440;
+            inventoryPanel.style.backgroundColor = new Color(0.08f, 0.11f, 0.20f, 0.96f);
+            inventoryPanel.style.borderTopLeftRadius = 10;
+            inventoryPanel.style.borderTopRightRadius = 10;
+            inventoryPanel.style.borderBottomLeftRadius = 10;
+            inventoryPanel.style.borderBottomRightRadius = 10;
+            inventoryPanel.style.borderTopWidth = 2;
+            inventoryPanel.style.borderRightWidth = 2;
+            inventoryPanel.style.borderBottomWidth = 2;
+            inventoryPanel.style.borderLeftWidth = 2;
+            inventoryPanel.style.borderTopColor = new Color(0.3f, 0.6f, 1f);
+            inventoryPanel.style.borderRightColor = new Color(0.3f, 0.6f, 1f);
+            inventoryPanel.style.borderBottomColor = new Color(0.3f, 0.6f, 1f);
+            inventoryPanel.style.borderLeftColor = new Color(0.3f, 0.6f, 1f);
+            inventoryPanel.style.paddingTop = 12;
+            inventoryPanel.style.paddingBottom = 12;
+            inventoryPanel.style.paddingLeft = 12;
+            inventoryPanel.style.paddingRight = 12;
+            inventoryPanel.style.display = DisplayStyle.None;
+
+            var header = new Label("Land Tiles");
+            header.style.fontSize = 18;
+            header.style.color = Color.white;
+            header.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.style.marginBottom = 10;
+            inventoryPanel.Add(header);
+
+            var grid = new VisualElement();
+            grid.style.flexDirection = FlexDirection.Row;
+            grid.style.flexWrap = Wrap.Wrap;
+            grid.style.justifyContent = Justify.FlexStart;
+
+            if (landTileInventory != null && landTileInventory.tiles != null)
+            {
+                for (int i = 0; i < landTileInventory.tiles.Count; i++)
+                {
+                    int index = i;
+                    grid.Add(CreateInventorySlot(landTileInventory.tiles[i], index));
+                }
+            }
+            else
+            {
+                var emptyLabel = new Label("No Land Tiles assigned");
+                emptyLabel.style.color = Color.gray;
+                grid.Add(emptyLabel);
+            }
+            inventoryPanel.Add(grid);
+            
+            // ===== Bottom buttons =====
+            var buttonRow = new VisualElement();
+            buttonRow.style.flexDirection = FlexDirection.Row;
+            buttonRow.style.justifyContent = Justify.SpaceBetween;
+            buttonRow.style.marginTop = 12;
+
+            buttonRow.Add(CreateInventoryButton("Clear", OnClearClicked));
+            buttonRow.Add(CreateInventoryButton("Save", OnSaveClicked));
+            buttonRow.Add(CreateInventoryButton("Load", OnLoadClicked));
+
+            inventoryPanel.Add(buttonRow);
+            
+            root.Add(inventoryPanel);
+            RegisterUIBlockers(inventoryPanel);
+        }
+        
+        private void BuildWallsAndBuildingsPanel()
+        {
+            wallsBuildingsPanel = new VisualElement { name = "WallsAndBuildingsPanel" };
+            wallsBuildingsPanel.pickingMode = PickingMode.Position;
+            wallsBuildingsPanel.style.position = Position.Absolute;
+            wallsBuildingsPanel.style.top = 110;
+            wallsBuildingsPanel.style.right = 20;
+            wallsBuildingsPanel.style.width = 320;
+            wallsBuildingsPanel.style.maxHeight = 480;
+            wallsBuildingsPanel.style.backgroundColor = new Color(0.08f, 0.11f, 0.20f, 0.96f);
+            wallsBuildingsPanel.style.borderTopLeftRadius = 10;
+            wallsBuildingsPanel.style.borderTopRightRadius = 10;
+            wallsBuildingsPanel.style.borderBottomLeftRadius = 10;
+            wallsBuildingsPanel.style.borderBottomRightRadius = 10;
+            wallsBuildingsPanel.style.borderTopWidth = 2;
+            wallsBuildingsPanel.style.borderRightWidth = 2;
+            wallsBuildingsPanel.style.borderBottomWidth = 2;
+            wallsBuildingsPanel.style.borderLeftWidth = 2;
+            wallsBuildingsPanel.style.borderTopColor = new Color(0.3f, 0.75f, 0.45f);
+            wallsBuildingsPanel.style.borderRightColor = new Color(0.3f, 0.75f, 0.45f);
+            wallsBuildingsPanel.style.borderBottomColor = new Color(0.3f, 0.75f, 0.45f);
+            wallsBuildingsPanel.style.borderLeftColor = new Color(0.3f, 0.75f, 0.45f);
+            wallsBuildingsPanel.style.paddingTop = 12;
+            wallsBuildingsPanel.style.paddingBottom = 12;
+            wallsBuildingsPanel.style.paddingLeft = 12;
+            wallsBuildingsPanel.style.paddingRight = 12;
+            wallsBuildingsPanel.style.display = DisplayStyle.None;
+
+            // Header
+            var header = new Label("Walls and Buildings");
+            header.style.fontSize = 18;
+            header.style.color = Color.white;
+            header.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.style.marginBottom = 10;
+            wallsBuildingsPanel.Add(header);
+
+            // ===== Tabs =====
+            var tabRow = new VisualElement();
+            tabRow.style.flexDirection = FlexDirection.Row;
+            tabRow.style.marginBottom = 10;
+
+            var wallsTabBtn = CreateTabButton("Walls", true);
+            var buildingsTabBtn = CreateTabButton("Buildings", false);
+
+            tabRow.Add(wallsTabBtn);
+            tabRow.Add(buildingsTabBtn);
+            wallsBuildingsPanel.Add(tabRow);
+
+            // Content containers
+            var wallsContent = new VisualElement { name = "WallsContent" };
+            var buildingsContent = new VisualElement { name = "BuildingsContent" };
+            buildingsContent.style.display = DisplayStyle.None;
+
+            // --- Walls Grid ---
+            var wallsGrid = new VisualElement();
+            wallsGrid.style.flexDirection = FlexDirection.Row;
+            wallsGrid.style.flexWrap = Wrap.Wrap;
+            wallsGrid.style.justifyContent = Justify.FlexStart;
+
+            if (wallInventory != null && wallInventory.walls != null && wallInventory.walls.Count > 0)
+            {
+                for (int i = 0; i < wallInventory.walls.Count; i++)
+                {
+                    int index = i;
+                    wallsGrid.Add(CreateWallSlot(wallInventory.walls[i], index));
+                }
+            }
+            else
+            {
+                var emptyLabel = new Label("No Walls assigned");
+                emptyLabel.style.color = Color.gray;
+                wallsGrid.Add(emptyLabel);
+            }
+            wallsContent.Add(wallsGrid);
+
+            // --- Buildings Grid (placeholder for now) ---
+            var buildingsGrid = new VisualElement();
+            buildingsGrid.style.flexDirection = FlexDirection.Row;
+            buildingsGrid.style.flexWrap = Wrap.Wrap;
+
+            var buildingsPlaceholder = new Label("Buildings coming soon");
+            buildingsPlaceholder.style.color = Color.gray;
+            buildingsGrid.Add(buildingsPlaceholder);
+            buildingsContent.Add(buildingsGrid);
+
+            wallsBuildingsPanel.Add(wallsContent);
+            wallsBuildingsPanel.Add(buildingsContent);
+
+            // Tab switching
+            wallsTabBtn.clicked += () =>
+            {
+                wallsContent.style.display = DisplayStyle.Flex;
+                buildingsContent.style.display = DisplayStyle.None;
+                SetTabActive(wallsTabBtn, true);
+                SetTabActive(buildingsTabBtn, false);
+            };
+
+            buildingsTabBtn.clicked += () =>
+            {
+                wallsContent.style.display = DisplayStyle.None;
+                buildingsContent.style.display = DisplayStyle.Flex;
+                SetTabActive(wallsTabBtn, false);
+                SetTabActive(buildingsTabBtn, true);
+            };
+
+            // ===== Bottom buttons =====
+            var buttonRow = new VisualElement();
+            buttonRow.style.flexDirection = FlexDirection.Row;
+            buttonRow.style.justifyContent = Justify.SpaceBetween;
+            buttonRow.style.marginTop = 12;
+
+            buttonRow.Add(CreateInventoryButton("Clear", OnWallsClearClicked));
+            buttonRow.Add(CreateInventoryButton("Save", OnWallsSaveClicked));
+            buttonRow.Add(CreateInventoryButton("Load", OnWallsLoadClicked));
+
+            wallsBuildingsPanel.Add(buttonRow);
+
+            root.Add(wallsBuildingsPanel);
+            RegisterUIBlockers(wallsBuildingsPanel);
+        }
+        
+        private VisualElement CreatePlaceholderSlot(string labelText)
+        {
+            var slot = new VisualElement();
+            slot.style.width = 64;
+            slot.style.height = 64;
+            slot.style.marginRight = 8;
+            slot.style.marginBottom = 8;
+            slot.style.backgroundColor = new Color(0.15f, 0.18f, 0.25f, 1f);
+            slot.style.borderTopLeftRadius = 6;
+            slot.style.borderTopRightRadius = 6;
+            slot.style.borderBottomLeftRadius = 6;
+            slot.style.borderBottomRightRadius = 6;
+            slot.style.justifyContent = Justify.Center;
+            slot.style.alignItems = Align.Center;
+
+            var label = new Label(labelText);
+            label.style.fontSize = 11;
+            label.style.color = Color.gray;
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            slot.Add(label);
+
+            return slot;
+        }
+        
+        private Button CreateInventoryButton(string text, Action onClick)
+        {
+            var btn = new Button { text = text };
+            btn.style.flexGrow = 1;
+            btn.style.height = 36;
+            btn.style.marginLeft = 4;
+            btn.style.marginRight = 4;
+            btn.style.fontSize = 13;
+            btn.style.backgroundColor = new Color(0.16f, 0.20f, 0.32f);
+            btn.style.color = Color.white;
+            btn.style.borderTopLeftRadius = 5;
+            btn.style.borderTopRightRadius = 5;
+            btn.style.borderBottomLeftRadius = 5;
+            btn.style.borderBottomRightRadius = 5;
+            btn.clicked += onClick;
+            return btn;
+        }
+
+        #region UIHelpers
+
+        private Button CreateTabButton(string text, bool isActive)
+        {
+            var btn = new Button { text = text };
+            btn.style.flexGrow = 1;
+            btn.style.height = 32;
+            btn.style.marginRight = 4;
+            btn.style.fontSize = 13;
+            btn.style.borderTopLeftRadius = 5;
+            btn.style.borderTopRightRadius = 5;
+            btn.style.borderBottomLeftRadius = 5;
+            btn.style.borderBottomRightRadius = 5;
+
+            SetTabActive(btn, isActive);
+            return btn;
+        }
+
+        private void SetTabActive(Button btn, bool active)
+        {
+            if (active)
+            {
+                btn.style.backgroundColor = new Color(0.25f, 0.55f, 0.35f);
+                btn.style.color = Color.white;
+            }
+            else
+            {
+                btn.style.backgroundColor = new Color(0.16f, 0.20f, 0.28f);
+                btn.style.color = new Color(0.7f, 0.7f, 0.7f);
+            }
+        }
+
+        private VisualElement CreateWallSlot(WallInventorySO.WallEntry entry, int index)
+        {
+            var slot = new VisualElement();
+            slot.pickingMode = PickingMode.Position;
+            slot.style.width = 72;
+            slot.style.height = 72;
+            slot.style.backgroundColor = new Color(0.18f, 0.22f, 0.35f);
+            slot.style.borderTopLeftRadius = 6;
+            slot.style.borderTopRightRadius = 6;
+            slot.style.borderBottomLeftRadius = 6;
+            slot.style.borderBottomRightRadius = 6;
+            slot.style.marginRight = 8;
+            slot.style.marginBottom = 8;
+            slot.style.justifyContent = Justify.Center;
+            slot.style.alignItems = Align.Center;
+
+            // Placeholder icon (or real icon later)
+            if (entry != null && entry.icon != null)
+            {
+                slot.style.backgroundImage = new StyleBackground(entry.icon);
+                slot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            }
+            else
+            {
+                var placeholder = new Label("W");
+                placeholder.style.fontSize = 20;
+                placeholder.style.color = new Color(0.6f, 0.8f, 0.7f);
+                placeholder.style.unityFontStyleAndWeight = FontStyle.Bold;
+                slot.Add(placeholder);
+            }
+
+            // Count label
+            int count = wallInventory != null ? wallInventory.GetCount(index) : 0;
+            var countLabel = new Label(count.ToString());
+            while (wallCountLabels.Count <= index)
+                wallCountLabels.Add(null);
+            wallCountLabels[index] = countLabel;
+            
+            countLabel.style.position = Position.Absolute;
+            countLabel.style.right = 4;
+            countLabel.style.bottom = 2;
+            countLabel.style.fontSize = 13;
+            countLabel.style.color = Color.white;
+            countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            countLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
+            countLabel.style.paddingLeft = 4;
+            countLabel.style.paddingRight = 4;
+            countLabel.style.borderTopLeftRadius = 3;
+            countLabel.style.borderTopRightRadius = 3;
+            countLabel.style.borderBottomLeftRadius = 3;
+            countLabel.style.borderBottomRightRadius = 3;
+            slot.Add(countLabel);
+
+            // Click to select
+            slot.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (entry == null || entry.prefab == null) return;
+
+                builderController?.SelectPrefab(
+                    entry.prefab,
+                    Vector2Int.one,          // assuming 1×1 walls for now
+                    isLand: false,           // walls go on Object Grid
+                    inventoryIndex: index
+                );
+
+                HighlightSelectedSlot(slot);
+            });
+
+            return slot;
+        }
+
+        #endregion
+        
+        
+        private void OnClearClicked()
+        {
+            builderController?.PlacementService.ClearLandTilesOnly(landTileInventory);
+
+            // Refresh labels
+            if (landTileInventory != null)
+            {
+                for (int i = 0; i < landTileInventory.tiles.Count; i++)
+                {
+                    if (i < slotCountLabels.Count && slotCountLabels[i] != null)
+                        slotCountLabels[i].text = landTileInventory.GetCount(i).ToString();
+                }
+            }
+        }
+
+        private void OnSaveClicked()
+        {
+            Debug.Log("<color=yellow>Save clicked</color>");
+            // TODO: basic save of layout + counts
+        }
+
+        private void OnLoadClicked()
+        {
+            Debug.Log("<color=yellow>Load clicked</color>");
+            // TODO: basic load of layout + counts
+        }
+        
+        private void OnWallsClearClicked()
+        {
+            builderController?.PlacementService.ClearObjectsOnly(wallInventory);
+
+            // Refresh wall count labels if you have them (optional for now)
+            Debug.Log("<color=yellow>Cleared all Walls + restored inventory counts</color>");
+        }
+
+        private void OnWallsSaveClicked()
+        {
+            Debug.Log("[WallsAndBuildings] Save clicked – wiring later");
+        }
+
+        private void OnWallsLoadClicked()
+        {
+            Debug.Log("[WallsAndBuildings] Load clicked – wiring later");
+        }
+
+        private VisualElement CreateInventorySlot(LandTileInventorySO.LandTileEntry entry, int index)
+        {
+            var slot = new VisualElement();
+            slot.pickingMode = PickingMode.Position;
+            slot.style.width = 72;
+            slot.style.height = 72;
+            slot.style.backgroundColor = new Color(0.18f, 0.22f, 0.35f);
+            slot.style.borderTopLeftRadius = 6;
+            slot.style.borderTopRightRadius = 6;
+            slot.style.borderBottomLeftRadius = 6;
+            slot.style.borderBottomRightRadius = 6;
+            slot.style.marginRight = 8;
+            slot.style.marginBottom = 8;
+            slot.style.justifyContent = Justify.Center;
+            slot.style.alignItems = Align.Center;
+
+            if (entry != null && entry.icon != null)
+            {
+                slot.style.backgroundImage = new StyleBackground(entry.icon);
+                slot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            }
+
+            int count = landTileInventory != null ? landTileInventory.GetCount(index) : 0;
+            var countLabel = new Label(count.ToString());
+            countLabel.style.position = Position.Absolute;
+            countLabel.style.right = 4;
+            countLabel.style.bottom = 2;
+            countLabel.style.fontSize = 13;
+            countLabel.style.color = Color.white;
+            countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            countLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
+            countLabel.style.paddingLeft = 4;
+            countLabel.style.paddingRight = 4;
+            countLabel.style.borderTopLeftRadius = 3;
+            countLabel.style.borderTopRightRadius = 3;
+            countLabel.style.borderBottomLeftRadius = 3;
+            countLabel.style.borderBottomRightRadius = 3;
+            slot.Add(countLabel);
+
+            while (slotCountLabels.Count <= index)
+                slotCountLabels.Add(null);
+            slotCountLabels[index] = countLabel;
+
+            slot.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (entry == null) return;
+                builderController?.SelectPrefab(entry.prefab, Vector2Int.one, isLand: true, inventoryIndex: index);
+                HighlightSelectedSlot(slot);
+            });
+
+            return slot;
+        }
+
+        #endregion
+
+        #region UI Click-Through Protection
+
+        private void RegisterUIBlockers(VisualElement element)
+        {
+            if (element == null || builderController == null) return;
+
+            element.RegisterCallback<PointerEnterEvent>(evt =>
+            {
+                builderController.SetPointerOverUI(true);
+            });
+
+            element.RegisterCallback<PointerLeaveEvent>(evt =>
+            {
+                builderController.SetPointerOverUI(false);
+            });
+        }
+
+        #endregion
+
+        #region Inventory Helpers
+
+        private void HighlightSelectedSlot(VisualElement slot)
+        {
+            if (currentlySelectedSlot != null)
+            {
+                currentlySelectedSlot.style.borderTopWidth = 0;
+                currentlySelectedSlot.style.borderRightWidth = 0;
+                currentlySelectedSlot.style.borderBottomWidth = 0;
+                currentlySelectedSlot.style.borderLeftWidth = 0;
+            }
+
+            currentlySelectedSlot = slot;
+            slot.style.borderTopWidth = 2;
+            slot.style.borderRightWidth = 2;
+            slot.style.borderBottomWidth = 2;
+            slot.style.borderLeftWidth = 2;
+            slot.style.borderTopColor = new Color(0.3f, 0.9f, 1f);
+            slot.style.borderRightColor = new Color(0.3f, 0.9f, 1f);
+            slot.style.borderBottomColor = new Color(0.3f, 0.9f, 1f);
+            slot.style.borderLeftColor = new Color(0.3f, 0.9f, 1f);
+        }
+
+        public void SetInventoryVisible(bool visible)
+        {
+            if (inventoryPanel != null)
+                inventoryPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private void HandleLandTilePlaced(int index)
+        {
+            if (landTileInventory == null) return;
+            if (index < 0 || index >= landTileInventory.tiles.Count) return;
+
+            // Consume from the same SO the HUD is displaying
+            bool consumed = landTileInventory.ConsumeTile(index);
+            if (!consumed)
+            {
+                Debug.LogWarning($"Could not consume tile at index {index} (count may be 0)");
+                return;
+            }
+            
+
+            // Update the label
+            if (index < slotCountLabels.Count && slotCountLabels[index] != null)
+                slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
+        }
+
+        #endregion
+
+        #region Button Factories
 
         private Button CreateModeButton(string text, BuilderMode mode)
         {
@@ -127,7 +717,14 @@ namespace _Project.Scripts.BaseBuilder.UI
             btn.clicked += () =>
             {
                 builderController?.SetMode(mode);
-                // Raise specific events if needed
+
+                // Show / hide panels based on mode
+                if (inventoryPanel != null)
+                    inventoryPanel.style.display = (mode == BuilderMode.BuildOnWater) ? DisplayStyle.Flex : DisplayStyle.None;
+
+                if (wallsBuildingsPanel != null)
+                    wallsBuildingsPanel.style.display = (mode == BuilderMode.BuildOnLand) ? DisplayStyle.Flex : DisplayStyle.None;
+
                 switch (mode)
                 {
                     case BuilderMode.Select: OnSelectModeClicked?.Invoke(); break;
@@ -143,7 +740,6 @@ namespace _Project.Scripts.BaseBuilder.UI
         {
             var btn = new Button { text = text };
             StyleFilterButton(btn);
-
             btn.clicked += () => builderController?.SetSelectFilter(filter);
             return btn;
         }
@@ -155,7 +751,11 @@ namespace _Project.Scripts.BaseBuilder.UI
             btn.clicked += onClick;
             return btn;
         }
-        
+
+        #endregion
+
+        #region Styling
+
         private void StyleButton(Button btn, Color backgroundColor)
         {
             btn.style.height = 40;
@@ -168,8 +768,6 @@ namespace _Project.Scripts.BaseBuilder.UI
             btn.style.borderBottomLeftRadius = 6;
             btn.style.borderBottomRightRadius = 6;
         }
-
-        // ==================== STYLING HELPERS ====================
 
         private void StyleModeButton(Button btn)
         {
@@ -212,5 +810,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             btn.style.borderBottomLeftRadius = 6;
             btn.style.borderBottomRightRadius = 6;
         }
+
+        #endregion
     }
 }

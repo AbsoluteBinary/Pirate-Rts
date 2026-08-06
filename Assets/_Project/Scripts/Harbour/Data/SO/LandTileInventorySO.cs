@@ -7,13 +7,13 @@ namespace _Project.Scripts.Harbour.Data.SO
     [CreateAssetMenu(fileName = "LandTileInventory", menuName = "Harbour/Land Tile Inventory")]
     public class LandTileInventorySO : ScriptableObject
     {
-        public List<TileEntry> tiles = new List<TileEntry>();
+        public List<LandTileEntry> tiles = new List<LandTileEntry>();
         
         // === NEW: Event for MVVM View updates ===
         public event Action<int> OnCountChanged;
 
         [Serializable]
-        public class TileEntry
+        public class LandTileEntry
         {
             public string tileName;
             public GameObject prefab;

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using _Project.Scripts.BaseBuilder.Runtime.Data;
+using _Project.Scripts.Harbour.Data.SO;
 using TGS;
 using UnityEngine;
 
@@ -7,15 +7,25 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
 {
     public class PlacementService
     {
+        // ─────────────────────────────────────────────
+        // Lightweight record of everything we place
+        // ─────────────────────────────────────────────
+        private class PlacedEntry
+        {
+            public GameObject instance;
+            public bool isLand;
+            public int inventoryIndex;      // -1 if not from an inventory
+            public int originCellIndex;
+            public Vector2Int size;
+        }
+
         private readonly OccupationSystem occupation;
         private readonly PlacementValidator validator;
 
         private TerrainGridSystem landGrid;
         private TerrainGridSystem objectGrid;
 
-        private readonly List<GameObject> placedObjects = new List<GameObject>();
-
-        public IReadOnlyList<GameObject> PlacedObjects => placedObjects;
+        private readonly List<PlacedEntry> placedEntries = new List<PlacedEntry>();
 
         public PlacementService(OccupationSystem occupationSystem, PlacementValidator placementValidator)
         {
@@ -30,7 +40,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             validator.SetGrids(land, objects);
         }
 
-        public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject)
+        // ─────────────────────────────────────────────
+        // Placement
+        // ─────────────────────────────────────────────
+
+        public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject, int inventoryIndex = -1)
         {
             if (prefab == null) return null;
 
@@ -48,53 +62,167 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             GameObject instance = Object.Instantiate(prefab, finalPos, Quaternion.identity);
             instance.name = prefab.name;
 
-            // Set layer if it exists
             int placedLayer = LayerMask.NameToLayer("PlacedObjects");
             if (placedLayer != -1)
                 SetLayerRecursively(instance, placedLayer);
 
-            placedObjects.Add(instance);
+            // Record the entry
+            var entry = new PlacedEntry
+            {
+                instance = instance,
+                isLand = isLandObject,
+                inventoryIndex = inventoryIndex,
+                originCellIndex = originCell.index,
+                size = size
+            };
+
+            placedEntries.Add(entry);
             occupation.OccupyFootprint(originCell.index, size, grid.columnCount, isLandObject);
 
             return instance;
         }
 
-        public bool Remove(GameObject obj, Vector2Int size, bool isLandObject)
+        // ─────────────────────────────────────────────
+        // Removal
+        // ─────────────────────────────────────────────
+
+        public bool Remove(GameObject obj)
         {
             if (obj == null) return false;
 
-            TerrainGridSystem grid = isLandObject ? landGrid : objectGrid;
-            if (grid == null) return false;
-
-            Cell originCell = grid.CellGetAtWorldPosition(obj.transform.position, 0);
-            if (originCell != null)
+            for (int i = 0; i < placedEntries.Count; i++)
             {
-                // Adjust for footprint centre → origin
-                float cellSize = grid.cellSize.x;
-                Vector3 originPos = obj.transform.position;
-                originPos.x -= (size.x - 1) * cellSize * 0.5f;
-                originPos.z -= (size.y - 1) * cellSize * 0.5f;
+                if (placedEntries[i].instance == obj)
+                {
+                    var entry = placedEntries[i];
+                    TerrainGridSystem grid = entry.isLand ? landGrid : objectGrid;
 
-                originCell = grid.CellGetAtWorldPosition(originPos, 0);
-                if (originCell != null)
-                    occupation.FreeFootprint(originCell.index, size, grid.columnCount, isLandObject);
+                    if (grid != null)
+                        occupation.FreeFootprint(entry.originCellIndex, entry.size, grid.columnCount, entry.isLand);
+
+                    placedEntries.RemoveAt(i);
+                    Object.Destroy(obj);
+                    return true;
+                }
             }
-
-            placedObjects.Remove(obj);
-            Object.Destroy(obj);
-            return true;
+            return false;
         }
+
+        // ─────────────────────────────────────────────
+        // Clear methods
+        // ─────────────────────────────────────────────
 
         public void ClearAll()
         {
-            for (int i = placedObjects.Count - 1; i >= 0; i--)
+            for (int i = placedEntries.Count - 1; i >= 0; i--)
             {
-                if (placedObjects[i] != null)
-                    Object.Destroy(placedObjects[i]);
+                if (placedEntries[i].instance != null)
+                    Object.Destroy(placedEntries[i].instance);
             }
 
-            placedObjects.Clear();
+            placedEntries.Clear();
             occupation.Clear();
+        }
+
+        /// <summary>
+        /// Clears only Land Tiles that have no object on top of them.
+        /// Restores the correct inventory counts.
+        /// </summary>
+        public void ClearLandTilesOnly(LandTileInventorySO landInventory)
+        {
+            if (landGrid == null) return;
+
+            for (int i = placedEntries.Count - 1; i >= 0; i--)
+            {
+                var entry = placedEntries[i];
+
+                if (!entry.isLand) continue;
+                if (entry.instance == null)
+                {
+                    placedEntries.RemoveAt(i);
+                    continue;
+                }
+
+                // Skip if any wall/building is sitting on top
+                if (HasObjectOnTop(entry.instance.transform.position))
+                    continue;
+
+                // Restore inventory count
+                if (landInventory != null && entry.inventoryIndex >= 0 &&
+                    entry.inventoryIndex < landInventory.tiles.Count)
+                {
+                    landInventory.tiles[entry.inventoryIndex].count++;
+                }
+
+                // Free occupation + destroy
+                occupation.FreeFootprint(entry.originCellIndex, entry.size, landGrid.columnCount, true);
+                Object.Destroy(entry.instance);
+                placedEntries.RemoveAt(i);
+            }
+        }
+
+        /// <summary>
+        /// Clears all Walls / Buildings and restores their inventory counts.
+        /// </summary>
+        public void ClearObjectsOnly(WallInventorySO wallInventory = null)
+        {
+            if (objectGrid == null) return;
+
+            for (int i = placedEntries.Count - 1; i >= 0; i--)
+            {
+                var entry = placedEntries[i];
+
+                if (entry.isLand) continue;
+                if (entry.instance == null)
+                {
+                    placedEntries.RemoveAt(i);
+                    continue;
+                }
+
+                // Restore wall inventory count
+                if (wallInventory != null && entry.inventoryIndex >= 0 &&
+                    entry.inventoryIndex < wallInventory.walls.Count)
+                {
+                    wallInventory.walls[entry.inventoryIndex].count++;
+                }
+
+                occupation.FreeFootprint(entry.originCellIndex, entry.size, objectGrid.columnCount, false);
+                Object.Destroy(entry.instance);
+                placedEntries.RemoveAt(i);
+            }
+        }
+
+        // ─────────────────────────────────────────────
+        // Helpers
+        // ─────────────────────────────────────────────
+
+        private bool HasObjectOnTop(Vector3 landWorldPosition)
+        {
+            if (objectGrid == null || landGrid == null) return false;
+
+            Cell landCell = landGrid.CellGetAtWorldPosition(landWorldPosition, 0);
+            if (landCell == null) return false;
+
+            Vector3 landCenter = landGrid.CellGetPosition(landCell.index);
+            float half = landGrid.cellSize.x * 0.5f;
+
+            // 2×2 object cells that sit inside this land cell
+            Vector3[] samplePoints =
+            {
+                landCenter + new Vector3(-half * 0.5f, 0f, -half * 0.5f),
+                landCenter + new Vector3( half * 0.5f, 0f, -half * 0.5f),
+                landCenter + new Vector3(-half * 0.5f, 0f,  half * 0.5f),
+                landCenter + new Vector3( half * 0.5f, 0f,  half * 0.5f)
+            };
+
+            foreach (var point in samplePoints)
+            {
+                Cell objectCell = objectGrid.CellGetAtWorldPosition(point, 0);
+                if (objectCell != null && occupation.IsObjectOccupied(objectCell.index))
+                    return true;
+            }
+
+            return false;
         }
 
         private void SetLayerRecursively(GameObject obj, int layer)

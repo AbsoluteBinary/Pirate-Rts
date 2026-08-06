@@ -6,17 +6,25 @@ namespace _Project.Scripts.Cam_System
 {
     public class OrthographicZoomComponent : MonoBehaviour
     {
-        public float speed = 10;
+        [Header("Zoom Settings")]
+        public float speed = 10f;
         public bool isInverted = false;
+
+        [Header("Orthographic Limits")]
+        [Tooltip("Smallest orthographic size (most zoomed in)")]
+        public float minSize = 10f;
+
+        [Tooltip("Largest orthographic size (most zoomed out)")]
+        public float maxSize = 40f;
+
         private float currentZoom;
         private StrategyCameraController controller;
-        private new Camera camera
+
+        private Camera camera
         {
-            get
-            {
-                return controller.camera;
-            }
+            get { return controller.camera; }
         }
+
         private CameraInputs xinputs
         {
             get { return controller.xinputs; }
@@ -25,32 +33,31 @@ namespace _Project.Scripts.Cam_System
         void Start()
         {
             if (controller == null)
-            {
                 controller = GetComponent<StrategyCameraController>();
-            }
-            currentZoom = controller.camera.fieldOfView;
+
+            currentZoom = camera.orthographic ? camera.orthographicSize : camera.fieldOfView;
         }
 
         private void Update()
         {
-            var zoomVal = xinputs.zoom;
-            Zoom(zoomVal);
+            Zoom(xinputs.zoom);
         }
 
         private void Zoom(float dir)
         {
             if (camera.orthographic)
             {
-                // Orthographic camera (what you're using)
-                float size = camera.orthographicSize - dir * speed * Time.deltaTime * (isInverted ? -1 : 1);
-                size = controller.ZoomFovConstaints(size);   // still works because it just clamps
+                float size = camera.orthographicSize - dir * speed * Time.deltaTime * (isInverted ? -1f : 1f);
+
+                // Clamp with our own limits instead of the controller's
+                size = Mathf.Clamp(size, minSize, maxSize);
+
                 camera.orthographicSize = size;
             }
             else
             {
-                // Perspective camera (original behaviour)
-                float fov = camera.fieldOfView + dir * speed * Time.deltaTime * (isInverted ? -1 : 1);
-                fov = controller.ZoomFovConstaints(fov);
+                float fov = camera.fieldOfView + dir * speed * Time.deltaTime * (isInverted ? -1f : 1f);
+                fov = controller.ZoomFovConstaints(fov); // keep original for perspective
                 camera.fieldOfView = fov;
             }
         }
