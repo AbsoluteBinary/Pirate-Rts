@@ -12,6 +12,9 @@
 
 #Ignore large files
 Assets/Packages/
+Assets/Crest/Crest-Examples/
+Assets/SCI-FI/
+Assets/Sci-Fi/
 
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
