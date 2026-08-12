@@ -3,6 +3,7 @@ using _Project.Scripts.BaseBuilder.Runtime.Modes;
 using _Project.Scripts.BaseBuilder.Runtime.Placement;
 using _Project.Scripts.BaseBuilder.Runtime.Selection;
 using _Project.Scripts.Harbour.Data.SO;
+using Packages.ModularStrategyTopDownCameraController.Scripts;
 using TGS;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,6 +33,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         [Header("Input")]
         [SerializeField] private Camera buildCamera;
+        [SerializeField] private StrategyCameraController strategyCamera;
 
         #endregion
 
@@ -57,6 +59,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private int lastHighlightedCell = -1;
         private TerrainGridSystem lastHighlightedGrid;
         private bool isPointerOverUI = false;
+        private BuilderInputActions builderInputActions;
 
         private TerrainGridSystem ActiveGrid
         {
@@ -79,6 +82,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             Validator = new PlacementValidator(OccupationSystem);
             PlacementService = new PlacementService(OccupationSystem, Validator);
             SelectionSystem = new SelectionSystem();
+
+            // Input maps + strategy camera (prevent pan/zoom while placing)
+            builderInputActions = new BuilderInputActions();
+            if (strategyCamera == null)
+                strategyCamera = FindFirstObjectByType<StrategyCameraController>();
 
             // New systems
             _highlightService = new CellHighlightService();
@@ -105,11 +113,23 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             ModeSystem.OnModeChanged += (mode) =>
             {
                 UpdateGridVisibility();
-                ClearSelectedPrefab();          // ← add this
+                ClearSelectedPrefab();
+
+                // Lock strategy camera while in placement modes
+                bool inPlacementMode = mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand;
+                SetBuilderInputActive(inPlacementMode);
             };
 
             if (landGrid != null || objectGrid != null)
                 PlacementService.SetGrids(landGrid, objectGrid);
+        }
+
+        private void OnDestroy()
+        {
+            // Restore player/camera input if this object is destroyed mid-build
+            SetBuilderInputActive(false);
+            builderInputActions?.Dispose();
+            builderInputActions = null;
         }
 
         private void Update()
@@ -145,6 +165,33 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             isPointerOverUI = over;
         }
 
+        /// <summary>
+        /// Switches Input Action maps and strategy-camera input.
+        /// active true  → Builder map on, Player map off, camera inputs disabled.
+        /// active false → Player map on, Builder map off, camera inputs enabled.
+        /// </summary>
+        public void SetBuilderInputActive(bool active)
+        {
+            Debug.Log($"[Input] SetBuilderInputActive({active}) | strategyCamera={(strategyCamera != null)}");
+            
+            if (builderInputActions == null)
+                builderInputActions = new BuilderInputActions();
+
+            if (active)
+            {
+                builderInputActions.Player.Disable();
+                builderInputActions.Builder.Enable();
+                strategyCamera?.xinputs?.DisableInputs();
+            }
+            else
+            {
+                builderInputActions.Builder.Disable();
+                builderInputActions.Player.Enable();
+                strategyCamera?.xinputs?.EnableInputs();
+                Debug.LogWarning("[Input] strategyCamera is null – cannot gate camera");
+            }
+        }
+
         public void SetBuilderActive(bool active)
         {
             gameObject.SetActive(active);
@@ -155,11 +202,14 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 if (objectGrid != null) objectGrid.gameObject.SetActive(false);
                 ClearSelectedPrefab();
                 isPointerOverUI = false;
+                SetBuilderInputActive(false);
                 return;
             }
 
             ModeSystem.SetMode(BuilderMode.Select);
             UpdateGridVisibility();
+            // Select mode keeps camera free until BuildOnWater / BuildOnLand
+            SetBuilderInputActive(false);
         }
 
         public void UpdateGridVisibility()
