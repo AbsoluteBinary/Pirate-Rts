@@ -13,6 +13,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
     public class BaseBuilderController : MonoBehaviour
     {
         #region Inspector Fields
+        
+        
 
         [Header("Grid References")]
         [SerializeField] private TerrainGridSystem landGrid;
@@ -34,6 +36,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         [Header("Input")]
         [SerializeField] private Camera buildCamera;
         [SerializeField] private StrategyCameraController strategyCamera;
+        
+        private BuilderInputActions inputActions;
 
         #endregion
 
@@ -110,6 +114,13 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     wallInventory.Consume(index);
             };
             
+            inputActions = new BuilderInputActions();
+            inputActions.Player.Enable();
+            inputActions.Builder.Disable();
+
+            if (strategyCamera == null)
+                strategyCamera = FindFirstObjectByType<StrategyCameraController>();
+            
             ModeSystem.OnModeChanged += (mode) =>
             {
                 UpdateGridVisibility();
@@ -117,6 +128,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
                 // Lock strategy camera while in placement modes
                 bool inPlacementMode = mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand;
+                bool isBuilding = mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand;
+                SetBuilderInputActive(isBuilding);
                 SetBuilderInputActive(inPlacementMode);
             };
 
@@ -170,25 +183,30 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         /// active true  → Builder map on, Player map off, camera inputs disabled.
         /// active false → Player map on, Builder map off, camera inputs enabled.
         /// </summary>
-        public void SetBuilderInputActive(bool active)
+        private void SetBuilderInputActive(bool active)
         {
             Debug.Log($"[Input] SetBuilderInputActive({active}) | strategyCamera={(strategyCamera != null)}");
-            
-            if (builderInputActions == null)
-                builderInputActions = new BuilderInputActions();
 
-            if (active)
+            if (inputActions != null)
             {
-                builderInputActions.Player.Disable();
-                builderInputActions.Builder.Enable();
-                strategyCamera?.xinputs?.DisableInputs();
+                if (active)
+                {
+                    inputActions.Player.Disable();
+                    inputActions.Builder.Enable();
+                }
+                else
+                {
+                    inputActions.Builder.Disable();
+                    inputActions.Player.Enable();
+                }
             }
-            else
+
+            if (strategyCamera != null)
             {
-                builderInputActions.Builder.Disable();
-                builderInputActions.Player.Enable();
-                strategyCamera?.xinputs?.EnableInputs();
-                Debug.LogWarning("[Input] strategyCamera is null – cannot gate camera");
+                if (active)
+                    strategyCamera.xinputs.DisableInputs();
+                else
+                    strategyCamera.xinputs.EnableInputs();
             }
         }
 
@@ -208,8 +226,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
             ModeSystem.SetMode(BuilderMode.Select);
             UpdateGridVisibility();
-            // Select mode keeps camera free until BuildOnWater / BuildOnLand
-            SetBuilderInputActive(false);
+            SetBuilderInputActive(true);
         }
 
         public void UpdateGridVisibility()
