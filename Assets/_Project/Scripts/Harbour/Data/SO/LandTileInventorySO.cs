@@ -53,5 +53,15 @@ namespace _Project.Scripts.Harbour.Data.SO
             
             return true;
         }
+        
+        public void Restore(int index, int amount = 1)
+        {
+            if (index < 0 || index >= tiles.Count) return;
+            tiles[index].count += amount;
+            OnCountChanged?.Invoke(index);
+            
+        }
+        
+        
     }
 }

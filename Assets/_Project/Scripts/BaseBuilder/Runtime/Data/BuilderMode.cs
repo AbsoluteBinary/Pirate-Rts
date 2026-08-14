@@ -4,6 +4,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Data
     {
         Select,
         BuildOnWater,   // Land Grid + land tiles
-        BuildOnLand     // Object Grid + walls / buildings / etc.
+        BuildOnLand,     // Object Grid + walls / buildings / etc.
+        PickUp,
+        Delete
     }
 }

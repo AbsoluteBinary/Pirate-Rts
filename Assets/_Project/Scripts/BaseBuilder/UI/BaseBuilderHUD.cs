@@ -75,6 +75,13 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             builderController.OnLandTilePlaced -= HandleLandTilePlaced; // avoid double subscribe
             builderController.OnLandTilePlaced += HandleLandTilePlaced;
+            landTileInventory.OnCountChanged += HandleLandCountChanged;
+        }
+        private void HandleLandCountChanged(int index)
+        {
+            if (index < 0 || index >= slotCountLabels.Count) return;
+            if (slotCountLabels[index] != null)
+                slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
         }
 
         private void OnDisable()
@@ -144,8 +151,27 @@ namespace _Project.Scripts.BaseBuilder.UI
             spacer.style.flexGrow = 1;
             topBar.Add(spacer);
 
-            topBar.Add(CreateActionButton("Pick Up", () => OnPickUpClicked?.Invoke()));
-            topBar.Add(CreateActionButton("Delete", () => OnDeleteClicked?.Invoke()));
+            //buttonRow.Add(CreateInventoryButton("Save", OnSaveClicked));
+            topBar.Add(CreateActionButton("Pick Up", () =>
+            {
+                builderController?.ClearSelectedPrefab();
+                builderController?.SetMode(BuilderMode.PickUp);
+                OnPickUpClicked?.Invoke(); // optional – keep if something else listens
+                Debug.Log("<color=cyan>Mode → Pick Up</color>");
+            }));
+            topBar.Add(CreateActionButton("Delete", () =>
+            {
+                builderController?.ClearSelectedPrefab();
+                builderController?.SetMode(BuilderMode.Delete);
+                OnDeleteClicked?.Invoke();
+                Debug.Log("<color=orange>Mode → Delete</color>");
+            }));
+            topBar.Add(CreateActionButton("Clear Selection", () =>
+            {
+                builderController?.ClearSelectedPrefab();
+                //builderController?.SetMode(BuilderMode.Select);
+                Debug.Log("<color=cyan>Selection cleared</color>");
+            }));
             topBar.Add(CreateActionButton("Lock", () => OnLockClicked?.Invoke()));
             topBar.Add(CreateActionButton("Unlock", () => OnUnlockClicked?.Invoke()));
 
@@ -658,6 +684,15 @@ namespace _Project.Scripts.BaseBuilder.UI
         #endregion
 
         #region Inventory Helpers
+        
+        private void RefreshLandTileLabel(int index)
+        {
+            if (landTileInventory == null) return;
+            if (index < 0 || index >= slotCountLabels.Count) return;
+            if (slotCountLabels[index] == null) return;
+
+            slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
+        }
 
         private void HighlightSelectedSlot(VisualElement slot)
         {

@@ -123,14 +123,23 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             
             ModeSystem.OnModeChanged += (mode) =>
             {
-                UpdateGridVisibility();
                 ClearSelectedPrefab();
 
-                // Lock strategy camera while in placement modes
-                bool inPlacementMode = mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand;
-                bool isBuilding = mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand;
-                SetBuilderInputActive(isBuilding);
-                SetBuilderInputActive(inPlacementMode);
+                if (mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand)
+                {
+                    UpdateGridVisibility();
+                    SetBuilderInputActive(true);
+                }
+                else if (mode == BuilderMode.PickUp || mode == BuilderMode.Delete)
+                {
+                    // Keep grids as they are – do not call UpdateGridVisibility()
+                    SetBuilderInputActive(false); // or true if you still want camera locked
+                }
+                else // Select, etc.
+                {
+                    UpdateGridVisibility(); // hides both when not building
+                    SetBuilderInputActive(false);
+                }
             };
 
             if (landGrid != null || objectGrid != null)
@@ -147,8 +156,20 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void Update()
         {
-            _paintAndDrag.Tick();
-            
+            _paintAndDrag?.Tick();
+
+            if (ModeSystem.CurrentMode == BuilderMode.PickUp)
+            {
+                HandlePickUpInput();
+                return;
+            }
+
+            if (ModeSystem.CurrentMode == BuilderMode.Delete)
+            {
+                HandleDeleteInput();
+                return;
+            }
+
             if (!ModeSystem.IsBuildOnWater && !ModeSystem.IsBuildOnLand)
             {
                 currentHoveredCell = null;
@@ -271,6 +292,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         {
             selectedPrefab = null;
             selectedInventoryIndex = -1;
+            selectedSize = Vector2Int.one;
+            isLandObject = true;
             DestroyPreview();
         }
 
@@ -305,6 +328,124 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         #endregion
         
         #region Helper's
+        
+        private void HandlePickUpInput()
+        {
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+                return;
+            if (isPointerOverUI) return;
+
+            Camera cam = buildCamera != null ? buildCamera : Camera.main;
+            if (cam == null) return;
+
+            Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            int layer = LayerMask.GetMask("PlacedObjects");
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, layer))
+                return;
+
+            if (!PlacementService.TryPickUp(hit.collider.gameObject, out var info))
+            {
+                // Hit a child collider – try root
+                if (!PlacementService.TryPickUp(hit.collider.transform.root.gameObject, out info))
+                    return;
+            }
+
+            // Restore inventory
+            RestoreInventory(info.IsLandObject ? PlaceableKind.Land : PlaceableKind.Wall, info.InventoryIndex);
+
+            // Re-select so preview follows mouse
+            if (info.Prefab != null)
+                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
+
+            Object.Destroy(info.Instance);
+
+            Debug.Log($"<color=cyan>Picked up {(info.IsLandObject ? "Land" : "Wall/Building")} index {info.InventoryIndex}</color>");
+        }
+        
+        private void HandleDeleteInput()
+        {
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+                return;
+            if (isPointerOverUI) return;
+
+            Camera cam = buildCamera != null ? buildCamera : Camera.main;
+            if (cam == null) return;
+
+            Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            int layer = LayerMask.GetMask("PlacedObjects");
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, layer))
+                return;
+
+            GameObject target = hit.collider.transform.root.gameObject;
+
+            if (!PlacementService.TryPickUp(target, out var info))
+                return;
+            
+
+            RestoreInventory(info.IsLandObject ? PlaceableKind.Land : PlaceableKind.Wall, info.InventoryIndex);
+
+            Object.Destroy(info.Instance);
+
+            Debug.Log($"<color=orange>Deleted {(info.IsLandObject ? "Land" : "Wall/Building")} index {info.InventoryIndex}</color>");
+        }
+        
+        // private void RestoreInventory(bool isLand, bool isWall, bool isBuilding, bool isWater, int inventoryIndex)
+        // {
+        //
+        //     if (inventoryIndex < 0) return;
+        //     //-------Current Logic Used for Land and Wall Inventory Restoration-------
+        //     if (isLand && landTileInventory != null)
+        //         landTileInventory.Restore(inventoryIndex);
+        //     else if (!isLand && wallInventory != null)
+        //         wallInventory.Restore(inventoryIndex);
+        //     
+        //     // ----- New Logic to Restore Inventory for Land, Wall, Building, and Water Objects-----
+        //     // if (isLand && landTileInventory != null)
+        //     //     landTileInventory.Restore(inventoryIndex);
+        //     // if (isWall && wallInventory != null)
+        //     //     wallInventory.Restore(inventoryIndex);
+        //     // if (isBuilding && buildingInventory != null)
+        //     //     buildingInventory.Restore(inventoryIndex);
+        //     // if (isWater && waterInventory != null)
+        //     //     waterInventory.Restore(inventoryIndex);
+        // }
+        public enum PlaceableKind
+        {
+            Land,
+            Wall,
+            Building,
+            Water
+        }
+
+        private void RestoreInventory(PlaceableKind kind, int inventoryIndex)
+        {
+            if (inventoryIndex < 0) return;
+
+            switch (kind)
+            {
+                case PlaceableKind.Land:
+                    if (landTileInventory != null)
+                        landTileInventory.Restore(inventoryIndex);
+                    break;
+
+                case PlaceableKind.Wall:
+                    if (wallInventory != null)
+                        wallInventory.Restore(inventoryIndex);
+                    break;
+
+                // case PlaceableKind.Building:
+                //     if (buildingInventory != null)
+                //         buildingInventory.Restore(inventoryIndex);
+                //     break;
+                //
+                // case PlaceableKind.Water:
+                //     if (waterInventory != null)
+                //         waterInventory.Restore(inventoryIndex);
+                //     break;
+            }
+        }
+        
+        
         
         private void CheckInventoryAndClearIfEmpty()
         {

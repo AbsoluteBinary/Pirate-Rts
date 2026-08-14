@@ -144,7 +144,7 @@ namespace _Project.Scripts.LevelEditor.Editor
         {
             Select,
             BuildOnWater,   // Land Grid + landTiles
-            BuildOnLand     // Object Grid + walls/buildings/etc.
+            BuildOnLand, // Object Grid + walls/buildings/etc.
         }
 
         private BuilderMode currentMode = BuilderMode.Select;

@@ -5,6 +5,18 @@ using UnityEngine;
 
 namespace _Project.Scripts.BaseBuilder.Runtime.Placement
 {
+    public class PlacedInfo
+    {
+        public GameObject Instance;
+        public GameObject Prefab;       // needed so we can re-select after pick up
+        public bool IsLandObject;
+        public bool IsWallObject;
+        public bool IsBuildingObject;
+        public bool IsWaterObject;
+        public int InventoryIndex;
+        public int OriginCellIndex;
+        public Vector2Int Size;
+    }
     public class PlacementService
     {
         // ─────────────────────────────────────────────
@@ -13,6 +25,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         private class PlacedEntry
         {
             public GameObject instance;
+            public GameObject prefab;
             public bool isLand;
             public int inventoryIndex;      // -1 if not from an inventory
             public int originCellIndex;
@@ -39,7 +52,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             objectGrid = objects;
             validator.SetGrids(land, objects);
         }
-
+        
+        
         // ─────────────────────────────────────────────
         // Placement
         // ─────────────────────────────────────────────
@@ -70,16 +84,54 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             var entry = new PlacedEntry
             {
                 instance = instance,
+                prefab = prefab,                // ← add
                 isLand = isLandObject,
                 inventoryIndex = inventoryIndex,
                 originCellIndex = originCell.index,
                 size = size
             };
-
+            
             placedEntries.Add(entry);
             occupation.OccupyFootprint(originCell.index, size, grid.columnCount, isLandObject);
 
             return instance;
+        }
+        
+        /// <summary>
+        /// Removes tracking + frees occupation. Does NOT destroy the GameObject.
+        /// Caller destroys after reading Prefab / restoring inventory.
+        /// </summary>
+        public bool TryPickUp(GameObject obj, out PlacedInfo info)
+        {
+            info = null;
+            if (obj == null) return false;
+
+            for (int i = 0; i < placedEntries.Count; i++)
+            {
+                if (placedEntries[i].instance != obj)
+                    continue;
+
+                var entry = placedEntries[i];
+                TerrainGridSystem grid = entry.isLand ? landGrid : objectGrid;
+
+                if (grid != null)
+                    occupation.FreeFootprint(entry.originCellIndex, entry.size, grid.columnCount, entry.isLand);
+
+                info = new PlacedInfo
+                {
+                    Instance = entry.instance,
+                    Prefab = entry.prefab,
+                    IsLandObject = entry.isLand,
+                    InventoryIndex = entry.inventoryIndex,
+                    OriginCellIndex = entry.originCellIndex,
+                    Size = entry.size
+                };
+
+                placedEntries.RemoveAt(i);
+                return true;
+            }
+
+            return false;
         }
 
         // ─────────────────────────────────────────────
