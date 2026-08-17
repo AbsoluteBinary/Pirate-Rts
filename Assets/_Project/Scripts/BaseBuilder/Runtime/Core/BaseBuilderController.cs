@@ -343,23 +343,30 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, layer))
                 return;
 
-            if (!PlacementService.TryPickUp(hit.collider.gameObject, out var info))
-            {
-                // Hit a child collider – try root
-                if (!PlacementService.TryPickUp(hit.collider.transform.root.gameObject, out info))
-                    return;
-            }
+            GameObject target = hit.collider.transform.root.gameObject;
 
-            // Restore inventory
-            RestoreInventory(info.IsLandObject ? PlaceableKind.Land : PlaceableKind.Wall, info.InventoryIndex);
+            if (!PlacementService.TryPickUp(target, out var info))
+                return;
 
-            // Re-select so preview follows mouse
+            // Back into inventory count (will consume again on place)
+            RestoreInventory(
+                info.IsLandObject ? PlaceableKind.Land : PlaceableKind.Wall,
+                info.InventoryIndex
+            );
+
+            // Same as clicking an inventory slot → sticks to mouse
             if (info.Prefab != null)
                 SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
 
             Object.Destroy(info.Instance);
 
-            Debug.Log($"<color=cyan>Picked up {(info.IsLandObject ? "Land" : "Wall/Building")} index {info.InventoryIndex}</color>");
+            // Critical: leave PickUp mode so hover + place logic runs
+            if (info.IsLandObject)
+                ModeSystem.SetMode(BuilderMode.BuildOnWater);
+            else
+                ModeSystem.SetMode(BuilderMode.BuildOnLand);
+
+            Debug.Log($"<color=cyan>Picked up – now placing {(info.IsLandObject ? "Land" : "Wall")}</color>");
         }
         
         private void HandleDeleteInput()

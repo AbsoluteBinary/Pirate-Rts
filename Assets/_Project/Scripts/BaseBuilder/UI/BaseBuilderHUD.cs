@@ -79,9 +79,14 @@ namespace _Project.Scripts.BaseBuilder.UI
         }
         private void HandleLandCountChanged(int index)
         {
+            if (landTileInventory == null) return;
             if (index < 0 || index >= slotCountLabels.Count) return;
-            if (slotCountLabels[index] != null)
-                slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
+
+            var label = slotCountLabels[index];
+            if (label == null) return;           // ← was missing / not enough
+            if (label.panel == null) return;     // label not attached to UI anymore
+
+            label.text = landTileInventory.GetCount(index).ToString();
         }
 
         private void OnDisable()
@@ -103,8 +108,10 @@ namespace _Project.Scripts.BaseBuilder.UI
             if (wallInventory == null) return;
             if (index < 0 || index >= wallCountLabels.Count) return;
 
-            if (wallCountLabels[index] != null)
-                wallCountLabels[index].text = wallInventory.GetCount(index).ToString();
+            var label = wallCountLabels[index];
+            if (label == null || label.panel == null) return;
+
+            label.text = wallInventory.GetCount(index).ToString();
         }
 
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
