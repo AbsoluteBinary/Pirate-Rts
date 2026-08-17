@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.Harbour.Data.SO;
 using TGS;
 using UnityEngine;
@@ -8,29 +9,26 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
     public class PlacedInfo
     {
         public GameObject Instance;
-        public GameObject Prefab;       // needed so we can re-select after pick up
-        public bool IsLandObject;
-        public bool IsWallObject;
-        public bool IsBuildingObject;
-        public bool IsWaterObject;
+        public GameObject Prefab;
+        public PlaceableKind Kind;
+        public bool IsLandObject;       // keep for now if other code still uses it
         public int InventoryIndex;
         public int OriginCellIndex;
         public Vector2Int Size;
     }
+
+    public class PlacedEntry
+    {
+        public GameObject instance;
+        public GameObject prefab;
+        public PlaceableKind kind;
+        public bool isLand;
+        public int inventoryIndex;
+        public int originCellIndex;
+        public Vector2Int size;
+    }
     public class PlacementService
     {
-        // ─────────────────────────────────────────────
-        // Lightweight record of everything we place
-        // ─────────────────────────────────────────────
-        private class PlacedEntry
-        {
-            public GameObject instance;
-            public GameObject prefab;
-            public bool isLand;
-            public int inventoryIndex;      // -1 if not from an inventory
-            public int originCellIndex;
-            public Vector2Int size;
-        }
 
         private readonly OccupationSystem occupation;
         private readonly PlacementValidator validator;
@@ -84,7 +82,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             var entry = new PlacedEntry
             {
                 instance = instance,
-                prefab = prefab,                // ← add
+                prefab = prefab,
+                kind = isLandObject ? PlaceableKind.Land : PlaceableKind.Wall,
                 isLand = isLandObject,
                 inventoryIndex = inventoryIndex,
                 originCellIndex = originCell.index,
@@ -112,6 +111,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                     continue;
 
                 var entry = placedEntries[i];
+                
                 TerrainGridSystem grid = entry.isLand ? landGrid : objectGrid;
 
                 if (grid != null)
@@ -121,6 +121,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 {
                     Instance = entry.instance,
                     Prefab = entry.prefab,
+                    Kind = entry.kind,
                     IsLandObject = entry.isLand,
                     InventoryIndex = entry.inventoryIndex,
                     OriginCellIndex = entry.originCellIndex,
@@ -130,6 +131,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 placedEntries.RemoveAt(i);
                 return true;
             }
+            
 
             return false;
         }

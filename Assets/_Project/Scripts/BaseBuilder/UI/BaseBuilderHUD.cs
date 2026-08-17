@@ -17,7 +17,9 @@ namespace _Project.Scripts.BaseBuilder.UI
         [SerializeField] private BaseBuilderController builderController;
         [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private WallInventorySO wallInventory;
+        [SerializeField] private BuildingsInventorySO buildingsInventory;
 
+        private readonly List<Label> buildingCountLabels = new List<Label>();
         private readonly List<Label> wallCountLabels = new List<Label>();
         #endregion
 
@@ -99,6 +101,11 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             if (builderController != null)
                 builderController.OnLandTilePlaced -= HandleLandTilePlaced;
+            if (buildingsInventory != null)
+            {
+                buildingsInventory.OnCountChanged -= HandleBuildingCountChanged;
+                buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
+            }
 
             builderController?.SetPointerOverUI(false);
         }
@@ -112,6 +119,17 @@ namespace _Project.Scripts.BaseBuilder.UI
             if (label == null || label.panel == null) return;
 
             label.text = wallInventory.GetCount(index).ToString();
+        }
+        
+        private void HandleBuildingCountChanged(int index)
+        {
+            if (buildingsInventory == null) return;
+            if (index < 0 || index >= buildingCountLabels.Count) return;
+
+            var label = buildingCountLabels[index];
+            if (label == null || label.panel == null) return;
+
+            label.text = buildingsInventory.GetCount(index).ToString();
         }
 
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
@@ -164,8 +182,10 @@ namespace _Project.Scripts.BaseBuilder.UI
                 builderController?.ClearSelectedPrefab();
                 builderController?.SetMode(BuilderMode.PickUp);
                 OnPickUpClicked?.Invoke(); // optional – keep if something else listens
+                
                 Debug.Log("<color=cyan>Mode → Pick Up</color>");
             }));
+            
             topBar.Add(CreateActionButton("Delete", () =>
             {
                 builderController?.ClearSelectedPrefab();
@@ -173,12 +193,14 @@ namespace _Project.Scripts.BaseBuilder.UI
                 OnDeleteClicked?.Invoke();
                 Debug.Log("<color=orange>Mode → Delete</color>");
             }));
+            
             topBar.Add(CreateActionButton("Clear Selection", () =>
             {
                 builderController?.ClearSelectedPrefab();
                 //builderController?.SetMode(BuilderMode.Select);
                 Debug.Log("<color=cyan>Selection cleared</color>");
             }));
+            
             topBar.Add(CreateActionButton("Lock", () => OnLockClicked?.Invoke()));
             topBar.Add(CreateActionButton("Unlock", () => OnUnlockClicked?.Invoke()));
 
@@ -373,18 +395,40 @@ namespace _Project.Scripts.BaseBuilder.UI
             }
             wallsContent.Add(wallsGrid);
 
-            // --- Buildings Grid (placeholder for now) ---
+            // --- Buildings Grid  ---
             var buildingsGrid = new VisualElement();
             buildingsGrid.style.flexDirection = FlexDirection.Row;
             buildingsGrid.style.flexWrap = Wrap.Wrap;
 
-            var buildingsPlaceholder = new Label("Buildings coming soon");
+            var buildingsPlaceholder = new Label("Buildings");
             buildingsPlaceholder.style.color = Color.gray;
             buildingsGrid.Add(buildingsPlaceholder);
             buildingsContent.Add(buildingsGrid);
 
             wallsBuildingsPanel.Add(wallsContent);
             wallsBuildingsPanel.Add(buildingsContent);
+            
+            // --- Buildings Grid ---
+            buildingsGrid.style.flexDirection = FlexDirection.Row;
+            buildingsGrid.style.flexWrap = Wrap.Wrap;
+            buildingsGrid.style.justifyContent = Justify.FlexStart;
+
+            if (buildingsInventory != null && buildingsInventory.buildings != null &&
+                buildingsInventory.buildings.Count > 0)
+            {
+                for (int i = 0; i < buildingsInventory.buildings.Count; i++)
+                {
+                    int index = i;
+                    buildingsGrid.Add(CreateBuildingSlot(buildingsInventory.buildings[i], index));
+                }
+            }
+            else
+            {
+                var emptyLabel = new Label("No Buildings assigned");
+                emptyLabel.style.color = Color.gray;
+                buildingsGrid.Add(emptyLabel);
+            }
+            buildingsContent.Add(buildingsGrid);
 
             // Tab switching
             wallsTabBtn.clicked += () =>
@@ -439,6 +483,76 @@ namespace _Project.Scripts.BaseBuilder.UI
             label.style.color = Color.gray;
             label.style.unityTextAlign = TextAnchor.MiddleCenter;
             slot.Add(label);
+
+            return slot;
+        }
+        
+        private VisualElement CreateBuildingSlot(BuildingsInventorySO.BuildingsEntry entry, int index)
+        {
+            var slot = new VisualElement();
+            slot.pickingMode = PickingMode.Position;
+            slot.style.width = 72;
+            slot.style.height = 72;
+            slot.style.backgroundColor = new Color(0.18f, 0.22f, 0.35f);
+            slot.style.borderTopLeftRadius = 6;
+            slot.style.borderTopRightRadius = 6;
+            slot.style.borderBottomLeftRadius = 6;
+            slot.style.borderBottomRightRadius = 6;
+            slot.style.marginRight = 8;
+            slot.style.marginBottom = 8;
+            slot.style.justifyContent = Justify.Center;
+            slot.style.alignItems = Align.Center;
+
+            if (entry != null && entry.icon != null)
+            {
+                slot.style.backgroundImage = new StyleBackground(entry.icon);
+                slot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            }
+            else
+            {
+                var placeholder = new Label("B");
+                placeholder.style.fontSize = 20;
+                placeholder.style.color = new Color(0.7f, 0.75f, 0.9f);
+                placeholder.style.unityFontStyleAndWeight = FontStyle.Bold;
+                slot.Add(placeholder);
+            }
+
+            int count = buildingsInventory != null ? buildingsInventory.GetCount(index) : 0;
+            var countLabel = new Label(count.ToString());
+            while (buildingCountLabels.Count <= index)
+                buildingCountLabels.Add(null);
+            buildingCountLabels[index] = countLabel;
+
+            countLabel.style.position = Position.Absolute;
+            countLabel.style.right = 4;
+            countLabel.style.bottom = 2;
+            countLabel.style.fontSize = 13;
+            countLabel.style.color = Color.white;
+            countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            countLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
+            countLabel.style.paddingLeft = 4;
+            countLabel.style.paddingRight = 4;
+            countLabel.style.borderTopLeftRadius = 3;
+            countLabel.style.borderTopRightRadius = 3;
+            countLabel.style.borderBottomLeftRadius = 3;
+            countLabel.style.borderBottomRightRadius = 3;
+            slot.Add(countLabel);
+
+            slot.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (entry == null || entry.prefab == null) return;
+
+                builderController?.SelectPrefab(
+                    entry.prefab,
+                    entry.size,   // add entry.size later if buildings are larger
+                    isLand: false,    // object grid
+                    inventoryIndex: index
+                );
+
+                HighlightSelectedSlot(slot);
+            });
 
             return slot;
         }

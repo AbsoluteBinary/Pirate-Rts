@@ -1,4 +1,5 @@
 using _Project.Scripts.BaseBuilder.Runtime.Data;
+using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.BaseBuilder.Runtime.Modes;
 using _Project.Scripts.BaseBuilder.Runtime.Placement;
 using _Project.Scripts.BaseBuilder.Runtime.Selection;
@@ -29,9 +30,13 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         public Vector2Int selectedSize = Vector2Int.one;
         public bool isLandObject = true;
         public int selectedInventoryIndex = -1;
+        
+        private BuilderInventoryFacade _inventory;
+        private bool _clearSelectionAfterPlace;
 
         [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private WallInventorySO wallInventory;
+        [SerializeField] private BuildingsInventorySO  buildingsInventory;
 
         [Header("Input")]
         [SerializeField] private Camera buildCamera;
@@ -81,6 +86,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void Awake()
         {
+            _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory);
+            
             ModeSystem = new BuilderModeSystem();
             OccupationSystem = new OccupationSystem();
             Validator = new PlacementValidator(OccupationSystem);
@@ -270,6 +277,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         public void SelectPrefab(GameObject prefab, Vector2Int size, bool isLand, int inventoryIndex = -1)
         {
+            _clearSelectionAfterPlace = false;
             DestroyPreview();
 
             selectedPrefab = prefab;
@@ -286,6 +294,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 SetPreviewStyle(currentPreview);
                 Debug.Log($"<color=cyan>Selected: {prefab.name} (index {inventoryIndex})</color>");
             }
+            
         }
 
         public void ClearSelectedPrefab()
@@ -348,24 +357,23 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (!PlacementService.TryPickUp(target, out var info))
                 return;
 
-            // Back into inventory count (will consume again on place)
-            RestoreInventory(
-                info.IsLandObject ? PlaceableKind.Land : PlaceableKind.Wall,
-                info.InventoryIndex
-            );
-
-            // Same as clicking an inventory slot → sticks to mouse
-            if (info.Prefab != null)
-                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
+            RestoreInventory(info.Kind, info.InventoryIndex);
 
             Object.Destroy(info.Instance);
 
-            // Critical: leave PickUp mode so hover + place logic runs
-            if (info.IsLandObject)
+            if (info.Kind == PlaceableKind.Land)
                 ModeSystem.SetMode(BuilderMode.BuildOnWater);
             else
                 ModeSystem.SetMode(BuilderMode.BuildOnLand);
 
+            if (info.Prefab != null)
+                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
+            
+            if (info.Prefab != null)
+                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
+
+            _clearSelectionAfterPlace = true;
+            
             Debug.Log($"<color=cyan>Picked up – now placing {(info.IsLandObject ? "Land" : "Wall")}</color>");
         }
         
@@ -389,8 +397,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
             
 
-            RestoreInventory(info.IsLandObject ? PlaceableKind.Land : PlaceableKind.Wall, info.InventoryIndex);
-
+            RestoreInventory(info.Kind, info.InventoryIndex);
             Object.Destroy(info.Instance);
 
             Debug.Log($"<color=orange>Deleted {(info.IsLandObject ? "Land" : "Wall/Building")} index {info.InventoryIndex}</color>");
@@ -416,40 +423,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         //     // if (isWater && waterInventory != null)
         //     //     waterInventory.Restore(inventoryIndex);
         // }
-        public enum PlaceableKind
-        {
-            Land,
-            Wall,
-            Building,
-            Water
-        }
+        
 
         private void RestoreInventory(PlaceableKind kind, int inventoryIndex)
         {
-            if (inventoryIndex < 0) return;
-
-            switch (kind)
-            {
-                case PlaceableKind.Land:
-                    if (landTileInventory != null)
-                        landTileInventory.Restore(inventoryIndex);
-                    break;
-
-                case PlaceableKind.Wall:
-                    if (wallInventory != null)
-                        wallInventory.Restore(inventoryIndex);
-                    break;
-
-                // case PlaceableKind.Building:
-                //     if (buildingInventory != null)
-                //         buildingInventory.Restore(inventoryIndex);
-                //     break;
-                //
-                // case PlaceableKind.Water:
-                //     if (waterInventory != null)
-                //         waterInventory.Restore(inventoryIndex);
-                //     break;
-            }
+            _inventory?.Restore(kind, inventoryIndex);
         }
         
         
@@ -565,7 +543,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (selectedPrefab == null || currentHoveredCell == null || ActiveGrid == null)
                 return;
 
-            // Block placement when inventory is empty
+            // Block empty land inventory
             if (isLandObject && selectedInventoryIndex >= 0 && landTileInventory != null)
             {
                 if (landTileInventory.GetCount(selectedInventoryIndex) <= 0)
@@ -575,14 +553,21 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 }
             }
 
+            // Cache before anything can clear selection
+            GameObject prefab = selectedPrefab;
+            Vector2Int size = selectedSize;
+            bool isLand = isLandObject;
+            int invIndex = selectedInventoryIndex;
+            bool clearAfter = _clearSelectionAfterPlace;
+
             Vector3 placePos = ActiveGrid.CellGetPosition(currentHoveredCell.index);
 
             GameObject placed = PlacementService.Place(
-                selectedPrefab,
+                prefab,
                 placePos,
-                selectedSize,
-                isLandObject,
-                selectedInventoryIndex
+                size,
+                isLand,
+                invIndex
             );
 
             if (placed == null)
@@ -591,21 +576,23 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
             }
 
-            if (isLandObject && selectedInventoryIndex >= 0)
-            {
-                OnLandTilePlaced?.Invoke(selectedInventoryIndex);
-            }
-            else if (!isLandObject && selectedInventoryIndex >= 0 && wallInventory != null)
-            {
-                // Consume wall
-                bool consumed = wallInventory.Consume(selectedInventoryIndex);
-                if (!consumed)
-                    Debug.LogWarning($"Could not consume wall at index {selectedInventoryIndex}");
-            }
+            if (isLand && invIndex >= 0)
+                OnLandTilePlaced?.Invoke(invIndex);
+            else if (!isLand && invIndex >= 0 && wallInventory != null)
+                wallInventory.Consume(invIndex);
 
-            CheckInventoryAndClearIfEmpty();
+            Debug.Log($"<color=green>Placed {prefab.name} at cell {currentHoveredCell.index}</color>");
 
-            Debug.Log($"<color=green>Placed {selectedPrefab.name} at cell {currentHoveredCell.index}</color>");
+            // LAST – after all uses of selection state
+            if (clearAfter)
+            {
+                _clearSelectionAfterPlace = false;
+                ClearSelectedPrefab();
+            }
+            else
+            {
+                CheckInventoryAndClearIfEmpty();
+            }
         }
 
         #endregion

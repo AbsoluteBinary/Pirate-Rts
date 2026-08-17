@@ -11,9 +11,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/BuildingsInventorySO.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/BuildingsInventorySO.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/SO Asset/LandTileInventory.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/SO Asset/LandTileInventory.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,6 +40,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/BuilderMode.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/PlaceableObjectData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Modes/BuilderModeSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/CellHighLightService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/OccupationSystem.cs" root0="FORCE_HIGHLIGHTING" />
@@ -49,6 +60,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/EventBus/EventBus.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FleetData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FormationData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/BuildingsInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/HarbourMode.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/WallInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Modules/ArmourData.cs" root0="FORCE_HIGHLIGHTING" />
@@ -79,61 +91,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000010645" />
-      <entry key="S10" value="1.0000023062520995" />
-      <entry key="S30" value="1.038629690372218" />
-      <entry key="S60" value="1.4394830849963673" />
-      <entry key="M2" value="2.482366566621423" />
-      <entry key="M5" value="4.096672343230914" />
-      <entry key="M10" value="5.560360435382205" />
-      <entry key="M15" value="7.295428358280034" />
-      <entry key="M30" value="14.32304908716767" />
-      <entry key="H1" value="33.769528811655356" />
-      <entry key="H2" value="68.38409826539375" />
-      <entry key="H4" value="111.84138215097188" />
-      <entry key="D1" value="247.9962590591089" />
-      <entry key="W1" value="332.20045958347157" />
+      <entry key="MS100" value="2.1811140853180069E-13" />
+      <entry key="MS500" value="0.0029362084356768106" />
+      <entry key="S2" value="0.2570299492707449" />
+      <entry key="S5" value="0.784085957750194" />
+      <entry key="S10" value="1.2224104482072937" />
+      <entry key="S30" value="1.6878010997148332" />
+      <entry key="S60" value="1.8359987849550812" />
+      <entry key="M2" value="1.9397350076885032" />
+      <entry key="M5" value="3.705578796178576" />
+      <entry key="M10" value="9.310623944961153" />
+      <entry key="M15" value="13.834078224072226" />
+      <entry key="M30" value="21.189702471274344" />
+      <entry key="H1" value="28.086370485774225" />
+      <entry key="H2" value="44.91878356794257" />
+      <entry key="H4" value="84.41182884920518" />
+      <entry key="D1" value="252.37441053393997" />
+      <entry key="W1" value="360.2472572463282" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="4.1457996779517497E-194" />
-      <entry key="S10" value="2.0361236892565607E-97" />
-      <entry key="S30" value="5.883034369159943E-33" />
-      <entry key="S60" value="7.670094112303927E-17" />
-      <entry key="M2" value="8.75790734839322E-9" />
-      <entry key="M5" value="5.983578696341367E-4" />
-      <entry key="M10" value="0.024509499841514053" />
-      <entry key="M15" value="0.0861770950775181" />
-      <entry key="M30" value="0.38421724310911604" />
-      <entry key="H1" value="1.361968981848282" />
-      <entry key="H2" value="3.8646150582306054" />
-      <entry key="H4" value="8.880750475795917" />
-      <entry key="D1" value="35.136262780873196" />
-      <entry key="W1" value="52.10326751973282" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000037564056" />
+      <entry key="S2" value="1.0078287625396847" />
+      <entry key="S5" value="1.1437067766129188" />
+      <entry key="S10" value="1.3790867666022102" />
+      <entry key="S30" value="1.7237349427331032" />
+      <entry key="S60" value="1.8507261267488517" />
+      <entry key="M2" value="1.9223481591833158" />
+      <entry key="M5" value="1.96818411777168" />
+      <entry key="M10" value="1.9839634741597352" />
+      <entry key="M15" value="1.9892807195168676" />
+      <entry key="M30" value="1.9955667690187955" />
+      <entry key="H1" value="2.0647152598751015" />
+      <entry key="H2" value="2.8584034786446866" />
+      <entry key="H4" value="6.188058709713019" />
+      <entry key="D1" value="32.999841958157646" />
+      <entry key="W1" value="53.17928082270937" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="2.98023223876953E-8" />
-      <entry key="MS500" value="0.03125" />
-      <entry key="S2" value="0.42044820762685725" />
-      <entry key="S5" value="0.7071067811875537" />
-      <entry key="S10" value="0.8408986518822438" />
-      <entry key="S30" value="0.9820888745078408" />
-      <entry key="S60" value="1.408614173627935" />
-      <entry key="M2" value="2.4639470117659843" />
-      <entry key="M5" value="4.0880669165869525" />
-      <entry key="M10" value="5.579229867804331" />
-      <entry key="M15" value="7.376813354714075" />
-      <entry key="M30" value="14.702176780984859" />
-      <entry key="H1" value="35.12476955463591" />
-      <entry key="H2" value="72.24143659016767" />
-      <entry key="H4" value="120.71571440230147" />
-      <entry key="D1" value="283.1296518383808" />
-      <entry key="W1" value="384.30314932374483" />
+      <entry key="MS100" value="3.008993413852289E-10" />
+      <entry key="MS500" value="0.012480472937373083" />
+      <entry key="S2" value="0.413790416025941" />
+      <entry key="S5" value="1.2522961121363871" />
+      <entry key="S10" value="2.112822060949006" />
+      <entry key="S30" value="3.1894270550936796" />
+      <entry key="S60" value="3.565614168328654" />
+      <entry key="M2" value="3.7987158797270615" />
+      <entry key="M5" value="5.646585840086846" />
+      <entry key="M10" value="11.279045458905014" />
+      <entry key="M15" value="15.81198567731454" />
+      <entry key="M30" value="23.17875911153778" />
+      <entry key="H1" value="30.1471946119476" />
+      <entry key="H2" value="47.773661135321" />
+      <entry key="H4" value="90.59585270237409" />
+      <entry key="D1" value="285.37154054959063" />
+      <entry key="W1" value="413.4259444693284" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
