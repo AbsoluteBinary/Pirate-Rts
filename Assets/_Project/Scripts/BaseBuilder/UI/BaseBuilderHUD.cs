@@ -78,18 +78,11 @@ namespace _Project.Scripts.BaseBuilder.UI
             builderController.OnLandTilePlaced -= HandleLandTilePlaced; // avoid double subscribe
             builderController.OnLandTilePlaced += HandleLandTilePlaced;
             landTileInventory.OnCountChanged += HandleLandCountChanged;
+            
+            
+            buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
         }
-        private void HandleLandCountChanged(int index)
-        {
-            if (landTileInventory == null) return;
-            if (index < 0 || index >= slotCountLabels.Count) return;
-
-            var label = slotCountLabels[index];
-            if (label == null) return;           // ← was missing / not enough
-            if (label.panel == null) return;     // label not attached to UI anymore
-
-            label.text = landTileInventory.GetCount(index).ToString();
-        }
+        
 
         private void OnDisable()
         {
@@ -106,32 +99,9 @@ namespace _Project.Scripts.BaseBuilder.UI
                 buildingsInventory.OnCountChanged -= HandleBuildingCountChanged;
                 buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
             }
-
             builderController?.SetPointerOverUI(false);
         }
         
-        private void HandleWallCountChanged(int index)
-        {
-            if (wallInventory == null) return;
-            if (index < 0 || index >= wallCountLabels.Count) return;
-
-            var label = wallCountLabels[index];
-            if (label == null || label.panel == null) return;
-
-            label.text = wallInventory.GetCount(index).ToString();
-        }
-        
-        private void HandleBuildingCountChanged(int index)
-        {
-            if (buildingsInventory == null) return;
-            if (index < 0 || index >= buildingCountLabels.Count) return;
-
-            var label = buildingCountLabels[index];
-            if (label == null || label.panel == null) return;
-
-            label.text = buildingsInventory.GetCount(index).ToString();
-        }
-
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
         {
             root = rootElement;
@@ -855,10 +825,44 @@ namespace _Project.Scripts.BaseBuilder.UI
                 return;
             }
             
-
             // Update the label
             if (index < slotCountLabels.Count && slotCountLabels[index] != null)
                 slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
+        }
+        
+        private void HandleLandCountChanged(int index)
+        {
+            if (landTileInventory == null) return;
+            if (index < 0 || index >= slotCountLabels.Count) return;
+
+            var label = slotCountLabels[index];
+            if (label == null) return;           // ← was missing / not enough
+            if (label.panel == null) return;     // label not attached to UI anymore
+
+            label.text = landTileInventory.GetCount(index).ToString();
+        }
+        
+        private void HandleWallCountChanged(int index)
+        {
+            if (wallInventory == null) return;
+            if (index < 0 || index >= wallCountLabels.Count) return;
+
+            var label = wallCountLabels[index];
+            if (label == null || label.panel == null) return;
+
+            label.text = wallInventory.GetCount(index).ToString();
+        }
+        
+        private void HandleBuildingCountChanged(int index)
+        {
+            Debug.Log($"[HUD] Building count changed index={index} count={buildingsInventory.GetCount(index)} labels={buildingCountLabels.Count}");
+            if (buildingsInventory == null) return;
+            if (index < 0 || index >= buildingCountLabels.Count) return;
+
+            var label = buildingCountLabels[index];
+            if (label == null || label.panel == null) return;
+
+            label.text = buildingsInventory.GetCount(index).ToString();
         }
 
         #endregion

@@ -56,7 +56,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         // Placement
         // ─────────────────────────────────────────────
 
-        public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject, int inventoryIndex = -1)
+        public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject, int inventoryIndex = -1, PlaceableKind kind = PlaceableKind.Land)
         {
             if (prefab == null) return null;
 
@@ -83,7 +83,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             {
                 instance = instance,
                 prefab = prefab,
-                kind = isLandObject ? PlaceableKind.Land : PlaceableKind.Wall,
+                kind = kind,
                 isLand = isLandObject,
                 inventoryIndex = inventoryIndex,
                 originCellIndex = originCell.index,

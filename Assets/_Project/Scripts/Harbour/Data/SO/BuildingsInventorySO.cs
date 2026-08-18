@@ -20,7 +20,7 @@ namespace _Project.Scripts.Harbour.Data.SO
             public GameObject prefab;
             public Sprite icon;
             public int count = 10;   
-            public Vector2Int size = new Vector2Int(2, 2);
+            public Vector2Int size = new (2, 2);
         }
 
         // Called by HarbourBuilderManager when a building is placed
@@ -43,7 +43,7 @@ namespace _Project.Scripts.Harbour.Data.SO
         /// Decrements the count for the given tile index.
         /// Returns true if the tile was consumed, false if there were none left.
         /// </summary>
-        public bool ConsumeTile(int index)
+        public bool Consume(int index)
         {
             if (index < 0 || index >= buildings.Count) return false;
             if (buildings[index].count <= 0) return false;
@@ -51,6 +51,7 @@ namespace _Project.Scripts.Harbour.Data.SO
             buildings[index].count--;
             
             // Fire the event so the UI knows to update
+            Debug.Log($"[Buildings] ConsumeTile {index} → {buildings[index].count}");
             OnCountChanged?.Invoke(index);
             
             return true;

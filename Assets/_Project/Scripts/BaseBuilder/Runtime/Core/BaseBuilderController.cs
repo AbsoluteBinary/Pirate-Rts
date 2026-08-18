@@ -580,6 +580,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 OnLandTilePlaced?.Invoke(invIndex);
             else if (!isLand && invIndex >= 0 && wallInventory != null)
                 wallInventory.Consume(invIndex);
+            else if (!isLand && invIndex >= 0 && buildingsInventory != null)
+                buildingsInventory.Consume(invIndex);
 
             Debug.Log($"<color=green>Placed {prefab.name} at cell {currentHoveredCell.index}</color>");
 

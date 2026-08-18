@@ -19,7 +19,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
         private readonly LandTileInventorySO _land;
         private readonly WallInventorySO _walls;
         // Add later when you have them:
-        // private readonly BuildingInventorySO _buildings;
+         private readonly BuildingsInventorySO _buildings;
         // private readonly WaterInventorySO _water;
 
         public BuilderInventoryFacade(
@@ -55,6 +55,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                     return _land != null && _land.ConsumeTile(index);
                 case PlaceableKind.Wall:
                     return _walls != null && _walls.Consume(index);
+                case PlaceableKind.Building:
+                    return _buildings != null && _buildings.Consume(index);
                 default:
                     return false;
             }
@@ -72,9 +74,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                 case PlaceableKind.Wall:
                     _walls?.Restore(index, amount);
                     break;
-                // case PlaceableKind.Building:
-                //     _buildings?.Restore(index, amount);
-                //     break;
+                case PlaceableKind.Building:
+                    _buildings?.Restore(index, amount);
+                    break;
             }
         }
 
