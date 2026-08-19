@@ -80,7 +80,6 @@ namespace _Project.Scripts.BaseBuilder.UI
             builderController.OnLandTilePlaced += HandleLandTilePlaced;
             landTileInventory.OnCountChanged += HandleLandCountChanged;
             
-            
             buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
         }
         
@@ -867,6 +866,65 @@ namespace _Project.Scripts.BaseBuilder.UI
 
         #endregion
 
+        #region SelectionToolUI
+
+        private VisualElement selectRectRoot;
+        private VisualElement selectRectBox;
+
+        private void BuildRectangleSelectOverlay()
+        {
+            selectRectRoot = new VisualElement { name = "RectangleSelectOverlay" };
+            selectRectRoot.pickingMode = PickingMode.Ignore; // never steal clicks
+            selectRectRoot.style.position = Position.Absolute;
+            selectRectRoot.style.left = 0;
+            selectRectRoot.style.top = 0;
+            selectRectRoot.style.right = 0;
+            selectRectRoot.style.bottom = 0;
+
+            selectRectBox = new VisualElement { name = "SelectRectBox" };
+            selectRectBox.pickingMode = PickingMode.Ignore;
+            selectRectBox.style.position = Position.Absolute;
+            selectRectBox.style.display = DisplayStyle.None;
+            selectRectBox.style.borderTopWidth = 2;
+            selectRectBox.style.borderRightWidth = 2;
+            selectRectBox.style.borderBottomWidth = 2;
+            selectRectBox.style.borderLeftWidth = 2;
+            // Orange outline
+            var outline = new Color(1f, 0.55f, 0.1f, 1f);
+            selectRectBox.style.borderTopColor = outline;
+            selectRectBox.style.borderRightColor = outline;
+            selectRectBox.style.borderBottomColor = outline;
+            selectRectBox.style.borderLeftColor = outline;
+            // Light orange fill
+            selectRectBox.style.backgroundColor = new Color(1f, 0.55f, 0.1f, 0.28f);
+
+            selectRectRoot.Add(selectRectBox);
+            root.Add(selectRectRoot); // same root as your other panels
+        }
+
+        public void ShowSelectRect(Rect screenRect)
+        {
+            if (selectRectBox == null) return;
+            // Input System Y is bottom-left; UI Toolkit Y is top-left
+            float panelH = root.worldBound.height; // or resolvedStyle.height
+            float top = panelH - screenRect.yMax;
+            float left = screenRect.xMin;
+
+            selectRectBox.style.display = DisplayStyle.Flex;
+            selectRectBox.style.left = left;
+            selectRectBox.style.top = top;
+            selectRectBox.style.width = screenRect.width;
+            selectRectBox.style.height = screenRect.height;
+        }
+
+        public void HideSelectRect()
+        {
+            if (selectRectBox == null) return;
+            selectRectBox.style.display = DisplayStyle.None;
+        }
+
+        #endregion
+
         #region Button Factories
 
         private Button CreateModeButton(string text, BuilderMode mode)
@@ -876,24 +934,60 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             btn.clicked += () =>
             {
-                builderController?.SetMode(mode);
+                if (builderController == null) return;
 
-                // Show / hide panels based on mode
+                // Only Select requires an active grid
+                if (mode == BuilderMode.Select && !builderController.IsAnyGridActive())
+                {
+                    Debug.LogWarning("Select – no grid active");
+                    return;
+                }
+
+                builderController.SetMode(mode);
+
                 if (inventoryPanel != null)
-                    inventoryPanel.style.display = (mode == BuilderMode.BuildOnWater) ? DisplayStyle.Flex : DisplayStyle.None;
+                    inventoryPanel.style.display =
+                        (mode == BuilderMode.BuildOnWater) ? DisplayStyle.Flex : DisplayStyle.None;
 
                 if (wallsBuildingsPanel != null)
-                    wallsBuildingsPanel.style.display = (mode == BuilderMode.BuildOnLand) ? DisplayStyle.Flex : DisplayStyle.None;
+                    wallsBuildingsPanel.style.display =
+                        (mode == BuilderMode.BuildOnLand) ? DisplayStyle.Flex : DisplayStyle.None;
 
                 switch (mode)
                 {
-                    case BuilderMode.Select: OnSelectModeClicked?.Invoke(); break;
-                    case BuilderMode.BuildOnWater: OnBuildOnWaterClicked?.Invoke(); break;
-                    case BuilderMode.BuildOnLand: OnBuildOnLandClicked?.Invoke(); break;
+                    case BuilderMode.Select:
+                        OnSelectModeClicked?.Invoke();
+                        UpdateFilterBarReadyState();
+                        break;
+                    case BuilderMode.BuildOnWater:
+                        OnBuildOnWaterClicked?.Invoke();
+                        break;
+                    case BuilderMode.BuildOnLand:
+                        OnBuildOnLandClicked?.Invoke();
+                        break;
                 }
             };
 
             return btn;
+        }
+        
+        private void UpdateFilterBarReadyState()
+        {
+            if (filterBar == null || builderController == null) return;
+
+            bool ready = builderController.IsAnyGridActive()
+                         && builderController.CurrentMode == BuilderMode.Select;
+
+            filterBar.SetEnabled(ready);
+            // or: filterBar.style.opacity = ready ? 1f : 0.45f;
+            // or: filterBar.style.display = ready ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (!ready) return;
+
+            // Which grid is active – use later for filter options
+            bool land = builderController.IsLandGridActive();
+            bool objects = builderController.IsObjectGridActive();
+            Debug.Log($"<color=cyan>Filters ready | LandGrid={land} ObjectGrid={objects}</color>");
         }
 
         private Button CreateFilterButton(string text, SelectFilter filter)

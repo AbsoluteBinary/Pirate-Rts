@@ -751,11 +751,13 @@ MonoBehaviour:
   selectedSize: {x: 1, y: 1}
   isLandObject: 1
   selectedInventoryIndex: -1
+  hud: {fileID: 1440541968}
   landTileInventory: {fileID: 11400000, guid: c37720018df17a7739c4e39606c3c8fd, type: 2}
   wallInventory: {fileID: 11400000, guid: 61162d85b338d9bc59ff0b94a7203fcb, type: 2}
   buildingsInventory: {fileID: 11400000, guid: e6ca864f7e9c65bc9bdbcc99d323587b, type: 2}
   buildCamera: {fileID: 2025360598}
   strategyCamera: {fileID: 892000899}
+  selectedKind: 0
 --- !u!4 &459898000
 Transform:
   m_ObjectHideFlags: 0

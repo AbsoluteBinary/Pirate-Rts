@@ -4,6 +4,7 @@ using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.BaseBuilder.Runtime.Modes;
 using _Project.Scripts.BaseBuilder.Runtime.Placement;
 using _Project.Scripts.BaseBuilder.Runtime.Selection;
+using _Project.Scripts.BaseBuilder.UI;
 using _Project.Scripts.Harbour.Data.SO;
 using Packages.ModularStrategyTopDownCameraController.Scripts;
 using TGS;
@@ -35,6 +36,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         
         private BuilderInventoryFacade _inventory;
         private bool _clearSelectionAfterPlace;
+        private RectangleSelectSystem _rectSelect;
+        [SerializeField] private BaseBuilderHUD hud;
 
         [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private WallInventorySO wallInventory;
@@ -91,7 +94,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private void Awake()
         {
             _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory);
-            
+            _rectSelect = new RectangleSelectSystem();
             
             ModeSystem = new BuilderModeSystem();
             OccupationSystem = new OccupationSystem();
@@ -117,6 +120,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 (index) => landTileInventory != null ? landTileInventory.GetCount(index) : 0,  // ← NEW
                 () => ActiveGrid
             );
+            
+            _rectSelect.OnDragUpdated += HandleRectSelectUpdated;
+            _rectSelect.OnDragEnded   += HandleRectSelectEnded;
 
             _paintAndDrag.OnLandTilePlaced += (index) =>
                 _inventory.Consume(PlaceableKind.Land, index);
@@ -145,10 +151,21 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                          || mode == BuilderMode.Lock
                          || mode == BuilderMode.Unlock)
                 {
-                    // Keep current grids – do not call UpdateGridVisibility()
                     SetBuilderInputActive(false);
                 }
-                else
+                else if (mode == BuilderMode.Observation)
+                {
+                    // Idle: no forced grids for building; camera free
+                    if (landGrid != null) landGrid.gameObject.SetActive(false);
+                    if (objectGrid != null) objectGrid.gameObject.SetActive(false);
+                    SetBuilderInputActive(false);
+                }
+                else if (mode == BuilderMode.Select)
+                {
+                    // Keep current grid visibility – do not hide
+                    SetBuilderInputActive(false);
+                }
+                else // Select, etc.
                 {
                     UpdateGridVisibility();
                     SetBuilderInputActive(false);
@@ -158,6 +175,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (landGrid != null || objectGrid != null)
                 PlacementService.SetGrids(landGrid, objectGrid);
         }
+        
+        
 
         private void OnDestroy()
         {
@@ -169,6 +188,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void Update()
         {
+            if (ModeSystem.CurrentMode == BuilderMode.Select)
+            {
+                _rectSelect.Tick();
+            }
+            
             _paintAndDrag?.Tick();
 
             if (ModeSystem.CurrentMode == BuilderMode.PickUp)
@@ -180,6 +204,12 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (ModeSystem.CurrentMode == BuilderMode.Delete)
             {
                 HandleDeleteInput();
+                return;
+            }
+            
+            if (ModeSystem.CurrentMode == BuilderMode.Observation)
+            {
+                currentHoveredCell = null;
                 return;
             }
 
@@ -216,7 +246,15 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             PlacementService.SetGrids(land, objects);
         }
 
-        public void SetMode(BuilderMode mode) => ModeSystem.SetMode(mode);
+        public void SetMode(BuilderMode mode)
+        {
+            if (mode == BuilderMode.Select && !IsAnyGridActive())
+            {
+                Debug.LogWarning("Select requires an active grid (Build on Water or Build on Land first)");
+                return;
+            }
+            ModeSystem.SetMode(mode);
+        }
         public void SetSelectFilter(SelectFilter filter) => ModeSystem.SetSelectFilter(filter);
 
         public void SetPointerOverUI(bool over)
@@ -270,9 +308,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
             }
 
-            ModeSystem.SetMode(BuilderMode.Select);
+            ModeSystem.SetMode(BuilderMode.Observation);
             UpdateGridVisibility();
-            SetBuilderInputActive(true);
+            SetBuilderInputActive(false);
         }
 
         public void UpdateGridVisibility()
@@ -351,6 +389,19 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     }
                 }
             }
+        }
+        
+        private void HandleRectSelectUpdated()
+        {
+            if (hud == null) return;
+            hud.ShowSelectRect(_rectSelect.GetScreenRect());
+        }
+
+        private void HandleRectSelectEnded()
+        {
+            if (hud == null) return;
+            hud.HideSelectRect();
+            // Task 5 later: selection from _rectSelect.GetScreenRect()
         }
 
         #endregion
@@ -444,26 +495,6 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             Debug.Log($"<color=orange>Deleted {(info.IsLandObject ? "Land" : "Wall/Building")} index {info.InventoryIndex}</color>");
         }
         
-        // private void RestoreInventory(bool isLand, bool isWall, bool isBuilding, bool isWater, int inventoryIndex)
-        // {
-        //
-        //     if (inventoryIndex < 0) return;
-        //     //-------Current Logic Used for Land and Wall Inventory Restoration-------
-        //     if (isLand && landTileInventory != null)
-        //         landTileInventory.Restore(inventoryIndex);
-        //     else if (!isLand && wallInventory != null)
-        //         wallInventory.Restore(inventoryIndex);
-        //     
-        //     // ----- New Logic to Restore Inventory for Land, Wall, Building, and Water Objects-----
-        //     // if (isLand && landTileInventory != null)
-        //     //     landTileInventory.Restore(inventoryIndex);
-        //     // if (isWall && wallInventory != null)
-        //     //     wallInventory.Restore(inventoryIndex);
-        //     // if (isBuilding && buildingInventory != null)
-        //     //     buildingInventory.Restore(inventoryIndex);
-        //     // if (isWater && waterInventory != null)
-        //     //     waterInventory.Restore(inventoryIndex);
-        // }
         
 
         private void RestoreInventory(PlaceableKind kind, int inventoryIndex)
@@ -661,6 +692,33 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             bool ok = PlacementService.TrySetLocked(target, lockIt);
             //Debug.Log($"[Lock] TrySetLocked → {ok}");
         }
+        #endregion
+
+        #region Helpers
+
+        public bool IsAnyGridActive()
+        {
+            bool landOn = landGrid != null && landGrid.gameObject.activeInHierarchy;
+            bool objectOn = objectGrid != null && objectGrid.gameObject.activeInHierarchy;
+            return landOn || objectOn;
+        }
+
+        /// <summary>Land grid, Object grid, or null if none.</summary>
+        public TerrainGridSystem GetActiveBuildGrid()
+        {
+            if (landGrid != null && landGrid.gameObject.activeInHierarchy)
+                return landGrid;
+            if (objectGrid != null && objectGrid.gameObject.activeInHierarchy)
+                return objectGrid;
+            return null;
+        }
+
+        public bool IsLandGridActive() =>
+            landGrid != null && landGrid.gameObject.activeInHierarchy;
+
+        public bool IsObjectGridActive() =>
+            objectGrid != null && objectGrid.gameObject.activeInHierarchy;
+
         #endregion
     }
 }          
