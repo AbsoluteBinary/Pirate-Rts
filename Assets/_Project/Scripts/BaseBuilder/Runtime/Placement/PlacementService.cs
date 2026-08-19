@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.Harbour.Data.SO;
 using TGS;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace _Project.Scripts.BaseBuilder.Runtime.Placement
 {
@@ -15,6 +17,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         public int InventoryIndex;
         public int OriginCellIndex;
         public Vector2Int Size;
+        public bool isLocked;
     }
 
     public class PlacedEntry
@@ -26,6 +29,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         public int inventoryIndex;
         public int originCellIndex;
         public Vector2Int size;
+        public bool isLocked;
     }
     public class PlacementService
     {
@@ -59,6 +63,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject, int inventoryIndex = -1, PlaceableKind kind = PlaceableKind.Land)
         {
             if (prefab == null) return null;
+            
+            
 
             TerrainGridSystem grid = isLandObject ? landGrid : objectGrid;
             if (grid == null) return null;
@@ -87,7 +93,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 isLand = isLandObject,
                 inventoryIndex = inventoryIndex,
                 originCellIndex = originCell.index,
-                size = size
+                size = size,
+                isLocked = false
             };
             
             placedEntries.Add(entry);
@@ -104,6 +111,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         {
             info = null;
             if (obj == null) return false;
+            
 
             for (int i = 0; i < placedEntries.Count; i++)
             {
@@ -276,6 +284,65 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                     return true;
             }
 
+            return false;
+        }
+        
+        [Obsolete("Obsolete")]
+        public bool TrySetLocked(GameObject obj, bool locked)
+        {
+            if (obj == null)
+            {
+                Debug.Log("[Lock] TrySetLocked obj is null");
+                return false;
+            }
+
+            Debug.Log($"[Lock] TrySetLocked looking for {obj.name} instanceID={obj.GetInstanceID()}");
+
+            for (int i = 0; i < placedEntries.Count; i++)
+            {
+                var e = placedEntries[i];
+                if (e.instance == null) continue;
+
+                bool match =
+                    e.instance == obj ||
+                    e.instance == obj.transform.root.gameObject ||
+                    e.instance.transform.root.gameObject == obj;
+
+                Debug.Log($"[Lock] entry[{i}] {e.instance.name} id={e.instance.GetInstanceID()} match={match} wasLocked={e.isLocked}");
+
+                if (!match) continue;
+
+                e.isLocked = locked;
+                placedEntries[i] = e; // if PlacedEntry is a struct – important!
+                Debug.Log($"[Lock] SET locked={locked} on {e.instance.name}");
+                return true;
+            }
+
+            Debug.LogWarning("[Lock] No matching placed entry");
+            return false;
+        }
+
+        public bool IsLocked(GameObject obj)
+        {
+            if (obj == null) return false;
+
+            foreach (var entry in placedEntries)
+            {
+                if (entry.instance == null) continue;
+
+                bool match =
+                    entry.instance == obj ||
+                    entry.instance == obj.transform.root.gameObject ||
+                    entry.instance.transform.root.gameObject == obj;
+
+                if (match)
+                {
+                    Debug.Log($"[Lock] IsLocked {obj.name} → {entry.isLocked}");
+                    return entry.isLocked;
+                }
+            }
+
+            Debug.Log($"[Lock] IsLocked {obj.name} → no entry (false)");
             return false;
         }
 

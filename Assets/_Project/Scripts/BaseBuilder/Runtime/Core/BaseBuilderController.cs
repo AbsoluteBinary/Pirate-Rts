@@ -1,3 +1,4 @@
+using System;
 using _Project.Scripts.BaseBuilder.Runtime.Data;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.BaseBuilder.Runtime.Modes;
@@ -8,6 +9,7 @@ using Packages.ModularStrategyTopDownCameraController.Scripts;
 using TGS;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Object = UnityEngine.Object;
 
 namespace _Project.Scripts.BaseBuilder.Runtime.Core
 {
@@ -56,6 +58,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         public BuilderMode CurrentMode => ModeSystem.CurrentMode;
         public SelectFilter CurrentSelectFilter => ModeSystem.CurrentSelectFilter;
+        
+        public PlaceableKind selectedKind = PlaceableKind.Land;
 
         public event System.Action<int> OnLandTilePlaced;
 
@@ -86,7 +90,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void Awake()
         {
-            _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory);
+            _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory);
+            
             
             ModeSystem = new BuilderModeSystem();
             OccupationSystem = new OccupationSystem();
@@ -113,13 +118,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 () => ActiveGrid
             );
 
-            _paintAndDrag.OnLandTilePlaced += (index) => OnLandTilePlaced?.Invoke(index);
-            
+            _paintAndDrag.OnLandTilePlaced += (index) =>
+                _inventory.Consume(PlaceableKind.Land, index);
+
             _paintAndDrag.OnWallPlaced += (index) =>
-            {
-                if (wallInventory != null)
-                    wallInventory.Consume(index);
-            };
+                _inventory.Consume(PlaceableKind.Wall, index);
             
             inputActions = new BuilderInputActions();
             inputActions.Player.Enable();
@@ -137,14 +140,17 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     UpdateGridVisibility();
                     SetBuilderInputActive(true);
                 }
-                else if (mode == BuilderMode.PickUp || mode == BuilderMode.Delete)
+                else if (mode == BuilderMode.PickUp
+                         || mode == BuilderMode.Delete
+                         || mode == BuilderMode.Lock
+                         || mode == BuilderMode.Unlock)
                 {
-                    // Keep grids as they are – do not call UpdateGridVisibility()
-                    SetBuilderInputActive(false); // or true if you still want camera locked
+                    // Keep current grids – do not call UpdateGridVisibility()
+                    SetBuilderInputActive(false);
                 }
-                else // Select, etc.
+                else
                 {
-                    UpdateGridVisibility(); // hides both when not building
+                    UpdateGridVisibility();
                     SetBuilderInputActive(false);
                 }
             };
@@ -174,6 +180,18 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (ModeSystem.CurrentMode == BuilderMode.Delete)
             {
                 HandleDeleteInput();
+                return;
+            }
+
+            if (ModeSystem.CurrentMode == BuilderMode.Lock)
+            {
+                HandleLockInput(true);
+                return;
+            }
+
+            if (ModeSystem.CurrentMode == BuilderMode.Unlock)
+            {
+                HandleLockInput(false);
                 return;
             }
 
@@ -275,12 +293,13 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         #region Selection & Preview
 
-        public void SelectPrefab(GameObject prefab, Vector2Int size, bool isLand, int inventoryIndex = -1)
+        public void SelectPrefab(GameObject prefab, Vector2Int size, bool isLand, int inventoryIndex = -1, PlaceableKind kind = PlaceableKind.Land)
         {
             _clearSelectionAfterPlace = false;
             DestroyPreview();
 
             selectedPrefab = prefab;
+            selectedKind = kind;
             selectedSize = size;
             isLandObject = isLand;
             selectedInventoryIndex = inventoryIndex;
@@ -338,6 +357,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         
         #region Helper's
         
+        [Obsolete("Obsolete")]
         private void HandlePickUpInput()
         {
             if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
@@ -353,10 +373,19 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
 
             GameObject target = hit.collider.transform.root.gameObject;
+            Debug.Log($"[PickUp] target={target.name} id={target.GetInstanceID()}");
+
+            if (PlacementService.IsLocked(target))
+            {
+                Debug.LogWarning("[PickUp] BLOCKED – locked");
+                return;
+            }
+
+            Debug.Log("[PickUp] not locked – continuing");
 
             if (!PlacementService.TryPickUp(target, out var info))
                 return;
-
+            
             RestoreInventory(info.Kind, info.InventoryIndex);
 
             Object.Destroy(info.Instance);
@@ -392,9 +421,21 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
 
             GameObject target = hit.collider.transform.root.gameObject;
+            
+            if (PlacementService.IsLocked(target))
+            {
+                Debug.LogWarning("Object is locked – cannot pick up");
+                return;
+            }
 
             if (!PlacementService.TryPickUp(target, out var info))
                 return;
+            
+            if (PlacementService.IsLocked(target))
+            {
+                Debug.LogWarning("Object is locked – cannot delete");
+                return;
+            }
             
 
             RestoreInventory(info.Kind, info.InventoryIndex);
@@ -542,16 +583,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         {
             if (selectedPrefab == null || currentHoveredCell == null || ActiveGrid == null)
                 return;
-
-            // Block empty land inventory
-            if (isLandObject && selectedInventoryIndex >= 0 && landTileInventory != null)
-            {
-                if (landTileInventory.GetCount(selectedInventoryIndex) <= 0)
-                {
-                    Debug.LogWarning("No tiles left in inventory for this slot");
-                    return;
-                }
-            }
+            
 
             // Cache before anything can clear selection
             GameObject prefab = selectedPrefab;
@@ -560,6 +592,13 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             int invIndex = selectedInventoryIndex;
             bool clearAfter = _clearSelectionAfterPlace;
 
+            PlaceableKind kind = selectedKind;
+            if (invIndex >= 0 && _inventory.GetCount(kind, invIndex) <= 0)
+            {
+                Debug.LogWarning($"No items left in inventory ({kind} index {invIndex})");
+                return;
+            }
+
             Vector3 placePos = ActiveGrid.CellGetPosition(currentHoveredCell.index);
 
             GameObject placed = PlacementService.Place(
@@ -567,7 +606,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 placePos,
                 size,
                 isLand,
-                invIndex
+                invIndex,
+                selectedKind
             );
 
             if (placed == null)
@@ -576,12 +616,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
             }
 
-            if (isLand && invIndex >= 0)
-                OnLandTilePlaced?.Invoke(invIndex);
-            else if (!isLand && invIndex >= 0 && wallInventory != null)
-                wallInventory.Consume(invIndex);
-            else if (!isLand && invIndex >= 0 && buildingsInventory != null)
-                buildingsInventory.Consume(invIndex);
+            if (invIndex >= 0)
+                _inventory.Consume(selectedKind, invIndex);
 
             Debug.Log($"<color=green>Placed {prefab.name} at cell {currentHoveredCell.index}</color>");
 
@@ -596,7 +632,35 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 CheckInventoryAndClearIfEmpty();
             }
         }
+        
+        private void HandleLockInput(bool lockIt)
+        {
+            //Debug.Log($"[Lock] HandleLockInput lockIt={lockIt} lmb={Mouse.current?.leftButton.wasPressedThisFrame}");
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+                return;
+            if (isPointerOverUI) return;
 
+            Camera cam = buildCamera != null ? buildCamera : Camera.main;
+            if (cam == null) return;
+
+            Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            int layer = LayerMask.GetMask("PlacedObjects");
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, layer))
+            {
+                //Debug.Log("[Lock] raycast miss – check PlacedObjects layer on instance");
+                return;
+            }
+
+            GameObject target = hit.collider.transform.root.gameObject;
+
+            //Debug.Log($"[Lock] Click hit={hit.collider.name} root={hit.collider.transform.root.name} lockIt={lockIt}");
+
+            if (PlacementService.TrySetLocked(target, lockIt))
+                Debug.Log(lockIt ? "<color=yellow>Locked</color>" : "<color=cyan>Unlocked</color>");
+            
+            bool ok = PlacementService.TrySetLocked(target, lockIt);
+            //Debug.Log($"[Lock] TrySetLocked → {ok}");
+        }
         #endregion
     }
 }          

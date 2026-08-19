@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using _Project.Scripts.BaseBuilder.Runtime.Core;
 using _Project.Scripts.BaseBuilder.Runtime.Data;
+using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.Harbour.Data.SO;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -171,8 +172,18 @@ namespace _Project.Scripts.BaseBuilder.UI
                 Debug.Log("<color=cyan>Selection cleared</color>");
             }));
             
-            topBar.Add(CreateActionButton("Lock", () => OnLockClicked?.Invoke()));
-            topBar.Add(CreateActionButton("Unlock", () => OnUnlockClicked?.Invoke()));
+            topBar.Add(CreateActionButton("Lock", () =>
+            {
+                builderController?.ClearSelectedPrefab();
+                Debug.Log("HUD → SetMode Lock");
+                builderController?.SetMode(BuilderMode.Lock);
+            }));
+
+            topBar.Add(CreateActionButton("Unlock", () =>
+            {
+                builderController?.ClearSelectedPrefab();
+                builderController?.SetMode(BuilderMode.Unlock);
+            }));
 
             var exitBtn = new Button { text = "Exit Build Mode" };
             StyleButton(exitBtn, new Color(0.55f, 0.15f, 0.15f));
@@ -514,12 +525,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             {
                 if (entry == null || entry.prefab == null) return;
 
-                builderController?.SelectPrefab(
-                    entry.prefab,
-                    entry.size,   // add entry.size later if buildings are larger
-                    isLand: false,    // object grid
-                    inventoryIndex: index
-                );
+                builderController?.SelectPrefab(entry.prefab, entry.size, false, index, PlaceableKind.Building);
 
                 HighlightSelectedSlot(slot);
             });
@@ -637,12 +643,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             {
                 if (entry == null || entry.prefab == null) return;
 
-                builderController?.SelectPrefab(
-                    entry.prefab,
-                    Vector2Int.one,          // assuming 1×1 walls for now
-                    isLand: false,           // walls go on Object Grid
-                    inventoryIndex: index
-                );
+                builderController?.SelectPrefab(entry.prefab, Vector2Int.one, false, index, PlaceableKind.Wall);
 
                 HighlightSelectedSlot(slot);
             });
@@ -814,27 +815,26 @@ namespace _Project.Scripts.BaseBuilder.UI
 
         private void HandleLandTilePlaced(int index)
         {
-            if (landTileInventory == null) return;
-            if (index < 0 || index >= landTileInventory.tiles.Count) return;
-
-            // Consume from the same SO the HUD is displaying
-            bool consumed = landTileInventory.ConsumeTile(index);
-            if (!consumed)
-            {
-                Debug.LogWarning($"Could not consume tile at index {index} (count may be 0)");
-                return;
-            }
-            
-            // Update the label
-            if (index < slotCountLabels.Count && slotCountLabels[index] != null)
-                slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
+            // if (landTileInventory == null) return;
+            // if (index < 0 || index >= landTileInventory.tiles.Count) return;
+            //
+            // // Consume from the same SO the HUD is displaying
+            // bool consumed = landTileInventory.ConsumeTile(index);
+            // if (!consumed)
+            // {
+            //     Debug.LogWarning($"Could not consume tile at index {index} (count may be 0)");
+            //     return;
+            // }
+            //
+            // // Update the label
+            // if (index < slotCountLabels.Count && slotCountLabels[index] != null)
+            //     slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
+            HandleBuildingCountChanged(index);
         }
         
         private void HandleLandCountChanged(int index)
         {
             if (landTileInventory == null) return;
-            if (index < 0 || index >= slotCountLabels.Count) return;
-
             var label = slotCountLabels[index];
             if (label == null) return;           // ← was missing / not enough
             if (label.panel == null) return;     // label not attached to UI anymore

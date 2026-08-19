@@ -18,16 +18,16 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
     {
         private readonly LandTileInventorySO _land;
         private readonly WallInventorySO _walls;
-        // Add later when you have them:
-         private readonly BuildingsInventorySO _buildings;
-        // private readonly WaterInventorySO _water;
+        private readonly BuildingsInventorySO _buildings;
 
         public BuilderInventoryFacade(
             LandTileInventorySO land,
-            WallInventorySO walls)
+            WallInventorySO walls,
+            BuildingsInventorySO buildings = null)
         {
             _land = land;
             _walls = walls;
+            _buildings = buildings;
         }
 
         public int GetCount(PlaceableKind kind, int index)
@@ -40,6 +40,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                     return _land != null ? _land.GetCount(index) : 0;
                 case PlaceableKind.Wall:
                     return _walls != null ? _walls.GetCount(index) : 0;
+                case PlaceableKind.Building:
+                    return _buildings != null ? _buildings.GetCount(index) : 0;
                 default:
                     return 0;
             }
@@ -78,11 +80,6 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                     _buildings?.Restore(index, amount);
                     break;
             }
-        }
-
-        public static PlaceableKind FromIsLand(bool isLand)
-        {
-            return isLand ? PlaceableKind.Land : PlaceableKind.Wall;
         }
     }
 }

@@ -6,6 +6,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Data
         BuildOnWater,   // Land Grid + land tiles
         BuildOnLand,     // Object Grid + walls / buildings / etc.
         PickUp,
-        Delete
+        Delete,
+        Lock,
+        Unlock
     }
 }
