@@ -121,6 +121,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             BuildFilterBar();
             BuildInventoryPanel();
             BuildWallsAndBuildingsPanel();
+            BuildRectangleSelectOverlay();
         }
 
         private void BuildTopBar()
@@ -905,6 +906,13 @@ namespace _Project.Scripts.BaseBuilder.UI
         public void ShowSelectRect(Rect screenRect)
         {
             if (selectRectBox == null) return;
+            const float MinSize = 4f;
+            if (screenRect.width < MinSize && screenRect.height < MinSize)
+            {
+                selectRectBox.style.display = DisplayStyle.None;
+                return;
+            }
+            
             // Input System Y is bottom-left; UI Toolkit Y is top-left
             float panelH = root.worldBound.height; // or resolvedStyle.height
             float top = panelH - screenRect.yMax;

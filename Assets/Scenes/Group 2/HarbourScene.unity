@@ -727,7 +727,7 @@ GameObject:
   - component: {fileID: 459898000}
   - component: {fileID: 459897999}
   m_Layer: 0
-  m_Name: BaseBuilderManager
+  m_Name: BaseBuilderController - Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -747,6 +747,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.BaseBuilder.Runtime.Core.BaseBuilderController
   landGrid: {fileID: 1640162068}
   objectGrid: {fileID: 226015902}
+  cameraController: {fileID: 892000899}
   selectedPrefab: {fileID: 1219891228768175825, guid: 878eefc7cebdb69e08d552db5102827f, type: 3}
   selectedSize: {x: 1, y: 1}
   isLandObject: 1

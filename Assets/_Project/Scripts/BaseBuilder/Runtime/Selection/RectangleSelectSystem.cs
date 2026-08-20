@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,19 +18,32 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Selection
         public event System.Action OnDragUpdated;
         public event System.Action OnDragEnded; // later: pass rect / selection
 
+        private readonly Func<bool> _isPointerOverUI;
+
+        public RectangleSelectSystem(Func<bool> isPointerOverUI = null)
+        {
+            _isPointerOverUI = isPointerOverUI;
+        }
+        
         public void Tick()
         {
+            //Debug.Log($"[RectSelect] Tick | State={CurrentState} Ctrl={Keyboard.current?.leftCtrlKey.isPressed} LMB={Mouse.current?.leftButton.isPressed}");
+            
             bool ctrl = Keyboard.current != null && Keyboard.current.leftCtrlKey.isPressed;
             bool lmbDown = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
             bool lmbHeld = Mouse.current != null && Mouse.current.leftButton.isPressed;
             bool lmbUp   = Mouse.current != null && Mouse.current.leftButton.wasReleasedThisFrame;
 
             Vector2 mouse = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
+            
 
             if (CurrentState == State.Idle)
             {
                 if (ctrl && lmbDown)
                 {
+                    if (_isPointerOverUI != null && _isPointerOverUI())
+                        return; // click was on HUD – ignore
+
                     StartScreen = mouse;
                     CurrentScreen = mouse;
                     CurrentState = State.Dragging;
@@ -37,15 +51,26 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Selection
                 }
                 return;
             }
-
             // Dragging
             if (lmbHeld)
             {
                 CurrentScreen = mouse;
                 OnDragUpdated?.Invoke();
             }
+            
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                Cancel();
+                return;
+            }
 
             if (lmbUp || !ctrl) // release or lose Ctrl → end
+            {
+                CurrentState = State.Idle;
+                OnDragEnded?.Invoke();
+            }
+            
+            if (lmbUp)
             {
                 CurrentState = State.Idle;
                 OnDragEnded?.Invoke();

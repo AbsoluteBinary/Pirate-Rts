@@ -27,6 +27,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         [Header("Highlight References")]
         private CellHighlightService _highlightService;
         private PaintAndDragSystem _paintAndDrag;
+        
+        [Header("Camera")]
+        [SerializeField] private StrategyCameraController cameraController;
 
         [Header("Placement")]
         public GameObject selectedPrefab;
@@ -93,6 +96,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void Awake()
         {
+            _rectSelect = new RectangleSelectSystem(() => isPointerOverUI);
+            
             _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory);
             _rectSelect = new RectangleSelectSystem();
             
@@ -140,35 +145,31 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             ModeSystem.OnModeChanged += (mode) =>
             {
                 ClearSelectedPrefab();
+                _rectSelect?.Cancel();
+                hud?.HideSelectRect();
 
                 if (mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand)
                 {
                     UpdateGridVisibility();
                     SetBuilderInputActive(true);
-                }
-                else if (mode == BuilderMode.PickUp
-                         || mode == BuilderMode.Delete
-                         || mode == BuilderMode.Lock
-                         || mode == BuilderMode.Unlock)
-                {
-                    SetBuilderInputActive(false);
-                }
-                else if (mode == BuilderMode.Observation)
-                {
-                    // Idle: no forced grids for building; camera free
-                    if (landGrid != null) landGrid.gameObject.SetActive(false);
-                    if (objectGrid != null) objectGrid.gameObject.SetActive(false);
-                    SetBuilderInputActive(false);
+                    SetCameraInputEnabled(true);
                 }
                 else if (mode == BuilderMode.Select)
                 {
-                    // Keep current grid visibility – do not hide
                     SetBuilderInputActive(false);
+                    SetCameraInputEnabled(false);
                 }
-                else // Select, etc.
+                else if (mode == BuilderMode.Observation)
                 {
-                    UpdateGridVisibility();
+                    if (landGrid != null) landGrid.gameObject.SetActive(false);
+                    if (objectGrid != null) objectGrid.gameObject.SetActive(false);
                     SetBuilderInputActive(false);
+                    SetCameraInputEnabled(true);
+                }
+                else
+                {
+                    SetBuilderInputActive(false);
+                    SetCameraInputEnabled(false);
                 }
             };
 
@@ -296,7 +297,10 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         public void SetBuilderActive(bool active)
         {
+            _rectSelect?.Cancel();
+            hud?.HideSelectRect();
             gameObject.SetActive(active);
+            SetCameraInputEnabled(true);
 
             if (!active)
             {
@@ -696,6 +700,16 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         #region Helpers
 
+        private void SetCameraInputEnabled(bool enabled)
+        {
+            if (cameraController == null || cameraController.xinputs == null) return;
+
+            if (enabled)
+                cameraController.xinputs.EnableInputs();
+            else
+                cameraController.xinputs.DisableInputs();
+        }
+        
         public bool IsAnyGridActive()
         {
             bool landOn = landGrid != null && landGrid.gameObject.activeInHierarchy;
