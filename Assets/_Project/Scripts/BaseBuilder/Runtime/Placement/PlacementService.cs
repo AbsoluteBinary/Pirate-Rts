@@ -55,6 +55,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             validator.SetGrids(land, objects);
         }
         
+        public IReadOnlyList<PlacedEntry> GetPlacedEntries()
+        {
+            return placedEntries;
+        }
+        
         
         // ─────────────────────────────────────────────
         // Placement
@@ -258,7 +263,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         // Helpers
         // ─────────────────────────────────────────────
 
-        private bool HasObjectOnTop(Vector3 landWorldPosition)
+        public bool HasObjectOnTop(Vector3 landWorldPosition)
         {
             if (objectGrid == null || landGrid == null) return false;
 
@@ -286,6 +291,21 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
 
             return false;
         }
+        
+        public bool TryGetIsLand(GameObject obj, out bool isLand)
+        {
+            isLand = false;
+            if (obj == null) return false;
+
+            for (int i = 0; i < placedEntries.Count; i++)
+            {
+                if (placedEntries[i].instance != obj) continue;
+                isLand = placedEntries[i].isLand;
+                return true;
+            }
+            return false;
+        }
+        
         
         [Obsolete("Obsolete")]
         public bool TrySetLocked(GameObject obj, bool locked)

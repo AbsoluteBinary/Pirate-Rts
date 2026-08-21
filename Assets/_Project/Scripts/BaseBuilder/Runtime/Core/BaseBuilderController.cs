@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using _Project.Scripts.BaseBuilder.Runtime.Data;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.BaseBuilder.Runtime.Modes;
@@ -97,6 +98,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private void Awake()
         {
             _rectSelect = new RectangleSelectSystem(() => isPointerOverUI);
+            _rectSelect.OnDragStarted += () => SelectionSystem?.Clear();
             
             _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory);
             _rectSelect = new RectangleSelectSystem();
@@ -106,6 +108,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             Validator = new PlacementValidator(OccupationSystem);
             PlacementService = new PlacementService(OccupationSystem, Validator);
             SelectionSystem = new SelectionSystem();
+            
+            SelectionSystem.OnSelectionChanged += RefreshSelectionHighlights;
 
             // Input maps + strategy camera (prevent pan/zoom while placing)
             builderInputActions = new BuilderInputActions();
@@ -185,6 +189,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             SetBuilderInputActive(false);
             builderInputActions?.Dispose();
             builderInputActions = null;
+            
+            if (SelectionSystem != null)
+                SelectionSystem.OnSelectionChanged -= RefreshSelectionHighlights;
         }
 
         private void Update()
@@ -405,7 +412,35 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         {
             if (hud == null) return;
             hud.HideSelectRect();
-            // Task 5 later: selection from _rectSelect.GetScreenRect()
+
+            if (_rectSelect == null || ModeSystem.CurrentMode != BuilderMode.Select)
+                return;
+
+            Rect rect = _rectSelect.GetScreenRect();
+            const float MinSize = 4f;
+            if (rect.width < MinSize && rect.height < MinSize)
+                return;
+
+            Camera cam = buildCamera != null ? buildCamera : Camera.main;
+            if (cam == null || PlacementService == null || SelectionSystem == null)
+                return;
+
+            var hits = new List<GameObject>();
+            var entries = PlacementService.GetPlacedEntries();
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                if (!PassesSelectFilter(entry)) continue;
+                if (!IsWorldPointInScreenRect(cam, entry.instance.transform.position, rect))
+                    continue;
+                hits.Add(entry.instance);
+            }
+
+            SelectionSystem.SetSelection(hits);
+            
+
+            Debug.Log($"[RectSelect] Selected {hits.Count} object(s) | filter={ModeSystem.CurrentSelectFilter}");
         }
 
         #endregion
@@ -467,6 +502,14 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
             if (isPointerOverUI) return;
 
+            // ── Multi-delete from marquee selection ──
+            if (SelectionSystem != null && SelectionSystem.SelectedObjects.Count > 0)
+            {
+                DeleteSelectedObjects();
+                return;
+            }
+
+            // ── Fallback: single-click raycast ──
             Camera cam = buildCamera != null ? buildCamera : Camera.main;
             if (cam == null) return;
 
@@ -476,27 +519,91 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
 
             GameObject target = hit.collider.transform.root.gameObject;
-            
-            if (PlacementService.IsLocked(target))
+            TryDeleteOne(target);
+        }
+        
+        public void DeleteSelectedOrEnterMode()
+        {
+            ClearSelectedPrefab();
+
+            if (SelectionSystem != null && SelectionSystem.SelectedObjects.Count > 0)
             {
-                Debug.LogWarning("Object is locked – cannot pick up");
+                DeleteSelectedObjects(); // highlights off here
                 return;
             }
 
-            if (!PlacementService.TryPickUp(target, out var info))
-                return;
-            
+            SetMode(BuilderMode.Delete); // no selection → single-click delete mode
+        }
+
+        /// <summary>
+        /// Deletes every object currently in SelectionSystem (skips locked).
+        /// Restores inventory and clears selection + highlights.
+        /// </summary>
+        private void DeleteSelectedObjects()
+        {
+            var toDelete = new List<GameObject>(SelectionSystem.SelectedObjects);
+            int deleted = 0;
+            int skippedLocked = 0;
+
+            foreach (var obj in toDelete)
+            {
+                if (obj == null) continue;
+
+                if (PlacementService.IsLocked(obj))
+                {
+                    skippedLocked++;
+                    continue;
+                }
+
+                // Turn highlight off BEFORE destroy (Destroy is end-of-frame)
+                SetHighlightActive(obj, false);
+
+                if (TryDeleteOne(obj))
+                    deleted++;
+            }
+
+            // Clear selection list + event (also refreshes any leftovers)
+            SelectionSystem.Clear();
+            RefreshSelectionHighlights(); // explicit — don’t wait for next input
+
+            Debug.Log($"<color=orange>Deleted {deleted} selected object(s)" +
+                      (skippedLocked > 0 ? $", skipped {skippedLocked} locked" : "") +
+                      "</color>");
+        }
+
+        /// <summary>
+        /// Removes one placed object: free occupation, restore inventory, destroy GO.
+        /// Returns true if deleted.
+        /// </summary>
+        private bool TryDeleteOne(GameObject target)
+        {
+            if (target == null) return false;
+
             if (PlacementService.IsLocked(target))
             {
                 Debug.LogWarning("Object is locked – cannot delete");
-                return;
+                return false;
             }
-            
+
+            // Land tiles only: block delete if a wall/building is on top
+            if (PlacementService.TryGetIsLand(target, out bool isLand) && isLand)
+            {
+                if (PlacementService.HasObjectOnTop(target.transform.position))
+                {
+                    Debug.LogWarning("Cannot delete land tile – object placed on top");
+                    return false;
+                }
+            }
+
+            if (!PlacementService.TryPickUp(target, out var info))
+                return false;
 
             RestoreInventory(info.Kind, info.InventoryIndex);
-            Object.Destroy(info.Instance);
 
-            Debug.Log($"<color=orange>Deleted {(info.IsLandObject ? "Land" : "Wall/Building")} index {info.InventoryIndex}</color>");
+            if (info.Instance != null)
+                Object.Destroy(info.Instance);
+
+            return true;
         }
         
         
@@ -700,6 +807,86 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         #region Helpers
 
+        private const string SelectionHighlightName = "SelectionHighlight";
+
+        private void RefreshSelectionHighlights()
+        {
+            if (PlacementService != null)
+            {
+                foreach (var entry in PlacementService.GetPlacedEntries())
+                {
+                    if (entry.instance == null) continue;
+                    SetHighlightActive(entry.instance, false);
+                }
+            }
+
+            if (SelectionSystem == null) return;
+
+            foreach (var obj in SelectionSystem.SelectedObjects)
+            {
+                if (obj == null) continue;
+                SetHighlightActive(obj, true);
+            }
+        }
+
+        private static void SetHighlightActive(GameObject root, bool active)
+        {
+            if (root == null) return;
+
+            Transform t = root.transform.Find(SelectionHighlightName);
+            if (t == null)
+                t = FindChildRecursive(root.transform, SelectionHighlightName);
+
+            if (t != null)
+                t.gameObject.SetActive(active);
+        }
+
+        private static Transform FindChildRecursive(Transform parent, string name)
+        {
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                Transform child = parent.GetChild(i);
+                if (child.name == name)
+                    return child;
+
+                Transform nested = FindChildRecursive(child, name);
+                if (nested != null)
+                    return nested;
+            }
+            return null;
+        }
+        
+        private static bool IsWorldPointInScreenRect(Camera cam, Vector3 worldPos, Rect screenRect)
+        {
+            Vector3 sp = cam.WorldToScreenPoint(worldPos);
+            if (sp.z < 0f) return false;
+            return screenRect.Contains(new Vector2(sp.x, sp.y));
+        }
+
+        private bool PassesSelectFilter(PlacedEntry entry)
+        {
+            if (entry.instance == null) return false;
+
+            switch (ModeSystem.CurrentSelectFilter)
+            {
+                case SelectFilter.All:
+                    return true;
+
+                case SelectFilter.Walls:
+                    // Prefer kind; fall back so old/paint-placed walls still match
+                    return entry.kind == PlaceableKind.Wall
+                           || (!entry.isLand && entry.kind != PlaceableKind.Building);
+
+                case SelectFilter.Land:
+                    return entry.kind == PlaceableKind.Land || entry.isLand;
+
+                case SelectFilter.Turrets:
+                    return false; // until you have a Turret kind
+
+                default:
+                    return false;
+            }
+        }
         private void SetCameraInputEnabled(bool enabled)
         {
             if (cameraController == null || cameraController.xinputs == null) return;

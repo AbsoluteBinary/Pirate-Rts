@@ -36,6 +36,22 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Selection
                 OnSelectionChanged?.Invoke();
             }
         }
+        
+        public void SetSelection(IReadOnlyList<GameObject> objects)
+        {
+            selected.Clear();
+            if (objects != null)
+            {
+                for (int i = 0; i < objects.Count; i++)
+                {
+                    var obj = objects[i];
+                    if (obj == null || IsLocked(obj)) continue;
+                    if (!selected.Contains(obj))
+                        selected.Add(obj);
+                }
+            }
+            OnSelectionChanged?.Invoke();
+        }
 
         public void Deselect(GameObject obj)
         {

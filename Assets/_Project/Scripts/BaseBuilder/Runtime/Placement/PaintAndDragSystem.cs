@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using TGS;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -236,7 +237,18 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 }
 
                 Vector3 worldPos = _grid.CellGetPosition(cell.index);
-                GameObject instance = _placementService.Place(_prefab, worldPos, _size, _isLand, inventoryIndex);
+                
+                PlaceableKind kind = _isLand ? PlaceableKind.Land : PlaceableKind.Wall;
+
+                GameObject instance = _placementService.Place(
+                    _prefab,
+                    worldPos,
+                    _size,
+                    _isLand,
+                    inventoryIndex,
+                    kind
+                );
+                
                 if (instance == null)
                     break;
 

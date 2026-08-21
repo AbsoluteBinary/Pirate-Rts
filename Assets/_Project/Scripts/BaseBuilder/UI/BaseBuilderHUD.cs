@@ -161,6 +161,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             {
                 builderController?.ClearSelectedPrefab();
                 builderController?.SetMode(BuilderMode.Delete);
+                builderController?.DeleteSelectedOrEnterMode();
                 OnDeleteClicked?.Invoke();
                 Debug.Log("<color=orange>Mode → Delete</color>");
             }));
@@ -168,7 +169,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             topBar.Add(CreateActionButton("Clear Selection", () =>
             {
                 builderController?.ClearSelectedPrefab();
-                //builderController?.SetMode(BuilderMode.Select);
+                builderController?.SelectionSystem?.Clear();
                 Debug.Log("<color=cyan>Selection cleared</color>");
             }));
             
