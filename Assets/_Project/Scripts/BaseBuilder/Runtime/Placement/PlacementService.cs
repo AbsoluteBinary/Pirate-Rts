@@ -372,5 +372,22 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             foreach (Transform child in obj.transform)
                 SetLayerRecursively(child.gameObject, layer);
         }
+        
+        public bool TryGetAtCell(int originCellIndex, bool isLand, out PlacedEntry entry)
+        {
+            entry = null;
+            for (int i = 0; i < placedEntries.Count; i++)
+            {
+                if (placedEntries[i].originCellIndex == originCellIndex &&
+                    placedEntries[i].isLand == isLand)
+                {
+                    entry = placedEntries[i];
+                    return entry.instance != null;
+                }
+            }
+            return false;
+        }
+
+        public IReadOnlyList<PlacedEntry> Entries => placedEntries;
     }
 }

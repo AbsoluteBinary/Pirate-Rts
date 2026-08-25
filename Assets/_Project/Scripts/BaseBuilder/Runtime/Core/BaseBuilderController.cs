@@ -80,6 +80,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private TerrainGridSystem lastHighlightedGrid;
         private bool isPointerOverUI = false;
         private BuilderInputActions builderInputActions;
+        private WallRowHoldSystem _wallRowHold;
 
         private TerrainGridSystem ActiveGrid
         {
@@ -152,11 +153,19 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 _rectSelect?.Cancel();
                 hud?.HideSelectRect();
 
-                if (mode == BuilderMode.BuildOnWater || mode == BuilderMode.BuildOnLand)
+                if (mode == BuilderMode.BuildOnWater)
                 {
                     UpdateGridVisibility();
                     SetBuilderInputActive(true);
                     SetCameraInputEnabled(true);
+                    _wallRowHold.DisableInput();
+                }
+                else if (mode == BuilderMode.BuildOnLand)
+                {
+                    UpdateGridVisibility();
+                    SetBuilderInputActive(true);
+                    SetCameraInputEnabled(true);
+                    _wallRowHold.EnableInput();
                 }
                 else if (mode == BuilderMode.Select)
                 {
@@ -176,6 +185,10 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     SetCameraInputEnabled(false);
                 }
             };
+            
+            _wallRowHold = new WallRowHoldSystem();
+            _wallRowHold.Bind(PlacementService, Validator, inputActions, buildCamera);
+            _wallRowHold.SetGrids(landGrid, objectGrid);
 
             if (landGrid != null || objectGrid != null)
                 PlacementService.SetGrids(landGrid, objectGrid);
@@ -238,6 +251,14 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 currentHoveredCell = null;
                 return;
             }
+            
+            if (ModeSystem.IsBuildOnLand)
+            {
+                if (CurrentMode == BuilderMode.BuildOnLand)
+                    _wallRowHold.Tick();
+                return;
+            }
+            
 
             UpdateHoveredCell();
             HandlePlacementInput();
@@ -534,6 +555,40 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
             SetMode(BuilderMode.Delete); // no selection → single-click delete mode
         }
+        
+        /// <summary>
+        /// If there is a selection, lock/unlock all of them now.
+        /// Otherwise enter Lock or Unlock mode for single-click.
+        /// </summary>
+        public void LockSelectedOrEnterMode(bool lockIt)
+        {
+            ClearSelectedPrefab();
+
+            if (SelectionSystem != null && SelectionSystem.SelectedObjects.Count > 0)
+            {
+                ApplyLockToSelected(lockIt);
+                return;
+            }
+
+            SetMode(lockIt ? BuilderMode.Lock : BuilderMode.Unlock);
+        }
+
+        private void ApplyLockToSelected(bool lockIt)
+        {
+            var list = new List<GameObject>(SelectionSystem.SelectedObjects);
+            int applied = 0;
+
+            foreach (var obj in list)
+            {
+                if (obj == null) continue;
+                if (PlacementService.TrySetLocked(obj, lockIt))
+                    applied++;
+            }
+
+            Debug.Log(lockIt
+                ? $"<color=yellow>Locked {applied} selected object(s)</color>"
+                : $"<color=cyan>Unlocked {applied} selected object(s)</color>");
+        }
 
         /// <summary>
         /// Deletes every object currently in SelectionSystem (skips locked).
@@ -706,6 +761,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void HandlePlacementInput()
         {
+            if (_wallRowHold != null && _wallRowHold.IsHolding)
+                return;
             // Prevent normal single-click placement while PaintAndDrag is active
             if (_paintAndDrag != null && _paintAndDrag.IsBusy)
                 return;

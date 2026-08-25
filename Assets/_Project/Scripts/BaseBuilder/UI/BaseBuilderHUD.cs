@@ -159,11 +159,9 @@ namespace _Project.Scripts.BaseBuilder.UI
             
             topBar.Add(CreateActionButton("Delete", () =>
             {
-                builderController?.ClearSelectedPrefab();
-                builderController?.SetMode(BuilderMode.Delete);
                 builderController?.DeleteSelectedOrEnterMode();
                 OnDeleteClicked?.Invoke();
-                Debug.Log("<color=orange>Mode → Delete</color>");
+                Debug.Log("<color=orange>Delete button</color>");
             }));
             
             topBar.Add(CreateActionButton("Clear Selection", () =>
@@ -175,15 +173,16 @@ namespace _Project.Scripts.BaseBuilder.UI
             
             topBar.Add(CreateActionButton("Lock", () =>
             {
-                builderController?.ClearSelectedPrefab();
-                Debug.Log("HUD → SetMode Lock");
-                builderController?.SetMode(BuilderMode.Lock);
+                builderController?.LockSelectedOrEnterMode(true);
+                OnLockClicked?.Invoke();
+                Debug.Log("<color=yellow>Lock button</color>");
             }));
 
             topBar.Add(CreateActionButton("Unlock", () =>
             {
-                builderController?.ClearSelectedPrefab();
-                builderController?.SetMode(BuilderMode.Unlock);
+                builderController?.LockSelectedOrEnterMode(false);
+                OnUnlockClicked?.Invoke();
+                Debug.Log("<color=cyan>Unlock button</color>");
             }));
 
             var exitBtn = new Button { text = "Exit Build Mode" };
