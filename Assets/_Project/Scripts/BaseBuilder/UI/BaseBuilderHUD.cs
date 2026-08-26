@@ -231,6 +231,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             filterBar.Add(CreateFilterButton("Walls", SelectFilter.Walls));
             filterBar.Add(CreateFilterButton("Turrets", SelectFilter.Turrets));
             filterBar.Add(CreateFilterButton("Land", SelectFilter.Land));
+            filterBar.Add(CreateFilterButton("Buildings", SelectFilter.Buildings));
 
             root.Add(filterBar);
             RegisterUIBlockers(filterBar);

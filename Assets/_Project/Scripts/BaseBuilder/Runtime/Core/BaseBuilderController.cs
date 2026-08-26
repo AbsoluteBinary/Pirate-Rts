@@ -459,6 +459,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             for (int i = 0; i < entries.Count; i++)
             {
                 var entry = entries[i];
+
+                // Buildings are never marquee-selectable (static structures)
+                if (entry.kind == PlaceableKind.Building)
+                    continue;
+
                 if (!PassesSelectFilter(entry)) continue;
                 if (!IsWorldPointInScreenRect(cam, entry.instance.transform.position, rect))
                     continue;
@@ -644,6 +649,12 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (PlacementService.IsLocked(target))
             {
                 Debug.LogWarning("Object is locked – cannot delete");
+                return false;
+            }
+            // Buildings: never delete — use Pick Up / store only
+            if (IsPlacedBuilding(target))
+            {
+                Debug.LogWarning("Buildings cannot be deleted – use Pick Up");
                 return false;
             }
 
@@ -873,6 +884,18 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private const string SelectionHighlightName = "SelectionHighlight";
 
+        private bool IsPlacedBuilding(GameObject target)
+        {
+            if (target == null || PlacementService == null) return false;
+
+            var entries = PlacementService.GetPlacedEntries();
+            for (int i = 0; i < entries.Count; i++)
+            {
+                if (entries[i].instance == target)
+                    return entries[i].kind == PlaceableKind.Building;
+            }
+            return false;
+        }
         private void RefreshSelectionHighlights()
         {
             if (PlacementService != null)
@@ -937,16 +960,16 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     return true;
 
                 case SelectFilter.Walls:
-                    // Prefer kind; fall back so old/paint-placed walls still match
-                    return entry.kind == PlaceableKind.Wall
-                           || (!entry.isLand && entry.kind != PlaceableKind.Building);
+                    return entry.kind == PlaceableKind.Wall;
+
+                case SelectFilter.Turrets:
+                    return entry.kind == PlaceableKind.Turret;
 
                 case SelectFilter.Land:
                     return entry.kind == PlaceableKind.Land || entry.isLand;
 
-                case SelectFilter.Turrets:
-                    return entry.kind == PlaceableKind.Turret
-                           || (!entry.isLand && entry.kind != PlaceableKind.Turret);
+                case SelectFilter.Buildings:
+                    return entry.kind == PlaceableKind.Building;
 
                 default:
                     return false;

@@ -5,6 +5,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Data
         All,
         Walls,
         Turrets,
-        Land
+        Land,
+        Buildings
     }
 }
