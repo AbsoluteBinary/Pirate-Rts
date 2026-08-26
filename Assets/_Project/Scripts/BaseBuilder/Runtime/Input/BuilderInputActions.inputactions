@@ -94,6 +94,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "0f613d16-abe2-419f-ad5d-0652f36c0619",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -142,15 +152,37 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "82cede94-cfa9-4d14-9514-0ca50e8933c8",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "MultiTap",
+                    "name": "One Modifier",
+                    "id": "c5c1b14f-9ef6-4230-83c4-82fc17fddb00",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PickUpRow",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "cbc7ca3e-d837-46a5-9bc4-3c8160979752",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "PickUpRow",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "3855c77d-9d62-4c64-a3b3-a0611a2080d3",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PickUpRow",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "",
@@ -182,6 +214,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "RotateHeld",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de64c4da-e9f5-4dbc-8e2f-e7047da09868",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

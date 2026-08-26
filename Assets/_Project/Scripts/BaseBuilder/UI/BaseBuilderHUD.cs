@@ -19,7 +19,9 @@ namespace _Project.Scripts.BaseBuilder.UI
         [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private WallInventorySO wallInventory;
         [SerializeField] private BuildingsInventorySO buildingsInventory;
-
+        [SerializeField] private TurretInventorySO turretInventory;
+        
+        private readonly List<Label> turretCountLabels = new List<Label>();
         private readonly List<Label> buildingCountLabels = new List<Label>();
         private readonly List<Label> wallCountLabels = new List<Label>();
         #endregion
@@ -73,12 +75,19 @@ namespace _Project.Scripts.BaseBuilder.UI
                 wallInventory.OnCountChanged -= HandleWallCountChanged;
                 wallInventory.OnCountChanged += HandleWallCountChanged;
             }
+            if (turretInventory != null)
+            {
+                turretInventory.OnCountChanged -= HandleTurretCountChanged;
+                turretInventory.OnCountChanged += HandleTurretCountChanged;
+            }
             
             if (builderController == null) return;
 
             builderController.OnLandTilePlaced -= HandleLandTilePlaced; // avoid double subscribe
             builderController.OnLandTilePlaced += HandleLandTilePlaced;
             landTileInventory.OnCountChanged += HandleLandCountChanged;
+            builderController.OnTurretPlaced -= HandleTurretPlaced;
+            builderController.OnTurretPlaced += HandleTurretPlaced;
             
             buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
         }
@@ -344,7 +353,9 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             var wallsTabBtn = CreateTabButton("Walls", true);
             var buildingsTabBtn = CreateTabButton("Buildings", false);
-
+            var turretsTabBtn = CreateTabButton("Turrets", false);
+            
+            tabRow.Add(turretsTabBtn);
             tabRow.Add(wallsTabBtn);
             tabRow.Add(buildingsTabBtn);
             wallsBuildingsPanel.Add(tabRow);
@@ -352,6 +363,8 @@ namespace _Project.Scripts.BaseBuilder.UI
             // Content containers
             var wallsContent = new VisualElement { name = "WallsContent" };
             var buildingsContent = new VisualElement { name = "BuildingsContent" };
+            var turretsContent = new VisualElement { name = "TurretsContent" };
+            turretsContent.style.display = DisplayStyle.None;
             buildingsContent.style.display = DisplayStyle.None;
 
             // --- Walls Grid ---
@@ -375,6 +388,26 @@ namespace _Project.Scripts.BaseBuilder.UI
                 wallsGrid.Add(emptyLabel);
             }
             wallsContent.Add(wallsGrid);
+            
+            // ---Turret Grid ---
+            var turretsGrid = new VisualElement();
+            turretsGrid.style.flexDirection = FlexDirection.Row;
+            turretsGrid.style.flexWrap = Wrap.Wrap;
+            turretsGrid.style.justifyContent = Justify.FlexStart;
+
+            if (turretInventory != null && turretInventory.turrets != null && turretInventory.turrets.Count > 0)
+            {
+                for (int i = 0; i < turretInventory.turrets.Count; i++)
+                    turretsGrid.Add(CreateTurretSlot(turretInventory.turrets[i], i));
+            }
+            else
+            {
+                var emptyLabel = new Label("No Turrets assigned");
+                emptyLabel.style.color = Color.gray;
+                turretsGrid.Add(emptyLabel);
+            }
+            turretsContent.Add(turretsGrid);
+            wallsBuildingsPanel.Add(turretsContent);
 
             // --- Buildings Grid  ---
             var buildingsGrid = new VisualElement();
@@ -427,7 +460,17 @@ namespace _Project.Scripts.BaseBuilder.UI
                 SetTabActive(wallsTabBtn, false);
                 SetTabActive(buildingsTabBtn, true);
             };
-
+            
+            turretsTabBtn.clicked += () =>
+            {
+                wallsContent.style.display = DisplayStyle.None;
+                buildingsContent.style.display = DisplayStyle.None;
+                turretsContent.style.display = DisplayStyle.Flex;
+                SetTabActive(wallsTabBtn, false);
+                SetTabActive(buildingsTabBtn, false);
+                SetTabActive(turretsTabBtn, true);
+            };
+            
             // ===== Bottom buttons =====
             var buttonRow = new VisualElement();
             buttonRow.style.flexDirection = FlexDirection.Row;
@@ -650,6 +693,74 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             return slot;
         }
+        
+        private VisualElement CreateTurretSlot(TurretInventorySO.TurretEntry entry, int index)
+        {
+            var slot = new VisualElement();
+            slot.pickingMode = PickingMode.Position;
+            slot.style.width = 72;
+            slot.style.height = 72;
+            slot.style.backgroundColor = new Color(0.18f, 0.22f, 0.35f);
+            slot.style.borderTopLeftRadius = 6;
+            slot.style.borderTopRightRadius = 6;
+            slot.style.borderBottomLeftRadius = 6;
+            slot.style.borderBottomRightRadius = 6;
+            slot.style.marginRight = 8;
+            slot.style.marginBottom = 8;
+            slot.style.justifyContent = Justify.Center;
+            slot.style.alignItems = Align.Center;
+
+            // Placeholder icon (or real icon later)
+            if (entry != null && entry.icon != null)
+            {
+                slot.style.backgroundImage = new StyleBackground(entry.icon);
+                slot.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                slot.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            }
+            else
+            {
+                var placeholder = new Label("W");
+                placeholder.style.fontSize = 20;
+                placeholder.style.color = new Color(0.6f, 0.8f, 0.7f);
+                placeholder.style.unityFontStyleAndWeight = FontStyle.Bold;
+                slot.Add(placeholder);
+            }
+
+            // Count label
+            int count = turretInventory != null ? turretInventory.GetCount(index) : 0;
+            var countLabel = new Label(count.ToString());
+            while (turretCountLabels.Count <= index)
+                turretCountLabels.Add(null);
+            turretCountLabels[index] = countLabel;
+            
+            countLabel.style.position = Position.Absolute;
+            countLabel.style.right = 4;
+            countLabel.style.bottom = 2;
+            countLabel.style.fontSize = 13;
+            countLabel.style.color = Color.white;
+            countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            countLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
+            countLabel.style.paddingLeft = 4;
+            countLabel.style.paddingRight = 4;
+            countLabel.style.borderTopLeftRadius = 3;
+            countLabel.style.borderTopRightRadius = 3;
+            countLabel.style.borderBottomLeftRadius = 3;
+            countLabel.style.borderBottomRightRadius = 3;
+            slot.Add(countLabel);
+
+            // Click to select
+            slot.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (entry == null || entry.prefab == null) return;
+
+                builderController?.SelectPrefab(entry.prefab, Vector2Int.one, false, index, PlaceableKind.Turret);
+
+                HighlightSelectedSlot(slot);
+            });
+
+            return slot;
+        }
 
         #endregion
         
@@ -832,6 +943,12 @@ namespace _Project.Scripts.BaseBuilder.UI
             HandleBuildingCountChanged(index);
         }
         
+        private void HandleTurretPlaced(int index)
+        {
+            if (turretInventory == null) return;
+            turretInventory.Consume(index); // count-- and OnCountChanged
+        }
+        
         private void HandleLandCountChanged(int index)
         {
             if (landTileInventory == null) return;
@@ -851,6 +968,17 @@ namespace _Project.Scripts.BaseBuilder.UI
             if (label == null || label.panel == null) return;
 
             label.text = wallInventory.GetCount(index).ToString();
+        }
+        
+        private void HandleTurretCountChanged(int index)
+        {
+            if (turretInventory == null) return;
+            if (index < 0 || index >= turretCountLabels.Count) return;
+
+            var label = turretCountLabels[index];
+            if (label == null || label.panel == null) return;
+
+            label.text = turretInventory.GetCount(index).ToString();
         }
         
         private void HandleBuildingCountChanged(int index)

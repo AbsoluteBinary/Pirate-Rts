@@ -8,7 +8,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
         Land,
         Wall,
         Building,
-        Water
+        Water,
+        Turret
     }
 
     /// <summary>
@@ -19,15 +20,18 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
         private readonly LandTileInventorySO _land;
         private readonly WallInventorySO _walls;
         private readonly BuildingsInventorySO _buildings;
+        private readonly TurretInventorySO _turrets;
 
         public BuilderInventoryFacade(
             LandTileInventorySO land,
             WallInventorySO walls,
-            BuildingsInventorySO buildings = null)
+            BuildingsInventorySO buildings = null,
+            TurretInventorySO turrets = null)
         {
             _land = land;
             _walls = walls;
             _buildings = buildings;
+            _turrets = turrets;
         }
 
         public int GetCount(PlaceableKind kind, int index)
@@ -42,6 +46,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                     return _walls != null ? _walls.GetCount(index) : 0;
                 case PlaceableKind.Building:
                     return _buildings != null ? _buildings.GetCount(index) : 0;
+                case PlaceableKind.Turret:
+                    return _turrets != null ? _turrets.GetCount(index) : 0;
                 default:
                     return 0;
             }
@@ -59,6 +65,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                     return _walls != null && _walls.Consume(index);
                 case PlaceableKind.Building:
                     return _buildings != null && _buildings.Consume(index);
+                case PlaceableKind.Turret:
+                    return _turrets != null && _turrets.Consume(index);
                 default:
                     return false;
             }
@@ -78,6 +86,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Inventory
                     break;
                 case PlaceableKind.Building:
                     _buildings?.Restore(index, amount);
+                    break;
+                case PlaceableKind.Turret:
+                    _turrets?.Restore(index, amount);
                     break;
             }
         }

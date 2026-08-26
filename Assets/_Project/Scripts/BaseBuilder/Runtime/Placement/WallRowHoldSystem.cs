@@ -1,14 +1,19 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TGS;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
+using Object = UnityEngine.Object;
 
 namespace _Project.Scripts.BaseBuilder.Runtime.Placement
 {
     public class WallRowHoldSystem
     {
         public bool IsHolding => _held.Count > 0;
+        
+        Func<bool> _isInventoryPlacing;
+        bool _ignorePlaceUntilRelease;
 
         struct HeldPiece
         {
@@ -47,12 +52,14 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             PlacementService placement,
             PlacementValidator validator,
             BuilderInputActions input,
-            Camera cam)
+            Camera cam,
+            Func<bool> isInventoryPlacing)
         {
             _placement = placement;
             _validator = validator;
             _input = input;
             _cam = cam;
+            _isInventoryPlacing = isInventoryPlacing;
         }
 
         public void SetGrids(TerrainGridSystem land, TerrainGridSystem objects)
@@ -77,9 +84,18 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             _input.Builder.RotateHeld.performed -= OnRotate;
         }
 
+        
+
         public void Tick()
         {
             if (!IsHolding || _objectGrid == null) return;
+
+            if (_ignorePlaceUntilRelease)
+            {
+                if (Mouse.current == null || Mouse.current.leftButton.isPressed)
+                    return; // still holding the pickup click
+                _ignorePlaceUntilRelease = false;
+            }
 
             Cell under = GetCellUnderMouse(_objectGrid);
             if (under == null) return;
@@ -93,6 +109,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         void OnPickUpRow(InputAction.CallbackContext _)
         {
             if (_objectGrid == null || IsHolding) return;
+            if (_isInventoryPlacing != null && _isInventoryPlacing()) return;
 
             Cell start = GetCellUnderMouse(_objectGrid);
             if (start == null) return;
@@ -106,6 +123,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 Debug.LogWarning("Row pick up: wall is locked");
                 return;
             }
+            
+            _ignorePlaceUntilRelease = true;
 
             var row = CollectRow(start.index);
             if (row.Count == 0) return;

@@ -3,6 +3,9 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="BackgroundAgentGlobalSettings">
+    <option name="selectedModelId" value="auto" />
+  </component>
   <component name="CMakeProjectFlavorService">
     <option name="flavorId" value="CMakePlainProjectFlavor" />
   </component>
@@ -11,21 +14,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WallRowHoldSystem.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WallRowHoldSystem.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/TurretInventorySO.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/TurretInventorySO.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.inputactions" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.inputactions" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.inputactions.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.inputactions.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WallRowHoldSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WallRowHoldSystem.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/home/baus/Documents/Unity/Pirate-Rts-Repo" value="3IRvScUc3pXTQc5LRUzZYabjRfx" />
+    </persistenceIdMap>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -37,6 +47,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/BuilderMode.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/PlaceableObjectData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Input/BuilderInputActions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Modes/BuilderModeSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/CellHighLightService.cs" root0="FORCE_HIGHLIGHTING" />
@@ -61,6 +72,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FormationData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/BuildingsInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/HarbourMode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/TurretInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/WallInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Modules/ArmourData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Modules/EngineData.cs" root0="FORCE_HIGHLIGHTING" />
@@ -94,59 +106,62 @@
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
       <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000122489896" />
-      <entry key="S10" value="1.000155996555133" />
-      <entry key="S30" value="1.1621460524063723" />
-      <entry key="S60" value="2.0410019502087593" />
-      <entry key="M2" value="3.7010594617383785" />
-      <entry key="M5" value="6.060788240680667" />
-      <entry key="M10" value="7.553953208817517" />
-      <entry key="M15" value="8.27445297689005" />
-      <entry key="M30" value="9.402263602080376" />
-      <entry key="H1" value="11.657239438742437" />
-      <entry key="H2" value="20.806606860566564" />
-      <entry key="H4" value="48.61809192655999" />
-      <entry key="D1" value="258.8800614764585" />
-      <entry key="W1" value="431.8821743936453" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000007497813577" />
+      <entry key="S60" value="1.0027767128999228" />
+      <entry key="M2" value="1.1877992010839404" />
+      <entry key="M5" value="3.5447722258276078" />
+      <entry key="M10" value="7.970898608932797" />
+      <entry key="M15" value="11.639428884708678" />
+      <entry key="M30" value="19.566343212042568" />
+      <entry key="H1" value="28.996633833328087" />
+      <entry key="H2" value="42.02844559402953" />
+      <entry key="H4" value="69.98888698688847" />
+      <entry key="D1" value="283.34262738579866" />
+      <entry key="W1" value="465.8987111147032" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.6944471950761545E-239" />
-      <entry key="MS500" value="1.761187554536937E-48" />
-      <entry key="S2" value="1.1519971432985013E-12" />
-      <entry key="S5" value="1.677473481470383E-5" />
-      <entry key="S10" value="0.004149200237293696" />
-      <entry key="S30" value="0.1977557397906978" />
-      <entry key="S60" value="0.5943196818266089" />
-      <entry key="M2" value="1.0732762689267148" />
-      <entry key="M5" value="1.5532280781830716" />
-      <entry key="M10" value="1.7734317398929031" />
-      <entry key="M15" value="1.9116964813901915" />
-      <entry key="M30" value="2.3875326942506976" />
-      <entry key="H1" value="3.2782471166333482" />
-      <entry key="H2" value="5.001292091228438" />
-      <entry key="H4" value="8.685515223831082" />
-      <entry key="D1" value="38.49165357030565" />
-      <entry key="W1" value="67.41312858138255" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="2.4246524776022394E-179" />
+      <entry key="S30" value="3.5619744483536145E-60" />
+      <entry key="S60" value="2.5223245324588583E-30" />
+      <entry key="M2" value="2.2110672523031835E-15" />
+      <entry key="M5" value="2.0739171503546738E-6" />
+      <entry key="M10" value="0.002049238761843443" />
+      <entry key="M15" value="0.021050915964533266" />
+      <entry key="M30" value="0.2505390093057918" />
+      <entry key="H1" value="1.0619515474158743" />
+      <entry key="H2" value="2.8465166375070905" />
+      <entry key="H4" value="6.552565024894374" />
+      <entry key="D1" value="36.72562488484056" />
+      <entry key="W1" value="66.9623323688416" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="2.877997289875293E-13" />
-      <entry key="MS500" value="0.003103259375375408" />
-      <entry key="S2" value="0.23602310478817343" />
-      <entry key="S5" value="0.5612959132787433" />
-      <entry key="S10" value="0.7529222911254959" />
-      <entry key="S30" value="1.2406062544795664" />
-      <entry key="S60" value="2.521396166929921" />
-      <entry key="M2" value="4.673188159481473" />
-      <entry key="M5" value="7.551483698452967" />
-      <entry key="M10" value="9.290088246015827" />
-      <entry key="M15" value="10.159373766469118" />
-      <entry key="M30" value="11.774661739389673" />
-      <entry key="H1" value="14.926768655254726" />
-      <entry key="H2" value="25.802363885278417" />
-      <entry key="H4" value="57.29922270572502" />
-      <entry key="D1" value="297.3686509867003" />
-      <entry key="W1" value="499.2945582793548" />
+      <entry key="MS100" value="5.506780270519634E-11" />
+      <entry key="MS500" value="0.008875228631145987" />
+      <entry key="S2" value="0.3069339209787651" />
+      <entry key="S5" value="0.6234734367177139" />
+      <entry key="S10" value="0.789603341379527" />
+      <entry key="S30" value="0.9242795471098575" />
+      <entry key="S60" value="0.964155400034978" />
+      <entry key="M2" value="1.1675959955583852" />
+      <entry key="M5" value="3.5325945385048496" />
+      <entry key="M10" value="7.9635156400053955" />
+      <entry key="M15" value="11.652569433305432" />
+      <entry key="M30" value="19.810518495086605" />
+      <entry key="H1" value="30.05304863341814" />
+      <entry key="H2" value="44.87035910417305" />
+      <entry key="H4" value="76.53739130762764" />
+      <entry key="D1" value="320.06519936241534" />
+      <entry key="W1" value="532.8602851778928" />
     </decayedShown>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
@@ -155,32 +170,48 @@
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_id" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="BACKGROUND" />
+        <option name="worktreeMode" value="WORKSPACE" />
+      </template>
+    </option>
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;mainbranch&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/baus/Downloads/Symfony_Plugin-2026.1.286.zip&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "mainbranch",
+    "last_opened_file_path": "/home/baus/Downloads/Symfony_Plugin-2026.1.286.zip",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.5.6f1/Editor/Unity" />

@@ -180,6 +180,16 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""New action"",
+                    ""type"": ""Button"",
+                    ""id"": ""0f613d16-abe2-419f-ad5d-0652f36c0619"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -228,15 +238,37 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""82cede94-cfa9-4d14-9514-0ca50e8933c8"",
-                    ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": ""MultiTap"",
+                    ""name"": ""One Modifier"",
+                    ""id"": ""c5c1b14f-9ef6-4230-83c4-82fc17fddb00"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PickUpRow"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""cbc7ca3e-d837-46a5-9bc4-3c8160979752"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""PickUpRow"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""3855c77d-9d62-4c64-a3b3-a0611a2080d3"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PickUpRow"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
@@ -270,6 +302,17 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""RotateHeld"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""de64c4da-e9f5-4dbc-8e2f-e7047da09868"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -287,6 +330,7 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
         m_Builder_PickUpRow = m_Builder.FindAction("PickUpRow", throwIfNotFound: true);
         m_Builder_CancelHeld = m_Builder.FindAction("CancelHeld", throwIfNotFound: true);
         m_Builder_RotateHeld = m_Builder.FindAction("RotateHeld", throwIfNotFound: true);
+        m_Builder_Newaction = m_Builder.FindAction("New action", throwIfNotFound: true);
     }
 
     ~@BuilderInputActions()
@@ -470,6 +514,7 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Builder_PickUpRow;
     private readonly InputAction m_Builder_CancelHeld;
     private readonly InputAction m_Builder_RotateHeld;
+    private readonly InputAction m_Builder_Newaction;
     /// <summary>
     /// Provides access to input actions defined in input action map "Builder".
     /// </summary>
@@ -505,6 +550,10 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Builder/RotateHeld".
         /// </summary>
         public InputAction @RotateHeld => m_Wrapper.m_Builder_RotateHeld;
+        /// <summary>
+        /// Provides access to the underlying input action "Builder/Newaction".
+        /// </summary>
+        public InputAction @Newaction => m_Wrapper.m_Builder_Newaction;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -549,6 +598,9 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
             @RotateHeld.started += instance.OnRotateHeld;
             @RotateHeld.performed += instance.OnRotateHeld;
             @RotateHeld.canceled += instance.OnRotateHeld;
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
         }
 
         /// <summary>
@@ -578,6 +630,9 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
             @RotateHeld.started -= instance.OnRotateHeld;
             @RotateHeld.performed -= instance.OnRotateHeld;
             @RotateHeld.canceled -= instance.OnRotateHeld;
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
         }
 
         /// <summary>
@@ -675,5 +730,12 @@ public partial class @BuilderInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRotateHeld(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "New action" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNewaction(InputAction.CallbackContext context);
     }
 }

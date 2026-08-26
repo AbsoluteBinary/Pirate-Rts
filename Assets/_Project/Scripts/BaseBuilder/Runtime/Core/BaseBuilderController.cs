@@ -46,7 +46,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private WallInventorySO wallInventory;
         [SerializeField] private BuildingsInventorySO  buildingsInventory;
-
+        [SerializeField] private TurretInventorySO turretInventory;
+        
         [Header("Input")]
         [SerializeField] private Camera buildCamera;
         [SerializeField] private StrategyCameraController strategyCamera;
@@ -69,6 +70,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         public PlaceableKind selectedKind = PlaceableKind.Land;
 
         public event System.Action<int> OnLandTilePlaced;
+        public event Action<int> OnTurretPlaced;
+        
 
         #endregion
 
@@ -101,7 +104,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             _rectSelect = new RectangleSelectSystem(() => isPointerOverUI);
             _rectSelect.OnDragStarted += () => SelectionSystem?.Clear();
             
-            _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory);
+            _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory, turretInventory);
             _rectSelect = new RectangleSelectSystem();
             
             ModeSystem = new BuilderModeSystem();
@@ -187,7 +190,13 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             };
             
             _wallRowHold = new WallRowHoldSystem();
-            _wallRowHold.Bind(PlacementService, Validator, inputActions, buildCamera);
+            _wallRowHold.Bind(
+                PlacementService,
+                Validator,
+                inputActions,
+                buildCamera,
+                () => selectedPrefab != null
+            );
             _wallRowHold.SetGrids(landGrid, objectGrid);
 
             if (landGrid != null || objectGrid != null)
@@ -251,13 +260,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 currentHoveredCell = null;
                 return;
             }
-            
-            if (ModeSystem.IsBuildOnLand)
-            {
-                if (CurrentMode == BuilderMode.BuildOnLand)
-                    _wallRowHold.Tick();
-                return;
-            }
+
+            if (ModeSystem.IsBuildOnLand && CurrentMode == BuilderMode.BuildOnLand && _wallRowHold != null)
+                _wallRowHold.Tick();
+
+            // do NOT return here — fall through to cell hover + preview follow
             
 
             UpdateHoveredCell();
@@ -938,7 +945,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     return entry.kind == PlaceableKind.Land || entry.isLand;
 
                 case SelectFilter.Turrets:
-                    return false; // until you have a Turret kind
+                    return entry.kind == PlaceableKind.Turret
+                           || (!entry.isLand && entry.kind != PlaceableKind.Turret);
 
                 default:
                     return false;
