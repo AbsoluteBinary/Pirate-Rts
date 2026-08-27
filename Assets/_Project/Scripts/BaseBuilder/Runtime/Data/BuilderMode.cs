@@ -9,6 +9,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Data
         PickUp,
         Delete,
         Lock,
-        Unlock
+        Unlock,
+        Store
     }
 }

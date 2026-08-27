@@ -48,6 +48,8 @@ namespace _Project.Scripts.BaseBuilder.UI
         private VisualElement wallsBuildingsPanel;
         private VisualElement currentlySelectedSlot;
         private readonly List<Label> slotCountLabels = new List<Label>();
+        
+        private Button storeBuildingsButton;
 
         #endregion
 
@@ -80,6 +82,11 @@ namespace _Project.Scripts.BaseBuilder.UI
                 turretInventory.OnCountChanged -= HandleTurretCountChanged;
                 turretInventory.OnCountChanged += HandleTurretCountChanged;
             }
+            if (builderController.ModeSystem != null)
+            {
+                builderController.ModeSystem.OnModeChanged -= HandleModeChangedForButtons;
+                builderController.ModeSystem.OnModeChanged += HandleModeChangedForButtons;
+            }
             
             if (builderController == null) return;
 
@@ -108,6 +115,8 @@ namespace _Project.Scripts.BaseBuilder.UI
                 buildingsInventory.OnCountChanged -= HandleBuildingCountChanged;
                 buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
             }
+            if (builderController?.ModeSystem != null)
+                builderController.ModeSystem.OnModeChanged -= HandleModeChangedForButtons;
             builderController?.SetPointerOverUI(false);
         }
         
@@ -124,6 +133,7 @@ namespace _Project.Scripts.BaseBuilder.UI
         private void BuildUI()
         {
             root.Clear();
+            modeButtons.Clear();
             currentlySelectedSlot = null;
 
             BuildTopBar();
@@ -151,27 +161,47 @@ namespace _Project.Scripts.BaseBuilder.UI
             topBar.Add(CreateModeButton("Select", BuilderMode.Select));
             topBar.Add(CreateModeButton("Build on Water", BuilderMode.BuildOnWater));
             topBar.Add(CreateModeButton("Build on Land", BuilderMode.BuildOnLand));
+            
 
             var spacer = new VisualElement();
             spacer.style.flexGrow = 1;
             topBar.Add(spacer);
 
             //buttonRow.Add(CreateInventoryButton("Save", OnSaveClicked));
-            topBar.Add(CreateActionButton("Pick Up", () =>
+            // topBar.Add(CreateActionButton("Pick Up", () =>
+            // {
+            //     builderController?.ClearSelectedPrefab();
+            //     builderController?.SetMode(BuilderMode.PickUp);
+            //     OnPickUpClicked?.Invoke(); // optional – keep if something else listens
+            //     
+            //     Debug.Log("<color=cyan>Mode → Pick Up</color>");
+            // }));
+            
+            storeBuildingsButton = CreateActionButton("Store Buildings", () =>
+            {
+                builderController?.ToggleStoreMode();
+                Debug.Log("<color=cyan>Store Buildings toggled</color>");
+            });
+            modeButtons[BuilderMode.Store] = storeBuildingsButton;
+            topBar.Add(storeBuildingsButton);
+            
+            var pickUpBtn = CreateActionButton("Pick Up", () =>
             {
                 builderController?.ClearSelectedPrefab();
                 builderController?.SetMode(BuilderMode.PickUp);
-                OnPickUpClicked?.Invoke(); // optional – keep if something else listens
-                
+                OnPickUpClicked?.Invoke();
                 Debug.Log("<color=cyan>Mode → Pick Up</color>");
-            }));
+            });
+            modeButtons[BuilderMode.PickUp] = pickUpBtn;
+            topBar.Add(pickUpBtn);
             
-            topBar.Add(CreateActionButton("Delete", () =>
-            {
-                builderController?.DeleteSelectedOrEnterMode();
-                OnDeleteClicked?.Invoke();
-                Debug.Log("<color=orange>Delete button</color>");
-            }));
+            
+            // topBar.Add(CreateActionButton("Delete", () =>
+            // {
+            //     builderController?.DeleteSelectedOrEnterMode();
+            //     OnDeleteClicked?.Invoke();
+            //     Debug.Log("<color=orange>Delete button</color>");
+            // }));
             
             topBar.Add(CreateActionButton("Clear Selection", () =>
             {
@@ -180,19 +210,42 @@ namespace _Project.Scripts.BaseBuilder.UI
                 Debug.Log("<color=cyan>Selection cleared</color>");
             }));
             
-            topBar.Add(CreateActionButton("Lock", () =>
+            // topBar.Add(CreateActionButton("Lock", () =>
+            // {
+            //     builderController?.LockSelectedOrEnterMode(true);
+            //     OnLockClicked?.Invoke();
+            //     Debug.Log("<color=yellow>Lock button</color>");
+            // }));
+            //
+            // topBar.Add(CreateActionButton("Unlock", () =>
+            // {
+            //     builderController?.LockSelectedOrEnterMode(false);
+            //     OnUnlockClicked?.Invoke();
+            //     Debug.Log("<color=cyan>Unlock button</color>");
+            // }));
+            var deleteBtn = CreateActionButton("Delete", () =>
+            {
+                builderController?.DeleteSelectedOrEnterMode();
+                OnDeleteClicked?.Invoke();
+            });
+            modeButtons[BuilderMode.Delete] = deleteBtn;
+            topBar.Add(deleteBtn);
+
+            var lockBtn = CreateActionButton("Lock", () =>
             {
                 builderController?.LockSelectedOrEnterMode(true);
                 OnLockClicked?.Invoke();
-                Debug.Log("<color=yellow>Lock button</color>");
-            }));
+            });
+            modeButtons[BuilderMode.Lock] = lockBtn;
+            topBar.Add(lockBtn);
 
-            topBar.Add(CreateActionButton("Unlock", () =>
+            var unlockBtn = CreateActionButton("Unlock", () =>
             {
                 builderController?.LockSelectedOrEnterMode(false);
                 OnUnlockClicked?.Invoke();
-                Debug.Log("<color=cyan>Unlock button</color>");
-            }));
+            });
+            modeButtons[BuilderMode.Unlock] = unlockBtn;
+            topBar.Add(unlockBtn);
 
             var exitBtn = new Button { text = "Exit Build Mode" };
             StyleButton(exitBtn, new Color(0.55f, 0.15f, 0.15f));
@@ -231,7 +284,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             filterBar.Add(CreateFilterButton("Walls", SelectFilter.Walls));
             filterBar.Add(CreateFilterButton("Turrets", SelectFilter.Turrets));
             filterBar.Add(CreateFilterButton("Land", SelectFilter.Land));
-            filterBar.Add(CreateFilterButton("Buildings", SelectFilter.Buildings));
+            
 
             root.Add(filterBar);
             RegisterUIBlockers(filterBar);
@@ -993,6 +1046,18 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             label.text = buildingsInventory.GetCount(index).ToString();
         }
+        
+        private void HandleModeChangedForButtons(BuilderMode mode)
+        {
+            RefreshModeButtonGlows(mode);
+            UpdateFilterBarReadyState();
+        }
+
+        private void RefreshModeButtonGlows(BuilderMode current)
+        {
+            foreach (var kvp in modeButtons)
+                SetButtonGlow(kvp.Value, kvp.Key == current);
+        }
 
         #endregion
 
@@ -1064,6 +1129,8 @@ namespace _Project.Scripts.BaseBuilder.UI
 
         #region Button Factories
 
+        private readonly Dictionary<BuilderMode, Button> modeButtons = new Dictionary<BuilderMode, Button>();
+        
         private Button CreateModeButton(string text, BuilderMode mode)
         {
             var btn = new Button { text = text };
@@ -1104,8 +1171,59 @@ namespace _Project.Scripts.BaseBuilder.UI
                         break;
                 }
             };
+            modeButtons[mode] = btn;
 
             return btn;
+        }
+        
+        private static readonly Color ModeGlowColor = new Color(0.35f, 0.95f, 1f);
+
+        private void SetButtonGlow(Button btn, bool on)
+        {
+            if (btn == null) return;
+
+            if (on)
+            {
+                btn.style.borderTopWidth = 3;
+                btn.style.borderRightWidth = 3;
+                btn.style.borderBottomWidth = 3;
+                btn.style.borderLeftWidth = 3;
+                btn.style.borderTopColor = ModeGlowColor;
+                btn.style.borderRightColor = ModeGlowColor;
+                btn.style.borderBottomColor = ModeGlowColor;
+                btn.style.borderLeftColor = ModeGlowColor;
+            }
+            else
+            {
+                btn.style.borderTopWidth = 0;
+                btn.style.borderRightWidth = 0;
+                btn.style.borderBottomWidth = 0;
+                btn.style.borderLeftWidth = 0;
+            }
+        }
+        
+        private void SetStoreButtonActive(bool on)
+        {
+            if (storeBuildingsButton == null) return;
+
+            if (on)
+            {
+                storeBuildingsButton.style.borderTopWidth = 3;
+                storeBuildingsButton.style.borderRightWidth = 3;
+                storeBuildingsButton.style.borderBottomWidth = 3;
+                storeBuildingsButton.style.borderLeftWidth = 3;
+                storeBuildingsButton.style.borderTopColor = new Color(0.35f, 0.95f, 1f);
+                storeBuildingsButton.style.borderRightColor = new Color(0.35f, 0.95f, 1f);
+                storeBuildingsButton.style.borderBottomColor = new Color(0.35f, 0.95f, 1f);
+                storeBuildingsButton.style.borderLeftColor = new Color(0.35f, 0.95f, 1f);
+            }
+            else
+            {
+                storeBuildingsButton.style.borderTopWidth = 0;
+                storeBuildingsButton.style.borderRightWidth = 0;
+                storeBuildingsButton.style.borderBottomWidth = 0;
+                storeBuildingsButton.style.borderLeftWidth = 0;
+            }
         }
         
         private void UpdateFilterBarReadyState()

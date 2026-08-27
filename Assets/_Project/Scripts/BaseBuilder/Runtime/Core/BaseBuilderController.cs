@@ -42,6 +42,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private bool _clearSelectionAfterPlace;
         private RectangleSelectSystem _rectSelect;
         [SerializeField] private BaseBuilderHUD hud;
+        public readonly List<StoredBuilding> BuildingsStorage = new List<StoredBuilding>();
 
         [SerializeField] private LandTileInventorySO landTileInventory;
         [SerializeField] private WallInventorySO wallInventory;
@@ -51,7 +52,6 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         [Header("Input")]
         [SerializeField] private Camera buildCamera;
         [SerializeField] private StrategyCameraController strategyCamera;
-        
         private BuilderInputActions inputActions;
 
         #endregion
@@ -254,6 +254,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 HandleLockInput(false);
                 return;
             }
+            if (ModeSystem.CurrentMode == BuilderMode.Store)
+            {
+                HandleStoreInput();
+                return;
+            }
 
             if (!ModeSystem.IsBuildOnWater && !ModeSystem.IsBuildOnLand)
             {
@@ -280,6 +285,15 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             landGrid = land;
             objectGrid = objects;
             PlacementService.SetGrids(land, objects);
+        }
+        
+        public void ToggleStoreMode()
+        {
+            ClearSelectedPrefab();
+            if (ModeSystem.CurrentMode == BuilderMode.Store)
+                SetMode(BuilderMode.Select);
+            else
+                SetMode(BuilderMode.Store);
         }
 
         public void SetMode(BuilderMode mode)
@@ -527,6 +541,46 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             _clearSelectionAfterPlace = true;
             
             Debug.Log($"<color=cyan>Picked up – now placing {(info.IsLandObject ? "Land" : "Wall")}</color>");
+        }
+        
+        private void HandleStoreInput()
+        {
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+                return;
+            if (isPointerOverUI) return;
+
+            Camera cam = buildCamera != null ? buildCamera : Camera.main;
+            if (cam == null || PlacementService == null) return;
+
+            Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            int layer = LayerMask.GetMask("PlacedObjects");
+            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, layer))
+                return;
+
+            GameObject target = hit.collider.transform.root.gameObject;
+
+            if (PlacementService.IsLocked(target))
+            {
+                Debug.LogWarning("[Store] Blocked – locked");
+                return;
+            }
+
+            if (!IsPlacedBuilding(target))
+            {
+                Debug.LogWarning("[Store] Not a building");
+                return;
+            }
+
+            if (!PlacementService.TryPickUp(target, out var info))
+                return;
+
+            // Do NOT RestoreInventory — SO count stays unchanged
+            BuildingsStorage.Add(new StoredBuilding(info.Kind, 1, info.Size));
+
+            if (info.Instance != null)
+                Object.Destroy(info.Instance);
+
+            Debug.Log($"[Store] Stored {info.Kind} Lv1 size={info.Size} | storage={BuildingsStorage.Count}");
         }
         
         private void HandleDeleteInput()
