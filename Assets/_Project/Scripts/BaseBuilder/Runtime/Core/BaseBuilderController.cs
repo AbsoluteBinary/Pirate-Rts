@@ -4,6 +4,7 @@ using _Project.Scripts.BaseBuilder.Runtime.Data;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.BaseBuilder.Runtime.Modes;
 using _Project.Scripts.BaseBuilder.Runtime.Placement;
+using _Project.Scripts.BaseBuilder.Runtime.Presentation;
 using _Project.Scripts.BaseBuilder.Runtime.Selection;
 using _Project.Scripts.BaseBuilder.UI;
 using _Project.Scripts.Harbour.Data.SO;
@@ -19,7 +20,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
     {
         #region Inspector Fields
         
-        
+        private int _placeYawSteps;
 
         [Header("Grid References")]
         [SerializeField] private TerrainGridSystem landGrid;
@@ -146,6 +147,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             inputActions = new BuilderInputActions();
             inputActions.Player.Enable();
             inputActions.Builder.Disable();
+            
+            inputActions.Builder.RotateHeld.performed += OnRotateHeld;
 
             if (strategyCamera == null)
                 strategyCamera = FindFirstObjectByType<StrategyCameraController>();
@@ -212,6 +215,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             builderInputActions?.Dispose();
             builderInputActions = null;
             
+            if (inputActions != null)
+                inputActions.Builder.RotateHeld.performed -= OnRotateHeld;
             if (SelectionSystem != null)
                 SelectionSystem.OnSelectionChanged -= RefreshSelectionHighlights;
         }
@@ -395,6 +400,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             isLandObject = isLand;
             selectedInventoryIndex = inventoryIndex;
             
+            _placeYawSteps = 0;
+            
             Debug.Log($"[SelectPrefab] Set selectedInventoryIndex = {selectedInventoryIndex}");
 
             if (prefab != null)
@@ -402,6 +409,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 currentPreview = Instantiate(prefab);
                 currentPreview.name = "PlacementPreview";
                 SetPreviewStyle(currentPreview);
+                ApplyPreviewRotation();
+                RefreshPlacementHighlights();
+                
                 Debug.Log($"<color=cyan>Selected: {prefab.name} (index {inventoryIndex})</color>");
             }
             
@@ -533,10 +543,10 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 ModeSystem.SetMode(BuilderMode.BuildOnLand);
 
             if (info.Prefab != null)
-                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
+                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex, info.Kind);
             
             if (info.Prefab != null)
-                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex);
+                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex, info.Kind);
 
             _clearSelectionAfterPlace = true;
             
@@ -808,8 +818,18 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 pos.z += (selectedSize.y - 1) * cellSize * 0.5f;
                 pos.y += 0.1f;
 
-                currentPreview.transform.position = pos;
+                currentPreview.transform.SetPositionAndRotation(
+                    pos,
+                    Quaternion.Euler(0f, _placeYawSteps * 90f, 0f)
+                );
                 currentPreview.SetActive(true);
+                RefreshPlacementHighlights();
+                
+                bool valid = IsCurrentHoverValid();
+                ActiveGrid.CellSetColor(
+                    currentHoveredCell.index,
+                    valid ? new Color(0.2f, 0.9f, 0.3f, 0.55f) : new Color(0.95f, 0.2f, 0.2f, 0.55f)
+                );
             }
 
             ActiveGrid.CellSetColor(currentHoveredCell.index, new Color(0.2f, 0.9f, 0.3f, 0.55f));
@@ -878,11 +898,15 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 size,
                 isLand,
                 invIndex,
-                selectedKind
+                selectedKind,
+                Quaternion.Euler(0f, _placeYawSteps * 90f, 0f)
             );
 
             if (placed == null)
             {
+                SetNamedHighlight(currentPreview, CorrectHighlightName, false);
+                SetNamedHighlight(currentPreview, WrongHighlightName, true);
+                ApplyWireFrameColor(currentPreview, new Color(1f, 0.2f, 0.2f, 1f));
                 Debug.LogWarning("Placement failed – cell occupied or invalid");
                 return;
             }
@@ -1028,6 +1052,71 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 default:
                     return false;
             }
+        }
+        
+        private void OnRotateHeld(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.performed) return;
+            if (currentPreview == null) return;
+            if (ModeSystem.CurrentMode != BuilderMode.BuildOnLand
+                && ModeSystem.CurrentMode != BuilderMode.BuildOnWater)
+                return;
+
+            _placeYawSteps = (_placeYawSteps + 1) % 4;
+
+            if (selectedSize.x != selectedSize.y)
+                selectedSize = new Vector2Int(selectedSize.y, selectedSize.x);
+
+            ApplyPreviewRotation();
+            RefreshPlacementHighlights();
+        }
+
+        private void ApplyPreviewRotation()
+        {
+            if (currentPreview == null) return;
+            currentPreview.transform.rotation = Quaternion.Euler(0f, _placeYawSteps * 90f, 0f);
+        }
+
+        private const string CorrectHighlightName = "CorrectHighlight";
+        private const string WrongHighlightName = "WrongHighlight";
+
+        private void RefreshPlacementHighlights()
+        {
+            if (currentPreview == null) return;
+
+            bool valid = IsCurrentHoverValid();
+
+            SetNamedHighlight(currentPreview, CorrectHighlightName, valid);
+            SetNamedHighlight(currentPreview, WrongHighlightName, !valid);
+            SetNamedHighlight(currentPreview, SelectionHighlightName, false);
+
+            ApplyWireFrameColor(currentPreview, valid ? new Color(0.2f, 1f, 0.35f, 1f) : new Color(1f, 0.2f, 0.2f, 1f));
+        }
+        private bool IsCurrentHoverValid()
+        {
+            if (currentHoveredCell == null || ActiveGrid == null || Validator == null)
+                return false;
+
+            Vector3 worldPos = ActiveGrid.CellGetPosition(currentHoveredCell.index);
+            return Validator.CanPlace(worldPos, selectedSize, isLandObject);
+        }
+        
+        private static void ApplyWireFrameColor(GameObject root, Color color)
+        {
+            if (root == null) return;
+            var frames = root.GetComponentsInChildren<StaticWireFrame>(true);
+            for (int i = 0; i < frames.Length; i++)
+                frames[i].Color = color;
+        }
+
+        private static void SetNamedHighlight(GameObject root, string childName, bool active)
+        {
+            if (root == null) return;
+            Transform t = root.transform.Find(childName);
+            if (t == null)
+                t = FindChildRecursive(root.transform, childName);
+            if (t != null)
+                t.gameObject.SetActive(active);
         }
         private void SetCameraInputEnabled(bool enabled)
         {

@@ -14,12 +14,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/StoredBuilding.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/StoredBuilding.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Presentation.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Presentation/StaticWireFrame.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Presentation/StaticWireFrame.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/4x4 Building.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/4x4 Building.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Land Tile.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Land Tile.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Turret-Harbour.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Turret-Harbour.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Wall.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Wall.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/BuilderMode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/BuilderMode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,6 +58,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementValidator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WallRowHoldSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WireFramePreview.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Presentation/StaticWireFrame.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Selection/RectangleSelectSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Selection/SelectionSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" root0="FORCE_HIGHLIGHTING" />
@@ -89,7 +96,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Test Scripts/CombatSceneManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@eaac5bf1c7b5/Runtime/UGUI/UI/Core/VertexModifiers/Outline.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@7a4e1a2a8194/InputSystem/Runtime/Actions/InputAction.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -98,61 +105,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000845403728096" />
-      <entry key="MS500" value="1.1532543575066445" />
-      <entry key="S2" value="1.6256813471155036" />
-      <entry key="S5" value="1.8289747132223548" />
-      <entry key="S10" value="1.9104804848113741" />
-      <entry key="S30" value="1.9692226332131268" />
-      <entry key="S60" value="1.9844910528862751" />
-      <entry key="M2" value="1.9922152250828964" />
-      <entry key="M5" value="1.9968921360427352" />
-      <entry key="M10" value="2.0116114268194556" />
-      <entry key="M15" value="2.130162947462355" />
-      <entry key="M30" value="3.3475112593734426" />
-      <entry key="H1" value="7.49210948620067" />
-      <entry key="H2" value="18.582086762751796" />
-      <entry key="H4" value="44.77430100022729" />
-      <entry key="D1" value="264.97480693469055" />
-      <entry key="W1" value="474.2071225482115" />
+      <entry key="MS100" value="1.6636433489989018E-23" />
+      <entry key="MS500" value="2.7810708027256524E-5" />
+      <entry key="S2" value="0.07261945937134016" />
+      <entry key="S5" value="0.3502847292563229" />
+      <entry key="S10" value="0.591848569531365" />
+      <entry key="S30" value="0.8395956905058176" />
+      <entry key="S60" value="0.9162945435316188" />
+      <entry key="M2" value="0.9572327530604137" />
+      <entry key="M5" value="0.9826684668719904" />
+      <entry key="M10" value="0.9913000426835469" />
+      <entry key="M15" value="0.9947902074860983" />
+      <entry key="M30" value="1.1017531212318747" />
+      <entry key="H1" value="2.647898214143717" />
+      <entry key="H2" value="9.950588435279316" />
+      <entry key="H4" value="31.696963891727254" />
+      <entry key="D1" value="251.20777627204407" />
+      <entry key="W1" value="481.67113414743056" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="0.0" />
-      <entry key="S30" value="1.1814527007784267E-222" />
-      <entry key="S60" value="1.4526591827014377E-111" />
-      <entry key="M2" value="5.306196603614166E-56" />
-      <entry key="M5" value="1.1718282321789578E-22" />
-      <entry key="M10" value="1.5403834328625044E-11" />
-      <entry key="M15" value="8.077838799767066E-8" />
-      <entry key="M30" value="4.907806688013869E-4" />
-      <entry key="H1" value="0.04700139502967242" />
-      <entry key="H2" value="0.5988482015524347" />
-      <entry key="H4" value="3.005473139424041" />
-      <entry key="D1" value="32.251712466598285" />
-      <entry key="W1" value="65.73112787450624" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.000000002495815" />
+      <entry key="M10" value="1.0000544505482363" />
+      <entry key="M15" value="1.0016558052280216" />
+      <entry key="M30" value="1.0587026584194723" />
+      <entry key="H1" value="1.3971022776813506" />
+      <entry key="H2" value="2.2291396577914724" />
+      <entry key="H4" value="4.343738209635877" />
+      <entry key="D1" value="32.670024206295686" />
+      <entry key="W1" value="68.67834306152749" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.01884079955744076" />
-      <entry key="MS500" value="0.48684002278290883" />
-      <entry key="S2" value="1.2523071646809902" />
-      <entry key="S5" value="1.6387299812198475" />
-      <entry key="S10" value="1.8066919605930118" />
-      <entry key="S30" value="1.9324905653992261" />
-      <entry key="S60" value="1.9658437818006815" />
-      <entry key="M2" value="1.982820166555753" />
-      <entry key="M5" value="1.9931168256587835" />
-      <entry key="M10" value="2.009720405379895" />
-      <entry key="M15" value="2.128898721721842" />
-      <entry key="M30" value="3.347310961990954" />
-      <entry key="H1" value="7.538163938010998" />
-      <entry key="H2" value="19.178928979007665" />
-      <entry key="H4" value="47.776883897503495" />
-      <entry key="D1" value="297.2235243052767" />
-      <entry key="W1" value="539.9374561662653" />
+      <entry key="MS100" value="7.882000810064491E-20" />
+      <entry key="MS500" value="1.5112193264448003E-4" />
+      <entry key="S2" value="0.11377701443952207" />
+      <entry key="S5" value="0.5115187700935666" />
+      <entry key="S10" value="0.9549714281843383" />
+      <entry key="S30" value="1.5410283086166876" />
+      <entry key="S60" value="1.7523598330790293" />
+      <entry key="M2" value="1.8712281696061888" />
+      <entry key="M5" value="1.9472453773925205" />
+      <entry key="M10" value="1.9734680218952683" />
+      <entry key="M15" value="1.9844790727845594" />
+      <entry key="M30" value="2.154359785352528" />
+      <entry key="H1" value="4.041505347312029" />
+      <entry key="H2" value="12.17700608120744" />
+      <entry key="H4" value="36.03783441751299" />
+      <entry key="D1" value="283.87482081137756" />
+      <entry key="W1" value="550.348651079694" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">

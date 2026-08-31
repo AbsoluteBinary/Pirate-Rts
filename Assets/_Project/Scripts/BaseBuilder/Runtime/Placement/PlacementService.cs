@@ -18,6 +18,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         public int OriginCellIndex;
         public Vector2Int Size;
         public bool isLocked;
+        public Quaternion rotation;
     }
 
     public class PlacedEntry
@@ -30,7 +31,10 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         public int originCellIndex;
         public Vector2Int size;
         public bool isLocked;
+        public Quaternion rotation;
     }
+    
+    
     public class PlacementService
     {
 
@@ -65,11 +69,12 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
         // Placement
         // ─────────────────────────────────────────────
 
-        public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject, int inventoryIndex = -1, PlaceableKind kind = PlaceableKind.Land)
+        public GameObject Place(GameObject prefab, Vector3 worldPosition, Vector2Int size, bool isLandObject, int inventoryIndex = -1, PlaceableKind kind = PlaceableKind.Land, Quaternion rotation = default)
         {
             if (prefab == null) return null;
             
-            
+            if (rotation == default)
+                rotation = Quaternion.identity;
 
             TerrainGridSystem grid = isLandObject ? landGrid : objectGrid;
             if (grid == null) return null;
@@ -82,7 +87,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
 
             Vector3 finalPos = validator.GetFootprintCenter(originCell, size, grid);
 
-            GameObject instance = Object.Instantiate(prefab, finalPos, Quaternion.identity);
+            GameObject instance = Object.Instantiate(prefab, finalPos, rotation);
             instance.name = prefab.name;
 
             int placedLayer = LayerMask.NameToLayer("PlacedObjects");
@@ -99,7 +104,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 inventoryIndex = inventoryIndex,
                 originCellIndex = originCell.index,
                 size = size,
-                isLocked = false
+                isLocked = false,
+                rotation = rotation
             };
             
             placedEntries.Add(entry);
@@ -138,7 +144,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                     IsLandObject = entry.isLand,
                     InventoryIndex = entry.inventoryIndex,
                     OriginCellIndex = entry.originCellIndex,
-                    Size = entry.size
+                    Size = entry.size,
+                    rotation = entry.rotation
                 };
 
                 placedEntries.RemoveAt(i);
