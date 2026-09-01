@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.BaseBuilder.Runtime.Presentation.StaticWireFrame
   color: {r: 0, g: 1, b: 0, a: 1}
-  size: 1
+  size: 2
   wireMaterial: {fileID: 0}
   sourceFilter: {fileID: 1218362441317469446}
   rebuildOnEnable: 1
@@ -570,7 +570,7 @@ GameObject:
   - component: {fileID: 1700143219011391587}
   - component: {fileID: 6725150900612799848}
   m_Layer: 0
-  m_Name: 'WrongHighlight '
+  m_Name: WrongHighlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -612,7 +612,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.BaseBuilder.Runtime.Presentation.StaticWireFrame
   color: {r: 1, g: 0, b: 0, a: 1}
-  size: 1
+  size: 2
   wireMaterial: {fileID: 0}
   sourceFilter: {fileID: 1218362441317469446}
   rebuildOnEnable: 1

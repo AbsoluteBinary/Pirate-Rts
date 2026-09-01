@@ -200,7 +200,7 @@ GameObject:
   - component: {fileID: 4838841232148166074}
   - component: {fileID: 6522924976714779207}
   m_Layer: 0
-  m_Name: 'WrongHighlight '
+  m_Name: WrongHighlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

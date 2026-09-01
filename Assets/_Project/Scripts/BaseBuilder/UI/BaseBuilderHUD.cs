@@ -24,6 +24,8 @@ namespace _Project.Scripts.BaseBuilder.UI
         private readonly List<Label> turretCountLabels = new List<Label>();
         private readonly List<Label> buildingCountLabels = new List<Label>();
         private readonly List<Label> wallCountLabels = new List<Label>();
+        private readonly Dictionary<SelectFilter, Button> filterButtons = new();
+        private static readonly Color FilterGlowColor = new Color(0.45f, 0.85f, 0.55f); // softer green
         #endregion
 
         #region Events
@@ -87,6 +89,12 @@ namespace _Project.Scripts.BaseBuilder.UI
                 builderController.ModeSystem.OnModeChanged -= HandleModeChangedForButtons;
                 builderController.ModeSystem.OnModeChanged += HandleModeChangedForButtons;
             }
+            if (builderController?.ModeSystem != null)
+            {
+                builderController.ModeSystem.OnSelectFilterChanged -= RefreshFilterButtonGlows;
+                builderController.ModeSystem.OnSelectFilterChanged += RefreshFilterButtonGlows;
+            }
+            
             
             if (builderController == null) return;
 
@@ -141,6 +149,9 @@ namespace _Project.Scripts.BaseBuilder.UI
             BuildInventoryPanel();
             BuildWallsAndBuildingsPanel();
             BuildRectangleSelectOverlay();
+            UpdateFilterBarReadyState();
+            if (builderController != null)
+                RefreshFilterButtonGlows(builderController.CurrentSelectFilter);
         }
 
         private void BuildTopBar()
@@ -288,6 +299,9 @@ namespace _Project.Scripts.BaseBuilder.UI
 
             root.Add(filterBar);
             RegisterUIBlockers(filterBar);
+            filterBar.SetEnabled(false);
+            filterBar.style.opacity = 0.4f;
+            filterBar.pickingMode = PickingMode.Ignore;
         }
 
         private void BuildInventoryPanel()
@@ -499,31 +513,48 @@ namespace _Project.Scripts.BaseBuilder.UI
             buildingsContent.Add(buildingsGrid);
 
             // Tab switching
-            wallsTabBtn.clicked += () =>
+            void ShowObjectPanelTab(Button activeBtn, VisualElement activeContent)
             {
-                wallsContent.style.display = DisplayStyle.Flex;
+                wallsContent.style.display = DisplayStyle.None;
                 buildingsContent.style.display = DisplayStyle.None;
-                SetTabActive(wallsTabBtn, true);
-                SetTabActive(buildingsTabBtn, false);
-            };
+                turretsContent.style.display = DisplayStyle.None;
 
-            buildingsTabBtn.clicked += () =>
-            {
-                wallsContent.style.display = DisplayStyle.None;
-                buildingsContent.style.display = DisplayStyle.Flex;
-                SetTabActive(wallsTabBtn, false);
-                SetTabActive(buildingsTabBtn, true);
-            };
-            
-            turretsTabBtn.clicked += () =>
-            {
-                wallsContent.style.display = DisplayStyle.None;
-                buildingsContent.style.display = DisplayStyle.None;
-                turretsContent.style.display = DisplayStyle.Flex;
                 SetTabActive(wallsTabBtn, false);
                 SetTabActive(buildingsTabBtn, false);
-                SetTabActive(turretsTabBtn, true);
-            };
+                SetTabActive(turretsTabBtn, false);
+
+                activeContent.style.display = DisplayStyle.Flex;
+                SetTabActive(activeBtn, true);
+            }
+
+            wallsTabBtn.clicked += () => ShowObjectPanelTab(wallsTabBtn, wallsContent);
+            buildingsTabBtn.clicked += () => ShowObjectPanelTab(buildingsTabBtn, buildingsContent);
+            turretsTabBtn.clicked += () => ShowObjectPanelTab(turretsTabBtn, turretsContent);
+            // wallsTabBtn.clicked += () =>
+            // {
+            //     wallsContent.style.display = DisplayStyle.Flex;
+            //     buildingsContent.style.display = DisplayStyle.None;
+            //     SetTabActive(wallsTabBtn, true);
+            //     SetTabActive(buildingsTabBtn, false);
+            // };
+            //
+            // buildingsTabBtn.clicked += () =>
+            // {
+            //     wallsContent.style.display = DisplayStyle.None;
+            //     buildingsContent.style.display = DisplayStyle.Flex;
+            //     SetTabActive(wallsTabBtn, false);
+            //     SetTabActive(buildingsTabBtn, true);
+            // };
+            //
+            // turretsTabBtn.clicked += () =>
+            // {
+            //     wallsContent.style.display = DisplayStyle.None;
+            //     buildingsContent.style.display = DisplayStyle.None;
+            //     turretsContent.style.display = DisplayStyle.Flex;
+            //     SetTabActive(wallsTabBtn, false);
+            //     SetTabActive(buildingsTabBtn, false);
+            //     SetTabActive(turretsTabBtn, true);
+            // };
             
             // ===== Bottom buttons =====
             var buttonRow = new VisualElement();
@@ -1202,6 +1233,36 @@ namespace _Project.Scripts.BaseBuilder.UI
             }
         }
         
+        private void SetFilterButtonGlow(Button btn, bool on)
+        {
+            if (btn == null) return;
+
+            if (on)
+            {
+                btn.style.borderTopWidth = 2;
+                btn.style.borderRightWidth = 2;
+                btn.style.borderBottomWidth = 2;
+                btn.style.borderLeftWidth = 2;
+                btn.style.borderTopColor = FilterGlowColor;
+                btn.style.borderRightColor = FilterGlowColor;
+                btn.style.borderBottomColor = FilterGlowColor;
+                btn.style.borderLeftColor = FilterGlowColor;
+            }
+            else
+            {
+                btn.style.borderTopWidth = 0;
+                btn.style.borderRightWidth = 0;
+                btn.style.borderBottomWidth = 0;
+                btn.style.borderLeftWidth = 0;
+            }
+        }
+
+        private void RefreshFilterButtonGlows(SelectFilter current)
+        {
+            foreach (var kvp in filterButtons)
+                SetFilterButtonGlow(kvp.Value, kvp.Key == current);
+        }
+        
         private void SetStoreButtonActive(bool on)
         {
             if (storeBuildingsButton == null) return;
@@ -1228,27 +1289,25 @@ namespace _Project.Scripts.BaseBuilder.UI
         
         private void UpdateFilterBarReadyState()
         {
-            if (filterBar == null || builderController == null) return;
+            if (filterBar == null) return;
 
-            bool ready = builderController.IsAnyGridActive()
-                         && builderController.CurrentMode == BuilderMode.Select;
+            bool selectActive = builderController != null
+                                && builderController.CurrentMode == BuilderMode.Select
+                                && builderController.IsAnyGridActive();
 
-            filterBar.SetEnabled(ready);
-            // or: filterBar.style.opacity = ready ? 1f : 0.45f;
-            // or: filterBar.style.display = ready ? DisplayStyle.Flex : DisplayStyle.None;
-
-            if (!ready) return;
-
-            // Which grid is active – use later for filter options
-            bool land = builderController.IsLandGridActive();
-            bool objects = builderController.IsObjectGridActive();
-            Debug.Log($"<color=cyan>Filters ready | LandGrid={land} ObjectGrid={objects}</color>");
+            filterBar.SetEnabled(selectActive);
+            filterBar.pickingMode = selectActive ? PickingMode.Position : PickingMode.Ignore;
+            filterBar.style.opacity = selectActive ? 1f : 0.4f;
+            
+            if (selectActive && builderController != null)
+                RefreshFilterButtonGlows(builderController.CurrentSelectFilter);
         }
 
         private Button CreateFilterButton(string text, SelectFilter filter)
         {
             var btn = new Button { text = text };
             StyleFilterButton(btn);
+            filterButtons[filter] = btn;
             btn.clicked += () => builderController?.SetSelectFilter(filter);
             return btn;
         }

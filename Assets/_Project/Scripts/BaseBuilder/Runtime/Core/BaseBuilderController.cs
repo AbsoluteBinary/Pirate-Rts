@@ -92,6 +92,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             {
                 if (ModeSystem.IsBuildOnWater) return landGrid;
                 if (ModeSystem.IsBuildOnLand) return objectGrid;
+
+                if (ModeSystem.CurrentMode == BuilderMode.PickUp && selectedPrefab != null)
+                    return isLandObject ? landGrid : objectGrid;
+                
+
                 return null;
             }
         }
@@ -185,6 +190,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                     SetBuilderInputActive(false);
                     SetCameraInputEnabled(true);
                 }
+                else if (mode == BuilderMode.PickUp)
+                {
+                    SetBuilderInputActive(true);
+                    SetCameraInputEnabled(true);
+                }
                 else
                 {
                     SetBuilderInputActive(false);
@@ -220,6 +230,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             if (SelectionSystem != null)
                 SelectionSystem.OnSelectionChanged -= RefreshSelectionHighlights;
         }
+        
+        
 
         private void Update()
         {
@@ -230,9 +242,19 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             
             _paintAndDrag?.Tick();
 
+            
+            
             if (ModeSystem.CurrentMode == BuilderMode.PickUp)
             {
-                HandlePickUpInput();
+                if (selectedPrefab != null)
+                {
+                    UpdateHoveredCell();
+                    HandlePlacementInput();
+                }
+                else
+                {
+                    HandlePickUpInput();
+                }
                 return;
             }
 
@@ -376,13 +398,16 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             bool showLand = ModeSystem.IsBuildOnWater;
             bool showObject = ModeSystem.IsBuildOnLand;
 
+            if (ModeSystem.CurrentMode == BuilderMode.PickUp && selectedPrefab != null)
+            {
+                showLand = isLandObject;
+                showObject = !isLandObject;
+            }
+
             if (landGrid != null)
                 landGrid.gameObject.SetActive(showLand);
-
             if (objectGrid != null)
                 objectGrid.gameObject.SetActive(showObject);
-
-            Debug.Log($"<color=cyan>Grid Visibility → Land: {showLand} | Object: {showObject} | Mode: {ModeSystem.CurrentMode}</color>");
         }
 
         #endregion
@@ -409,6 +434,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 currentPreview = Instantiate(prefab);
                 currentPreview.name = "PlacementPreview";
                 SetPreviewStyle(currentPreview);
+                RefreshPlacementHighlights();
                 ApplyPreviewRotation();
                 RefreshPlacementHighlights();
                 
@@ -504,7 +530,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         
         #region Helper's
         
-        [Obsolete("Obsolete")]
+        
         private void HandlePickUpInput()
         {
             if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
@@ -520,7 +546,6 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
 
             GameObject target = hit.collider.transform.root.gameObject;
-            Debug.Log($"[PickUp] target={target.name} id={target.GetInstanceID()}");
 
             if (PlacementService.IsLocked(target))
             {
@@ -528,29 +553,41 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 return;
             }
 
-            Debug.Log("[PickUp] not locked – continuing");
+            if (PlacementService.TryGetIsLand(target, out bool isLand) && isLand)
+            {
+                if (PlacementService.HasObjectOnTop(target.transform.position))
+                {
+                    Debug.LogWarning("[PickUp] BLOCKED – object on top of land tile");
+                    return;
+                }
+            }
 
             if (!PlacementService.TryPickUp(target, out var info))
                 return;
-            
+
             RestoreInventory(info.Kind, info.InventoryIndex);
 
-            Object.Destroy(info.Instance);
+            GameObject prefab = info.Prefab;
+            if (prefab == null)
+            {
+                Debug.LogWarning("[PickUp] entry.prefab was null – cannot spawn ghost");
+                if (info.Instance != null)
+                    Object.Destroy(info.Instance);
+                return;
+            }
 
-            if (info.Kind == PlaceableKind.Land)
-                ModeSystem.SetMode(BuilderMode.BuildOnWater);
-            else
-                ModeSystem.SetMode(BuilderMode.BuildOnLand);
+            if (info.Instance != null)
+                Object.Destroy(info.Instance);
 
-            if (info.Prefab != null)
-                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex, info.Kind);
-            
-            if (info.Prefab != null)
-                SelectPrefab(info.Prefab, info.Size, info.IsLandObject, info.InventoryIndex, info.Kind);
-
+            // Stay in Pick Up — do not SetMode Water/Land
+            SelectPrefab(prefab, info.Size, info.IsLandObject, info.InventoryIndex, info.Kind);
+            _placeYawSteps = YawStepsFrom(info.rotation);
+            ApplyPreviewRotation();
+            UpdateGridVisibility();
             _clearSelectionAfterPlace = true;
-            
-            Debug.Log($"<color=cyan>Picked up – now placing {(info.IsLandObject ? "Land" : "Wall")}</color>");
+            UpdateGridVisibility();
+
+            Debug.Log($"[PickUp] ghost ready kind={info.Kind} land={info.IsLandObject} prefab={prefab.name}");
         }
         
         private void HandleStoreInput()
@@ -818,23 +855,16 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 pos.z += (selectedSize.y - 1) * cellSize * 0.5f;
                 pos.y += 0.1f;
 
-                currentPreview.transform.SetPositionAndRotation(
-                    pos,
-                    Quaternion.Euler(0f, _placeYawSteps * 90f, 0f)
-                );
+                currentPreview.transform.position = pos;
                 currentPreview.SetActive(true);
                 RefreshPlacementHighlights();
-                
-                bool valid = IsCurrentHoverValid();
-                ActiveGrid.CellSetColor(
-                    currentHoveredCell.index,
-                    valid ? new Color(0.2f, 0.9f, 0.3f, 0.55f) : new Color(0.95f, 0.2f, 0.2f, 0.55f)
-                );
             }
 
-            ActiveGrid.CellSetColor(currentHoveredCell.index, new Color(0.2f, 0.9f, 0.3f, 0.55f));
+            bool valid = IsCurrentHoverValid();
+            
             lastHighlightedCell = currentHoveredCell.index;
             lastHighlightedGrid = ActiveGrid;
+            
         }
 
         private void ClearHighlight()
@@ -906,7 +936,6 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             {
                 SetNamedHighlight(currentPreview, CorrectHighlightName, false);
                 SetNamedHighlight(currentPreview, WrongHighlightName, true);
-                ApplyWireFrameColor(currentPreview, new Color(1f, 0.2f, 0.2f, 1f));
                 Debug.LogWarning("Placement failed – cell occupied or invalid");
                 return;
             }
@@ -961,6 +990,62 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         #region Helpers
 
         private const string SelectionHighlightName = "SelectionHighlight";
+        private const string CorrectHighlightName = "CorrectHighlight";
+        private const string WrongHighlightName = "WrongHighlight";
+
+        private bool IsCurrentHoverValid()
+        {
+            if (currentHoveredCell == null || ActiveGrid == null || Validator == null)
+                return false;
+
+            Vector3 worldPos = ActiveGrid.CellGetPosition(currentHoveredCell.index);
+            return Validator.CanPlace(worldPos, selectedSize, isLandObject);
+        }
+
+        private void RefreshPlacementHighlights()
+        {
+            if (currentPreview == null) return;
+
+            bool valid = IsCurrentHoverValid();
+            Transform wrong = FindNamed(currentPreview, WrongHighlightName);
+            Transform correct = FindNamed(currentPreview, CorrectHighlightName);
+
+            // Debug.Log(
+            //     $"[PlacePreview] valid={valid} cell={currentHoveredCell?.index} " +
+            //     $"foundCorrect={correct != null} foundWrong={wrong != null} " +
+            //     $"preview={currentPreview.name}"
+            // );
+
+            if (correct != null) correct.gameObject.SetActive(valid);
+            if (wrong != null) wrong.gameObject.SetActive(!valid);
+            SetNamedHighlight(currentPreview, SelectionHighlightName, false);
+            
+            if (wrong == null)
+            {
+                var all = currentPreview.GetComponentsInChildren<Transform>(true);
+                for (int i = 0; i < all.Length; i++)
+                    Debug.Log($"[PlacePreview] child[{i}] name='{all[i].name}'");
+            }
+        }
+
+        private static Transform FindNamed(GameObject root, string childName)
+        {
+            if (root == null) return null;
+            Transform t = root.transform.Find(childName);
+            return t != null ? t : FindChildRecursive(root.transform, childName);
+        }
+
+        private static void SetNamedHighlight(GameObject root, string childName, bool active)
+        {
+            if (root == null) return;
+
+            Transform t = root.transform.Find(childName);
+            if (t == null)
+                t = FindChildRecursive(root.transform, childName);
+
+            if (t != null)
+                t.gameObject.SetActive(active);
+        }
 
         private bool IsPlacedBuilding(GameObject target)
         {
@@ -1057,10 +1142,20 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private void OnRotateHeld(InputAction.CallbackContext ctx)
         {
             if (!ctx.performed) return;
+            TryRotatePreview();
+        }
+
+        private void TryRotatePreview()
+        {
             if (currentPreview == null) return;
-            if (ModeSystem.CurrentMode != BuilderMode.BuildOnLand
-                && ModeSystem.CurrentMode != BuilderMode.BuildOnWater)
-                return;
+            if (isPointerOverUI) return;
+
+            bool canRotate =
+                ModeSystem.CurrentMode == BuilderMode.BuildOnLand
+                || ModeSystem.CurrentMode == BuilderMode.BuildOnWater
+                || (ModeSystem.CurrentMode == BuilderMode.PickUp && selectedPrefab != null);
+
+            if (!canRotate) return;
 
             _placeYawSteps = (_placeYawSteps + 1) % 4;
 
@@ -1069,37 +1164,23 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
             ApplyPreviewRotation();
             RefreshPlacementHighlights();
+            Debug.Log($"[Rotate] yawSteps={_placeYawSteps} size={selectedSize}");
+        }
+
+        private static int YawStepsFrom(Quaternion rot)
+        {
+            int steps = Mathf.RoundToInt(rot.eulerAngles.y / 90f) % 4;
+            if (steps < 0) steps += 4;
+            return steps;
         }
 
         private void ApplyPreviewRotation()
         {
             if (currentPreview == null) return;
-            currentPreview.transform.rotation = Quaternion.Euler(0f, _placeYawSteps * 90f, 0f);
+            currentPreview.transform.rotation = Quaternion.AngleAxis(_placeYawSteps * 90f, Vector3.up);
         }
-
-        private const string CorrectHighlightName = "CorrectHighlight";
-        private const string WrongHighlightName = "WrongHighlight";
-
-        private void RefreshPlacementHighlights()
-        {
-            if (currentPreview == null) return;
-
-            bool valid = IsCurrentHoverValid();
-
-            SetNamedHighlight(currentPreview, CorrectHighlightName, valid);
-            SetNamedHighlight(currentPreview, WrongHighlightName, !valid);
-            SetNamedHighlight(currentPreview, SelectionHighlightName, false);
-
-            ApplyWireFrameColor(currentPreview, valid ? new Color(0.2f, 1f, 0.35f, 1f) : new Color(1f, 0.2f, 0.2f, 1f));
-        }
-        private bool IsCurrentHoverValid()
-        {
-            if (currentHoveredCell == null || ActiveGrid == null || Validator == null)
-                return false;
-
-            Vector3 worldPos = ActiveGrid.CellGetPosition(currentHoveredCell.index);
-            return Validator.CanPlace(worldPos, selectedSize, isLandObject);
-        }
+        
+        
         
         private static void ApplyWireFrameColor(GameObject root, Color color)
         {
@@ -1108,16 +1189,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             for (int i = 0; i < frames.Length; i++)
                 frames[i].Color = color;
         }
-
-        private static void SetNamedHighlight(GameObject root, string childName, bool active)
-        {
-            if (root == null) return;
-            Transform t = root.transform.Find(childName);
-            if (t == null)
-                t = FindChildRecursive(root.transform, childName);
-            if (t != null)
-                t.gameObject.SetActive(active);
-        }
+        
         private void SetCameraInputEnabled(bool enabled)
         {
             if (cameraController == null || cameraController.xinputs == null) return;

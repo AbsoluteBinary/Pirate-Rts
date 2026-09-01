@@ -16,5 +16,5 @@ MonoBehaviour:
   - buildingName: OutPost
     prefab: {fileID: 1219891228768175825, guid: 4c7eea4d7991af4f6b0401e544561154, type: 3}
     icon: {fileID: 21300000, guid: 86049326b5c4c6c4289588b5941c424b, type: 3}
-    count: 4
+    count: 35
     size: {x: 2, y: 2}
