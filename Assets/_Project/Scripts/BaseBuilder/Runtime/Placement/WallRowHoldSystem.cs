@@ -283,7 +283,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
             }
         }
 
-        void ClearHeld(bool destroyGhosts)
+        public void ClearHeld(bool destroyGhosts)
         {
             if (destroyGhosts)
             {
@@ -324,5 +324,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 c.enabled = false;
             // optional: tint / transparent later
         }
+        
+        
+        
     }
 }

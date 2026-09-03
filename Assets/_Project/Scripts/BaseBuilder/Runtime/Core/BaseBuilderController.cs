@@ -108,7 +108,11 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         private void Awake()
         {
             _rectSelect = new RectangleSelectSystem(() => isPointerOverUI);
-            _rectSelect.OnDragStarted += () => SelectionSystem?.Clear();
+            _rectSelect.OnDragStarted += () =>
+            {
+                SelectionSystem?.Clear();
+                SetCameraInputEnabled(false);
+            };
             
             _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory, turretInventory);
             _rectSelect = new RectangleSelectSystem();
@@ -136,7 +140,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 () => selectedSize,
                 () => isLandObject,
                 () => selectedInventoryIndex,
-                (index) => landTileInventory != null ? landTileInventory.GetCount(index) : 0,  // ← NEW
+                (index) => _inventory != null ? _inventory.GetCount(selectedKind, index) : 0,  // ← NEW
                 () => ActiveGrid
             );
             
@@ -181,7 +185,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 else if (mode == BuilderMode.Select)
                 {
                     SetBuilderInputActive(false);
-                    SetCameraInputEnabled(false);
+                    SetCameraInputEnabled(true);
                 }
                 else if (mode == BuilderMode.Observation)
                 {
@@ -237,6 +241,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         {
             if (ModeSystem.CurrentMode == BuilderMode.Select)
             {
+                bool lmb = Mouse.current != null && Mouse.current.leftButton.isPressed;
+                SetCameraInputEnabled(!lmb);
+
                 _rectSelect.Tick();
             }
             
@@ -450,7 +457,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             selectedSize = Vector2Int.one;
             isLandObject = true;
             DestroyPreview();
+            _wallRowHold.ClearHeld(destroyGhosts: true);
         }
+        
 
         private void DestroyPreview()
         {
@@ -488,6 +497,7 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void HandleRectSelectEnded()
         {
+            SetCameraInputEnabled(true);
             if (hud == null) return;
             hud.HideSelectRect();
 
@@ -793,26 +803,14 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         {
             if (selectedInventoryIndex < 0) return;
 
-            int remaining = 0;
+            int remaining = _inventory != null
+                ? _inventory.GetCount(selectedKind, selectedInventoryIndex)
+                : 0;
 
-            if (isLandObject)
-            {
-                if (landTileInventory == null) return;
-                remaining = landTileInventory.GetCount(selectedInventoryIndex);
-            }
-            else
-            {
-                // Walls
-                // We need access to the WallInventorySO – see note below
-                if (wallInventory == null) return;
-                remaining = wallInventory.GetCount(selectedInventoryIndex);
-            }
+            if (remaining > 0) return;
 
-            if (remaining <= 0)
-            {
-                ClearSelectedPrefab();
-                Debug.Log("<color=orange>Inventory empty – preview cleared</color>");
-            }
+            ClearSelectedPrefab();
+            Debug.Log("<color=orange>Inventory empty – preview cleared</color>");
         }
         
         #endregion
