@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
-using _Project.Scripts.Harbour.Data.SO;
 using TGS;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -193,77 +192,50 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Placement
                 if (placedEntries[i].instance != null)
                     Object.Destroy(placedEntries[i].instance);
             }
-
             placedEntries.Clear();
             occupation.Clear();
         }
 
         /// <summary>
-        /// Clears only Land Tiles that have no object on top of them.
-        /// Restores the correct inventory counts.
+        /// Removes every entry of this kind that passes canClear.
+        /// Calls onCleared once per removed entry (use for inventory Restore).
+        /// Does not restore itself.
         /// </summary>
-        public void ClearLandTilesOnly(LandTileInventorySO landInventory)
+        public int ClearKind(
+            PlaceableKind kind,
+            Func<PlacedEntry, bool> canClear = null,
+            Action<PlacedEntry> onCleared = null)
         {
-            if (landGrid == null) return;
+            int removed = 0;
 
             for (int i = placedEntries.Count - 1; i >= 0; i--)
             {
                 var entry = placedEntries[i];
 
-                if (!entry.isLand) continue;
+                if (entry.kind != kind)
+                    continue;
+
                 if (entry.instance == null)
                 {
                     placedEntries.RemoveAt(i);
                     continue;
                 }
 
-                // Skip if any wall/building is sitting on top
-                if (HasObjectOnTop(entry.instance.transform.position))
+                if (canClear != null && !canClear(entry))
                     continue;
 
-                // Restore inventory count
-                if (landInventory != null && entry.inventoryIndex >= 0 &&
-                    entry.inventoryIndex < landInventory.tiles.Count)
-                {
-                    landInventory.tiles[entry.inventoryIndex].count++;
-                }
+                TerrainGridSystem grid = entry.isLand ? landGrid : objectGrid;
+                if (grid != null)
+                    occupation.FreeFootprint(entry.originCellIndex, entry.size, grid.columnCount, entry.isLand);
 
-                // Free occupation + destroy
-                occupation.FreeFootprint(entry.originCellIndex, entry.size, landGrid.columnCount, true);
-                Object.Destroy(entry.instance);
+                GameObject go = entry.instance;
                 placedEntries.RemoveAt(i);
+                onCleared?.Invoke(entry);
+                Object.Destroy(go);
+                removed++;
             }
-        }
 
-        /// <summary>
-        /// Clears all Walls / Buildings and restores their inventory counts.
-        /// </summary>
-        public void ClearObjectsOnly(WallInventorySO wallInventory = null)
-        {
-            if (objectGrid == null) return;
-
-            for (int i = placedEntries.Count - 1; i >= 0; i--)
-            {
-                var entry = placedEntries[i];
-
-                if (entry.isLand) continue;
-                if (entry.instance == null)
-                {
-                    placedEntries.RemoveAt(i);
-                    continue;
-                }
-
-                // Restore wall inventory count
-                if (wallInventory != null && entry.inventoryIndex >= 0 &&
-                    entry.inventoryIndex < wallInventory.walls.Count)
-                {
-                    wallInventory.walls[entry.inventoryIndex].count++;
-                }
-
-                occupation.FreeFootprint(entry.originCellIndex, entry.size, objectGrid.columnCount, false);
-                Object.Destroy(entry.instance);
-                placedEntries.RemoveAt(i);
-            }
+            return removed;
         }
 
         // ─────────────────────────────────────────────

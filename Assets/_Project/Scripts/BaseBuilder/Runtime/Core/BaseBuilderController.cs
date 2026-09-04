@@ -5,6 +5,7 @@ using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.BaseBuilder.Runtime.Modes;
 using _Project.Scripts.BaseBuilder.Runtime.Placement;
 using _Project.Scripts.BaseBuilder.Runtime.Presentation;
+using _Project.Scripts.BaseBuilder.Runtime.Save;
 using _Project.Scripts.BaseBuilder.Runtime.Selection;
 using _Project.Scripts.BaseBuilder.UI;
 using _Project.Scripts.Harbour.Data.SO;
@@ -49,6 +50,10 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
         [SerializeField] private WallInventorySO wallInventory;
         [SerializeField] private BuildingsInventorySO  buildingsInventory;
         [SerializeField] private TurretInventorySO turretInventory;
+        
+        private BuilderSaveService _saveService;
+        private IBuilderSaveStore _saveStore;
+        private IPrefabCatalog _prefabCatalog;
         
         [Header("Input")]
         [SerializeField] private Camera buildCamera;
@@ -107,6 +112,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void Awake()
         {
+            _inventory?.SnapshotStarts();
+            
             _rectSelect = new RectangleSelectSystem(() => isPointerOverUI);
             _rectSelect.OnDragStarted += () =>
             {
@@ -115,6 +122,10 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             };
             
             _inventory = new BuilderInventoryFacade(landTileInventory, wallInventory, buildingsInventory, turretInventory);
+            _prefabCatalog = new InventoryPrefabCatalog(
+                landTileInventory, wallInventory, buildingsInventory, turretInventory);
+            _saveService = new BuilderSaveService();
+            _saveStore = new JsonFileSaveStore();
             _rectSelect = new RectangleSelectSystem();
             
             ModeSystem = new BuilderModeSystem();
@@ -140,7 +151,9 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
                 () => selectedSize,
                 () => isLandObject,
                 () => selectedInventoryIndex,
-                (index) => _inventory != null ? _inventory.GetCount(selectedKind, index) : 0,  // ← NEW
+                (index) => _inventory != null
+                    ? _inventory.GetCount(selectedKind, index)
+                    : 0,
                 () => ActiveGrid
             );
             
@@ -224,6 +237,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         private void OnDestroy()
         {
+            _inventory?.ResetToStart();
+            
             // Restore player/camera input if this object is destroyed mid-build
             SetBuilderInputActive(false);
             builderInputActions?.Dispose();
@@ -666,17 +681,29 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             TryDeleteOne(target);
         }
         
+        private BuilderMode _modeBeforeDelete = BuilderMode.BuildOnLand;
+
         public void DeleteSelectedOrEnterMode()
         {
             ClearSelectedPrefab();
 
-            if (SelectionSystem != null && SelectionSystem.SelectedObjects.Count > 0)
+            // Already in Delete → leave it
+            if (ModeSystem.CurrentMode == BuilderMode.Delete)
             {
-                DeleteSelectedObjects(); // highlights off here
+                SetMode(_modeBeforeDelete);
+                Debug.Log("<color=cyan>Delete mode off</color>");
                 return;
             }
 
-            SetMode(BuilderMode.Delete); // no selection → single-click delete mode
+            if (SelectionSystem != null && SelectionSystem.SelectedObjects.Count > 0)
+            {
+                DeleteSelectedObjects();
+                return;
+            }
+
+            _modeBeforeDelete = ModeSystem.CurrentMode;
+            SetMode(BuilderMode.Delete);
+            Debug.Log("<color=orange>Delete mode on</color>");
         }
         
         /// <summary>
@@ -790,11 +817,78 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
             return true;
         }
         
+        public void SaveLayout()
+        {
+            if (_saveService == null || _saveStore == null || _inventory == null)
+            {
+                Debug.LogError("[Save] Service not initialised");
+                return;
+            }
+
+            var data = _saveService.Capture(
+                PlacementService.GetPlacedEntries(),
+                _inventory,
+                _prefabCatalog);
+
+            _saveStore.Write(data);
+        }
+
+        public void LoadLayout()
+        {
+            if (_saveService == null || _saveStore == null)
+            {
+                Debug.LogError("[Save] Service not initialised");
+                return;
+            }
+
+            if (!_saveStore.TryRead(out var data))
+                return;
+
+            ClearSelectedPrefab();
+            SelectionSystem?.Clear();
+
+            _saveService.Apply(
+                data,
+                PlacementService,
+                _inventory,
+                _prefabCatalog,
+                landGrid,
+                objectGrid);
+        }
         
 
         private void RestoreInventory(PlaceableKind kind, int inventoryIndex)
         {
             _inventory?.Restore(kind, inventoryIndex);
+        }
+        
+        
+        public void ClearKindAndRestore(PlaceableKind kind, Func<PlacedEntry, bool> canClear = null)
+        {
+            PlacementService.ClearKind(kind, canClear, entry =>
+                RestoreInventory(entry.kind, entry.inventoryIndex));
+        }
+
+        public void ClearLandTilesEmpty()
+        {
+            ClearKindAndRestore(PlaceableKind.Land, entry =>
+                entry.instance == null ||
+                !PlacementService.HasObjectOnTop(entry.instance.transform.position));
+        }
+
+        public void ClearWalls()
+        {
+            ClearKindAndRestore(PlaceableKind.Wall);
+        }
+
+        public void ClearTurrets()
+        {
+            ClearKindAndRestore(PlaceableKind.Turret);
+        }
+
+        public void ClearBuildings()
+        {
+            ClearKindAndRestore(PlaceableKind.Building);
         }
         
         

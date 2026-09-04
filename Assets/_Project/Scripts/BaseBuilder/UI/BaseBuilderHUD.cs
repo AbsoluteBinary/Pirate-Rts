@@ -26,6 +26,8 @@ namespace _Project.Scripts.BaseBuilder.UI
         private readonly List<Label> wallCountLabels = new List<Label>();
         private readonly Dictionary<SelectFilter, Button> filterButtons = new();
         private static readonly Color FilterGlowColor = new Color(0.45f, 0.85f, 0.55f); // softer green
+        
+        
         #endregion
 
         #region Events
@@ -50,6 +52,8 @@ namespace _Project.Scripts.BaseBuilder.UI
         private VisualElement wallsBuildingsPanel;
         private VisualElement currentlySelectedSlot;
         private readonly List<Label> slotCountLabels = new List<Label>();
+        private PlaceableKind _objectPanelTab = PlaceableKind.Wall;
+        
         
         private Button storeBuildingsButton;
 
@@ -121,7 +125,7 @@ namespace _Project.Scripts.BaseBuilder.UI
             if (buildingsInventory != null)
             {
                 buildingsInventory.OnCountChanged -= HandleBuildingCountChanged;
-                buildingsInventory.OnCountChanged += HandleBuildingCountChanged;
+                
             }
             if (builderController?.ModeSystem != null)
                 builderController.ModeSystem.OnModeChanged -= HandleModeChangedForButtons;
@@ -527,9 +531,21 @@ namespace _Project.Scripts.BaseBuilder.UI
                 SetTabActive(activeBtn, true);
             }
 
-            wallsTabBtn.clicked += () => ShowObjectPanelTab(wallsTabBtn, wallsContent);
-            buildingsTabBtn.clicked += () => ShowObjectPanelTab(buildingsTabBtn, buildingsContent);
-            turretsTabBtn.clicked += () => ShowObjectPanelTab(turretsTabBtn, turretsContent);
+            wallsTabBtn.clicked += () =>
+            {
+                _objectPanelTab = PlaceableKind.Wall;
+                ShowObjectPanelTab(wallsTabBtn, wallsContent);
+            };
+            buildingsTabBtn.clicked += () =>
+            {
+                _objectPanelTab = PlaceableKind.Building;
+                ShowObjectPanelTab(buildingsTabBtn, buildingsContent);
+            };
+            turretsTabBtn.clicked += () =>
+            {
+                _objectPanelTab = PlaceableKind.Turret;
+                ShowObjectPanelTab(turretsTabBtn, turretsContent);
+            };
             // wallsTabBtn.clicked += () =>
             // {
             //     wallsContent.style.display = DisplayStyle.Flex;
@@ -852,7 +868,7 @@ namespace _Project.Scripts.BaseBuilder.UI
         
         private void OnClearClicked()
         {
-            builderController?.PlacementService.ClearLandTilesOnly(landTileInventory);
+            builderController?.ClearLandTilesEmpty();
 
             // Refresh labels
             if (landTileInventory != null)
@@ -867,33 +883,42 @@ namespace _Project.Scripts.BaseBuilder.UI
 
         private void OnSaveClicked()
         {
-            Debug.Log("<color=yellow>Save clicked</color>");
-            // TODO: basic save of layout + counts
+            builderController?.SaveLayout();
         }
 
         private void OnLoadClicked()
         {
-            Debug.Log("<color=yellow>Load clicked</color>");
-            // TODO: basic load of layout + counts
-        }
-        
-        private void OnWallsClearClicked()
-        {
-            builderController?.PlacementService.ClearObjectsOnly(wallInventory);
-
-            // Refresh wall count labels if you have them (optional for now)
-            Debug.Log("<color=yellow>Cleared all Walls + restored inventory counts</color>");
+            builderController?.LoadLayout();
         }
 
         private void OnWallsSaveClicked()
         {
-            Debug.Log("[WallsAndBuildings] Save clicked – wiring later");
+            builderController?.SaveLayout();
         }
 
         private void OnWallsLoadClicked()
         {
-            Debug.Log("[WallsAndBuildings] Load clicked – wiring later");
+            builderController?.LoadLayout();
         }
+        
+        private void OnWallsClearClicked()
+        {
+            if (builderController == null) return;
+
+            switch (_objectPanelTab)
+            {
+                case PlaceableKind.Wall:
+                    builderController.ClearWalls();
+                    break;
+                case PlaceableKind.Turret:
+                    builderController.ClearTurrets();
+                    break;
+                case PlaceableKind.Building:
+                    builderController.ClearBuildings();
+                    break;
+            }
+        }
+        
 
         private VisualElement CreateInventorySlot(LandTileInventorySO.LandTileEntry entry, int index)
         {
@@ -1009,30 +1034,9 @@ namespace _Project.Scripts.BaseBuilder.UI
                 inventoryPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        private void HandleLandTilePlaced(int index)
-        {
-            // if (landTileInventory == null) return;
-            // if (index < 0 || index >= landTileInventory.tiles.Count) return;
-            //
-            // // Consume from the same SO the HUD is displaying
-            // bool consumed = landTileInventory.ConsumeTile(index);
-            // if (!consumed)
-            // {
-            //     Debug.LogWarning($"Could not consume tile at index {index} (count may be 0)");
-            //     return;
-            // }
-            //
-            // // Update the label
-            // if (index < slotCountLabels.Count && slotCountLabels[index] != null)
-            //     slotCountLabels[index].text = landTileInventory.GetCount(index).ToString();
-            HandleBuildingCountChanged(index);
-        }
+        private void HandleLandTilePlaced(int index) => HandleLandCountChanged(index);
         
-        private void HandleTurretPlaced(int index)
-        {
-            if (turretInventory == null) return;
-            turretInventory.Consume(index); // count-- and OnCountChanged
-        }
+        private void HandleTurretPlaced(int index) => HandleTurretCountChanged(index);
         
         private void HandleLandCountChanged(int index)
         {
