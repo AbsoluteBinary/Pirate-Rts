@@ -1,4 +1,5 @@
 using _Project.Scripts.Harbour.Data;
+using _Project.Scripts.Harbour.Data.HUDData;
 using _Project.Scripts.Harbour.Data.SO;
 using TGS;
 using UnityEngine;

@@ -4,27 +4,32 @@ using _Project.Scripts.Harbour.ShipBuilder;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace _Project.Scripts.Harbour.Data
+namespace _Project.Scripts.Harbour.Data.HUDData
 {
     public class HarbourHUD : MonoBehaviour
     {
         [SerializeField] private PanelRenderer panelRenderer;
+        [SerializeField] private DockHUD dockHUD;
+        [SerializeField] private ShipBuilderHUD shipBuilderHUD;
 
-        // Events for HarbourController to listen to
         public event Action OnBuildHarbourBaseClicked;
         public event Action OnExitBuildMode;
         public event Action OnBuildShipClicked;
-        public event Action<string, int> OnLandTileSlotClicked;
+        public event Action OnDockClicked;
 
         private VisualElement root;
-        private VisualElement _currentBuildPanel;
-
-        [SerializeField] private ShipBuilderHUD shipBuilderHUD;
+        private HarbourStateSO.HarbourMode? pendingMode;
 
         private void OnEnable()
         {
             if (panelRenderer == null)
                 panelRenderer = GetComponent<PanelRenderer>();
+
+            if (panelRenderer == null)
+            {
+                Debug.LogError("HarbourHUD: PanelRenderer is missing.");
+                return;
+            }
 
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
         }
@@ -35,70 +40,55 @@ namespace _Project.Scripts.Harbour.Data
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
         }
 
-        private HarbourStateSO.HarbourMode? pendingMode = null;
-        private bool isUIReady = false;
-
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
         {
             root = rootElement;
-            isUIReady = true;
-
             Debug.Log("<color=lime>HarbourHUD: root is now ready</color>");
 
-            // If something requested a UI before we were ready, do it now
-            if (pendingMode.HasValue)
-            {
-                var mode = pendingMode.Value;
-                pendingMode = null;
-                ForceRefreshUI(mode);
-            }
+            if (!pendingMode.HasValue) return;
+
+            var mode = pendingMode.Value;
+            pendingMode = null;
+            RefreshUI(mode);
         }
 
         public void RefreshUI(HarbourStateSO.HarbourMode mode)
         {
-            if (!isUIReady || root == null)
+            if (root == null)
             {
-                // Queue the request
                 pendingMode = mode;
-                Debug.LogWarning($"HarbourHUD: UI not ready yet – queuing mode {mode}");
                 return;
             }
 
-            ForceRefreshUI(mode);
-            
-            
-            if (root == null) return;
-        }
-        
-        /// Always rebuilds the UI for the given mode (safe to call multiple times)
-        /// </summary>
-        private void ForceRefreshUI(HarbourStateSO.HarbourMode mode)
-        {
-            if (root == null) return;
+            if (mode != HarbourStateSO.HarbourMode.ShipBuilding)
+                shipBuilderHUD?.CloseShipBuilder();
 
-            // Close ship panel if needed
-            if (mode != HarbourStateSO.HarbourMode.ShipBuilding && shipBuilderHUD != null)
-                shipBuilderHUD.CloseShipBuilder();
+            if (mode != HarbourStateSO.HarbourMode.Dock)
+                dockHUD?.CloseDock();
 
             switch (mode)
             {
                 case HarbourStateSO.HarbourMode.Idle:
                     BuildIdleHUD();
                     break;
-
                 case HarbourStateSO.HarbourMode.HarbourBuild:
                     BuildHarbourBuildHUD();
                     break;
-
                 case HarbourStateSO.HarbourMode.ShipBuilding:
                     shipBuilderHUD?.OpenShipBuilder();
+                    break;
+                case HarbourStateSO.HarbourMode.Dock:
+                    OpenDockPanel();
                     break;
             }
         }
 
-        // ===================================================================
-        // IDLE HUD
-        // ===================================================================
+        private void OpenDockPanel()
+        {
+            BuildIdleHUD();
+            dockHUD?.OpenDock(root);
+        }
+
         public void BuildIdleHUD()
         {
             if (root == null) return;
@@ -156,6 +146,7 @@ namespace _Project.Scripts.Harbour.Data
 
             AddDropdownItem(buildDropdown, "Edit Harbour", () => OnBuildHarbourBaseClicked?.Invoke());
             AddDropdownItem(buildDropdown, "Build a Ship", () => OnBuildShipClicked?.Invoke());
+            AddDropdownItem(buildDropdown, "Dock", () => OnDockClicked?.Invoke());
             AddDropdownItem(buildDropdown, "Save and Exit", () => Debug.Log("Save and Exit clicked"));
             AddDropdownItem(buildDropdown, "Exit Without Saving", () => Debug.Log("Exit Without Saving clicked"));
 
@@ -164,7 +155,6 @@ namespace _Project.Scripts.Harbour.Data
             {
                 dropdownVisible = !dropdownVisible;
                 buildDropdown.style.display = dropdownVisible ? DisplayStyle.Flex : DisplayStyle.None;
-
                 buildTrigger.style.backgroundColor = dropdownVisible
                     ? new StyleColor(new Color(0.32f, 0.55f, 0.28f))
                     : new StyleColor(new Color(0.22f, 0.45f, 0.18f));
@@ -174,12 +164,9 @@ namespace _Project.Scripts.Harbour.Data
             topBar.Add(buildDropdown);
             root.Add(topBar);
 
-            Debug.Log("<color=lime>HarbourHUD: Idle HUD updated with PanelRenderer</color>");
+            Debug.Log("<color=lime>HarbourHUD: Idle HUD (PanelRenderer)</color>");
         }
 
-        // ===================================================================
-        // HARBOUR BUILD HUD
-        // ===================================================================
         public void BuildHarbourBuildHUD()
         {
             if (root == null) return;
@@ -242,7 +229,6 @@ namespace _Project.Scripts.Harbour.Data
             {
                 toolsVisible = !toolsVisible;
                 toolsDropdown.style.display = toolsVisible ? DisplayStyle.Flex : DisplayStyle.None;
-
                 toolsTrigger.style.backgroundColor = toolsVisible
                     ? new StyleColor(new Color(0.32f, 0.55f, 0.28f))
                     : new StyleColor(new Color(0.22f, 0.45f, 0.18f));
@@ -269,7 +255,7 @@ namespace _Project.Scripts.Harbour.Data
 
             root.Add(buildBar);
 
-            Debug.Log("<color=lime>HarbourHUD: Build HUD with PanelRenderer</color>");
+            Debug.Log("<color=lime>HarbourHUD: Build HUD (PanelRenderer)</color>");
         }
 
         private void AddDropdownItem(VisualElement dropdownParent, string text, Action action)

@@ -14,20 +14,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/BuilderSaveData.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/BuilderSaveData.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/BuilderSaveService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/BuilderSaveService.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/InventoryPrefabCatalog.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/InventoryPrefabCatalog.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/JsonFileSaveStore.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/JsonFileSaveStore.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Inventory/BuilderInventoryFacade.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/PlacementService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HarbourHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HarbourHUD.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/HarbourMode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/HarbourMode.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/HarbourBuilderManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/HarbourBuilderManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,6 +44,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/BootActions.inputactions" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/EditorTools/FolderOrganizer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Packages/TerrainGridSystem/Scripts/Core/TGSPrivate.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Prefabs/Combat/Builder/Turret-Harbour.prefab" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Core/BaseBuilderController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/BuilderMode.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Data/PlaceableObjectData.cs" root0="FORCE_HIGHLIGHTING" />
@@ -79,6 +77,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/EventBus/EventBus.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FleetData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FormationData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/BuildingsInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/HarbourMode.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/SO/TurretInventorySO.cs" root0="FORCE_HIGHLIGHTING" />
@@ -86,6 +85,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Modules/ArmourData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Modules/EngineData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Modules/ModuleDatabase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/SO Asset/HarbourState.asset" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/ComponentSelectionHUD.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/EngineSelectionHUD.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/HullData.cs" root0="FORCE_HIGHLIGHTING" />
@@ -105,6 +105,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@7a4e1a2a8194/InputSystem/Runtime/Actions/InputAction.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@7a4e1a2a8194/InputSystem/Runtime/Devices/Keyboard.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.render-pipelines.core@f54051cecb82/Runtime/Debugging/RuntimeDebugWindow.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -113,61 +114,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0024508975357267" />
-      <entry key="MS500" value="1.8343107854545666" />
-      <entry key="S2" value="5.600638732801257" />
-      <entry key="S5" value="8.135238879663081" />
-      <entry key="S10" value="9.396554919613406" />
-      <entry key="S30" value="10.41980577695525" />
-      <entry key="S60" value="10.70360571754011" />
-      <entry key="M2" value="10.85018025971147" />
-      <entry key="M5" value="10.9396773393229" />
-      <entry key="M10" value="10.976571167033669" />
-      <entry key="M15" value="11.108973188824741" />
-      <entry key="M30" value="13.522435801608484" />
-      <entry key="H1" value="22.860980169409093" />
-      <entry key="H2" value="39.503640220215395" />
-      <entry key="H4" value="66.31902687922111" />
-      <entry key="D1" value="291.2631753848053" />
-      <entry key="W1" value="543.6404885264865" />
+      <entry key="MS100" value="1.2985884734848658" />
+      <entry key="MS500" value="3.302330270431671" />
+      <entry key="S2" value="7.834030780332648" />
+      <entry key="S5" value="11.109496953797494" />
+      <entry key="S10" value="12.80259565603706" />
+      <entry key="S30" value="14.19968810978906" />
+      <entry key="S60" value="14.590463787088114" />
+      <entry key="M2" value="14.792812018654391" />
+      <entry key="M5" value="14.916535174326533" />
+      <entry key="M10" value="14.964961051163906" />
+      <entry key="M15" value="15.101150732709424" />
+      <entry key="M30" value="17.51778339826595" />
+      <entry key="H1" value="26.857220858960122" />
+      <entry key="H2" value="43.500483593185784" />
+      <entry key="H4" value="70.31641981623952" />
+      <entry key="D1" value="295.26130258771906" />
+      <entry key="W1" value="547.6399904561464" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
-      <entry key="S10" value="2.4331982074809515E-231" />
-      <entry key="S30" value="2.043105851359525E-77" />
-      <entry key="S60" value="7.615642289254086E-39" />
-      <entry key="M2" value="1.6478585834538567E-19" />
-      <entry key="M5" value="6.941493207495058E-8" />
-      <entry key="M10" value="5.29221444773101E-4" />
-      <entry key="M15" value="0.010728527014919635" />
-      <entry key="M30" value="0.24999740721396635" />
-      <entry key="H1" value="1.451752129470444" />
-      <entry key="H2" value="3.993999437070513" />
-      <entry key="H4" value="7.744506863505145" />
-      <entry key="D1" value="37.57662812975561" />
-      <entry key="W1" value="76.51077119579345" />
+      <entry key="S10" value="2.3024244961248944E-231" />
+      <entry key="S30" value="2.0058271435760323E-77" />
+      <entry key="S60" value="7.545844565114097E-39" />
+      <entry key="M2" value="1.6402898504024893E-19" />
+      <entry key="M5" value="6.928722480411213E-8" />
+      <entry key="M10" value="5.287343986985775E-4" />
+      <entry key="M15" value="0.010721943647565603" />
+      <entry key="M30" value="0.24992069224055333" />
+      <entry key="H1" value="1.4515293678176562" />
+      <entry key="H2" value="3.993692999066944" />
+      <entry key="H4" value="7.744209760716081" />
+      <entry key="D1" value="37.57638786699742" />
+      <entry key="W1" value="76.51070130911806" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.8430275854068042" />
-      <entry key="MS500" value="1.7661001447785243" />
-      <entry key="S2" value="5.2866800590173" />
-      <entry key="S5" value="7.7741171636042665" />
-      <entry key="S10" value="9.127795429469286" />
-      <entry key="S30" value="10.301414499072775" />
-      <entry key="S60" value="10.640027422678118" />
-      <entry key="M2" value="10.817226778782588" />
-      <entry key="M5" value="10.926207306068674" />
-      <entry key="M10" value="10.97031062489152" />
-      <entry key="M15" value="11.115090066647737" />
-      <entry key="M30" value="13.76928563231989" />
-      <entry key="H1" value="24.30916725209196" />
-      <entry key="H2" value="43.49373134854506" />
-      <entry key="H4" value="74.0597053805258" />
-      <entry key="D1" value="328.8365787583177" />
-      <entry key="W1" value="620.1503623318251" />
+      <entry key="MS100" value="1.1615222481867833" />
+      <entry key="MS500" value="3.1562664497131134" />
+      <entry key="S2" value="7.542252091751129" />
+      <entry key="S5" value="10.76199072600938" />
+      <entry key="S10" value="12.535703050499487" />
+      <entry key="S30" value="14.079149191317333" />
+      <entry key="S60" value="14.525299587441433" />
+      <entry key="M2" value="14.758921898684585" />
+      <entry key="M5" value="14.902653834384402" />
+      <entry key="M10" value="14.958488077918124" />
+      <entry key="M15" value="15.107118362183147" />
+      <entry key="M30" value="17.764484715944825" />
+      <entry key="H1" value="28.305149340926032" />
+      <entry key="H2" value="47.490250389294395" />
+      <entry key="H4" value="78.05679226432414" />
+      <entry key="D1" value="332.8344642028399" />
+      <entry key="W1" value="624.1497941590212" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">

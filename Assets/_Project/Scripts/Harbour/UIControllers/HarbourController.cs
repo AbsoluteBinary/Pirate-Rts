@@ -1,6 +1,7 @@
 using _Project.Scripts.BaseBuilder.Runtime.Core;
 using _Project.Scripts.BaseBuilder.UI;
 using _Project.Scripts.Harbour.Data;
+using _Project.Scripts.Harbour.Data.HUDData;
 using _Project.Scripts.Harbour.Data.SO;
 using _Project.Scripts.Harbour.ShipBuilder;
 using TGS;
@@ -24,6 +25,7 @@ namespace _Project.Scripts.Harbour.UIControllers
         [SerializeField] private HarbourHUD harbourHUD;
         [SerializeField] private HarbourBuilderManager harbourBuilderManager;
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
+        [SerializeField] private DockHUD dockHUD;
 
         #region Base Builder
         [Header("Base Builder")]
@@ -56,6 +58,11 @@ namespace _Project.Scripts.Harbour.UIControllers
 
         private void Start()
         {
+            harbourHUD.OnDockClicked += ToggleDockMode;
+            
+            if (dockHUD != null)
+                dockHUD.OnCloseRequested += ReturnToIdle;
+            
             if (harbourHUD == null)
                 harbourHUD = GetComponent<HarbourHUD>();
 
@@ -85,6 +92,14 @@ namespace _Project.Scripts.Harbour.UIControllers
             }
 
             ApplyHarbourState();
+        }
+        
+        private void ToggleDockMode()
+        {
+            if (state != null && state.currentMode == HarbourStateSO.HarbourMode.Dock)
+                SetMode(HarbourStateSO.HarbourMode.Idle);
+            else
+                SetMode(HarbourStateSO.HarbourMode.Dock);
         }
 
         private void ApplyHarbourState()
