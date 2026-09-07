@@ -58,11 +58,6 @@ namespace _Project.Scripts.Harbour.UIControllers
 
         private void Start()
         {
-            harbourHUD.OnDockClicked += ToggleDockMode;
-            
-            if (dockHUD != null)
-                dockHUD.OnCloseRequested += ReturnToIdle;
-            
             if (harbourHUD == null)
                 harbourHUD = GetComponent<HarbourHUD>();
 
@@ -72,16 +67,20 @@ namespace _Project.Scripts.Harbour.UIControllers
             if (shipBuilderHUD == null)
                 shipBuilderHUD = GetComponent<ShipBuilderHUD>();
 
-            // === EVENT WIRING ===
+            if (dockHUD == null)
+                dockHUD = GetComponent<DockHUD>();
+
             if (harbourHUD != null)
             {
                 harbourHUD.OnBuildHarbourBaseClicked += () => SetMode(HarbourStateSO.HarbourMode.HarbourBuild);
                 harbourHUD.OnBuildShipClicked += () => SetMode(HarbourStateSO.HarbourMode.ShipBuilding);
                 harbourHUD.OnExitBuildMode += () => SetMode(HarbourStateSO.HarbourMode.Idle);
-
-                Debug.Log("<color=lime>✅ All events wired (including Build a Ship)</color>");
+                harbourHUD.OnDockClicked += ToggleDockMode;
             }
-            
+
+            if (dockHUD != null)
+                dockHUD.OnCloseRequested += ReturnToIdle;
+
             if (baseBuilderHUD != null)
             {
                 baseBuilderHUD.OnExitClicked += () =>
@@ -96,99 +95,89 @@ namespace _Project.Scripts.Harbour.UIControllers
         
         private void ToggleDockMode()
         {
-            if (state != null && state.currentMode == HarbourStateSO.HarbourMode.Dock)
-                SetMode(HarbourStateSO.HarbourMode.Idle);
-            else
-                SetMode(HarbourStateSO.HarbourMode.Dock);
+            SetMode(HarbourStateSO.HarbourMode.Dock);
         }
 
         private void ApplyHarbourState()
-{
-    if (playerBuildGO != null)
-        playerBuildGO.SetActive(false);
-
-    switch (state.currentMode)
-    {
-        case HarbourStateSO.HarbourMode.Idle:
-            // Cameras
-            SetCamera(idleCamera, true);
-            SetCamera(harbourBuildCamera, false);
-
-            // HUDs
-            if (harbourHUD != null)
-                harbourHUD.gameObject.SetActive(true);
-
-            if (baseBuilderHUD != null)
-                baseBuilderHUD.gameObject.SetActive(false);
-
-            // Base Builder systems
-            baseBuilderController?.SetBuilderActive(false);
-
-            // Old grid
-            //SetTGSGrid(false);
-
-            shipBuilderHUD?.CloseShipBuilder();
-
-            // Refresh the Idle UI
-            harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Idle);
-            break;
-
-        case HarbourStateSO.HarbourMode.HarbourBuild:
-            // Cameras
-            SetCamera(idleCamera, false);
-            SetCamera(harbourBuildCamera, true);
-
-            // HUDs
-            if (harbourHUD != null)
-                harbourHUD.gameObject.SetActive(false);
-
-            if (baseBuilderHUD != null)
-            {
-                Debug.Log("<color=cyan>Activating BaseBuilderHUD</color>");
-                baseBuilderHUD.gameObject.SetActive(true);
-            }
-            else
-            {
-                Debug.LogError("baseBuilderHUD reference is NULL!");
-            }
-
-            // Base Builder systems
-            if (baseBuilderController != null)
-            {
-                baseBuilderController.SetGrids(landGrid, objectGrid);
-                baseBuilderController.SetBuilderActive(true);
-            }
-
-            // Old grid
-            //SetTGSGrid(false);
-
+        {
             if (playerBuildGO != null)
-                playerBuildGO.SetActive(true);
+                playerBuildGO.SetActive(false);
 
-            shipBuilderHUD?.CloseShipBuilder();
-            break;
+            switch (state.currentMode)
+            {
+                case HarbourStateSO.HarbourMode.Idle:
+                    SetCamera(idleCamera, true);
+                    SetCamera(harbourBuildCamera, false);
 
-        case HarbourStateSO.HarbourMode.ShipBuilding:
-            // Cameras
-            SetCamera(idleCamera, true);
-            SetCamera(harbourBuildCamera, false);
+                    if (harbourHUD != null)
+                        harbourHUD.gameObject.SetActive(true);
 
-            // HUDs
-            if (harbourHUD != null)
-                harbourHUD.gameObject.SetActive(true);
+                    if (baseBuilderHUD != null)
+                        baseBuilderHUD.gameObject.SetActive(false);
 
-            if (baseBuilderHUD != null)
-                baseBuilderHUD.gameObject.SetActive(false);
+                    baseBuilderController?.SetBuilderActive(false);
+                    shipBuilderHUD?.CloseShipBuilder();
+                    dockHUD?.CloseDock();
+                    harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Idle);
+                    break;
 
-            // Base Builder systems
-            baseBuilderController?.SetBuilderActive(false);
+                case HarbourStateSO.HarbourMode.HarbourBuild:
+                    SetCamera(idleCamera, false);
+                    SetCamera(harbourBuildCamera, true);
 
-            SetTGSGrid(false);
-            break;
-    }
+                    if (harbourHUD != null)
+                        harbourHUD.gameObject.SetActive(false);
 
-    Debug.Log($"<color=lime>Harbour State Applied: {state.currentMode}</color>");
-}
+                    if (baseBuilderHUD != null)
+                        baseBuilderHUD.gameObject.SetActive(true);
+
+                    if (baseBuilderController != null)
+                    {
+                        baseBuilderController.SetGrids(landGrid, objectGrid);
+                        baseBuilderController.SetBuilderActive(true);
+                    }
+
+                    if (playerBuildGO != null)
+                        playerBuildGO.SetActive(true);
+
+                    shipBuilderHUD?.CloseShipBuilder();
+                    dockHUD?.CloseDock();
+                    break;
+
+                case HarbourStateSO.HarbourMode.ShipBuilding:
+                    SetCamera(idleCamera, true);
+                    SetCamera(harbourBuildCamera, false);
+
+                    if (harbourHUD != null)
+                        harbourHUD.gameObject.SetActive(true);
+
+                    if (baseBuilderHUD != null)
+                        baseBuilderHUD.gameObject.SetActive(false);
+
+                    baseBuilderController?.SetBuilderActive(false);
+                    SetTGSGrid(false);
+                    dockHUD?.CloseDock();
+                    harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.ShipBuilding);
+                    break;
+
+                case HarbourStateSO.HarbourMode.Dock:
+                    SetCamera(idleCamera, true);
+                    SetCamera(harbourBuildCamera, false);
+
+                    if (harbourHUD != null)
+                        harbourHUD.gameObject.SetActive(true);
+
+                    if (baseBuilderHUD != null)
+                        baseBuilderHUD.gameObject.SetActive(false);
+
+                    baseBuilderController?.SetBuilderActive(false);
+                    shipBuilderHUD?.CloseShipBuilder();
+                    harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Dock);
+                    break;
+            }
+
+            Debug.Log($"<color=lime>Harbour State Applied: {state.currentMode}</color>");
+        }
 
         private void SetCamera(Camera cam, bool active)
         {

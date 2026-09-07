@@ -85,8 +85,20 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
         private void OpenDockPanel()
         {
-            BuildIdleHUD();
-            dockHUD?.OpenDock(root);
+            if (root == null)
+            {
+                Debug.LogError("HarbourHUD.OpenDockPanel: root is null.");
+                return;
+            }
+
+            if (dockHUD == null)
+            {
+                Debug.LogError("HarbourHUD.OpenDockPanel: dockHUD is not assigned.");
+                return;
+            }
+
+            root.Clear();
+            dockHUD.OpenDock(root);
         }
 
         public void BuildIdleHUD()
