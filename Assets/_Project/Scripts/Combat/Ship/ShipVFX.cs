@@ -32,19 +32,13 @@ namespace _Project.Scripts.Combat.Ship
         private void OnEnable()
         {
             if (health != null)
-            {
                 health.OnDeath.AddListener(PlayDeathVFX);
-                health.OnHealthChanged.AddListener(OnHealthChanged);
-            }
         }
 
         private void OnDisable()
         {
             if (health != null)
-            {
                 health.OnDeath.RemoveListener(PlayDeathVFX);
-                health.OnHealthChanged.RemoveListener(OnHealthChanged);
-            }
         }
 
         private void OnHealthChanged(float currentHealth)

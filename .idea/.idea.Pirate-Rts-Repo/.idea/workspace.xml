@@ -15,9 +15,28 @@
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data/Images/LogoPotrait.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data/Images/LogoPotrait.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data/Images/LogoUpscalemedia.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data/Images/LogoUpscalemedia.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/Examples Assets/dotweenpro_logo.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/Examples Assets/dotweenpro_logo.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Sprites/GrassTile.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Sprites/GrassTile.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Sprites/Hulls/Gunboat_Hull.jpg.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Sprites/Hulls/Gunboat_Hull.jpg.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Sprites/Hulls/HammerHead_Hull.jpeg.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Sprites/Hulls/HammerHead_Hull.jpeg.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Sprites/Hulls/Skirmisher_Hull.jpeg.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Sprites/Hulls/Skirmisher_Hull.jpeg.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Sprites/Weapons/Cannons/Cannon_01.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Sprites/Weapons/Cannons/Cannon_01.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/UniversalRenderPipelineGlobalSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/UniversalRenderPipelineGlobalSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Combat/Ship/ShipVFX.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Combat/Ship/ShipVFX.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/AudioListenerChecker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/AudioListenerChecker.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Boot/LoginPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Boot/LoginPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectAuditorSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectAuditorSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,61 +126,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2985884734848658" />
-      <entry key="MS500" value="3.302330270431671" />
-      <entry key="S2" value="7.834030780332648" />
-      <entry key="S5" value="11.109496953797494" />
-      <entry key="S10" value="12.80259565603706" />
-      <entry key="S30" value="14.19968810978906" />
-      <entry key="S60" value="14.590463787088114" />
-      <entry key="M2" value="14.792812018654391" />
-      <entry key="M5" value="14.916535174326533" />
-      <entry key="M10" value="14.964961051163906" />
-      <entry key="M15" value="15.101150732709424" />
-      <entry key="M30" value="17.51778339826595" />
-      <entry key="H1" value="26.857220858960122" />
-      <entry key="H2" value="43.500483593185784" />
-      <entry key="H4" value="70.31641981623952" />
-      <entry key="D1" value="295.26130258771906" />
-      <entry key="W1" value="547.6399904561464" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000468329211627" />
+      <entry key="S2" value="1.3911962772616007" />
+      <entry key="S5" value="4.519791989205833" />
+      <entry key="S10" value="8.642303219288403" />
+      <entry key="S30" value="13.98605451991961" />
+      <entry key="S60" value="15.852681820287037" />
+      <entry key="M2" value="16.88864990412452" />
+      <entry key="M5" value="17.546058471861635" />
+      <entry key="M10" value="17.778147677640614" />
+      <entry key="M15" value="17.975353675427556" />
+      <entry key="M30" value="20.44566465126092" />
+      <entry key="H1" value="29.80352021982734" />
+      <entry key="H2" value="46.457924450751214" />
+      <entry key="H4" value="73.28248719951722" />
+      <entry key="D1" value="298.2379595748363" />
+      <entry key="W1" value="550.6338207501948" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
-      <entry key="S10" value="2.3024244961248944E-231" />
-      <entry key="S30" value="2.0058271435760323E-77" />
-      <entry key="S60" value="7.545844565114097E-39" />
-      <entry key="M2" value="1.6402898504024893E-19" />
-      <entry key="M5" value="6.928722480411213E-8" />
-      <entry key="M10" value="5.287343986985775E-4" />
-      <entry key="M15" value="0.010721943647565603" />
-      <entry key="M30" value="0.24992069224055333" />
-      <entry key="H1" value="1.4515293678176562" />
-      <entry key="H2" value="3.993692999066944" />
-      <entry key="H4" value="7.744209760716081" />
-      <entry key="D1" value="37.57638786699742" />
-      <entry key="W1" value="76.51070130911806" />
+      <entry key="S10" value="1.1672016651149845E-231" />
+      <entry key="S30" value="1.5993628516785614E-77" />
+      <entry key="S60" value="6.738055831878926E-39" />
+      <entry key="M2" value="1.5500081179396237E-19" />
+      <entry key="M5" value="6.773583934476665E-8" />
+      <entry key="M10" value="5.227815365844509E-4" />
+      <entry key="M15" value="0.010641315109780405" />
+      <entry key="M30" value="0.24897922272157147" />
+      <entry key="H1" value="1.4487927795300737" />
+      <entry key="H2" value="3.989926540811952" />
+      <entry key="H4" value="7.740557111002219" />
+      <entry key="D1" value="37.57343339373619" />
+      <entry key="W1" value="76.50984189237286" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1615222481867833" />
-      <entry key="MS500" value="3.1562664497131134" />
-      <entry key="S2" value="7.542252091751129" />
-      <entry key="S5" value="10.76199072600938" />
-      <entry key="S10" value="12.535703050499487" />
-      <entry key="S30" value="14.079149191317333" />
-      <entry key="S60" value="14.525299587441433" />
-      <entry key="M2" value="14.758921898684585" />
-      <entry key="M5" value="14.902653834384402" />
-      <entry key="M10" value="14.958488077918124" />
-      <entry key="M15" value="15.107118362183147" />
-      <entry key="M30" value="17.764484715944825" />
-      <entry key="H1" value="28.305149340926032" />
-      <entry key="H2" value="47.490250389294395" />
-      <entry key="H4" value="78.05679226432414" />
-      <entry key="D1" value="332.8344642028399" />
-      <entry key="W1" value="624.1497941590212" />
+      <entry key="MS100" value="4.349499861504837E-16" />
+      <entry key="MS500" value="8.614985911995444E-4" />
+      <entry key="S2" value="0.5123289519652271" />
+      <entry key="S5" value="3.830784414264828" />
+      <entry key="S10" value="8.125288709083428" />
+      <entry key="S30" value="13.737189439235497" />
+      <entry key="S60" value="15.714308971840461" />
+      <entry key="M2" value="16.81552647719765" />
+      <entry key="M5" value="17.51579964612539" />
+      <entry key="M10" value="17.76336133130591" />
+      <entry key="M15" value="17.975676192145265" />
+      <entry key="M30" value="20.68863179556514" />
+      <entry key="H1" value="31.24731530603507" />
+      <entry key="H2" value="50.44322639786682" />
+      <entry key="H4" value="81.01885768714195" />
+      <entry key="D1" value="335.8081084399872" />
+      <entry key="W1" value="627.1427566846733" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -231,7 +250,7 @@
 }</component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.5.10f1/Editor/Unity" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.0f1/Editor/Unity" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath $PROJECT_DIR$ -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -241,7 +260,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.5.10f1/Editor/Unity" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.0f1/Editor/Unity" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath $PROJECT_DIR$ -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="PASS_PARENT_ENVS" value="1" />

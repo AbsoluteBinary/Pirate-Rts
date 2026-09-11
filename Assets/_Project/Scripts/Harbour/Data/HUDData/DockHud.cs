@@ -19,6 +19,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
         private VisualElement _root;
         private VisualElement _dockRoot;
+        private VisualElement _dockPanel;
+        private VisualElement _shipsOverlay;
+        private int _pendingDockSlot = -1;
         private readonly bool[] _slotOccupied = new bool[FleetSize];
         private readonly VisualElement[] _slotFrames = new VisualElement[FleetSize];
         private readonly Button[] _slotButtons = new Button[FleetSize];
@@ -49,25 +52,178 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             _dockRoot.style.left = 0;
             _dockRoot.style.right = 0;
             _dockRoot.style.bottom = 0;
-            _dockRoot.style.flexDirection = FlexDirection.Column;
-            _dockRoot.style.paddingTop = 12;
-            _dockRoot.style.paddingBottom = 12;
-            _dockRoot.style.paddingLeft = 16;
-            _dockRoot.style.paddingRight = 16;
+            _dockRoot.style.justifyContent = Justify.Center;
+            _dockRoot.style.alignItems = Align.Center;
+            _dockRoot.RegisterCallback<GeometryChangedEvent>(OnDockRootResized);
 
-            _dockRoot.Add(CreateOuterFrame("DockTopFrame", Length.Percent(30f)));
-            _dockRoot.Add(CreateMainFrame());
-            _dockRoot.Add(CreateOuterFrame("DockBottomFrame", Length.Percent(30f)));
+            _dockPanel = new VisualElement { name = "DockPanel" };
+            _dockPanel.style.flexDirection = FlexDirection.Row;
+            _dockPanel.style.alignItems = Align.Stretch;
+            _dockPanel.style.flexShrink = 0;
+            _dockPanel.style.paddingTop = 12;
+            _dockPanel.style.paddingBottom = 12;
+            _dockPanel.style.paddingLeft = 16;
+            _dockPanel.style.paddingRight = 16;
+            _dockPanel.style.transformOrigin = new TransformOrigin(Length.Percent(50), Length.Percent(50));
 
+            _dockPanel.Add(CreateSideFrame("DockLeftFrame"));
+
+            var main = CreateMainFrame();
+            main.style.flexGrow = 1;
+            main.style.flexShrink = 1;
+            main.style.marginBottom = 0;
+            main.style.marginLeft = 8;
+            main.style.marginRight = 8;
+            _dockPanel.Add(main);
+
+            _dockPanel.Add(CreateFleetStoragePanel());
+
+            _dockRoot.Add(_dockPanel);
             _root.Add(_dockRoot);
             RefreshAllSlotButtons();
+
+            _dockPanel.schedule.Execute(FitDockToScreen);
         }
 
         public void CloseDock()
         {
+            CloseMyShipsPanel();
             if (_dockRoot == null) return;
+            _dockRoot.UnregisterCallback<GeometryChangedEvent>(OnDockRootResized);
             _dockRoot.RemoveFromHierarchy();
             _dockRoot = null;
+            _dockPanel = null;
+        }
+        
+        private void OpenMyShipsPanel()
+        {
+            if (_dockRoot == null) return;
+
+            CloseMyShipsPanel();
+
+            _shipsOverlay = new VisualElement { name = "MyShipsOverlay" };
+            _shipsOverlay.style.position = Position.Absolute;
+            _shipsOverlay.style.top = 0;
+            _shipsOverlay.style.left = 0;
+            _shipsOverlay.style.right = 0;
+            _shipsOverlay.style.bottom = 0;
+            _shipsOverlay.pickingMode = PickingMode.Position;
+
+            var dimmer = new VisualElement { name = "MyShipsDimmer" };
+            dimmer.style.position = Position.Absolute;
+            dimmer.style.top = 0;
+            dimmer.style.left = 0;
+            dimmer.style.right = 0;
+            dimmer.style.bottom = 0;
+            dimmer.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
+            dimmer.pickingMode = PickingMode.Position;
+            _shipsOverlay.Add(dimmer);
+
+            var card = new VisualElement { name = "MyShipsPanel" };
+            card.style.position = Position.Absolute;
+            card.style.left = Length.Percent(18f);
+            card.style.right = Length.Percent(18f);
+            card.style.top = Length.Percent(12f);
+            card.style.bottom = Length.Percent(12f);
+            card.style.backgroundColor = new Color(0.06f, 0.10f, 0.22f, 0.98f);
+            card.style.borderTopWidth = 2;
+            card.style.borderRightWidth = 2;
+            card.style.borderBottomWidth = 2;
+            card.style.borderLeftWidth = 2;
+            card.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderTopLeftRadius = 10;
+            card.style.borderTopRightRadius = 10;
+            card.style.borderBottomLeftRadius = 10;
+            card.style.borderBottomRightRadius = 10;
+            card.style.paddingTop = 12;
+            card.style.paddingBottom = 16;
+            card.style.paddingLeft = 16;
+            card.style.paddingRight = 16;
+            card.style.flexDirection = FlexDirection.Column;
+            card.pickingMode = PickingMode.Position;
+
+            var header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.justifyContent = Justify.SpaceBetween;
+            header.style.alignItems = Align.Center;
+            header.style.marginBottom = 12;
+
+            var title = new Label("My Ships");
+            title.style.fontSize = 22;
+            title.style.color = Color.cyan;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.Add(title);
+
+            var closeBtn = new Button { text = "✕" };
+            closeBtn.style.width = 36;
+            closeBtn.style.height = 36;
+            closeBtn.style.fontSize = 18;
+            closeBtn.style.color = Color.white;
+            closeBtn.style.backgroundColor = new Color(0.7f, 0.15f, 0.15f);
+            closeBtn.style.borderTopLeftRadius = 18;
+            closeBtn.style.borderTopRightRadius = 18;
+            closeBtn.style.borderBottomLeftRadius = 18;
+            closeBtn.style.borderBottomRightRadius = 18;
+            closeBtn.clicked += CloseMyShipsPanel;
+            header.Add(closeBtn);
+            card.Add(header);
+
+            var box = new VisualElement { name = "MyShipsBox" };
+            box.style.flexGrow = 1;
+            box.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            box.style.borderTopWidth = 1;
+            box.style.borderRightWidth = 1;
+            box.style.borderBottomWidth = 1;
+            box.style.borderLeftWidth = 1;
+            box.style.borderTopColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            box.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            box.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            box.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            box.style.borderTopLeftRadius = 8;
+            box.style.borderTopRightRadius = 8;
+            box.style.borderBottomLeftRadius = 8;
+            box.style.borderBottomRightRadius = 8;
+            card.Add(box);
+
+            _shipsOverlay.Add(card);
+            _dockRoot.Add(_shipsOverlay);
+        }
+
+        private void CloseMyShipsPanel()
+        {
+            if (_shipsOverlay == null) return;
+            _shipsOverlay.RemoveFromHierarchy();
+            _shipsOverlay = null;
+            _pendingDockSlot = -1;
+        }
+
+        private void OnDockRootResized(GeometryChangedEvent evt)
+        {
+            if (Mathf.Approximately(evt.newRect.width, evt.oldRect.width) &&
+                Mathf.Approximately(evt.newRect.height, evt.oldRect.height))
+                return;
+
+            FitDockToScreen();
+        }
+
+        private void FitDockToScreen()
+        {
+            if (_dockRoot == null || _dockPanel == null) return;
+
+            var host = _dockRoot.contentRect;
+            var content = _dockPanel.layout;
+            if (host.width < 8f || host.height < 8f) return;
+            if (content.width < 8f || content.height < 8f) return;
+
+            float scale = Mathf.Min(
+                (host.width * 0.88f) / content.width,
+                (host.height * 0.88f) / content.height);
+
+            scale = Mathf.Clamp(scale, 0.4f, 1f);
+            _dockPanel.style.scale = new Scale(new Vector3(scale, scale, 1f));
         }
 
         private void RequestClose()
@@ -97,6 +253,111 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             frame.style.marginBottom = 8;
             return frame;
         }
+        
+        private const int StorageSlotCount = 12;
+
+        private VisualElement CreateSideFrame(string name)
+        {
+            var frame = new VisualElement { name = name };
+            frame.style.width = 330;
+            frame.style.flexShrink = 0;
+            frame.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            frame.style.borderTopWidth = 1;
+            frame.style.borderRightWidth = 1;
+            frame.style.borderBottomWidth = 1;
+            frame.style.borderLeftWidth = 1;
+            frame.style.borderTopColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            frame.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            frame.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            frame.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            frame.style.borderTopLeftRadius = 8;
+            frame.style.borderTopRightRadius = 8;
+            frame.style.borderBottomLeftRadius = 8;
+            frame.style.borderBottomRightRadius = 8;
+            frame.style.marginRight = 8;
+            return frame;
+        }
+
+        private VisualElement CreateFleetStoragePanel()
+        {
+            var panel = new VisualElement { name = "FleetStoragePanel" };
+            panel.style.width = 330;
+            panel.style.flexShrink = 0;
+            panel.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            panel.style.borderTopWidth = 1;
+            panel.style.borderRightWidth = 1;
+            panel.style.borderBottomWidth = 1;
+            panel.style.borderLeftWidth = 1;
+            panel.style.borderTopColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            panel.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            panel.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            panel.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            panel.style.borderTopLeftRadius = 8;
+            panel.style.borderTopRightRadius = 8;
+            panel.style.borderBottomLeftRadius = 8;
+            panel.style.borderBottomRightRadius = 8;
+            panel.style.paddingTop = 10;
+            panel.style.paddingBottom = 10;
+            panel.style.paddingLeft = 10;
+            panel.style.paddingRight = 10;
+            panel.style.flexDirection = FlexDirection.Column;
+
+            var header = new Label("Fleet Storage");
+            header.style.width = Length.Percent(100f);
+            header.style.fontSize = 16;
+            header.style.color = Color.cyan;
+            header.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.style.unityTextAlign = TextAnchor.MiddleCenter;
+            header.style.alignSelf = Align.Center;
+            header.style.marginBottom = 10;
+            panel.Add(header);
+
+            var grid = new VisualElement { name = "FleetStorageGrid" };
+            grid.style.flexDirection = FlexDirection.Row;
+            grid.style.flexWrap = Wrap.Wrap;
+            grid.style.justifyContent = Justify.Center;
+            grid.style.flexGrow = 1;
+
+            for (int i = 0; i < StorageSlotCount; i++)
+                grid.Add(CreateStorageSlot(i));
+
+            panel.Add(grid);
+            return panel;
+        }
+
+        private VisualElement CreateStorageSlot(int index)
+        {
+            var col = new VisualElement { name = $"StorageSlot_{index}" };
+            col.style.alignItems = Align.Center;
+            col.style.width = Length.Percent(31f);
+            col.style.marginBottom = 10;
+            col.style.marginLeft = 4;
+            col.style.marginRight = 4;
+            
+
+            var frame = new VisualElement { name = $"StorageFrame_{index}" };
+            frame.style.width = 72;
+            frame.style.height = 72;
+            frame.style.backgroundColor = new Color(0.12f, 0.16f, 0.30f, 0.95f);
+            frame.style.borderTopWidth = 2;
+            frame.style.borderRightWidth = 2;
+            frame.style.borderBottomWidth = 2;
+            frame.style.borderLeftWidth = 2;
+            frame.style.borderTopColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            frame.style.borderRightColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            frame.style.borderBottomColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            frame.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            col.Add(frame);
+
+            var nameField = new TextField { name = $"StorageName_{index}", value = "" };
+            nameField.SetEnabled(false);
+            nameField.style.width = 88;
+            nameField.style.marginTop = 6;
+            nameField.style.fontSize = 11;
+            col.Add(nameField);
+
+            return col;
+        }
 
         private VisualElement CreateMainFrame()
         {
@@ -121,6 +382,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             main.style.paddingLeft = 16;
             main.style.paddingRight = 16;
             main.style.flexDirection = FlexDirection.Column;
+            main.style.justifyContent = Justify.FlexStart;
             main.style.marginBottom = 8;
 
             var headerRow = new VisualElement();
@@ -148,10 +410,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             closeBtn.clicked += RequestClose;
             headerRow.Add(closeBtn);
             main.Add(headerRow);
-
-            var filler = new VisualElement();
-            filler.style.flexGrow = 1;
-            main.Add(filler);
+            
 
             main.Add(CreateFleetRow());
             main.Add(CreateCostsBlock());
@@ -239,9 +498,16 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
         private void OnSlotButtonClicked(int index)
         {
-            _slotOccupied[index] = !_slotOccupied[index];
-            RefreshSlotButton(index);
-            Debug.Log($"DockHUD: slot {index} -> {(_slotOccupied[index] ? "occupied (Remove Ship)" : "empty (Add Ship)")}");
+            if (_slotOccupied[index])
+            {
+                _slotOccupied[index] = false;
+                RefreshSlotButton(index);
+                Debug.Log($"DockHUD: slot {index} emptied");
+                return;
+            }
+
+            _pendingDockSlot = index;
+            OpenMyShipsPanel();
         }
 
         private void RefreshAllSlotButtons()
@@ -260,7 +526,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         {
             var block = new VisualElement { name = "CostsBlock" };
             block.style.alignItems = Align.Center;
-            block.style.marginBottom = 14;
+            block.style.marginBottom = 36;
+            block.style.flexShrink = 0;
 
             var header = new Label("Costs");
             header.style.fontSize = 18;
@@ -331,6 +598,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             row.style.flexDirection = FlexDirection.Row;
             row.style.justifyContent = Justify.Center;
             row.style.alignItems = Align.FlexStart;
+            row.style.marginTop = 52;
+            row.style.flexShrink = 0;
 
             row.Add(CreateBeginRepairsColumn());
             row.Add(CreateInstantRepairColumn());

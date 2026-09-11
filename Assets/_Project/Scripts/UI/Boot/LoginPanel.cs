@@ -17,6 +17,23 @@ namespace _Project.Scripts.UI.Boot
             WorldSpaceInteractionsEventBus.HarbourButtonClicked += OnStartGameClicked;
         }
 
+        private void OnDestroy()
+        {
+            WorldSpaceInteractionsEventBus.HarbourButtonClicked -= OnStartGameClicked;
+        }
+
+        private void OnEnterHarbourClicked()
+        {
+            if (IMGUILoadingOverlay.Instance != null)
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+
+            if (SceneLoader.Instance != null)
+                _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
+            else
+                Debug.LogError("SceneLoader.Instance is null");
+        }
+
+        private bool _uiBuilt = false;
         private void OnEnable()
         {
             var doc = GetComponent<UIDocument>();
@@ -27,10 +44,14 @@ namespace _Project.Scripts.UI.Boot
             }
 
             var root = doc.rootVisualElement;
+
+            if (_uiBuilt && root.Q("LoginPanel") != null)
+                return;
+
             root.Clear();
 
-            // Root container - centers everything
             var container = new VisualElement { name = "LoginPanel" };
+            container.style.display = DisplayStyle.None;
             container.style.position = Position.Absolute;
             container.style.top = Length.Percent(50);
             container.style.left = Length.Percent(50);
@@ -122,20 +143,7 @@ namespace _Project.Scripts.UI.Boot
             else
                 Debug.LogError("SceneLoader.Instance is null");
         }
-
-        private void OnEnterHarbourClicked()
-        {
-            if (IMGUILoadingOverlay.Instance != null)
-                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
-
-            if (SceneLoader.Instance != null)
-            {
-                _ = SceneLoader.Instance.ToggleNextSceneGroup();
-                _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
-            }
-            else
-                Debug.LogError("SceneLoader.Instance is null");
-        }
+        
 
         /// <summary>
         /// NEW: Load Combat Scene button handler

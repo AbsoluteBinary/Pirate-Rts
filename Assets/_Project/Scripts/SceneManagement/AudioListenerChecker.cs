@@ -1,23 +1,57 @@
-using System;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace _Project.Scripts.SceneManagement
 {
     public class AudioListenerChecker : MonoBehaviour
     {
-        [Obsolete("Obsolete")]
-        void Update()
+        private void OnEnable()
         {
-            var activeListeners = FindObjectsOfType<AudioListener>().Where(l => l.enabled).ToArray();
-            if (activeListeners.Length > 1)
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            EnforceSingleListener();
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            EnforceSingleListener();
+        }
+
+        public static void EnforceSingleListener()
+        {
+            var listeners = FindObjectsByType<AudioListener>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            if (listeners.Length == 0) return;
+
+            var active = SceneManager.GetActiveScene();
+            AudioListener keep = null;
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                Debug.LogError($"Multiple AudioListeners active: {activeListeners.Length}");
-                foreach (var listener in activeListeners)
+                if (listeners[i].gameObject.scene == active)
                 {
-                    //Debug.Log($"Active AudioListener on {listener.gameObject.name} in scene {listener.gameObject.scene.name}");
+                    keep = listeners[i];
+                    break;
                 }
             }
+
+            if (keep == null)
+                keep = listeners[0];
+
+            int disabled = 0;
+            for (int i = 0; i < listeners.Length; i++)
+            {
+                bool on = listeners[i] == keep;
+                if (listeners[i].enabled != on)
+                    listeners[i].enabled = on;
+                if (!on) disabled++;
+            }
+
+            if (disabled > 0)
+                Debug.Log($"AudioListenerChecker: kept '{keep.gameObject.name}' ({keep.gameObject.scene.name}), disabled {disabled}.");
         }
     }
 }

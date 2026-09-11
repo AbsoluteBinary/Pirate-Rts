@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus;
-using _Project.Scripts.Harbour.Data;
 using _Project.Scripts.Harbour.UIControllers;
 
 // For EventBus
@@ -369,18 +368,22 @@ namespace _Project.Scripts.SceneManagement
 
         private async void Start()
         {
-            if (manager.ActiveSceneGroup == null)
+            if (manager.ActiveSceneGroup != null)
+                return;
+
+    #if UNITY_EDITOR
+            if (bypassLoginForTesting)
             {
-#if UNITY_EDITOR // Dev-only bypass
-                if (bypassLoginForTesting)
-                {
-                    await LoadSceneGroup(0); // Load Boot minimally
-                    await BypassLoginAndLoadNext();
-                    return;
-                }
-#endif
-                await LoadSceneGroup(0); // Original Boot load + login
+                await LoadSceneGroup(0);
+                await BypassLoginAndLoadNext();
+                return;
             }
+    #endif
+
+            if (sceneGroups != null && sceneGroups.Length > 0)
+                manager.ActiveSceneGroup = sceneGroups[0];
+
+            isLoading = false;
         }
 
         private async Task BypassLoginAndLoadNext()
