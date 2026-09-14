@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rot Iron Armour
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Modules.ArmourData
   moduleName: Rot Iron Armour 1
-  icon: {fileID: 21300000, guid: 264ea33392537064c9608be6535ec11b, type: 3}
+  icon: {fileID: 21300000, guid: e7ce837574cb7ef48883710e912c3718, type: 3}
   description: 
   moduleSlots: []
   type: 1

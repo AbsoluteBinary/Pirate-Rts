@@ -2,7 +2,7 @@ using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 using _Project.Scripts.Harbour.Data.SO;
 using UnityEngine;
 
-namespace _Project.Scripts.BaseBuilder.Runtime.Save
+namespace _Project.Scripts.Persistence.TempSave
 {
     public interface IPrefabCatalog
     {

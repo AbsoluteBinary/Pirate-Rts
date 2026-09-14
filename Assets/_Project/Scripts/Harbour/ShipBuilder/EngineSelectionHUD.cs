@@ -243,11 +243,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             if (_targetSlot == null || engine == null) return;
 
+            string slotId = _targetSlot.slotId;
             _targetSlot.equippedModule = engine;
             OnEngineEquipped?.Invoke(engine, _targetSlot);
             CloseEngineSelection();
 
-            Debug.Log($"<color=cyan>✅ Equipped {engine.moduleName} to slot {_targetSlot.slotId}</color>");
+            Debug.Log($"<color=cyan>✅ Equipped {engine.moduleName} to slot {slotId}</color>");
         }
 
         public void CloseEngineSelection()

@@ -4,7 +4,7 @@ using _Project.Scripts.BaseBuilder.Runtime.Placement;
 using TGS;
 using UnityEngine;
 
-namespace _Project.Scripts.BaseBuilder.Runtime.Save
+namespace _Project.Scripts.Persistence.TempSave
 {
     public class BuilderSaveService
     {

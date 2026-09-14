@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using _Project.Scripts.BaseBuilder.Runtime.Inventory;
 
-namespace _Project.Scripts.BaseBuilder.Runtime.Save
+namespace _Project.Scripts.Persistence.TempSave
 {
     [Serializable]
     public class BuilderSaveData

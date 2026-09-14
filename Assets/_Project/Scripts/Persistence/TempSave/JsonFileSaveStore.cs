@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace _Project.Scripts.BaseBuilder.Runtime.Save
+namespace _Project.Scripts.Persistence.TempSave
 {
     public interface IBuilderSaveStore
     {

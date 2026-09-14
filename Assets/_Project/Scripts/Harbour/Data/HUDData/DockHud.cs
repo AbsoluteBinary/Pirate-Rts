@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -22,9 +23,29 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private VisualElement _dockPanel;
         private VisualElement _shipsOverlay;
         private int _pendingDockSlot = -1;
+        private int _highlightedShipIndex = -1;
+        private Label _inspectHealthValue;
+        private Label _inspectShipName;
+        private Label _inspectWeight;
+        private Label _inspectFuel;
+        private Label _inspectCargo;
+        private readonly List<VisualElement> _shipListRows = new();
+
+        private readonly string[] _placeholderShipNames =
+        {
+            "Gun Boat Alpha",
+            "Skirmisher Tide",
+            "HammerHead Vale"
+        };
         private readonly bool[] _slotOccupied = new bool[FleetSize];
         private readonly VisualElement[] _slotFrames = new VisualElement[FleetSize];
         private readonly Button[] _slotButtons = new Button[FleetSize];
+        private Label _selectedHealthLabel;
+        private Label _selectedHealthValue;
+        private Label _selectedShipName;
+        private Label _selectedWeight;
+        private Label _selectedFuel;
+        private Label _selectedCargo;
 
         private static readonly string[] MaterialNames =
         {
@@ -100,6 +121,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             if (_dockRoot == null) return;
 
             CloseMyShipsPanel();
+            _highlightedShipIndex = -1;
+            _shipListRows.Clear();
 
             _shipsOverlay = new VisualElement { name = "MyShipsOverlay" };
             _shipsOverlay.style.position = Position.Absolute;
@@ -121,10 +144,10 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             var card = new VisualElement { name = "MyShipsPanel" };
             card.style.position = Position.Absolute;
-            card.style.left = Length.Percent(18f);
-            card.style.right = Length.Percent(18f);
-            card.style.top = Length.Percent(12f);
-            card.style.bottom = Length.Percent(12f);
+            card.style.left = Length.Percent(12f);
+            card.style.right = Length.Percent(12f);
+            card.style.top = Length.Percent(8f);
+            card.style.bottom = Length.Percent(8f);
             card.style.backgroundColor = new Color(0.06f, 0.10f, 0.22f, 0.98f);
             card.style.borderTopWidth = 2;
             card.style.borderRightWidth = 2;
@@ -171,25 +194,234 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             header.Add(closeBtn);
             card.Add(header);
 
-            var box = new VisualElement { name = "MyShipsBox" };
-            box.style.flexGrow = 1;
-            box.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
-            box.style.borderTopWidth = 1;
-            box.style.borderRightWidth = 1;
-            box.style.borderBottomWidth = 1;
-            box.style.borderLeftWidth = 1;
-            box.style.borderTopColor = new Color(0.4f, 0.7f, 1f, 0.45f);
-            box.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.45f);
-            box.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.45f);
-            box.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.45f);
-            box.style.borderTopLeftRadius = 8;
-            box.style.borderTopRightRadius = 8;
-            box.style.borderBottomLeftRadius = 8;
-            box.style.borderBottomRightRadius = 8;
-            card.Add(box);
+            var body = new VisualElement { name = "MyShipsBody" };
+            body.style.flexDirection = FlexDirection.Row;
+            body.style.flexGrow = 1;
+            body.style.minHeight = 280;
+            body.Add(CreateMyShipsList());
+            body.Add(CreateMyShipsInspectPane());
+            card.Add(body);
 
+            var actions = new VisualElement { name = "MyShipsActions" };
+            actions.style.flexDirection = FlexDirection.Row;
+            actions.style.justifyContent = Justify.FlexEnd;
+            actions.style.marginTop = 14;
+
+            var cancelBtn = new Button { text = "Cancel" };
+            StyleMyShipsActionButton(cancelBtn, new Color(0.18f, 0.22f, 0.38f));
+            cancelBtn.clicked += CloseMyShipsPanel;
+            actions.Add(cancelBtn);
+
+            var confirmBtn = new Button { text = "Confirm" };
+            StyleMyShipsActionButton(confirmBtn, new Color(0.12f, 0.42f, 0.38f));
+            confirmBtn.style.marginLeft = 10;
+            confirmBtn.clicked += ConfirmHighlightedShip;
+            actions.Add(confirmBtn);
+
+            card.Add(actions);
             _shipsOverlay.Add(card);
             _dockRoot.Add(_shipsOverlay);
+
+            if (_placeholderShipNames.Length > 0)
+                HighlightShip(0);
+        }
+
+        private VisualElement CreateMyShipsList()
+        {
+            var list = new VisualElement { name = "MyShipsList" };
+            list.style.width = Length.Percent(42f);
+            list.style.flexShrink = 0;
+            list.style.marginRight = 12;
+            list.style.paddingTop = 8;
+            list.style.paddingBottom = 8;
+            list.style.paddingLeft = 8;
+            list.style.paddingRight = 8;
+            list.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            list.style.borderTopWidth = 1;
+            list.style.borderRightWidth = 1;
+            list.style.borderBottomWidth = 1;
+            list.style.borderLeftWidth = 1;
+            list.style.borderTopColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            list.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            list.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            list.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            list.style.borderTopLeftRadius = 8;
+            list.style.borderTopRightRadius = 8;
+            list.style.borderBottomLeftRadius = 8;
+            list.style.borderBottomRightRadius = 8;
+
+            var listTitle = new Label("Built Ships");
+            listTitle.style.fontSize = 14;
+            listTitle.style.color = new Color(0.7f, 0.85f, 1f);
+            listTitle.style.unityTextAlign = TextAnchor.MiddleCenter;
+            listTitle.style.marginBottom = 8;
+            list.Add(listTitle);
+
+            for (int i = 0; i < _placeholderShipNames.Length; i++)
+            {
+                int captured = i;
+
+                var row = new Button();
+                row.name = $"ShipRow_{i}";
+                row.style.height = 72;
+                row.style.marginBottom = 6;
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.style.backgroundColor = new Color(0.14f, 0.18f, 0.34f);
+                row.style.borderTopLeftRadius = 6;
+                row.style.borderTopRightRadius = 6;
+                row.style.borderBottomLeftRadius = 6;
+                row.style.borderBottomRightRadius = 6;
+                row.clicked += () => HighlightShip(captured);
+
+                var hex = new VisualElement { name = $"ShipRowHex_{i}" };
+                hex.style.width = 56;
+                hex.style.height = 56;
+                hex.style.marginLeft = 6;
+                hex.style.marginRight = 10;
+                hex.style.flexShrink = 0;
+                hex.style.backgroundColor = new Color(0.12f, 0.16f, 0.30f, 0.95f);
+                hex.style.borderTopWidth = 2;
+                hex.style.borderRightWidth = 2;
+                hex.style.borderBottomWidth = 2;
+                hex.style.borderLeftWidth = 2;
+                hex.style.borderTopColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                hex.style.borderRightColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                hex.style.borderBottomColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                hex.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                ApplyHexSprite(hex);
+                row.Add(hex);
+
+                var nameLabel = new Label(_placeholderShipNames[i]);
+                nameLabel.style.fontSize = 14;
+                nameLabel.style.color = Color.white;
+                nameLabel.style.flexGrow = 1;
+                nameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
+                row.Add(nameLabel);
+
+                list.Add(row);
+                _shipListRows.Add(row);
+            }
+
+            return list;
+        }
+
+        private VisualElement CreateMyShipsInspectPane()
+        {
+            var pane = new VisualElement { name = "MyShipsInspect" };
+            pane.style.flexGrow = 1;
+            pane.style.alignItems = Align.Center;
+            pane.style.justifyContent = Justify.FlexStart;
+            pane.style.paddingTop = 16;
+            pane.style.paddingBottom = 16;
+            pane.style.paddingLeft = 16;
+            pane.style.paddingRight = 16;
+            pane.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            pane.style.borderTopWidth = 2;
+            pane.style.borderRightWidth = 2;
+            pane.style.borderBottomWidth = 2;
+            pane.style.borderLeftWidth = 2;
+            pane.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+            pane.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+            pane.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+            pane.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
+            pane.style.borderTopLeftRadius = 8;
+            pane.style.borderTopRightRadius = 8;
+            pane.style.borderBottomLeftRadius = 8;
+            pane.style.borderBottomRightRadius = 8;
+
+            var healthHeader = new Label("Health");
+            healthHeader.style.fontSize = 13;
+            healthHeader.style.color = new Color(0.7f, 0.85f, 1f);
+            healthHeader.style.unityTextAlign = TextAnchor.MiddleCenter;
+            healthHeader.style.marginBottom = 4;
+            pane.Add(healthHeader);
+
+            _inspectHealthValue = new Label("3000 / 5000");
+            _inspectHealthValue.style.fontSize = 20;
+            _inspectHealthValue.style.color = Color.white;
+            _inspectHealthValue.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _inspectHealthValue.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _inspectHealthValue.style.marginBottom = 14;
+            pane.Add(_inspectHealthValue);
+
+            _inspectShipName = new Label("No Ship Selected");
+            _inspectShipName.style.fontSize = 18;
+            _inspectShipName.style.color = Color.cyan;
+            _inspectShipName.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _inspectShipName.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _inspectShipName.style.marginBottom = 12;
+            pane.Add(_inspectShipName);
+
+            _inspectWeight = AddInspectLine(pane, "Weight", "0 t");
+            _inspectFuel = AddInspectLine(pane, "Fuel", "0");
+            _inspectCargo = AddInspectLine(pane, "Cargo Hold", "0 / 0");
+
+            return pane;
+        }
+
+        private static Label AddInspectLine(VisualElement parent, string title, string value)
+        {
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.justifyContent = Justify.Center;
+            row.style.marginBottom = 6;
+
+            var label = new Label($"{title}:  {value}");
+            label.style.fontSize = 14;
+            label.style.color = Color.white;
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            row.Add(label);
+            parent.Add(row);
+            return label;
+        }
+
+        private static void StyleMyShipsActionButton(Button btn, Color bg)
+        {
+            btn.style.minWidth = 120;
+            btn.style.height = 40;
+            btn.style.fontSize = 15;
+            btn.style.color = Color.white;
+            btn.style.backgroundColor = bg;
+            btn.style.borderTopLeftRadius = 6;
+            btn.style.borderTopRightRadius = 6;
+            btn.style.borderBottomLeftRadius = 6;
+            btn.style.borderBottomRightRadius = 6;
+        }
+
+        private void HighlightShip(int index)
+        {
+            if (index < 0 || index >= _placeholderShipNames.Length) return;
+
+            _highlightedShipIndex = index;
+
+            for (int i = 0; i < _shipListRows.Count; i++)
+            {
+                bool on = i == index;
+                _shipListRows[i].style.backgroundColor = on
+                    ? new Color(0.20f, 0.38f, 0.62f)
+                    : new Color(0.14f, 0.18f, 0.34f);
+            }
+
+            _inspectShipName.text = _placeholderShipNames[index];
+            _inspectHealthValue.text = index == 0 ? "3000 / 5000" : index == 1 ? "2200 / 3500" : "4100 / 5000";
+            _inspectWeight.text = $"Weight:  {(120 + index * 40)} t";
+            _inspectFuel.text = $"Fuel:  {80 - index * 10}";
+            _inspectCargo.text = $"Cargo Hold:  {20 + index * 10} / 100";
+        }
+
+        private void ConfirmHighlightedShip()
+        {
+            if (_highlightedShipIndex < 0 || _pendingDockSlot < 0)
+            {
+                Debug.Log("My Ships: nothing to confirm.");
+                return;
+            }
+
+            _slotOccupied[_pendingDockSlot] = true;
+            RefreshSlotButton(_pendingDockSlot);
+            Debug.Log($"My Ships: '{_placeholderShipNames[_highlightedShipIndex]}' -> Dock slot {_pendingDockSlot}");
+            CloseMyShipsPanel();
         }
 
         private void CloseMyShipsPanel()
@@ -415,7 +647,82 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             main.Add(CreateFleetRow());
             main.Add(CreateCostsBlock());
             main.Add(CreateRepairBlock());
+            main.Add(CreateSelectedShipInfoPanel());
             return main;
+        }
+        
+        private VisualElement CreateSelectedShipInfoPanel()
+        {
+            var frame = new VisualElement { name = "SelectedShipInfoFrame" };
+            frame.style.flexGrow = 1;
+            frame.style.flexShrink = 0;
+            frame.style.minHeight = 140;
+            frame.style.marginTop = 16;
+            frame.style.alignItems = Align.Center;
+            frame.style.justifyContent = Justify.FlexStart;
+            frame.style.paddingTop = 16;
+            frame.style.paddingBottom = 16;
+            frame.style.paddingLeft = 20;
+            frame.style.paddingRight = 20;
+            frame.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            frame.style.borderTopWidth = 2;
+            frame.style.borderRightWidth = 2;
+            frame.style.borderBottomWidth = 2;
+            frame.style.borderLeftWidth = 2;
+            frame.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+            frame.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+            frame.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+            frame.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
+            frame.style.borderTopLeftRadius = 8;
+            frame.style.borderTopRightRadius = 8;
+            frame.style.borderBottomLeftRadius = 8;
+            frame.style.borderBottomRightRadius = 8;
+
+            _selectedHealthLabel = new Label("Health");
+            _selectedHealthLabel.style.fontSize = 13;
+            _selectedHealthLabel.style.color = new Color(0.7f, 0.85f, 1f);
+            _selectedHealthLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _selectedHealthLabel.style.marginBottom = 4;
+            frame.Add(_selectedHealthLabel);
+
+            _selectedHealthValue = new Label("3000 / 5000");
+            _selectedHealthValue.style.fontSize = 20;
+            _selectedHealthValue.style.color = Color.white;
+            _selectedHealthValue.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _selectedHealthValue.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _selectedHealthValue.style.marginBottom = 14;
+            frame.Add(_selectedHealthValue);
+
+            _selectedShipName = new Label("No Ship Selected");
+            _selectedShipName.style.fontSize = 18;
+            _selectedShipName.style.color = Color.cyan;
+            _selectedShipName.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _selectedShipName.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _selectedShipName.style.marginBottom = 12;
+            frame.Add(_selectedShipName);
+
+            _selectedWeight = AddInfoLine(frame, "Weight", "0 t");
+            _selectedFuel = AddInfoLine(frame, "Fuel", "0");
+            _selectedCargo = AddInfoLine(frame, "Cargo Hold", "0 / 0");
+
+            return frame;
+        }
+
+        private static Label AddInfoLine(VisualElement parent, string title, string value)
+        {
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.justifyContent = Justify.Center;
+            row.style.marginBottom = 6;
+
+            var label = new Label($"{title}:  {value}");
+            label.name = $"Info_{title}";
+            label.style.fontSize = 14;
+            label.style.color = Color.white;
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            row.Add(label);
+            parent.Add(row);
+            return label;
         }
 
         private VisualElement CreateFleetRow()

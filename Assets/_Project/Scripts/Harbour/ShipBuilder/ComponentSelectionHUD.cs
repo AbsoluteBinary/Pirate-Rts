@@ -241,11 +241,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             if (_targetSlot == null || component == null) return;
 
+            string slotId = _targetSlot.slotId;
             _targetSlot.equippedModule = component;
             OnComponentEquipped?.Invoke(component, _targetSlot);
             CloseComponentSelection();
 
-            Debug.Log($"<color=cyan>✅ Equipped {component.moduleName} to slot {_targetSlot.slotId}</color>");
+            Debug.Log($"<color=cyan>✅ Equipped {component.moduleName} to slot {slotId}</color>");
         }
 
         public void CloseComponentSelection()

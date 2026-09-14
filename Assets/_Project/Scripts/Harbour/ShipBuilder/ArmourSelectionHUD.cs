@@ -243,11 +243,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             if (_targetSlot == null || armour == null) return;
 
+            string slotId = _targetSlot.slotId;
             _targetSlot.equippedModule = armour;
             OnArmourEquipped?.Invoke(armour, _targetSlot);
             CloseArmourSelection();
 
-            Debug.Log($"<color=cyan>✅ Equipped {armour.moduleName} to slot {_targetSlot.slotId}</color>");
+            Debug.Log($"<color=cyan>✅ Equipped {armour.moduleName} to slot {slotId}</color>");
         }
 
         public void CloseArmourSelection()
