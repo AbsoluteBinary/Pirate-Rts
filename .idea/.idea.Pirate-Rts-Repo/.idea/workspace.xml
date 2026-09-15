@@ -13,7 +13,20 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="" />
+    <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/indexLayout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/JsonShipSaveStore.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/JsonShipSaveStore.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipBuildRecord.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipBuildRecord.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipSaveService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipSaveService.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/ShipBuilderHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/ShipBuilderHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/HierarchyWindow.settings" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/HierarchyWindow.settings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -47,10 +60,6 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WallRowHoldSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Placement/WireFramePreview.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Presentation/StaticWireFrame.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/BuilderSaveData.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/BuilderSaveService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/InventoryPrefabCatalog.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Save/JsonFileSaveStore.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Selection/RectangleSelectSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/Runtime/Selection/SelectionSystem.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/BaseBuilder/UI/BaseBuilderHUD.cs" root0="FORCE_HIGHLIGHTING" />
@@ -81,6 +90,9 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/LevelEditor/Data/CombatLayout.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/LevelEditor/Data/CombatlayoutDatabase.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/LevelEditor/Data/PlacedObjectData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/JsonShipSaveStore.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipBuildRecord.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipSaveService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/ObjectPooling/ObjectPooler.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" root0="FORCE_HIGHLIGHTING" />
@@ -92,7 +104,6 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@7a4e1a2a8194/InputSystem/Runtime/Actions/InputAction.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@7a4e1a2a8194/InputSystem/Runtime/Devices/Keyboard.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.render-pipelines.core@f54051cecb82/Runtime/Debugging/RuntimeDebugWindow.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -101,61 +112,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000468329211627" />
-      <entry key="S2" value="1.3911962772616007" />
-      <entry key="S5" value="4.519791989205833" />
-      <entry key="S10" value="8.642303219288403" />
-      <entry key="S30" value="13.98605451991961" />
-      <entry key="S60" value="15.852681820287037" />
-      <entry key="M2" value="16.88864990412452" />
-      <entry key="M5" value="17.546058471861635" />
-      <entry key="M10" value="17.778147677640614" />
-      <entry key="M15" value="17.975353675427556" />
-      <entry key="M30" value="20.44566465126092" />
-      <entry key="H1" value="29.80352021982734" />
-      <entry key="H2" value="46.457924450751214" />
-      <entry key="H4" value="73.28248719951722" />
-      <entry key="D1" value="298.2379595748363" />
-      <entry key="W1" value="550.6338207501948" />
+      <entry key="MS100" value="1.0000000000000264" />
+      <entry key="MS500" value="1.001934248234144" />
+      <entry key="S2" value="1.299846297677791" />
+      <entry key="S5" value="2.873112872051363" />
+      <entry key="S10" value="6.401843447644399" />
+      <entry key="S30" value="13.641200921067401" />
+      <entry key="S60" value="16.862033986886015" />
+      <entry key="M2" value="18.80098574829188" />
+      <entry key="M5" value="20.086973613967793" />
+      <entry key="M10" value="20.544354277846057" />
+      <entry key="M15" value="20.817553257598412" />
+      <entry key="M30" value="23.356416041176928" />
+      <entry key="H1" value="32.73953227440054" />
+      <entry key="H2" value="49.40871455320481" />
+      <entry key="H4" value="76.2440210134472" />
+      <entry key="D1" value="301.21217801475046" />
+      <entry key="W1" value="553.6270328721727" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
-      <entry key="S10" value="1.1672016651149845E-231" />
-      <entry key="S30" value="1.5993628516785614E-77" />
-      <entry key="S60" value="6.738055831878926E-39" />
-      <entry key="M2" value="1.5500081179396237E-19" />
-      <entry key="M5" value="6.773583934476665E-8" />
-      <entry key="M10" value="5.227815365844509E-4" />
-      <entry key="M15" value="0.010641315109780405" />
-      <entry key="M30" value="0.24897922272157147" />
-      <entry key="H1" value="1.4487927795300737" />
-      <entry key="H2" value="3.989926540811952" />
-      <entry key="H4" value="7.740557111002219" />
-      <entry key="D1" value="37.57343339373619" />
-      <entry key="W1" value="76.50984189237286" />
+      <entry key="S10" value="5.546900864017921E-232" />
+      <entry key="S30" value="1.2480974800817934E-77" />
+      <entry key="S60" value="5.952307460824757E-39" />
+      <entry key="M2" value="1.4568315834633446E-19" />
+      <entry key="M5" value="6.607674892478398E-8" />
+      <entry key="M10" value="5.163394597471043E-4" />
+      <entry key="M15" value="0.010553714799158365" />
+      <entry key="M30" value="0.24795229467822122" />
+      <entry key="H1" value="1.4458018808846316" />
+      <entry key="H2" value="3.985805996002333" />
+      <entry key="H4" value="7.736559098604831" />
+      <entry key="D1" value="37.57019823918844" />
+      <entry key="W1" value="76.50890076275456" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="4.349499861504837E-16" />
-      <entry key="MS500" value="8.614985911995444E-4" />
-      <entry key="S2" value="0.5123289519652271" />
-      <entry key="S5" value="3.830784414264828" />
-      <entry key="S10" value="8.125288709083428" />
-      <entry key="S30" value="13.737189439235497" />
-      <entry key="S60" value="15.714308971840461" />
-      <entry key="M2" value="16.81552647719765" />
-      <entry key="M5" value="17.51579964612539" />
-      <entry key="M10" value="17.76336133130591" />
-      <entry key="M15" value="17.975676192145265" />
-      <entry key="M30" value="20.68863179556514" />
-      <entry key="H1" value="31.24731530603507" />
-      <entry key="H2" value="50.44322639786682" />
-      <entry key="H4" value="81.01885768714195" />
-      <entry key="D1" value="335.8081084399872" />
-      <entry key="W1" value="627.1427566846733" />
+      <entry key="MS100" value="4.7492917354115537E-4" />
+      <entry key="MS500" value="0.2166449711565991" />
+      <entry key="S2" value="0.8391813939074861" />
+      <entry key="S5" value="2.377960636547141" />
+      <entry key="S10" value="5.917827581651824" />
+      <entry key="S30" value="13.343701107638617" />
+      <entry key="S60" value="16.6844021098348" />
+      <entry key="M2" value="18.703554276022192" />
+      <entry key="M5" value="20.045723570691575" />
+      <entry key="M10" value="20.523841341382393" />
+      <entry key="M15" value="20.81392438999005" />
+      <entry key="M30" value="23.596401909251973" />
+      <entry key="H1" value="34.17935600854873" />
+      <entry key="H2" value="53.389405046289276" />
+      <entry key="H4" value="83.9761477334568" />
+      <entry key="D1" value="338.77905067813384" />
+      <entry key="W1" value="630.1350217836322" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -200,29 +211,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;mainbranch&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/baus/Downloads/Symfony_Plugin-2026.1.286.zip&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "mainbranch",
+    "last_opened_file_path": "/home/baus/Downloads/Symfony_Plugin-2026.1.286.zip",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.0f1/Editor/Unity" />

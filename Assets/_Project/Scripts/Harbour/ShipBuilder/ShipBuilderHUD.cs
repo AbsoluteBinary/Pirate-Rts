@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using _Project.Scripts.Harbour.Modules;
+using _Project.Scripts.Persistence.TempSave;
 
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
@@ -12,6 +13,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         
         [Header("References")]
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
+        
+        //private readonly ShipSaveService _shipSave = new ShipSaveService(new JsonShipSaveStore());
         
         [Header("Selection HUDs")]
         [SerializeField] private WeaponSelectionHUD weaponSelectionHUD;
@@ -70,9 +73,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _shipBuilderPanel.style.alignItems = Align.Center;
 
             var card = new VisualElement { name = "ShipBuilderPanel" };
-            card.style.width = Length.Percent(82f);
-            card.style.height = Length.Percent(86f);
-            card.style.maxWidth = 1200;
+            card.style.width = Length.Percent(94f);
+            card.style.height = Length.Percent(92f);
             card.style.flexDirection = FlexDirection.Column;
             card.style.backgroundColor = new Color(0.06f, 0.10f, 0.22f, 0.98f);
             card.style.borderTopWidth = 2;
@@ -91,13 +93,27 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             card.style.paddingBottom = 16;
             card.style.paddingLeft = 20;
             card.style.paddingRight = 20;
+            card.style.overflow = Overflow.Hidden;
+            card.style.minWidth = 0;
+            card.style.minHeight = 0;
 
             card.Add(CreateHeader());
+
+            var body = new VisualElement { name = "BuilderBody" };
+            body.style.flexDirection = FlexDirection.Row;
+            body.style.flexGrow = 1;
+            body.style.minHeight = 0;
+
+            var main = new VisualElement { name = "BuilderMain" };
+            main.style.flexGrow = 1;
+            main.style.flexShrink = 1;
+            main.style.minWidth = 0;
+            main.style.flexDirection = FlexDirection.Column;
 
             var selectHullBtn = new Button { text = "Select Hull" };
             selectHullBtn.style.fontSize = 16;
             selectHullBtn.style.height = 44;
-            selectHullBtn.style.marginBottom = 6;
+            selectHullBtn.style.marginBottom = 10;
             selectHullBtn.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
             selectHullBtn.style.color = Color.white;
             selectHullBtn.style.borderTopLeftRadius = 6;
@@ -105,23 +121,14 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             selectHullBtn.style.borderBottomLeftRadius = 6;
             selectHullBtn.style.borderBottomRightRadius = 6;
             selectHullBtn.clicked += () => hullSelectionHUD?.OpenHullSelection();
-            card.Add(selectHullBtn);
+            main.Add(selectHullBtn);
 
-            _hullNameLabel = new Label("No Hull Selected");
-            _hullNameLabel.style.fontSize = 14;
-            _hullNameLabel.style.color = Color.white;
-            _hullNameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _hullNameLabel.style.unityFontStyleAndWeight = FontStyle.Normal;
-            _hullNameLabel.style.borderBottomWidth = 1;
-            _hullNameLabel.style.borderBottomColor = Color.white;
-            _hullNameLabel.style.paddingBottom = 1;
-            _hullNameLabel.style.marginBottom = 10;
-            card.Add(_hullNameLabel);
+            main.Add(CreateHullPreviewArea());
+            main.Add(CreateBuildCostRow());
 
-            card.Add(CreateHullPreviewArea());
-            card.Add(CreateBuildCostRow());
-            card.Add(CreateBuildActionRow());
-            card.Add(CreateStatsPanel());
+            body.Add(main);
+            body.Add(CreateBuilderSidePanel());
+            card.Add(body);
 
             _shipBuilderPanel.Add(card);
             root.Add(_shipBuilderPanel);
@@ -216,6 +223,76 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
                 return header;
             }
+            
+            private VisualElement CreateBuilderSidePanel()
+            {
+                var side = new VisualElement { name = "BuilderSidePanel" };
+                side.style.width = 280;
+                side.style.flexShrink = 0;
+                side.style.marginLeft = 14;
+                side.style.paddingTop = 12;
+                side.style.paddingBottom = 12;
+                side.style.paddingLeft = 12;
+                side.style.paddingRight = 12;
+                side.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+                side.style.borderTopWidth = 2;
+                side.style.borderRightWidth = 2;
+                side.style.borderBottomWidth = 2;
+                side.style.borderLeftWidth = 2;
+                side.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+                side.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+                side.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+                side.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
+                side.style.borderTopLeftRadius = 8;
+                side.style.borderTopRightRadius = 8;
+                side.style.borderBottomLeftRadius = 8;
+                side.style.borderBottomRightRadius = 8;
+
+                _hullNameLabel = new Label("No Hull Selected");
+                _hullNameLabel.style.fontSize = 18;
+                _hullNameLabel.style.color = Color.cyan;
+                _hullNameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+                _hullNameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+                _hullNameLabel.style.marginBottom = 12;
+                _hullNameLabel.style.paddingBottom = 8;
+                _hullNameLabel.style.borderBottomWidth = 1;
+                _hullNameLabel.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.7f);
+                side.Add(_hullNameLabel);
+
+                var stats = CreateStatsPanel();
+                stats.style.flexGrow = 1;
+                stats.style.marginTop = 0;
+                side.Add(stats);
+
+                side.Add(CreateSideActionButton("Build", () =>
+                    Debug.Log("ShipBuilder: Build (stub)")));
+                
+                side.Add(CreateSideActionButton("Instant Build", () =>
+                    Debug.Log("ShipBuilder: Instant Build (stub)")));
+                
+                side.Add(CreateSideActionButton("Save Blueprint", SaveCurrentBuild));
+                
+                side.Add(CreateSideActionButton("Load Blueprint", () =>
+                    Debug.Log("ShipBuilder: Load Blueprint (stub)")));
+
+                return side;
+            }
+
+            private Button CreateSideActionButton(string text, Action onClick)
+            {
+                var btn = new Button { text = text };
+                btn.style.height = 40;
+                btn.style.marginTop = 6;
+                btn.style.fontSize = 14;
+                btn.style.color = Color.white;
+                btn.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
+                btn.style.borderTopLeftRadius = 6;
+                btn.style.borderTopRightRadius = 6;
+                btn.style.borderBottomLeftRadius = 6;
+                btn.style.borderBottomRightRadius = 6;
+                btn.clicked += onClick;
+                return btn;
+            }
         
 
         public void SetSelectedHull(HullData hull)
@@ -245,8 +322,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             var block = new VisualElement { name = "BuildCostBlock" };
             block.style.flexShrink = 0;
-            block.style.marginBottom = 10;
-
+            block.style.width = Length.Percent(100);
+            
             var header = new Label("Costs");
             header.style.fontSize = 16;
             header.style.color = Color.cyan;
@@ -268,6 +345,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 row.style.flexDirection = FlexDirection.Row;
                 row.style.justifyContent = Justify.Center;
                 row.style.marginBottom = 6;
+                row.style.flexWrap = Wrap.NoWrap;
+                row.style.width = Length.Percent(100);
+                row.style.flexShrink = 0;
 
                 for (int c = 0; c < 3; c++)
                     row.Add(CreateCostCell(ids[r * 3 + c]));
@@ -283,30 +363,34 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             var cell = new VisualElement { name = $"CostCell_{id}" };
             cell.style.flexDirection = FlexDirection.Row;
             cell.style.alignItems = Align.Center;
-            cell.style.marginLeft = 10;
-            cell.style.marginRight = 10;
             cell.style.flexGrow = 1;
-            cell.style.maxWidth = 220;
+            cell.style.flexShrink = 1;
+            cell.style.flexBasis = Length.Percent(33f);
+            cell.style.minWidth = 0;
+            cell.style.marginLeft = 6;
+            cell.style.marginRight = 6;
 
             var check = new Toggle();
             check.value = false;
+            check.style.flexShrink = 0;
             check.style.marginRight = 6;
             cell.Add(check);
 
             var value = new Label("0");
             value.name = $"CostValue_{id}";
             value.style.flexGrow = 1;
+            value.style.minWidth = 0;
             value.style.fontSize = 13;
             value.style.color = Color.white;
             value.style.borderBottomWidth = 1;
             value.style.borderBottomColor = Color.white;
             value.style.paddingBottom = 1;
-            
             cell.Add(value);
 
             var iconBox = new VisualElement();
             iconBox.style.width = 22;
             iconBox.style.height = 22;
+            iconBox.style.flexShrink = 0;
             iconBox.style.marginLeft = 8;
             iconBox.style.backgroundColor = new Color(0.16f, 0.22f, 0.40f);
             iconBox.style.borderTopWidth = 1;
@@ -326,13 +410,17 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             var row = new VisualElement { name = "BuildActionRow" };
             row.style.flexDirection = FlexDirection.Row;
+            row.style.flexWrap = Wrap.NoWrap;
             row.style.justifyContent = Justify.Center;
-            row.style.marginBottom = 10;
+            row.style.width = Length.Percent(100);
             row.style.flexShrink = 0;
+            row.style.marginBottom = 10;
 
-            row.Add(CreateActionButton("Save Build", () =>  Debug.Log("ShipBuilder: Save Build (stub)")));
-            row.Add(CreateActionButton("Load Build", () =>  Debug.Log("ShipBuilder: Load Build (stub)")));
-            row.Add(CreateActionButton("Build", () =>  Debug.Log("ShipBuilder: Build (stub)")));
+            row.Add(CreateActionButton("Save Build", SaveCurrentBuild));
+            row.Add(CreateActionButton("Load Build", () =>
+                Debug.Log("ShipBuilder: Load Build (stub)")));
+            row.Add(CreateActionButton("Build", () =>
+                Debug.Log("ShipBuilder: Build (stub)")));
             return row;
         }
 
@@ -340,7 +428,10 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             var btn = new Button { text = text };
             btn.style.height = 40;
-            btn.style.minWidth = 130;
+            btn.style.flexGrow = 1;
+            btn.style.flexShrink = 1;
+            btn.style.flexBasis = Length.Percent(33f);
+            btn.style.minWidth = 0;
             btn.style.marginLeft = 6;
             btn.style.marginRight = 6;
             btn.style.fontSize = 14;
@@ -388,6 +479,20 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 slotBtn.style.top = slot.pixelPosition.y * s - 36f * s;
                 slotBtn.style.width = 72f * s;
                 slotBtn.style.height = 72f * s;
+                
+                slotBtn.style.position = Position.Absolute;
+                slotBtn.style.left = slot.pixelPosition.x * s - 36f * s;
+                slotBtn.style.top = slot.pixelPosition.y * s - 36f * s;
+                slotBtn.style.width = 72f * s;
+                slotBtn.style.height = 72f * s;
+                slotBtn.style.paddingTop = 0;
+                slotBtn.style.paddingBottom = 0;
+                slotBtn.style.paddingLeft = 0;
+                slotBtn.style.paddingRight = 0;
+                slotBtn.style.alignItems = Align.Center;
+                slotBtn.style.justifyContent = Justify.Center;
+                slotBtn.style.overflow = Overflow.Hidden;
+                
 
                 // Frame styling
                 slotBtn.style.backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.18f);
@@ -410,11 +515,10 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
                 // === ICON LOGIC ===
                 var icon = new VisualElement();
-                icon.style.width = 48f * s;
-                icon.style.height = 48f * s;
-                icon.style.marginTop = 8f * s;
-                icon.style.alignSelf = Align.Center;
-                icon.style.borderTopLeftRadius = 6;
+                icon.style.width = Length.Percent(100);
+                icon.style.height = Length.Percent(100);
+                icon.style.flexShrink = 0;
+                icon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
 
                 Sprite displayIcon = null;
                 Color tint = Color.white;
@@ -541,23 +645,56 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private VisualElement CreateStatsPanel()
         {
-            var panel = new VisualElement();
+            var panel = new VisualElement { name = "UpdateTextBlock" };
+            panel.style.width = Length.Percent(100);
+            panel.style.flexShrink = 0;
+            panel.style.flexGrow = 0;
+            panel.style.marginTop = 8;
+            panel.style.paddingTop = 8;
+            panel.style.paddingBottom = 8;
+            panel.style.paddingLeft = 15;
+            panel.style.paddingRight = 15;
             panel.style.backgroundColor = new Color(0.08f, 0.12f, 0.25f, 0.95f);
             panel.style.borderTopLeftRadius = 8;
             panel.style.borderTopRightRadius = 8;
             panel.style.borderBottomLeftRadius = 8;
             panel.style.borderBottomRightRadius = 8;
-            panel.style.paddingLeft = 15;
-            panel.style.paddingRight = 15;
-            panel.style.marginTop = 15;
-            panel.style.marginTop = 15;
 
             _statsLabel = new Label("Select a hull...");
             _statsLabel.style.fontSize = 15;
             _statsLabel.style.color = Color.white;
+            _statsLabel.style.whiteSpace = WhiteSpace.Normal;
+            _statsLabel.style.minWidth = 0;
             panel.Add(_statsLabel);
 
             return panel;
+        }
+        
+        private ShipSaveService _shipSave;
+
+        private void SaveCurrentBuild()
+        {
+            if (_currentLoadout?.hull == null)
+            {
+                Debug.LogWarning("[ShipSave] No hull selected.");
+                return;
+            }
+
+            _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
+
+            string name = _hullNameLabel != null && !string.IsNullOrEmpty(_hullNameLabel.text)
+                ? _hullNameLabel.text
+                : _currentLoadout.hull.hullName;
+
+            var record = _shipSave.Capture(_currentLoadout, name);
+            if (record == null)
+            {
+                Debug.LogError("[ShipSave] Capture failed.");
+                return;
+            }
+
+            _shipSave.AppendAndWrite(record);
+            Debug.Log($"<color=lime>[ShipSave] Saved '{record.shipName}' hull={record.hullId} slots={record.slots.Count}</color>");
         }
 
         public void CloseShipBuilder()
