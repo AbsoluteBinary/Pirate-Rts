@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using _Project.Scripts.Harbour.Modules;
+using _Project.Scripts.Harbour.ShipBuilder.Data;
 using _Project.Scripts.Persistence.TempSave;
 
 namespace _Project.Scripts.Harbour.ShipBuilder
@@ -13,8 +14,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         
         [Header("References")]
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
+        [SerializeField] private BuiltShipInventory builtShipInventory;
         
-        //private readonly ShipSaveService _shipSave = new ShipSaveService(new JsonShipSaveStore());
         
         [Header("Selection HUDs")]
         [SerializeField] private WeaponSelectionHUD weaponSelectionHUD;
@@ -22,6 +23,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         [SerializeField] private EngineSelectionHUD engineSelectionHUD;
         [SerializeField] private ComponentSelectionHUD componentSelectionHUD;
 
+        [Header("Build Timer")]
+        private Label _buildTimerLabel;
+        private bool _isBuilding;
+        private float _buildRemaining;
+        
         [Header("Visuals")]
         [SerializeField] private bool showSlotVisuals = true;
 
@@ -36,6 +42,72 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         private ShipLoadout _currentLoadout;
         
         private VisualElement root;
+
+        #region Timer Ticker + Build Finish
+
+        private void Update()
+        {
+            if (!_isBuilding) return;
+
+            _buildRemaining -= Time.deltaTime;
+            if (_buildRemaining <= 0f)
+            {
+                _buildRemaining = 0f;
+                SetTimerLabel(0f);
+                _isBuilding = false;
+                CompleteBuild();
+                return;
+            }
+
+            SetTimerLabel(_buildRemaining);
+        }
+
+        private void StartBuild()
+        {
+            if (_isBuilding)
+            {
+                Debug.LogWarning("[Build] Already in progress.");
+                return;
+            }
+
+            if (_currentLoadout?.hull == null)
+            {
+                Debug.LogWarning("[Build] No hull selected.");
+                return;
+            }
+
+            _currentLoadout.RecalculateStats();
+            _buildRemaining = Mathf.Max(0f, _currentLoadout.totalBuildTime);
+            SetTimerLabel(_buildRemaining);
+
+            if (_buildRemaining <= 0.05f)
+            {
+                CompleteBuild();
+                return;
+            }
+
+            _isBuilding = true;
+            Debug.Log($"<color=cyan>[Build] Started {_buildRemaining:0}s</color>");
+        }
+
+        private void SetTimerLabel(float seconds)
+        {
+            if (_buildTimerLabel == null) return;
+            int m = Mathf.FloorToInt(seconds / 60f);
+            int s = Mathf.FloorToInt(seconds % 60f);
+            string prefix = _isBuilding || seconds > 0f ? "Building" : "Build Time";
+            _buildTimerLabel.text = $"{prefix}: {m:00}:{s:00}";
+        }
+
+        private void CompleteBuild()
+        {
+            // existing BuildCurrentShip body — JSON + Register
+            BuildCurrentShip();
+            if (_buildTimerLabel != null)
+                _buildTimerLabel.text = "Build complete";
+        }
+
+        #endregion
 
         private void OnEnable()
         {
@@ -263,9 +335,19 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 stats.style.flexGrow = 1;
                 stats.style.marginTop = 0;
                 side.Add(stats);
+                
+                _buildTimerLabel = new Label("Build Time: --:--");
+                _buildTimerLabel.style.fontSize = 16;
+                _buildTimerLabel.style.color = Color.cyan;
+                _buildTimerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+                _buildTimerLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+                _buildTimerLabel.style.marginTop = 8;
+                _buildTimerLabel.style.marginBottom = 8;
+                side.Add(_buildTimerLabel);
 
-                side.Add(CreateSideActionButton("Build", () =>
-                    Debug.Log("ShipBuilder: Build (stub)")));
+                side.Add(CreateSideActionButton("Start Build", StartBuild));
+
+                //side.Add(CreateSideActionButton("Start Build", BuildCurrentShip));
                 
                 side.Add(CreateSideActionButton("Instant Build", () =>
                     Debug.Log("ShipBuilder: Instant Build (stub)")));
@@ -276,6 +358,32 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                     Debug.Log("ShipBuilder: Load Blueprint (stub)")));
 
                 return side;
+            }
+            
+            private void BuildCurrentShip()
+            {
+                if (_currentLoadout?.hull == null)
+                {
+                    Debug.LogWarning("[Build] No hull selected.");
+                    return;
+                }
+
+                if (builtShipInventory == null)
+                {
+                    Debug.LogError("[Build] Assign BuiltShipInventory on ShipBuilderHUD.");
+                    return;
+                }
+
+                _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
+                var record = _shipSave.Capture(_currentLoadout,
+                    _hullNameLabel != null ? _hullNameLabel.text : _currentLoadout.hull.hullName);
+                _shipSave.AppendAndWrite(record);
+
+                var blueprint = ScriptableObject.CreateInstance<ShipBlueprint>();
+                blueprint.PopulateFromLoadout(_currentLoadout, record.shipName);
+                builtShipInventory.Register(blueprint);
+
+                Debug.Log($"<color=lime>[Build] '{blueprint.shipName}' saved + in yard</color>");
             }
 
             private Button CreateSideActionButton(string text, Action onClick)
@@ -299,6 +407,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             _currentHull = hull;
             _currentLoadout = new ShipLoadout { hull = hull };
+            
+            _currentLoadout.RecalculateStats();
 
             if (hull?.hullImage == null) return;
 
@@ -314,6 +424,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _hullImageElement.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
 
             DrawSlotVisuals();
+            _currentLoadout.RecalculateStats();
             UpdateStatsDisplay();
             _hullCanvas.schedule.Execute(FitHullCanvas);
         }
@@ -419,7 +530,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             row.Add(CreateActionButton("Save Build", SaveCurrentBuild));
             row.Add(CreateActionButton("Load Build", () =>
                 Debug.Log("ShipBuilder: Load Build (stub)")));
-            row.Add(CreateActionButton("Build", () =>
+            row.Add(CreateActionButton("Start Build", () =>
                 Debug.Log("ShipBuilder: Build (stub)")));
             return row;
         }
@@ -640,7 +751,15 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         private void UpdateStatsDisplay()
         {
             if (_statsLabel == null) return;
-            _statsLabel.text = $"Hull: {_currentHull?.hullName}\nWeight: {_currentLoadout?.totalWeight:F1}";
+
+            float t = _currentLoadout != null ? _currentLoadout.totalBuildTime : 0f;
+            int m = Mathf.FloorToInt(t / 60f);
+            int s = Mathf.FloorToInt(t % 60f);
+
+            _statsLabel.text =
+                $"Hull: {_currentHull?.hullName}\n" +
+                $"Weight: {_currentLoadout?.totalWeight:F1}\n" +
+                $"Build Time: {m:00}:{s:00}";
         }
 
         private VisualElement CreateStatsPanel()
@@ -699,6 +818,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         public void CloseShipBuilder()
         {
+            _isBuilding = false;
+            _buildRemaining = 0f;
+            
             ResetAllSlotsToDefault();           // ← New: Clear equipped modules
 
             if (_shipBuilderPanel != null)

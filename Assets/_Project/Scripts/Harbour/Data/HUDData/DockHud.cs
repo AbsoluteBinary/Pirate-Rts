@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using _Project.Scripts.Harbour.ShipBuilder.Data;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,6 +17,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         [Header("Repair (assign later)")]
         [SerializeField] private Sprite coinSprite;
 
+        [SerializeField] private BuiltShipInventory builtShipInventory;
+        private readonly ShipBlueprint[] _slotShips = new ShipBlueprint[FleetSize];
         public event Action OnCloseRequested;
 
         private VisualElement _root;
@@ -31,6 +34,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private Label _inspectCargo;
         private readonly List<VisualElement> _shipListRows = new();
 
+        
+        
         private readonly string[] _placeholderShipNames =
         {
             "Gun Boat Alpha",
@@ -123,6 +128,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             CloseMyShipsPanel();
             _highlightedShipIndex = -1;
             _shipListRows.Clear();
+            
+            if (builtShipInventory != null && builtShipInventory.ships.Count > 0)
+                HighlightShip(0);
 
             _shipsOverlay = new VisualElement { name = "MyShipsOverlay" };
             _shipsOverlay.style.position = Position.Absolute;
@@ -257,12 +265,22 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             listTitle.style.marginBottom = 8;
             list.Add(listTitle);
 
-            for (int i = 0; i < _placeholderShipNames.Length; i++)
+            if (builtShipInventory == null || builtShipInventory.ships.Count == 0)
+            {
+                var empty = new Label("No ships built");
+                empty.style.color = Color.white;
+                empty.style.unityTextAlign = TextAnchor.MiddleCenter;
+                empty.style.marginTop = 20;
+                list.Add(empty);
+                return list;
+            }
+
+            for (int i = 0; i < builtShipInventory.ships.Count; i++)
             {
                 int captured = i;
+                var ship = builtShipInventory.ships[i];
 
                 var row = new Button();
-                row.name = $"ShipRow_{i}";
                 row.style.height = 72;
                 row.style.marginBottom = 6;
                 row.style.flexDirection = FlexDirection.Row;
@@ -274,29 +292,35 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 row.style.borderBottomRightRadius = 6;
                 row.clicked += () => HighlightShip(captured);
 
-                var hex = new VisualElement { name = $"ShipRowHex_{i}" };
+                var hex = new VisualElement();
                 hex.style.width = 56;
                 hex.style.height = 56;
                 hex.style.marginLeft = 6;
                 hex.style.marginRight = 10;
                 hex.style.flexShrink = 0;
-                hex.style.backgroundColor = new Color(0.12f, 0.16f, 0.30f, 0.95f);
-                hex.style.borderTopWidth = 2;
-                hex.style.borderRightWidth = 2;
-                hex.style.borderBottomWidth = 2;
-                hex.style.borderLeftWidth = 2;
-                hex.style.borderTopColor = new Color(0.4f, 0.8f, 1f, 0.9f);
-                hex.style.borderRightColor = new Color(0.4f, 0.8f, 1f, 0.9f);
-                hex.style.borderBottomColor = new Color(0.4f, 0.8f, 1f, 0.9f);
-                hex.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+                hex.style.alignItems = Align.Center;
+                hex.style.justifyContent = Justify.Center;
                 ApplyHexSprite(hex);
+
+                var portrait = ship != null && ship.storageImage != null
+                    ? ship.storageImage
+                    : ship?.hull?.hullImage;
+                if (portrait != null)
+                {
+                    var img = new VisualElement();
+                    img.style.width = 36;
+                    img.style.height = 36;
+                    img.style.backgroundImage = new StyleBackground(portrait);
+                    img.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                    hex.Add(img);
+                }
+
                 row.Add(hex);
 
-                var nameLabel = new Label(_placeholderShipNames[i]);
+                var nameLabel = new Label(ship != null ? ship.shipName : "Unknown");
                 nameLabel.style.fontSize = 14;
                 nameLabel.style.color = Color.white;
                 nameLabel.style.flexGrow = 1;
-                nameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
                 row.Add(nameLabel);
 
                 list.Add(row);
@@ -391,23 +415,25 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
         private void HighlightShip(int index)
         {
-            if (index < 0 || index >= _placeholderShipNames.Length) return;
+            if (builtShipInventory?.ships == null) return;
+            if (index < 0 || index >= builtShipInventory.ships.Count) return;
+            if (_inspectShipName == null || _inspectHealthValue == null) return;
+
+            var ship = builtShipInventory.ships[index];
+            if (ship == null) return;
 
             _highlightedShipIndex = index;
 
             for (int i = 0; i < _shipListRows.Count; i++)
-            {
-                bool on = i == index;
-                _shipListRows[i].style.backgroundColor = on
+                _shipListRows[i].style.backgroundColor = i == index
                     ? new Color(0.20f, 0.38f, 0.62f)
                     : new Color(0.14f, 0.18f, 0.34f);
-            }
 
-            _inspectShipName.text = _placeholderShipNames[index];
-            _inspectHealthValue.text = index == 0 ? "3000 / 5000" : index == 1 ? "2200 / 3500" : "4100 / 5000";
-            _inspectWeight.text = $"Weight:  {(120 + index * 40)} t";
-            _inspectFuel.text = $"Fuel:  {80 - index * 10}";
-            _inspectCargo.text = $"Cargo Hold:  {20 + index * 10} / 100";
+            _inspectShipName.text = ship.shipName;
+            _inspectHealthValue.text = $"{ship.totalHealth:0} / {ship.totalHealth:0}";
+            if (_inspectWeight != null) _inspectWeight.text = $"Weight:  {ship.totalWeight:0} t";
+            if (_inspectFuel != null) _inspectFuel.text = "Fuel:  0";
+            if (_inspectCargo != null) _inspectCargo.text = "Cargo Hold:  0 / 0";
         }
 
         private void ConfirmHighlightedShip()
@@ -418,10 +444,58 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 return;
             }
 
-            _slotOccupied[_pendingDockSlot] = true;
-            RefreshSlotButton(_pendingDockSlot);
-            Debug.Log($"My Ships: '{_placeholderShipNames[_highlightedShipIndex]}' -> Dock slot {_pendingDockSlot}");
+            if (builtShipInventory == null ||
+                _highlightedShipIndex >= builtShipInventory.ships.Count)
+                return;
+
+            var ship = builtShipInventory.ships[_highlightedShipIndex];
+            if (ship == null) return;
+
+            int slot = _pendingDockSlot;
+            _slotOccupied[slot] = true;
+            _slotShips[slot] = ship;
+            RefreshSlotButton(slot);
+            ApplyDockSlotPortrait(slot);
+
+            Debug.Log($"My Ships: '{ship.shipName}' -> Dock slot {slot}");
             CloseMyShipsPanel();
+        }
+        
+        private void ApplyDockSlotPortrait(int index)
+        {
+            var frame = _slotFrames[index];
+            if (frame == null) return;
+
+            const string childName = "SlotPortrait";
+            var portrait = frame.Q(childName);
+            if (portrait == null)
+            {
+                portrait = new VisualElement { name = childName };
+                portrait.style.position = Position.Absolute;
+                portrait.style.left = Length.Percent(18);
+                portrait.style.right = Length.Percent(18);
+                portrait.style.top = Length.Percent(18);
+                portrait.style.bottom = Length.Percent(18);
+                portrait.pickingMode = PickingMode.Ignore;
+                frame.Add(portrait);
+            }
+
+            var ship = _slotShips[index];
+            var sprite = ship != null
+                ? (ship.storageImage != null ? ship.storageImage : ship.hull?.hullImage)
+                : null;
+
+            if (_slotOccupied[index] && sprite != null)
+            {
+                portrait.style.backgroundImage = new StyleBackground(sprite);
+                portrait.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                portrait.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                portrait.style.backgroundImage = StyleKeyword.None;
+                portrait.style.display = DisplayStyle.None;
+            }
         }
 
         private void CloseMyShipsPanel()
@@ -768,6 +842,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             frame.style.borderRightColor = new Color(0.4f, 0.8f, 1f, 0.9f);
             frame.style.borderBottomColor = new Color(0.4f, 0.8f, 1f, 0.9f);
             frame.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            frame.style.position = Position.Relative;
+            frame.style.overflow = Overflow.Hidden;
+            
             ApplyHexSprite(frame);
 
             _slotFrames[index] = frame;
@@ -807,8 +884,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         {
             if (_slotOccupied[index])
             {
-                _slotOccupied[index] = false;
-                RefreshSlotButton(index);
+                // _slotOccupied[index] = false;
+                // RefreshSlotButton(index);
                 Debug.Log($"DockHUD: slot {index} emptied");
                 return;
             }

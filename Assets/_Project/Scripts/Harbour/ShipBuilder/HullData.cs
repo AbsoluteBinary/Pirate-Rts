@@ -7,6 +7,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
     [CreateAssetMenu(menuName = "Harbour/Hull Data")]
     public class HullData : ScriptableObject
     {
+        [Header("Build")]
+        public float buildTimeSeconds = 60f;
+        
         [Header("Mask System")]
         public HullSlotMask slotMask;
         

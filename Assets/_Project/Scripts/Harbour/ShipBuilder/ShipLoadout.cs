@@ -36,12 +36,15 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             RecalculateStats();
         }
 
+        public float totalBuildTime;
+
         public void RecalculateStats()
         {
             totalWeight = 0;
             totalCost = 0;
             totalPowerDraw = 0;
             totalDamageOutput = 0;
+            totalBuildTime = hull != null ? hull.buildTimeSeconds : 0f;
 
             foreach (var eq in equippedSlots)
             {
@@ -50,11 +53,10 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 totalWeight += eq.module.weight;
                 totalCost += eq.module.cost;
                 totalPowerDraw += eq.module.powerDraw;
+                totalBuildTime += eq.module.buildTimeSeconds;
 
                 if (eq.module is WeaponData weapon)
-                {
                     totalDamageOutput += weapon.damage * weapon.fireRate;
-                }
             }
         }
     }

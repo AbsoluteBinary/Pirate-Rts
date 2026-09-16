@@ -17,7 +17,10 @@ namespace _Project.Scripts.Harbour.Modules
         [Header("Stats")]
         public int cost = 100;
         public float weight = 10f;
-        public float powerDraw = 5f;           // Energy requirement
+        public float powerDraw = 5f;           
+        
+        [Header("Build Time")]
+        public float buildTimeSeconds = 15f;
 
         [TextArea(3, 6)]
         public string tooltip;
@@ -26,5 +29,6 @@ namespace _Project.Scripts.Harbour.Modules
         {
             return $"Cost: {cost} | Weight: {weight} | Power: {powerDraw}";
         }
+        
     }
 }
