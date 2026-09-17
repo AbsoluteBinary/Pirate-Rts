@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using _Project.Scripts.Harbour.Economy;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,6 +11,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
     {
         private const int FleetSize = 5;
         private const int FlagShipIndex = 2;
+        
+        [Header("Wallet")]
+        [SerializeField] private ResourceWalletHolder walletHolder;
 
         [Header("Slot Visuals (assign later)")]
         [SerializeField] private Sprite hexSlotSprite;
@@ -60,6 +64,15 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         };
 
         public bool IsOpen => _dockRoot != null && _dockRoot.parent != null;
+
+        public void Start()
+        {
+            var wallet = new ResourceWallet();
+            //wallet.LoadOrCreate(catalog);          // assign ResourceCatalog in Inspector
+            wallet.Add("Gold", 100);
+            Debug.Log($"Gold={wallet.Get("Gold")}");
+            wallet.Save();
+        }
 
         public void OpenDock(VisualElement root)
         {
@@ -971,9 +984,32 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             icon.style.borderBottomLeftRadius = 4;
             icon.style.borderBottomRightRadius = 4;
             icon.style.flexShrink = 0;
+            
+            
+            icon.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            icon.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+            icon.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+            
             cell.Add(icon);
 
+            int have = walletHolder != null && walletHolder.Wallet != null
+                ? walletHolder.Wallet.Get(materialName)
+                : 0;
+            amount.text = have.ToString();
+
+            var def = walletHolder != null && walletHolder.Catalog != null
+                ? walletHolder.Catalog.Get(materialName)
+                : null;
+            if (def?.icon != null)
+            {
+                icon.style.backgroundImage = new StyleBackground(def.icon);
+                icon.style.backgroundSize = new BackgroundSize(Length.Percent(100), Length.Percent(100));
+                icon.style.backgroundColor = Color.clear;
+            }
+
             return cell;
+            
+            
         }
 
         private VisualElement CreateRepairBlock()

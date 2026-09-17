@@ -1,4 +1,5 @@
 using System;
+using _Project.Scripts.Harbour.Economy;
 using UnityEngine;
 using UnityEngine.UIElements;
 using _Project.Scripts.Harbour.Modules;
@@ -16,6 +17,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
         [SerializeField] private BuiltShipInventory builtShipInventory;
         
+        [Header("Wallet")]
+        [SerializeField] private ResourceWalletHolder walletHolder;
         
         [Header("Selection HUDs")]
         [SerializeField] private WeaponSelectionHUD weaponSelectionHUD;
@@ -513,6 +516,29 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             iconBox.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.7f);
             iconBox.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.7f);
             cell.Add(iconBox);
+
+            
+            
+            iconBox.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+            iconBox.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+            iconBox.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+            
+            cell.Add(iconBox);
+
+            int have = walletHolder != null && walletHolder.Wallet != null
+                ? walletHolder.Wallet.Get(id)
+                : 0;
+            value.text = have.ToString();
+
+            var def = walletHolder != null && walletHolder.Catalog != null
+                ? walletHolder.Catalog.Get(id)
+                : null;
+            if (def?.icon != null)
+            {
+                iconBox.style.backgroundImage = new StyleBackground(def.icon);
+                iconBox.style.backgroundSize = new BackgroundSize(Length.Percent(100), Length.Percent(100));
+                iconBox.style.backgroundColor = Color.clear;
+            }
 
             return cell;
         }
