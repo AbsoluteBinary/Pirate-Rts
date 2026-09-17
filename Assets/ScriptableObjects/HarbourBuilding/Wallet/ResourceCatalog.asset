@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbdaffed3f93434d963f3a425f207141, type: 3}
+  m_Name: ResourceCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Economy.ResourceCatalog
+  resources:
+  - startingAmount: 1000
+    id: Oil
+    displayName: Oil
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Iron
+    displayName: Iron
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Steel
+    displayName: Steel
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Energy
+    displayName: Energy
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Aluminium
+    displayName: Aluminium
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Lumber
+    displayName: Lumber
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Alloy
+    displayName: Alloy
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Cloth
+    displayName: Cloth
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 1000
+    id: Uranium
+    displayName: Uranium
+    kind: 0
+    icon: {fileID: 0}
+  - startingAmount: 100
+    id: Gold
+    displayName: Gold
+    kind: 1
+    icon: {fileID: 0}
+  - startingAmount: 400
+    id: Silver
+    displayName: Silver
+    kind: 1
+    icon: {fileID: 0}
+  - startingAmount: 50
+    id: PieceOfEight
+    displayName: Piece of Eight
+    kind: 2
+    icon: {fileID: 0}
+  - startingAmount: 50
+    id: Shilling
+    displayName: Shilling
+    kind: 2
+    icon: {fileID: 0}

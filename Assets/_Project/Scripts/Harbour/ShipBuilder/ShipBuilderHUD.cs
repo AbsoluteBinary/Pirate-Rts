@@ -125,6 +125,25 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
         }
+        
+        private void RefreshWalletNumbers(VisualElement root, string labelPrefix)
+        {
+            if (root == null || walletHolder?.Wallet == null) return;
+
+            string[] ids =
+            {
+                "Oil", "Iron", "Steel",
+                "Energy", "Aluminium", "Lumber",
+                "Alloy", "Cloth", "Uranium"
+            };
+
+            foreach (var id in ids)
+            {
+                var lab = root.Q<Label>($"{labelPrefix}{id}");
+                if (lab != null)
+                    lab.text = walletHolder.Wallet.Get(id).ToString();
+            }
+        }
 
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
         {
@@ -200,6 +219,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
             main.Add(CreateHullPreviewArea());
             main.Add(CreateBuildCostRow());
+            
+            RefreshWalletNumbers(_shipBuilderPanel, "CostValue_");
 
             body.Add(main);
             body.Add(CreateBuilderSidePanel());
@@ -357,8 +378,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 
                 side.Add(CreateSideActionButton("Save Blueprint", SaveCurrentBuild));
                 
-                side.Add(CreateSideActionButton("Load Blueprint", () =>
-                    Debug.Log("ShipBuilder: Load Blueprint (stub)")));
+                side.Add(CreateSideActionButton("Load Blueprint", LoadLatestBlueprint));
 
                 return side;
             }
@@ -515,7 +535,6 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             iconBox.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.7f);
             iconBox.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.7f);
             iconBox.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.7f);
-            cell.Add(iconBox);
 
             
             
@@ -840,6 +859,104 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
             _shipSave.AppendAndWrite(record);
             Debug.Log($"<color=lime>[ShipSave] Saved '{record.shipName}' hull={record.hullId} slots={record.slots.Count}</color>");
+        }
+        
+        private void LoadLatestBlueprint()
+        {
+            if (_isBuilding)
+            {
+                Debug.LogWarning("[Load] Stop the build timer first.");
+                return;
+            }
+
+            if (builtShipInventory == null)
+            {
+                Debug.LogError("[Load] Assign BuiltShipInventory.");
+                return;
+            }
+
+            _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
+            if (!_shipSave.TryLoad(out var data) || data.ships == null || data.ships.Count == 0)
+            {
+                Debug.LogWarning("[Load] No blueprints in ships_temp.json.");
+                return;
+            }
+
+            ApplyBlueprintRecord(data.ships[data.ships.Count - 1]);
+        }
+
+        private void ApplyBlueprintRecord(ShipBuildRecord record)
+        {
+            if (record == null) return;
+
+            HullData hull = null;
+            var catalog = builtShipInventory.hullCatalog;
+            if (catalog != null)
+            {
+                foreach (var h in catalog)
+                {
+                    if (h == null) continue;
+                    if (h.name == record.hullId || h.hullName == record.hullId)
+                    {
+                        hull = h;
+                        break;
+                    }
+                }
+            }
+
+            if (hull == null)
+            {
+                Debug.LogError($"[Load] Hull not in catalog: {record.hullId}");
+                return;
+            }
+
+            if (hull.moduleSlots != null)
+            {
+                foreach (var slot in hull.moduleSlots)
+                    slot.equippedModule = null;
+            }
+
+            SetSelectedHull(hull);
+            if (_hullNameLabel != null)
+                _hullNameLabel.text = record.shipName;
+
+            var db = builtShipInventory.moduleDatabase;
+            db?.Initialize();
+
+            if (record.slots != null && hull.moduleSlots != null && db != null)
+            {
+                foreach (var saved in record.slots)
+                {
+                    ModuleSlot live = null;
+                    foreach (var s in hull.moduleSlots)
+                    {
+                        if (s != null && s.slotId == saved.slotId)
+                        {
+                            live = s;
+                            break;
+                        }
+                    }
+
+                    if (live == null)
+                    {
+                        Debug.LogWarning($"[Load] No slot {saved.slotId} on {hull.hullName}");
+                        continue;
+                    }
+
+                    var module = db.GetModuleById(saved.moduleId);
+                    if (module == null)
+                    {
+                        Debug.LogWarning($"[Load] Missing module {saved.moduleId}");
+                        continue;
+                    }
+
+                    _currentLoadout.EquipModule(live, module);
+                }
+            }
+
+            DrawSlotVisuals();
+            UpdateStatsDisplay();
+            Debug.Log($"<color=lime>[Load] '{record.shipName}' hull={record.hullId} slots={record.slots?.Count ?? 0}</color>");
         }
 
         public void CloseShipBuilder()

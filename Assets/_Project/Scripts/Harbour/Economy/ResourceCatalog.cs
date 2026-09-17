@@ -14,6 +14,7 @@ namespace _Project.Scripts.Harbour.Economy
     [Serializable]
     public class ResourceDef
     {
+        public int startingAmount;
         public string id;
         public string displayName;
         public ResourceKind kind;

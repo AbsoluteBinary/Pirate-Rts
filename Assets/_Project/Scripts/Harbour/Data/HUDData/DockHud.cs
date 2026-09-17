@@ -65,13 +65,25 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
         public bool IsOpen => _dockRoot != null && _dockRoot.parent != null;
 
-        public void Start()
+        
+        
+        private void RefreshWalletNumbers(VisualElement root, string labelPrefix)
         {
-            var wallet = new ResourceWallet();
-            //wallet.LoadOrCreate(catalog);          // assign ResourceCatalog in Inspector
-            wallet.Add("Gold", 100);
-            Debug.Log($"Gold={wallet.Get("Gold")}");
-            wallet.Save();
+            if (root == null || walletHolder?.Wallet == null) return;
+
+            string[] ids =
+            {
+                "Oil", "Iron", "Steel",
+                "Energy", "Aluminium", "Lumber",
+                "Alloy", "Cloth", "Uranium"
+            };
+
+            foreach (var id in ids)
+            {
+                var lab = root.Q<Label>($"{labelPrefix}{id}");
+                if (lab != null)
+                    lab.text = walletHolder.Wallet.Get(id).ToString();
+            }
         }
 
         public void OpenDock(VisualElement root)
@@ -119,6 +131,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             _dockRoot.Add(_dockPanel);
             _root.Add(_dockRoot);
+            
+            RefreshWalletNumbers(_dockPanel, "Amount_");
+            
             RefreshAllSlotButtons();
 
             _dockPanel.schedule.Execute(FitDockToScreen);
@@ -142,8 +157,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             _highlightedShipIndex = -1;
             _shipListRows.Clear();
             
-            if (builtShipInventory != null && builtShipInventory.ships.Count > 0)
-                HighlightShip(0);
+            // if (builtShipInventory != null && builtShipInventory.ships.Count > 0)
+            //     HighlightShip(0);
 
             _shipsOverlay = new VisualElement { name = "MyShipsOverlay" };
             _shipsOverlay.style.position = Position.Absolute;

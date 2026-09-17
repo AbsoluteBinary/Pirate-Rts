@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c3f225eb568444fa65c12d124ff73eb, type: 3}
   m_Name: BuiltShipInventory
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.ShipBuilder.Data.BuiltShipInventory
-  hullCatalog: []
+  hullCatalog:
+  - {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
   ships: []

@@ -30,12 +30,21 @@ namespace _Project.Scripts.Harbour.Economy
             _amounts.Clear();
             EnsureFromCatalog(catalog);
 
-            if (_store.TryRead(out var data) && data.amounts != null)
+            bool hadFile = _store.TryRead(out var data);
+            if (hadFile && data.amounts != null)
             {
                 foreach (var rec in data.amounts)
                 {
                     if (rec == null || string.IsNullOrEmpty(rec.id)) continue;
                     _amounts[rec.id] = rec.amount;
+                }
+            }
+            else if (catalog?.resources != null)
+            {
+                foreach (var def in catalog.resources)
+                {
+                    if (def == null || string.IsNullOrEmpty(def.id)) continue;
+                    _amounts[def.id] = def.startingAmount;
                 }
             }
 
