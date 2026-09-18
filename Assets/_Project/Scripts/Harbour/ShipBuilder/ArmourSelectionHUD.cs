@@ -14,18 +14,18 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         public event Action<ArmourData, ModuleSlot> OnArmourEquipped;
 
         private VisualElement _armourPanel;
+        private VisualElement _tabRow;
+        private VisualElement _gridHost;
         private ModuleSlot _targetSlot;
-        private VisualElement _currentTabContent;
-
-        private const string ALL_TAB = "All";
-        
+        private string _activeTab = "All";
         private VisualElement root;
+
+        private const string AllTab = "All";
 
         private void OnEnable()
         {
             if (panelRenderer == null)
                 panelRenderer = GetComponent<PanelRenderer>();
-
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
         }
 
@@ -42,188 +42,227 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         public void OpenArmourSelection(ModuleSlot targetSlot)
         {
-            
             if (root == null || moduleDatabase == null)
             {
-                Debug.LogError("ArmourSelectionHUD: Missing UIDocument or ModuleDatabase!");
+                Debug.LogError("ArmourSelectionHUD: Missing ModuleDatabase.");
                 return;
             }
 
             _targetSlot = targetSlot;
+            CloseArmourSelectionKeepSlot();
 
-            if (root == null) return;
-            if (_armourPanel != null) _armourPanel.RemoveFromHierarchy();
-
-            _armourPanel = new VisualElement { name = "ArmourSelectionPanel" };
+            _armourPanel = new VisualElement { name = "ArmourSelectionOverlay" };
             _armourPanel.style.position = Position.Absolute;
-            _armourPanel.style.top = 80;
-            _armourPanel.style.left = 80;
-            _armourPanel.style.right = 80;
-            _armourPanel.style.bottom = 80;
-            _armourPanel.style.backgroundColor = new Color(0.08f, 0.12f, 0.28f, 0.98f);
-            _armourPanel.style.borderTopLeftRadius = 12;
-            _armourPanel.style.borderTopRightRadius = 12;
-            _armourPanel.style.borderBottomLeftRadius = 12;
-            _armourPanel.style.borderBottomRightRadius = 12;
-            _armourPanel.style.paddingLeft = 25;
-            _armourPanel.style.paddingRight = 25;
-            _armourPanel.style.paddingTop = 25;
-            _armourPanel.style.paddingBottom = 25;
+            _armourPanel.style.top = 0;
+            _armourPanel.style.left = 0;
+            _armourPanel.style.right = 0;
+            _armourPanel.style.bottom = 0;
+            _armourPanel.pickingMode = PickingMode.Position;
 
-            var header = CreateHeader();
-            _armourPanel.Add(header);
+            var dimmer = new VisualElement();
+            dimmer.style.position = Position.Absolute;
+            dimmer.style.top = 0;
+            dimmer.style.left = 0;
+            dimmer.style.right = 0;
+            dimmer.style.bottom = 0;
+            dimmer.style.backgroundColor = new Color(0f, 0f, 0f, 0.5f);
+            dimmer.RegisterCallback<ClickEvent>(_ => CloseArmourSelection());
+            _armourPanel.Add(dimmer);
 
-            var tabContainer = CreateTabContainer();
-            _armourPanel.Add(tabContainer);
-
-            _currentTabContent = new VisualElement { name = "ArmourGridContent" };
-            _currentTabContent.style.flexGrow = 1;
-            _currentTabContent.style.marginTop = 15;
-            _armourPanel.Add(_currentTabContent);
-
-            root.Add(_armourPanel);
-
-            ShowArmourByCategory(ArmourCategory.Light);
-
-            Debug.Log("<color=green>Armour Selection HUD Opened</color>");
-        }
-
-        private VisualElement CreateHeader()
-        {
-            var header = new VisualElement();
-            header.style.flexDirection = FlexDirection.Row;
-            header.style.justifyContent = Justify.SpaceBetween;
-            header.style.alignItems = Align.Center;
-            header.style.marginBottom = 15;
-
-            var title = new Label("Select Armour");
-            title.style.fontSize = 26;
-            title.style.color = Color.cyan;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.Add(title);
-
-            var closeBtn = new Button { text = "✕" };
-            closeBtn.style.fontSize = 24;
-            closeBtn.style.color = Color.white;
-            closeBtn.style.backgroundColor = new Color(0.7f, 0.15f, 0.15f);
-            closeBtn.style.width = 50;
-            closeBtn.style.height = 50;
-            closeBtn.style.borderTopLeftRadius = 25;
-            closeBtn.style.borderTopRightRadius = 25;
-            closeBtn.style.borderBottomLeftRadius = 25;
-            closeBtn.style.borderBottomRightRadius = 25;
-            closeBtn.clicked += CloseArmourSelection;
-            header.Add(closeBtn);
-
-            return header;
-        }
-
-        private VisualElement CreateTabContainer()
-        {
-            var tabRow = new VisualElement();
-            tabRow.style.flexDirection = FlexDirection.Row;
-            tabRow.style.marginBottom = 10;
-            tabRow.style.flexWrap = Wrap.Wrap;
-
-            tabRow.Add(CreateTabButton(ALL_TAB, () => ShowArmourByCategory(ArmourCategory.None)));
-
-            foreach (ArmourCategory cat in Enum.GetValues(typeof(ArmourCategory)))
-            {
-                if (cat == ArmourCategory.None) continue;
-                tabRow.Add(CreateTabButton(cat.ToString(), () => ShowArmourByCategory(cat)));
-            }
-
-            return tabRow;
-        }
-
-        private Button CreateTabButton(string text, Action onClick)
-        {
-            var btn = new Button { text = text };
-            btn.style.height = 48;
-            btn.style.minWidth = 110;
-            btn.style.marginRight = 8;
-            btn.style.marginBottom = 8;
-            btn.style.fontSize = 16;
-            btn.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
-            btn.style.color = Color.white;
-            btn.style.borderTopLeftRadius = 6;
-            btn.style.borderTopRightRadius = 6;
-            btn.style.borderBottomLeftRadius = 6;
-            btn.style.borderBottomRightRadius = 6;
-            btn.clicked += onClick;
-            return btn;
-        }
-
-        private void ShowArmourByCategory(ArmourCategory category)
-        {
-            if (_currentTabContent == null) return;
-
-            _currentTabContent.Clear();
-
-            var grid = new VisualElement();
-            grid.style.flexDirection = FlexDirection.Row;
-            grid.style.flexWrap = Wrap.Wrap;
-            grid.style.justifyContent = Justify.FlexStart;
-
-            List<ArmourData> armourList = moduleDatabase.GetFilteredArmour(category);
-
-            foreach (var armour in armourList)
-            {
-                var card = CreateArmourCard(armour);
-                grid.Add(card);
-            }
-
-            _currentTabContent.Add(grid);
-        }
-
-        private VisualElement CreateArmourCard(ArmourData armour)
-        {
-            var card = new VisualElement();
-            card.style.width = 160;
-            card.style.height = 220;
-            card.style.backgroundColor = new Color(0.15f, 0.22f, 0.38f);
+            var card = new VisualElement { name = "ArmourSelectionCard" };
+            card.style.position = Position.Absolute;
+            card.style.top = Length.Percent(8);
+            card.style.bottom = Length.Percent(8);
+            card.style.left = Length.Percent(8);
+            card.style.right = Length.Percent(8);
+            card.style.backgroundColor = new Color(0.06f, 0.10f, 0.22f, 0.98f);
+            card.style.paddingTop = 16;
+            card.style.paddingBottom = 16;
+            card.style.paddingLeft = 18;
+            card.style.paddingRight = 18;
+            card.style.borderTopWidth = 2;
+            card.style.borderRightWidth = 2;
+            card.style.borderBottomWidth = 2;
+            card.style.borderLeftWidth = 2;
+            card.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
             card.style.borderTopLeftRadius = 10;
             card.style.borderTopRightRadius = 10;
             card.style.borderBottomLeftRadius = 10;
             card.style.borderBottomRightRadius = 10;
-            card.style.paddingTop = 10;
-            card.style.paddingBottom = 10;
-            card.style.alignItems = Align.Center;
+            card.pickingMode = PickingMode.Position;
 
-            var icon = new VisualElement();
-            icon.style.width = 100;
-            icon.style.height = 100;
+            var header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.alignItems = Align.Center;
+            header.style.marginBottom = 12;
+
+            var title = new Label("Select Armour");
+            title.style.flexGrow = 1;
+            title.style.fontSize = 22;
+            title.style.color = Color.cyan;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.unityTextAlign = TextAnchor.MiddleCenter;
+            header.Add(title);
+
+            var closeBtn = new Button { text = "✕" };
+            closeBtn.style.width = 36;
+            closeBtn.style.height = 36;
+            closeBtn.style.fontSize = 18;
+            closeBtn.style.color = Color.white;
+            closeBtn.style.backgroundColor = new Color(0.7f, 0.15f, 0.15f);
+            closeBtn.style.borderTopLeftRadius = 6;
+            closeBtn.style.borderTopRightRadius = 6;
+            closeBtn.style.borderBottomLeftRadius = 6;
+            closeBtn.style.borderBottomRightRadius = 6;
+            closeBtn.clicked += CloseArmourSelection;
+            header.Add(closeBtn);
+            card.Add(header);
+
+            _tabRow = new VisualElement { name = "ArmourTabs" };
+            _tabRow.style.flexDirection = FlexDirection.Row;
+            _tabRow.style.flexWrap = Wrap.Wrap;
+            _tabRow.style.marginBottom = 12;
+            _tabRow.Add(MakeTab(AllTab, () => ShowArmour(ArmourCategory.None, AllTab)));
+            foreach (ArmourCategory cat in Enum.GetValues(typeof(ArmourCategory)))
+            {
+                if (cat == ArmourCategory.None) continue;
+                var captured = cat;
+                _tabRow.Add(MakeTab(cat.ToString(), () => ShowArmour(captured, captured.ToString())));
+            }
+            card.Add(_tabRow);
+
+            var scroll = new ScrollView();
+            scroll.style.flexGrow = 1;
+            _gridHost = new VisualElement { name = "ArmourGrid" };
+            _gridHost.style.flexDirection = FlexDirection.Row;
+            _gridHost.style.flexWrap = Wrap.Wrap;
+            scroll.Add(_gridHost);
+            card.Add(scroll);
+
+            _armourPanel.Add(card);
+            root.Add(_armourPanel);
+            ShowArmour(ArmourCategory.None, AllTab);
+            Debug.Log("<color=green>Armour Selection HUD Opened</color>");
+        }
+
+        private Button MakeTab(string label, Action onClick)
+        {
+            var btn = new Button { text = label, name = $"Tab_{label}" };
+            StyleTab(btn, false);
+            btn.clicked += onClick;
+            return btn;
+        }
+
+        private static void StyleTab(Button btn, bool on)
+        {
+            btn.style.height = 36;
+            btn.style.flexGrow = 1;
+            btn.style.flexShrink = 1;
+            btn.style.flexBasis = Length.Percent(20);
+            btn.style.minWidth = 90;
+            btn.style.marginRight = 6;
+            btn.style.marginBottom = 6;
+            btn.style.fontSize = 13;
+            btn.style.color = Color.white;
+            btn.style.backgroundColor = on
+                ? new Color(0.18f, 0.42f, 0.62f)
+                : new Color(0.14f, 0.18f, 0.34f);
+            btn.style.borderTopLeftRadius = 6;
+            btn.style.borderTopRightRadius = 6;
+            btn.style.borderBottomLeftRadius = 6;
+            btn.style.borderBottomRightRadius = 6;
+        }
+
+        private void ShowArmour(ArmourCategory category, string tabName)
+        {
+            _activeTab = tabName;
+            if (_tabRow != null)
+            {
+                foreach (var child in _tabRow.Children())
+                {
+                    if (child is Button b)
+                        StyleTab(b, b.name == $"Tab_{_activeTab}");
+                }
+            }
+
+            _gridHost.Clear();
+            List<ArmourData> list = moduleDatabase.GetFilteredArmour(category);
+            if (list == null || list.Count == 0)
+            {
+                var empty = new Label("No armour in this tab");
+                empty.style.color = Color.white;
+                empty.style.unityTextAlign = TextAnchor.MiddleCenter;
+                empty.style.marginTop = 24;
+                empty.style.width = Length.Percent(100);
+                _gridHost.Add(empty);
+                return;
+            }
+
+            foreach (var a in list)
+            {
+                if (a == null) continue;
+                _gridHost.Add(CreateArmourTile(a));
+            }
+        }
+
+        private VisualElement CreateArmourTile(ArmourData armour)
+        {
+            var cell = new VisualElement();
+            cell.style.width = Length.Percent(18);
+            cell.style.minWidth = 120;
+            cell.style.marginRight = 8;
+            cell.style.marginBottom = 12;
+            cell.style.paddingTop = 8;
+            cell.style.paddingBottom = 8;
+            cell.style.paddingLeft = 8;
+            cell.style.paddingRight = 8;
+            cell.style.alignItems = Align.Center;
+            cell.style.backgroundColor = new Color(0.14f, 0.18f, 0.34f);
+            cell.style.borderTopWidth = 3;
+            cell.style.borderRightWidth = 1;
+            cell.style.borderBottomWidth = 1;
+            cell.style.borderLeftWidth = 1;
+            cell.style.borderTopColor = GetRarityColor(armour.rarity);
+            cell.style.borderRightColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            cell.style.borderBottomColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            cell.style.borderLeftColor = new Color(0.4f, 0.7f, 1f, 0.45f);
+            cell.style.borderTopLeftRadius = 8;
+            cell.style.borderTopRightRadius = 8;
+            cell.style.borderBottomLeftRadius = 8;
+            cell.style.borderBottomRightRadius = 8;
+
+            var imgBtn = new Button { text = "" };
+            imgBtn.style.width = Length.Percent(100);
+            imgBtn.style.height = 90;
+            imgBtn.style.marginBottom = 6;
+            imgBtn.style.backgroundColor = new Color(0.08f, 0.12f, 0.25f);
+            imgBtn.style.borderTopLeftRadius = 6;
+            imgBtn.style.borderTopRightRadius = 6;
+            imgBtn.style.borderBottomLeftRadius = 6;
+            imgBtn.style.borderBottomRightRadius = 6;
             if (armour.icon != null)
             {
-                icon.style.backgroundImage = new StyleBackground(armour.icon);
-                icon.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                imgBtn.style.backgroundImage = new StyleBackground(armour.icon);
+                imgBtn.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                imgBtn.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                imgBtn.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                //imgBtn.style.backgroundRepeat = BackgroundRepeat.NoRepeat;
             }
-            else
-            {
-                icon.style.backgroundColor = new Color(0.3f, 0.4f, 0.6f);
-            }
-            card.Add(icon);
+            imgBtn.clicked += () => EquipArmourToSlot(armour);
+            cell.Add(imgBtn);
 
             var nameLabel = new Label(armour.moduleName);
-            nameLabel.style.fontSize = 16;
+            nameLabel.style.fontSize = 13;
             nameLabel.style.color = Color.white;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            nameLabel.style.marginTop = 8;
-            card.Add(nameLabel);
+            nameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            nameLabel.style.whiteSpace = WhiteSpace.Normal;
+            cell.Add(nameLabel);
 
-            var statsLabel = new Label(armour.GetStatsSummary());
-            statsLabel.style.fontSize = 12;
-            statsLabel.style.color = new Color(0.7f, 0.85f, 1f);
-            statsLabel.style.marginTop = 4;
-            statsLabel.style.whiteSpace = WhiteSpace.Normal;
-            card.Add(statsLabel);
-
-            card.style.borderTopWidth = 4;
-            card.style.borderTopColor = GetRarityColor(armour.rarity);
-
-            card.RegisterCallback<ClickEvent>(evt => EquipArmourToSlot(armour));
-
-            return card;
+            return cell;
         }
 
         private Color GetRarityColor(ModuleRarity rarity)
@@ -242,22 +281,23 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         private void EquipArmourToSlot(ArmourData armour)
         {
             if (_targetSlot == null || armour == null) return;
-
             string slotId = _targetSlot.slotId;
             _targetSlot.equippedModule = armour;
             OnArmourEquipped?.Invoke(armour, _targetSlot);
             CloseArmourSelection();
+            Debug.Log($"<color=cyan>Equipped {armour.moduleName} to slot {slotId}</color>");
+        }
 
-            Debug.Log($"<color=cyan>✅ Equipped {armour.moduleName} to slot {slotId}</color>");
+        private void CloseArmourSelectionKeepSlot()
+        {
+            if (_armourPanel == null) return;
+            _armourPanel.RemoveFromHierarchy();
+            _armourPanel = null;
         }
 
         public void CloseArmourSelection()
         {
-            if (_armourPanel != null)
-            {
-                _armourPanel.RemoveFromHierarchy();
-                _armourPanel = null;
-            }
+            CloseArmourSelectionKeepSlot();
             _targetSlot = null;
         }
     }

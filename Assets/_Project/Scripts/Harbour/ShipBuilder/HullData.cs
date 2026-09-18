@@ -17,6 +17,16 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         public string hullName;
         public Sprite hullImage;
         public string description;
+        
+        public enum HullClass
+        {
+            Generic,
+            Advanced,
+            Legendary,
+            Garrison
+        }
+
+        public HullClass hullClass = HullClass.Generic;
 
         [Header("Module Slots")]
         public ModuleSlot[] moduleSlots;

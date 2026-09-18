@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using _Project.Scripts.Harbour.Modules;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
 using _Project.Scripts.Persistence.TempSave;
+using UnityEngine.UIElements.Experimental;
 
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
@@ -12,6 +13,10 @@ namespace _Project.Scripts.Harbour.ShipBuilder
     {
         [SerializeField] private PanelRenderer panelRenderer;
         private float _hullDrawScale = 1f;
+        private VisualElement _saveNameDropdown;
+        private TextField _saveNameField;
+        private bool _saveDropdownOpen;
+        private VisualElement _blueprintListOverlay;
         
         [Header("References")]
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
@@ -33,7 +38,6 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         
         [Header("Visuals")]
         [SerializeField] private bool showSlotVisuals = true;
-
         private VisualElement _shipBuilderPanel;
         private VisualElement _hullCanvas;
         private VisualElement _hullImageElement;
@@ -376,12 +380,251 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 side.Add(CreateSideActionButton("Instant Build", () =>
                     Debug.Log("ShipBuilder: Instant Build (stub)")));
                 
-                side.Add(CreateSideActionButton("Save Blueprint", SaveCurrentBuild));
-                
-                side.Add(CreateSideActionButton("Load Blueprint", LoadLatestBlueprint));
+                // side.Add(CreateSideActionButton("Save Blueprint", SaveCurrentBuild));
+                //
+                // side.Add(CreateSideActionButton("Load Blueprint", LoadLatestBlueprint));
+                side.Add(CreateSaveBlueprintBlock());
+                side.Add(CreateSideActionButton("Load Blueprint", OpenBlueprintListPanel));
 
                 return side;
             }
+            
+        private VisualElement CreateSaveBlueprintBlock()
+        {
+            var wrap = new VisualElement { name = "SaveBlueprintBlock" };
+            wrap.style.marginTop = 6;
+
+            var saveBtn = CreateSideActionButton("Save Blueprint", ToggleSaveNameDropdown);
+            saveBtn.style.marginTop = 0;
+            wrap.Add(saveBtn);
+
+            _saveNameDropdown = new VisualElement { name = "SaveNameDropdown" };
+            _saveNameDropdown.style.flexDirection = FlexDirection.Row;
+            _saveNameDropdown.style.alignItems = Align.Center;
+            _saveNameDropdown.style.overflow = Overflow.Hidden;
+            _saveNameDropdown.style.height = 0;
+            _saveNameDropdown.style.opacity = 0;
+            _saveNameDropdown.style.marginTop = 0;
+            _saveNameDropdown.style.backgroundColor = new Color(0.08f, 0.12f, 0.25f, 0.98f);
+            _saveNameDropdown.style.borderBottomLeftRadius = 6;
+            _saveNameDropdown.style.borderBottomRightRadius = 6;
+
+            _saveNameField = new TextField { value = "" };
+            _saveNameField.style.flexGrow = 1;
+            _saveNameField.style.marginLeft = 4;
+            _saveNameField.style.marginRight = 4;
+            _saveNameField.RegisterCallback<KeyDownEvent>(OnSaveNameKeyDown, TrickleDown.TrickleDown);
+            _saveNameDropdown.Add(_saveNameField);
+
+            var ok = new Button { text = "Save" };
+            ok.style.height = 32;
+            ok.style.marginRight = 4;
+            ok.style.fontSize = 13;
+            ok.style.color = Color.white;
+            ok.style.backgroundColor = new Color(0.12f, 0.42f, 0.38f);
+            ok.style.borderTopLeftRadius = 4;
+            ok.style.borderTopRightRadius = 4;
+            ok.style.borderBottomLeftRadius = 4;
+            ok.style.borderBottomRightRadius = 4;
+            ok.clicked += ConfirmNamedSave;
+            _saveNameDropdown.Add(ok);
+
+            wrap.Add(_saveNameDropdown);
+            _saveDropdownOpen = false;
+            return wrap;
+        }
+
+        private void OnSaveNameKeyDown(KeyDownEvent evt)
+        {
+            if (evt.keyCode != KeyCode.Return && evt.keyCode != KeyCode.KeypadEnter)
+                return;
+            evt.StopPropagation();
+            ConfirmNamedSave();
+        }
+
+        private void ToggleSaveNameDropdown()
+        {
+            if (_currentLoadout?.hull == null)
+            {
+                Debug.LogWarning("[ShipSave] No hull selected.");
+                return;
+            }
+
+            _saveDropdownOpen = !_saveDropdownOpen;
+            float h = _saveDropdownOpen ? 40f : 0f;
+            float o = _saveDropdownOpen ? 1f : 0f;
+            _saveNameDropdown.experimental.animation.Start(
+                new StyleValues { height = _saveDropdownOpen ? 0f : 40f, opacity = _saveDropdownOpen ? 0f : 1f },
+                new StyleValues { height = h, opacity = o },
+                180);
+
+            if (_saveDropdownOpen)
+            {
+                if (string.IsNullOrWhiteSpace(_saveNameField.value) && _hullNameLabel != null)
+                    _saveNameField.value = _hullNameLabel.text;
+                _saveNameField.schedule.Execute(() => _saveNameField.Focus());
+            }
+        }
+
+        private void ConfirmNamedSave()
+        {
+            string name = _saveNameField != null ? _saveNameField.value : null;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Debug.LogWarning("[ShipSave] Type a name first.");
+                return;
+            }
+
+            if (_currentLoadout?.hull == null)
+            {
+                Debug.LogWarning("[ShipSave] No hull selected.");
+                return;
+            }
+
+            _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
+            var record = _shipSave.Capture(_currentLoadout, name.Trim());
+            if (record == null)
+            {
+                Debug.LogError("[ShipSave] Capture failed.");
+                return;
+            }
+
+            _shipSave.AppendAndWrite(record);
+            Debug.Log($"<color=lime>[ShipSave] Saved '{record.shipName}'</color>");
+
+            if (_saveDropdownOpen)
+                ToggleSaveNameDropdown();
+
+            OpenBlueprintListPanel();
+        }
+        
+        private void OpenBlueprintListPanel()
+        {
+            CloseBlueprintListPanel();
+
+            _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
+            _shipSave.TryLoad(out var data);
+            var ships = data?.ships;
+
+            _blueprintListOverlay = new VisualElement { name = "BlueprintListOverlay" };
+            _blueprintListOverlay.style.position = Position.Absolute;
+            _blueprintListOverlay.style.top = 0;
+            _blueprintListOverlay.style.left = 0;
+            _blueprintListOverlay.style.right = 0;
+            _blueprintListOverlay.style.bottom = 0;
+            _blueprintListOverlay.pickingMode = PickingMode.Position;
+
+            var dimmer = new VisualElement();
+            dimmer.style.position = Position.Absolute;
+            dimmer.style.top = 0;
+            dimmer.style.left = 0;
+            dimmer.style.right = 0;
+            dimmer.style.bottom = 0;
+            dimmer.style.backgroundColor = new Color(0f, 0f, 0f, 0.45f);
+            dimmer.RegisterCallback<ClickEvent>(_ => CloseBlueprintListPanel());
+            _blueprintListOverlay.Add(dimmer);
+
+            var card = new VisualElement { name = "BlueprintListCard" };
+            card.style.position = Position.Absolute;
+            card.style.top = Length.Percent(18);
+            card.style.bottom = Length.Percent(18);
+            card.style.left = Length.Percent(32);
+            card.style.right = Length.Percent(32);
+            card.style.maxWidth = 420;
+            card.style.alignSelf = Align.Center;
+            card.style.backgroundColor = new Color(0.06f, 0.10f, 0.22f, 0.98f);
+            card.style.paddingTop = 14;
+            card.style.paddingBottom = 14;
+            card.style.paddingLeft = 16;
+            card.style.paddingRight = 16;
+            card.style.borderTopWidth = 2;
+            card.style.borderRightWidth = 2;
+            card.style.borderBottomWidth = 2;
+            card.style.borderLeftWidth = 2;
+            card.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
+            card.style.borderTopLeftRadius = 10;
+            card.style.borderTopRightRadius = 10;
+            card.style.borderBottomLeftRadius = 10;
+            card.style.borderBottomRightRadius = 10;
+            card.pickingMode = PickingMode.Position;
+
+            var header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.alignItems = Align.Center;
+            header.style.marginBottom = 12;
+
+            var title = new Label("Ship Save/Load Blueprints");
+            title.style.flexGrow = 1;
+            title.style.fontSize = 18;
+            title.style.color = Color.cyan;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.unityTextAlign = TextAnchor.MiddleCenter;
+            header.Add(title);
+
+            var close = new Button { text = "✕" };
+            close.style.width = 36;
+            close.style.height = 36;
+            close.style.fontSize = 18;
+            close.style.color = Color.white;
+            close.style.backgroundColor = new Color(0.7f, 0.15f, 0.15f);
+            close.style.borderTopLeftRadius = 6;
+            close.style.borderTopRightRadius = 6;
+            close.style.borderBottomLeftRadius = 6;
+            close.style.borderBottomRightRadius = 6;
+            close.clicked += CloseBlueprintListPanel;
+            header.Add(close);
+            card.Add(header);
+
+            var list = new ScrollView();
+            list.style.flexGrow = 1;
+            if (ships == null || ships.Count == 0)
+            {
+                var empty = new Label("No blueprints saved");
+                empty.style.color = Color.white;
+                empty.style.unityTextAlign = TextAnchor.MiddleCenter;
+                empty.style.marginTop = 20;
+                list.Add(empty);
+            }
+            else
+            {
+                for (int i = ships.Count - 1; i >= 0; i--)
+                {
+                    var rec = ships[i];
+                    if (rec == null) continue;
+                    var row = new Button { text = rec.shipName };
+                    row.style.height = 40;
+                    row.style.marginBottom = 6;
+                    row.style.unityTextAlign = TextAnchor.MiddleLeft;
+                    row.style.color = Color.white;
+                    row.style.backgroundColor = new Color(0.14f, 0.18f, 0.34f);
+                    row.style.borderTopLeftRadius = 6;
+                    row.style.borderTopRightRadius = 6;
+                    row.style.borderBottomLeftRadius = 6;
+                    row.style.borderBottomRightRadius = 6;
+                    var captured = rec;
+                    row.clicked += () =>
+                    {
+                        ApplyBlueprintRecord(captured);
+                        CloseBlueprintListPanel();
+                    };
+                    list.Add(row);
+                }
+            }
+
+            card.Add(list);
+            _blueprintListOverlay.Add(card);
+            _shipBuilderPanel.Add(_blueprintListOverlay);
+        }
+
+        private void CloseBlueprintListPanel()
+        {
+            if (_blueprintListOverlay == null) return;
+            _blueprintListOverlay.RemoveFromHierarchy();
+            _blueprintListOverlay = null;
+        }
             
             private void BuildCurrentShip()
             {
