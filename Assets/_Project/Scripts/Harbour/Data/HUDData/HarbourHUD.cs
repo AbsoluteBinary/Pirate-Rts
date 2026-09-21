@@ -1,5 +1,6 @@
 using System;
 using _Project.Scripts.Harbour.Data.SO;
+using _Project.Scripts.Harbour.Economy;
 using _Project.Scripts.Harbour.ShipBuilder;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,7 +12,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private DockHUD dockHUD;
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
-
+        [SerializeField] private ResourceHUD resourceHUD;
+        [SerializeField] private ResourceWalletHolder walletHolder;
+        public event Action OnResourcesClicked;
         public event Action OnBuildHarbourBaseClicked;
         public event Action OnExitBuildMode;
         public event Action OnBuildShipClicked;
@@ -65,6 +68,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             if (mode != HarbourStateSO.HarbourMode.Dock)
                 dockHUD?.CloseDock();
+            
+            
 
             switch (mode)
             {
@@ -82,6 +87,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                     break;
             }
         }
+        
 
         private void OpenDockPanel()
         {
@@ -161,6 +167,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             AddDropdownItem(buildDropdown, "Dock", () => OnDockClicked?.Invoke());
             AddDropdownItem(buildDropdown, "Save and Exit", () => Debug.Log("Save and Exit clicked"));
             AddDropdownItem(buildDropdown, "Exit Without Saving", () => Debug.Log("Exit Without Saving clicked"));
+            AddDropdownItem(buildDropdown, "Resources", () => OnResourcesClicked?.Invoke());
 
             bool dropdownVisible = false;
             buildTrigger.clicked += () =>
@@ -175,8 +182,108 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             topBar.Add(buildTrigger);
             topBar.Add(buildDropdown);
             root.Add(topBar);
+            root.Add(CreateIdleResourcePanel());
 
             Debug.Log("<color=lime>HarbourHUD: Idle HUD (PanelRenderer)</color>");
+        }
+        
+        private VisualElement CreateIdleResourcePanel()
+        {
+            var panel = new VisualElement { name = "IdleResourcePanel" };
+            panel.style.position = Position.Absolute;
+            panel.style.right = 16;
+            panel.style.bottom = 16;
+            panel.style.width = 220;
+            panel.style.backgroundColor = new Color(0.06f, 0.10f, 0.22f, 0.94f);
+            panel.style.paddingTop = 10;
+            panel.style.paddingBottom = 10;
+            panel.style.paddingLeft = 12;
+            panel.style.paddingRight = 12;
+            panel.style.borderTopWidth = 2;
+            panel.style.borderRightWidth = 2;
+            panel.style.borderBottomWidth = 2;
+            panel.style.borderLeftWidth = 2;
+            panel.style.borderTopColor = new Color(0.4f, 0.7f, 1f);
+            panel.style.borderRightColor = new Color(0.4f, 0.7f, 1f);
+            panel.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
+            panel.style.borderLeftColor = new Color(0.4f, 0.7f, 1f);
+            panel.style.borderTopLeftRadius = 8;
+            panel.style.borderTopRightRadius = 8;
+            panel.style.borderBottomLeftRadius = 8;
+            panel.style.borderBottomRightRadius = 8;
+
+            var title = new Label("Resources");
+            title.style.fontSize = 14;
+            title.style.color = Color.cyan;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.unityTextAlign = TextAnchor.MiddleCenter;
+            title.style.marginBottom = 8;
+            panel.Add(title);
+
+            string[] ids =
+            {
+                "Oil", "Iron", "Steel",
+                "Energy", "Aluminium", "Lumber",
+                "Alloy", "Cloth", "Uranium"
+            };
+
+            var grid = new VisualElement();
+            grid.style.flexDirection = FlexDirection.Row;
+            grid.style.flexWrap = Wrap.Wrap;
+            grid.style.flexDirection = FlexDirection.Column;
+            grid.style.flexWrap = Wrap.NoWrap;
+            foreach (var id in ids)
+                grid.Add(CreateIdleResourceCell(id));
+            panel.Add(grid);
+            return panel;
+        }
+
+        private VisualElement CreateIdleResourceCell(string id)
+        {
+            var def = walletHolder != null && walletHolder.Catalog != null
+                ? walletHolder.Catalog.Get(id)
+                : null;
+
+            var cell = new VisualElement();
+            cell.style.width = Length.Percent(100);
+            cell.style.marginRight = 0;
+            cell.style.flexDirection = FlexDirection.Row;
+            cell.style.alignItems = Align.Center;
+            cell.style.marginBottom = 4;
+
+            var nameLab = new Label(def != null && !string.IsNullOrEmpty(def.displayName)
+                ? def.displayName
+                : id);
+            nameLab.style.fontSize = 11;
+            nameLab.style.color = new Color(0.7f, 0.85f, 1f);
+            nameLab.style.width = 78;
+            nameLab.style.flexShrink = 0;
+            cell.Add(nameLab);
+
+            int have = walletHolder != null && walletHolder.Wallet != null
+                ? walletHolder.Wallet.Get(id)
+                : 0;
+            var amount = new Label(have.ToString());
+            amount.style.flexGrow = 1;
+            amount.style.fontSize = 12;
+            amount.style.color = Color.white;
+            cell.Add(amount);
+
+            var icon = new VisualElement();
+            icon.style.width = 16;
+            icon.style.height = 16;
+            icon.style.flexShrink = 0;
+            icon.style.marginLeft = 4;
+            if (def?.icon != null)
+            {
+                icon.style.backgroundImage = new StyleBackground(def.icon);
+                icon.style.backgroundSize = new BackgroundSize(Length.Percent(100), Length.Percent(100));
+            }
+            else
+                icon.style.backgroundColor = new Color(0.16f, 0.22f, 0.40f);
+            cell.Add(icon);
+
+            return cell;
         }
 
         public void BuildHarbourBuildHUD()

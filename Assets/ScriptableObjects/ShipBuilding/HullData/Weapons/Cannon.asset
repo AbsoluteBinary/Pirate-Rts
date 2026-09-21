@@ -21,6 +21,10 @@ MonoBehaviour:
   cost: 100
   weight: 10
   powerDraw: 5
+  buildTimeSeconds: 15
+  resourceCosts:
+  - id: Steel
+    amount: 10
   tooltip: 
   category: 0
   damage: 25

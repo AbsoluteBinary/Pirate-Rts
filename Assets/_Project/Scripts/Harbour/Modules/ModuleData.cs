@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using _Project.Scripts.Harbour.Economy;
 using _Project.Scripts.Harbour.ShipBuilder;
 using UnityEngine;
 
@@ -21,7 +23,12 @@ namespace _Project.Scripts.Harbour.Modules
         
         [Header("Build Time")]
         public float buildTimeSeconds = 15f;
+        
+        [Header("Build Cost")]
+        public List<ResourceCost> resourceCosts = new List<ResourceCost>();
 
+        
+        
         [TextArea(3, 6)]
         public string tooltip;
 

@@ -1,12 +1,19 @@
 using System.Collections.Generic;
+using _Project.Scripts.Harbour.Economy;
 using UnityEngine;
 using _Project.Scripts.Harbour.Modules;
 
+
+
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
+    
     [System.Serializable]
     public class ShipLoadout
     {
+        public List<ResourceCost> totalResourceCosts = new List<ResourceCost>();
+        
+        
         public HullData hull;
         public List<EquippedSlot> equippedSlots = new();
 
@@ -58,9 +65,33 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 if (eq.module is WeaponData weapon)
                     totalDamageOutput += weapon.damage * weapon.fireRate;
             }
+            
+            var map = new Dictionary<string, int>();
+            AddCosts(map, hull != null ? hull.resourceCosts : null);
+            foreach (var eq in equippedSlots)
+            {
+                if (eq?.module == null) continue;
+                AddCosts(map, eq.module.resourceCosts);
+            }
+
+            totalResourceCosts.Clear();
+            foreach (var kv in map)
+                totalResourceCosts.Add(new ResourceCost { id = kv.Key, amount = kv.Value });
+        }
+        
+        private static void AddCosts(Dictionary<string, int> map, List<ResourceCost> src)
+        {
+            if (src == null) return;
+            foreach (var c in src)
+            {
+                if (c == null || string.IsNullOrEmpty(c.id) || c.amount <= 0) continue;
+                map[c.id] = (map.TryGetValue(c.id, out int n) ? n : 0) + c.amount;
+            }
         }
     }
 
+    
+    
     [System.Serializable]
     public class EquippedSlot
     {

@@ -71,6 +71,32 @@ namespace _Project.Scripts.Harbour.Economy
             _amounts[id] = Get(id) - amount;
             return true;
         }
+        
+        public bool CanAfford(IReadOnlyList<ResourceCost> costs)
+        {
+            if (costs == null) return true;
+            foreach (var c in costs)
+            {
+                if (c == null || string.IsNullOrEmpty(c.id) || c.amount <= 0) continue;
+                if (Get(c.id) < c.amount) return false;
+            }
+            return true;
+        }
+
+        public bool TrySpendAll(IReadOnlyList<ResourceCost> costs)
+        {
+            if (!CanAfford(costs)) return false;
+            if (costs != null)
+            {
+                foreach (var c in costs)
+                {
+                    if (c == null || c.amount <= 0) continue;
+                    TrySpend(c.id, c.amount);
+                }
+            }
+            Save();
+            return true;
+        }
 
         public void Save()
         {

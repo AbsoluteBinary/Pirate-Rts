@@ -21,6 +21,10 @@ MonoBehaviour:
   cost: 100
   weight: 10
   powerDraw: 5
+  buildTimeSeconds: 30
+  resourceCosts:
+  - id: Iron
+    amount: 30
   tooltip: 
   category: 0
   armorValue: 120

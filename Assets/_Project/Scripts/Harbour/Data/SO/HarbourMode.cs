@@ -20,6 +20,7 @@ namespace _Project.Scripts.Harbour.Data.SO
         public bool showIdleHud = true;
         public bool showHarbourBuildHud = false;
         public bool showShipBuildHud = false;
+        public bool showResourcesHud = false;
 
         [Header("World State")]
         public bool tgsGridEnabled = false;

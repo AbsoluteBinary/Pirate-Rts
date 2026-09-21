@@ -21,6 +21,12 @@ MonoBehaviour:
   cost: 100
   weight: 10
   powerDraw: 5
+  buildTimeSeconds: 30
+  resourceCosts:
+  - id: Oil
+    amount: 100
+  - id: Steel
+    amount: 60
   tooltip: 
   category: 0
   thrustPower: 450

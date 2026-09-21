@@ -19,13 +19,17 @@ MonoBehaviour:
     slotData:
       slotId: Weapon_Slot_1
       acceptedType: 0
-      pixelPosition: {x: 0, y: 0}
+      slotIcon: {fileID: 0}
+      iconTint: {r: 1, g: 1, b: 1, a: 1}
+      pixelPosition: {x: -2, y: -29}
       maxCapacity: 1
       equippedModule: {fileID: 0}
   - colorKey: {r: 0, g: 1, b: 0, a: 0}
     slotData:
       slotId: Armour_Slot_1
       acceptedType: 1
+      slotIcon: {fileID: 0}
+      iconTint: {r: 1, g: 1, b: 1, a: 1}
       pixelPosition: {x: 0, y: 0}
       maxCapacity: 1
       equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}
@@ -33,6 +37,8 @@ MonoBehaviour:
     slotData:
       slotId: Engine_Slot_1
       acceptedType: 2
+      slotIcon: {fileID: 0}
+      iconTint: {r: 1, g: 1, b: 1, a: 1}
       pixelPosition: {x: 0, y: 0}
       maxCapacity: 1
       equippedModule: {fileID: 11400000, guid: efd6859606324c237854291bfc122c63, type: 2}

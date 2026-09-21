@@ -101,8 +101,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             _dockRoot.style.position = Position.Absolute;
             _dockRoot.style.top = 0;
             _dockRoot.style.left = 0;
-            _dockRoot.style.right = 0;
-            _dockRoot.style.bottom = 0;
+            _dockRoot.style.right = 240;
+            _dockRoot.style.bottom = 12;
             _dockRoot.style.justifyContent = Justify.Center;
             _dockRoot.style.alignItems = Align.Center;
             _dockRoot.RegisterCallback<GeometryChangedEvent>(OnDockRootResized);
@@ -132,7 +132,6 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             _dockRoot.Add(_dockPanel);
             _root.Add(_dockRoot);
             
-            RefreshWalletNumbers(_dockPanel, "Amount_");
             
             RefreshAllSlotButtons();
 
@@ -989,6 +988,21 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             amount.style.paddingBottom = 2;
             amount.style.marginRight = 8;
             cell.Add(amount);
+            
+            var def = walletHolder != null && walletHolder.Catalog != null
+                ? walletHolder.Catalog.Get(materialName)
+                : null;
+
+            var nameLab = new Label(def != null && !string.IsNullOrEmpty(def.displayName)
+                ? def.displayName
+                : materialName);
+            nameLab.name = $"CostName_{materialName}";
+            nameLab.style.fontSize = 11;
+            nameLab.style.color = new Color(0.7f, 0.85f, 1f);
+            nameLab.style.flexShrink = 0;
+            nameLab.style.marginRight = 6;
+            cell.Add(nameLab);
+            
 
             var icon = new VisualElement { name = $"Icon_{materialName}" };
             icon.style.width = 22;
@@ -1007,14 +1021,12 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             
             cell.Add(icon);
 
-            int have = walletHolder != null && walletHolder.Wallet != null
-                ? walletHolder.Wallet.Get(materialName)
-                : 0;
-            amount.text = have.ToString();
+            
+            amount.text = "0";
 
-            var def = walletHolder != null && walletHolder.Catalog != null
-                ? walletHolder.Catalog.Get(materialName)
-                : null;
+            // var def = walletHolder != null && walletHolder.Catalog != null
+            //     ? walletHolder.Catalog.Get(materialName)
+            //     : null;
             if (def?.icon != null)
             {
                 icon.style.backgroundImage = new StyleBackground(def.icon);

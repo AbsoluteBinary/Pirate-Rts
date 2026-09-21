@@ -26,6 +26,7 @@ namespace _Project.Scripts.Harbour.UIControllers
         [SerializeField] private HarbourBuilderManager harbourBuilderManager;
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
         [SerializeField] private DockHUD dockHUD;
+        [SerializeField] private ResourceHUD resourceHUD;
 
         #region Base Builder
         [Header("Base Builder")]
@@ -76,6 +77,9 @@ namespace _Project.Scripts.Harbour.UIControllers
                 harbourHUD.OnBuildShipClicked += () => SetMode(HarbourStateSO.HarbourMode.ShipBuilding);
                 harbourHUD.OnExitBuildMode += () => SetMode(HarbourStateSO.HarbourMode.Idle);
                 harbourHUD.OnDockClicked += ToggleDockMode;
+                //harbourHUD.OnResourcesClicked += () => SetMode(HarbourStateSO.HarbourMode.Resources);
+                if (resourceHUD != null)
+                    resourceHUD.OnCloseRequested += ReturnToIdle;
             }
 
             if (dockHUD != null)
@@ -174,6 +178,17 @@ namespace _Project.Scripts.Harbour.UIControllers
                     shipBuilderHUD?.CloseShipBuilder();
                     harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Dock);
                     break;
+                
+                // case HarbourStateSO.HarbourMode.Resources:
+                //     SetCamera(idleCamera, true);
+                //     SetCamera(harbourBuildCamera, false);
+                //     if (harbourHUD != null) harbourHUD.gameObject.SetActive(true);
+                //     if (baseBuilderHUD != null) baseBuilderHUD.gameObject.SetActive(false);
+                //     baseBuilderController?.SetBuilderActive(false);
+                //     shipBuilderHUD?.CloseShipBuilder();
+                //     dockHUD?.CloseDock();
+                //     harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Resources);
+                //     break;
             }
 
             Debug.Log($"<color=lime>Harbour State Applied: {state.currentMode}</color>");

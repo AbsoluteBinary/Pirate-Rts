@@ -1,6 +1,8 @@
 using UnityEngine;
 using _Project.Scripts.Harbour.Modules;
-using System.Linq;                    // ← Make sure this is present
+using System.Linq;
+using System.Collections.Generic;
+using _Project.Scripts.Harbour.Economy;
 
 namespace _Project.Scripts.Harbour.ShipBuilder
 {
@@ -9,6 +11,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
     {
         [Header("Build")]
         public float buildTimeSeconds = 60f;
+        
+        [Header("Build Cost")]
+        public List<ResourceCost> resourceCosts = new List<ResourceCost>();
         
         [Header("Mask System")]
         public HullSlotMask slotMask;

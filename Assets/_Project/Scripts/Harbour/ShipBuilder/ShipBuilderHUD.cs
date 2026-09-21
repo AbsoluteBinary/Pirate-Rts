@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using _Project.Scripts.Harbour.Economy;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -84,6 +85,20 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             }
 
             _currentLoadout.RecalculateStats();
+
+            if (walletHolder == null || walletHolder.Wallet == null)
+            {
+                Debug.LogWarning("[Build] No wallet — cannot start.");
+                return;
+            }
+
+            if (!walletHolder.Wallet.CanAfford(_currentLoadout.totalResourceCosts))
+            {
+                Debug.LogWarning("[Build] Not enough resources.");
+                return;
+            }
+            
+            
             _buildRemaining = Mathf.Max(0f, _currentLoadout.totalBuildTime);
             SetTimerLabel(_buildRemaining);
 
@@ -108,7 +123,18 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private void CompleteBuild()
         {
-            // existing BuildCurrentShip body — JSON + Register
+            if (_currentLoadout?.hull == null) return;
+
+            if (walletHolder?.Wallet == null ||
+                !walletHolder.Wallet.TrySpendAll(_currentLoadout.totalResourceCosts))
+            {
+                Debug.LogWarning("[Build] Spend failed — ship not built.");
+                if (_buildTimerLabel != null)
+                    _buildTimerLabel.text = "Build failed";
+                return;
+            }
+
+            RefreshBuildCostNumbers();
             BuildCurrentShip();
             if (_buildTimerLabel != null)
                 _buildTimerLabel.text = "Build complete";
@@ -130,9 +156,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
         }
         
-        private void RefreshWalletNumbers(VisualElement root, string labelPrefix)
+        private void RefreshBuildCostNumbers()
         {
-            if (root == null || walletHolder?.Wallet == null) return;
+            if (_shipBuilderPanel == null) return;
 
             string[] ids =
             {
@@ -141,11 +167,21 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 "Alloy", "Cloth", "Uranium"
             };
 
+            var map = new Dictionary<string, int>();
+            if (_currentLoadout?.totalResourceCosts != null)
+            {
+                foreach (var c in _currentLoadout.totalResourceCosts)
+                {
+                    if (c == null || string.IsNullOrEmpty(c.id)) continue;
+                    map[c.id] = c.amount;
+                }
+            }
+
             foreach (var id in ids)
             {
-                var lab = root.Q<Label>($"{labelPrefix}{id}");
-                if (lab != null)
-                    lab.text = walletHolder.Wallet.Get(id).ToString();
+                var lab = _shipBuilderPanel.Q<Label>($"CostValue_{id}");
+                if (lab == null) continue;
+                lab.text = map.TryGetValue(id, out int n) ? n.ToString() : "0";
             }
         }
 
@@ -165,8 +201,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _shipBuilderPanel.style.position = Position.Absolute;
             _shipBuilderPanel.style.top = 0;
             _shipBuilderPanel.style.left = 0;
-            _shipBuilderPanel.style.right = 0;
-            _shipBuilderPanel.style.bottom = 0;
+            _shipBuilderPanel.style.right = 240;
+            _shipBuilderPanel.style.bottom = 12;
             _shipBuilderPanel.style.justifyContent = Justify.Center;
             _shipBuilderPanel.style.alignItems = Align.Center;
 
@@ -224,7 +260,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             main.Add(CreateHullPreviewArea());
             main.Add(CreateBuildCostRow());
             
-            RefreshWalletNumbers(_shipBuilderPanel, "CostValue_");
+            RefreshBuildCostNumbers();
 
             body.Add(main);
             body.Add(CreateBuilderSidePanel());
@@ -737,6 +773,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private VisualElement CreateCostCell(string id)
         {
+            
+            
             var cell = new VisualElement { name = $"CostCell_{id}" };
             cell.style.flexDirection = FlexDirection.Row;
             cell.style.alignItems = Align.Center;
@@ -752,6 +790,22 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             check.style.flexShrink = 0;
             check.style.marginRight = 6;
             cell.Add(check);
+            
+            
+            var def = walletHolder != null && walletHolder.Catalog != null
+                ? walletHolder.Catalog.Get(id)
+                : null;
+
+            var nameLab = new Label(def != null && !string.IsNullOrEmpty(def.displayName)
+                ? def.displayName
+                : id);
+            nameLab.name = $"CostName_{id}";
+            nameLab.style.fontSize = 11;
+            nameLab.style.color = new Color(0.7f, 0.85f, 1f);
+            nameLab.style.flexShrink = 0;
+            nameLab.style.marginRight = 6;
+            cell.Add(nameLab);
+            
 
             var value = new Label("0");
             value.name = $"CostValue_{id}";
@@ -790,11 +844,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             int have = walletHolder != null && walletHolder.Wallet != null
                 ? walletHolder.Wallet.Get(id)
                 : 0;
-            value.text = have.ToString();
+            value.text = "0";
 
-            var def = walletHolder != null && walletHolder.Catalog != null
-                ? walletHolder.Catalog.Get(id)
-                : null;
+            // var def = walletHolder != null && walletHolder.Catalog != null
+            //     ? walletHolder.Catalog.Get(id)
+            //     : null;
             if (def?.icon != null)
             {
                 iconBox.style.backgroundImage = new StyleBackground(def.icon);
@@ -1036,8 +1090,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             UpdateStatsDisplay();
         }
 
-        private void UpdateStatsDisplay()
+        public void UpdateStatsDisplay()
         {
+            RefreshBuildCostNumbers();
             if (_statsLabel == null) return;
 
             float t = _currentLoadout != null ? _currentLoadout.totalBuildTime : 0f;
