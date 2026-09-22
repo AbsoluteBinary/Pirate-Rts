@@ -105,6 +105,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             root.Clear();
             dockHUD.OpenDock(root);
+            root.Add(CreateIdleResourcePanel());
         }
 
         public void BuildIdleHUD()
@@ -182,9 +183,42 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             topBar.Add(buildTrigger);
             topBar.Add(buildDropdown);
             root.Add(topBar);
-            root.Add(CreateIdleResourcePanel());
 
+            
+            root.Add(CreateIdleResourcePanel());
+            root.schedule.Execute(RefreshIdleResourceAmounts);
+            
             Debug.Log("<color=lime>HarbourHUD: Idle HUD (PanelRenderer)</color>");
+        }
+        
+        private void RefreshIdleResourceAmounts()
+        {
+            if (root == null) return;
+            var panel = root.Q("IdleResourcePanel");
+            if (panel == null) return;
+
+            string[] ids =
+            {
+                "Oil", "Iron", "Steel",
+                "Energy", "Aluminium", "Lumber",
+                "Alloy", "Cloth", "Uranium"
+            };
+
+            foreach (var id in ids)
+            {
+                var lab = panel.Q<Label>($"IdleRes_{id}");
+                if (lab == null) continue;
+
+                var def = walletHolder != null && walletHolder.Catalog != null
+                    ? walletHolder.Catalog.Get(id)
+                    : null;
+
+                int have = walletHolder != null && walletHolder.Wallet != null
+                    ? walletHolder.Wallet.Get(id)
+                    : (def != null ? def.startingAmount : 0);
+
+                lab.text = have.ToString();
+            }
         }
         
         private VisualElement CreateIdleResourcePanel()
@@ -235,11 +269,14 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             foreach (var id in ids)
                 grid.Add(CreateIdleResourceCell(id));
             panel.Add(grid);
+            
+            
             return panel;
         }
 
         private VisualElement CreateIdleResourceCell(string id)
         {
+            
             var def = walletHolder != null && walletHolder.Catalog != null
                 ? walletHolder.Catalog.Get(id)
                 : null;
@@ -262,11 +299,16 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             int have = walletHolder != null && walletHolder.Wallet != null
                 ? walletHolder.Wallet.Get(id)
-                : 0;
-            var amount = new Label(have.ToString());
+                : (def != null ? def.startingAmount : 0);
+            
+
+            var amount = new Label(have.ToString()) { name = $"IdleRes_{id}" };
+            amount.style.minWidth = 48;
             amount.style.flexGrow = 1;
-            amount.style.fontSize = 12;
+            amount.style.flexShrink = 0;
+            amount.style.fontSize = 13;
             amount.style.color = Color.white;
+            amount.style.unityTextAlign = TextAnchor.MiddleRight;
             cell.Add(amount);
 
             var icon = new VisualElement();

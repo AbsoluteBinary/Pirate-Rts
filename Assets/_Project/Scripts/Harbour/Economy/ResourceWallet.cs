@@ -21,8 +21,9 @@ namespace _Project.Scripts.Harbour.Economy
             {
                 if (def == null || string.IsNullOrEmpty(def.id)) continue;
                 if (!_amounts.ContainsKey(def.id))
-                    _amounts[def.id] = 0;
+                    _amounts[def.id] = def.startingAmount;
             }
+            
         }
 
         public void LoadOrCreate(ResourceCatalog catalog)
