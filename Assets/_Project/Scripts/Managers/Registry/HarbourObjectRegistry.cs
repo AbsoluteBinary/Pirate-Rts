@@ -51,59 +51,50 @@ namespace _Project.Scripts.Managers.Registry
         // Disable all (call when loading starts)
         public static void DisableAllForLoading()
         {
-            // Cameras
-            foreach (var kvp in cameras)
+            var camList = new List<Camera>(cameras.Values);
+            foreach (var cam in camList)
             {
-                if (kvp.Value != null && kvp.Value.gameObject != null)
-                {
-                    kvp.Value.gameObject.SetActive(false);
-                    //Debug.Log($"[HarbourRegistry] Disabled camera '{kvp.Key}'");
-                }
+                if (cam != null && cam.gameObject != null)
+                    cam.gameObject.SetActive(false);
             }
 
-            // TGS Grid
             if (tgsGrid != null)
-            {
                 tgsGrid.SetActive(false);
-                //Debug.Log("[HarbourRegistry] Disabled TGS Grid");
-            }
 
-            // IO Boxes
-            foreach (var kvp in ioBoxes)
+            var boxList = new List<GameObject>(ioBoxes.Values);
+            foreach (var box in boxList)
             {
-                if (kvp.Value != null)
-                {
-                    kvp.Value.SetActive(false);
-                    //Debug.Log($"[HarbourRegistry] Disabled IO Box '{kvp.Key}'");
+                if (box == null) continue;
+                box.SetActive(false);
 
-                    // Bonus: disable listener & eventsystem inside
-                    var listener = kvp.Value.GetComponentInChildren<AudioListener>(true);
-                    if (listener != null) listener.enabled = false;
+                var listener = box.GetComponentInChildren<AudioListener>(true);
+                if (listener != null) listener.enabled = false;
 
-                    var eventSys = kvp.Value.GetComponentInChildren<EventSystem>(true);
-                    if (eventSys != null) eventSys.enabled = false;
-                }
+                var eventSys = box.GetComponentInChildren<EventSystem>(true);
+                if (eventSys != null) eventSys.enabled = false;
             }
         }
 
         // Re-enable (call when returning to Idle or scene unload)
         public static void ReEnableAll()
         {
-            // Reverse logic of DisableAllForLoading
-            foreach (var kvp in cameras)
+            var camList = new List<Camera>(cameras.Values);
+            foreach (var cam in camList)
             {
-                if (kvp.Value != null && kvp.Value.gameObject != null)
-                    kvp.Value.gameObject.SetActive(true);
+                if (cam != null && cam.gameObject != null)
+                    cam.gameObject.SetActive(true);
             }
 
-            if (tgsGrid != null) tgsGrid.SetActive(true);
+            if (tgsGrid != null)
+                tgsGrid.SetActive(true);
 
-            foreach (var kvp in ioBoxes)
+            var boxList = new List<GameObject>(ioBoxes.Values);
+            foreach (var box in boxList)
             {
-                if (kvp.Value != null) kvp.Value.SetActive(true);
+                if (box != null)
+                    box.SetActive(true);
             }
-
-            //Debug.Log("[HarbourRegistry] All objects re-enabled");
+            
         }
 
         // Clear everything (e.g. on application quit or scene reset)

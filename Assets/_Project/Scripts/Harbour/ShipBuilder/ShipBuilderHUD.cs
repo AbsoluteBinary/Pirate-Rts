@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using _Project.Scripts.Harbour.Data.HUDData;
 using _Project.Scripts.Harbour.Economy;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -26,6 +27,13 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         [Header("Wallet")]
         [SerializeField] private ResourceWalletHolder walletHolder;
         
+        [Header("Instant Build")]
+        [SerializeField] private Sprite instantBuildTokenIcon;
+        [SerializeField] private int instantBuildTokenCost = 1;
+
+        private Label _instantTokenCountLabel;
+        private const string InstantTokenId = "PieceOfEight";
+        
         [Header("Selection HUDs")]
         [SerializeField] private WeaponSelectionHUD weaponSelectionHUD;
         [SerializeField] private ArmourSelectionHUD armourSelectionHUD;
@@ -48,6 +56,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private HullData _currentHull;
         private ShipLoadout _currentLoadout;
+        
+        private bool _clearMode;
+        private Button _clearBtn;
         
         private VisualElement root;
 
@@ -81,6 +92,12 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (_currentLoadout?.hull == null)
             {
                 Debug.LogWarning("[Build] No hull selected.");
+                return;
+            }
+            
+            if (!_currentLoadout.AllSlotsFilled())
+            {
+                Debug.LogWarning("[Build] Equip every slot first.");
                 return;
             }
 
@@ -121,9 +138,10 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _buildTimerLabel.text = $"{prefix}: {m:00}:{s:00}";
         }
 
-        private void CompleteBuild()
+        private bool CompleteBuild()
         {
-            if (_currentLoadout?.hull == null) return;
+            if (_currentLoadout?.hull == null)
+                return false;
 
             if (walletHolder?.Wallet == null ||
                 !walletHolder.Wallet.TrySpendAll(_currentLoadout.totalResourceCosts))
@@ -131,13 +149,16 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 Debug.LogWarning("[Build] Spend failed — ship not built.");
                 if (_buildTimerLabel != null)
                     _buildTimerLabel.text = "Build failed";
-                return;
+                return false;
             }
 
             RefreshBuildCostNumbers();
             BuildCurrentShip();
             if (_buildTimerLabel != null)
                 _buildTimerLabel.text = "Build complete";
+
+            GetComponent<HarbourHUD>()?.RefreshIdleResourceAmounts();
+            return true;
         }
 
         #endregion
@@ -198,6 +219,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 _shipBuilderPanel.RemoveFromHierarchy();
 
             _shipBuilderPanel = new VisualElement { name = "ShipBuilderHost" };
+            _shipBuilderPanel.style.flexDirection = FlexDirection.Row;
+            _shipBuilderPanel.style.alignItems = Align.Stretch;
             _shipBuilderPanel.style.position = Position.Absolute;
             _shipBuilderPanel.style.top = 0;
             _shipBuilderPanel.style.left = 0;
@@ -255,7 +278,32 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             selectHullBtn.style.borderBottomLeftRadius = 6;
             selectHullBtn.style.borderBottomRightRadius = 6;
             selectHullBtn.clicked += () => hullSelectionHUD?.OpenHullSelection();
-            main.Add(selectHullBtn);
+            var hullRow = new VisualElement();
+            hullRow.style.flexDirection = FlexDirection.Row;
+            hullRow.style.alignItems = Align.Center;
+            hullRow.style.marginBottom = 10;
+
+            selectHullBtn.style.flexGrow = 1;
+            selectHullBtn.style.marginBottom = 0;
+            selectHullBtn.style.marginRight = 8;
+            hullRow.Add(selectHullBtn);
+
+            _clearBtn = new Button { text = "Clear" };
+            _clearBtn.style.width = 88;
+            _clearBtn.style.height = 44;
+            _clearBtn.style.fontSize = 15;
+            _clearBtn.style.color = Color.white;
+            _clearBtn.style.borderTopLeftRadius = 6;
+            _clearBtn.style.borderTopRightRadius = 6;
+            _clearBtn.style.borderBottomLeftRadius = 6;
+            _clearBtn.style.borderBottomRightRadius = 6;
+            ApplyClearButtonLook(false);
+            _clearBtn.clicked += ToggleClearMode;
+            hullRow.Add(_clearBtn);
+
+            main.Add(hullRow);
+            
+            
 
             main.Add(CreateHullPreviewArea());
             main.Add(CreateBuildCostRow());
@@ -263,11 +311,50 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             RefreshBuildCostNumbers();
 
             body.Add(main);
-            body.Add(CreateBuilderSidePanel());
+            
             card.Add(body);
 
             _shipBuilderPanel.Add(card);
+            card.style.flexGrow = 1;
+            card.style.width = StyleKeyword.Null;
+            card.style.marginRight = 8;
+
+            var side = CreateBuilderSidePanel();
+            side.style.marginLeft = 0;
+            side.style.height = Length.Percent(92f);
+            _shipBuilderPanel.Add(side);
             root.Add(_shipBuilderPanel);
+        }
+        
+        private void ToggleClearMode()
+        {
+            _clearMode = !_clearMode;
+            ApplyClearButtonLook(_clearMode);
+        }
+
+        private void ApplyClearButtonLook(bool on)
+        {
+            if (_clearBtn == null) return;
+            if (on)
+            {
+                _clearBtn.style.backgroundColor = new Color(0.85f, 0.45f, 0.12f);
+                _clearBtn.style.borderTopWidth = 2;
+                _clearBtn.style.borderRightWidth = 2;
+                _clearBtn.style.borderBottomWidth = 2;
+                _clearBtn.style.borderLeftWidth = 2;
+                _clearBtn.style.borderTopColor = Color.cyan;
+                _clearBtn.style.borderRightColor = Color.cyan;
+                _clearBtn.style.borderBottomColor = Color.cyan;
+                _clearBtn.style.borderLeftColor = Color.cyan;
+            }
+            else
+            {
+                _clearBtn.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
+                _clearBtn.style.borderTopWidth = 0;
+                _clearBtn.style.borderRightWidth = 0;
+                _clearBtn.style.borderBottomWidth = 0;
+                _clearBtn.style.borderLeftWidth = 0;
+            }
         }
 
             private VisualElement CreateHullPreviewArea()
@@ -413,8 +500,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
                 //side.Add(CreateSideActionButton("Start Build", BuildCurrentShip));
                 
-                side.Add(CreateSideActionButton("Instant Build", () =>
-                    Debug.Log("ShipBuilder: Instant Build (stub)")));
+                side.Add(CreateSideActionButton("Instant Build", InstantBuild));
+                side.Add(CreateInstantTokenRow());
                 
                 // side.Add(CreateSideActionButton("Save Blueprint", SaveCurrentBuild));
                 //
@@ -423,6 +510,101 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 side.Add(CreateSideActionButton("Load Blueprint", OpenBlueprintListPanel));
 
                 return side;
+            }
+            
+            private VisualElement CreateInstantTokenRow()
+            {
+                var row = new VisualElement();
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.style.justifyContent = Justify.Center;
+                row.style.marginTop = 4;
+                row.style.marginBottom = 8;
+
+                var icon = new VisualElement();
+                icon.style.width = 22;
+                icon.style.height = 22;
+                icon.style.flexShrink = 0;
+                icon.style.marginRight = 8;
+
+                var sprite = instantBuildTokenIcon;
+                if (sprite == null && walletHolder?.Catalog != null)
+                    sprite = walletHolder.Catalog.Get(InstantTokenId)?.icon;
+
+                if (sprite != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(sprite);
+                    icon.style.backgroundSize = new BackgroundSize(Length.Percent(100), Length.Percent(100));
+                }
+                else
+                    icon.style.backgroundColor = new Color(0.16f, 0.22f, 0.40f);
+
+                row.Add(icon);
+
+                int have = walletHolder != null && walletHolder.Wallet != null
+                    ? walletHolder.Wallet.Get(InstantTokenId)
+                    : 0;
+                _instantTokenCountLabel = new Label(have.ToString());
+                _instantTokenCountLabel.style.fontSize = 14;
+                _instantTokenCountLabel.style.color = Color.white;
+                _instantTokenCountLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+                row.Add(_instantTokenCountLabel);
+                return row;
+            }
+
+            private void RefreshInstantTokenCount()
+            {
+                if (_instantTokenCountLabel == null) return;
+                int have = walletHolder != null && walletHolder.Wallet != null
+                    ? walletHolder.Wallet.Get(InstantTokenId)
+                    : 0;
+                _instantTokenCountLabel.text = have.ToString();
+            }
+            
+            private void InstantBuild()
+            {
+                if (_currentLoadout?.hull == null)
+                {
+                    Debug.LogWarning("[Build] No hull selected.");
+                    return;
+                }
+
+                _currentLoadout.RecalculateStats();
+
+                if (walletHolder == null || walletHolder.Wallet == null)
+                {
+                    Debug.LogWarning("[Build] No wallet — cannot build.");
+                    return;
+                }
+                
+                if (!_currentLoadout.AllSlotsFilled())
+                {
+                    Debug.LogWarning("[Build] Equip every slot first.");
+                    return;
+                }
+
+                if (!walletHolder.Wallet.CanAfford(_currentLoadout.totalResourceCosts))
+                {
+                    Debug.LogWarning("[Build] Not enough resources.");
+                    return;
+                }
+
+                if (walletHolder.Wallet.Get(InstantTokenId) < instantBuildTokenCost)
+                {
+                    Debug.LogWarning("[Build] Need a Piece of Eight for Instant Build.");
+                    return;
+                }
+
+                _isBuilding = false;
+                _buildRemaining = 0f;
+
+                if (!CompleteBuild())
+                    return;
+
+                walletHolder.Wallet.TrySpend(InstantTokenId, instantBuildTokenCost);
+                walletHolder.Wallet.Save();
+                RefreshInstantTokenCount();
+                GetComponent<HarbourHUD>()?.RefreshIdleResourceAmounts();
             }
             
         private VisualElement CreateSaveBlueprintBlock()
@@ -1021,6 +1203,15 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             Debug.Log($"<color=lime>Slot clicked: {slot.slotId} ({slot.acceptedType})</color>");
 
+            if (_clearMode)
+            {
+                _currentLoadout?.UnequipSlot(slot);
+                DrawSlotVisuals();
+                UpdateStatsDisplay();
+                RefreshBuildCostNumbers();
+                return;
+            }
+            
             switch (slot.acceptedType)
             {
                 case ModuleType.Weapon:
@@ -1269,9 +1460,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 _shipBuilderPanel.RemoveFromHierarchy();
                 _shipBuilderPanel = null;
             }
+            
 
             _currentHull = null;
             _currentLoadout = null;
+            _clearMode = false;
         }
         private void ResetAllSlotsToDefault()
         {

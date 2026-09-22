@@ -14,6 +14,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
         [SerializeField] private ResourceHUD resourceHUD;
         [SerializeField] private ResourceWalletHolder walletHolder;
+        
+        
+        
         public event Action OnResourcesClicked;
         public event Action OnBuildHarbourBaseClicked;
         public event Action OnExitBuildMode;
@@ -42,6 +45,14 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
         }
+        
+        public void HideAllUI()
+        {
+            if (root != null)
+                root.style.display = DisplayStyle.None;
+        }
+        
+        
 
         private void OnUIReady(PanelRenderer renderer, VisualElement rootElement)
         {
@@ -191,7 +202,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             Debug.Log("<color=lime>HarbourHUD: Idle HUD (PanelRenderer)</color>");
         }
         
-        private void RefreshIdleResourceAmounts()
+        public void RefreshIdleResourceAmounts()
         {
             if (root == null) return;
             var panel = root.Q("IdleResourcePanel");

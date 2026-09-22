@@ -208,7 +208,7 @@ MonoBehaviour:
   dockHUD: {fileID: 616167082}
   shipBuilderHUD: {fileID: 134604191}
   resourceHUD: {fileID: 134604198}
-  walletHolder: {fileID: 0}
+  walletHolder: {fileID: 379729371}
 --- !u!114 &134604190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,6 +251,8 @@ MonoBehaviour:
   hullSelectionHUD: {fileID: 134604192}
   builtShipInventory: {fileID: 11400000, guid: 80120db6ea7d656f1b2559b35d4b274e, type: 2}
   walletHolder: {fileID: 379729371}
+  instantBuildTokenIcon: {fileID: 21300000, guid: 297d7825a43063745bbf2ab9ade2166d, type: 3}
+  instantBuildTokenCost: 1
   weaponSelectionHUD: {fileID: 134604193}
   armourSelectionHUD: {fileID: 134604196}
   engineSelectionHUD: {fileID: 134604195}
@@ -1068,6 +1070,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58e1282bae6846a6abf46f9478b2b23e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Data.HUDData.DockHUD
+  worldSceneGroupIndex: 1
   walletHolder: {fileID: 379729371}
   hexSlotSprite: {fileID: 21300000, guid: dc09e84f86a2552428e2a58d7ccd79d3, type: 3}
   coinSprite: {fileID: 21300000, guid: 911a526ffb4252a4992c21d7c8fab782, type: 3}

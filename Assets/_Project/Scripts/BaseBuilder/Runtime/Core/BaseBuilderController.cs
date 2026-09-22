@@ -395,6 +395,8 @@ namespace _Project.Scripts.BaseBuilder.Runtime.Core
 
         public void SetBuilderActive(bool active)
         {
+            if (this == null) return;
+            
             _rectSelect?.Cancel();
             hud?.HideSelectRect();
             gameObject.SetActive(active);

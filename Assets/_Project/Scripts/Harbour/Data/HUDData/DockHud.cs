@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using _Project.Scripts.Fleet;
 using _Project.Scripts.Harbour.Economy;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
+using _Project.Scripts.SceneManagement;
+using _Project.Scripts.UI.IMGUI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,6 +12,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 {
     public class DockHUD : MonoBehaviour
     {
+        [SerializeField] private int worldSceneGroupIndex = 1;
+        
         private const int FleetSize = 5;
         private const int FlagShipIndex = 2;
         
@@ -745,11 +750,51 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             main.Add(headerRow);
             
 
+            main.Add(CreateLaunchButton());
             main.Add(CreateFleetRow());
             main.Add(CreateCostsBlock());
             main.Add(CreateRepairBlock());
             main.Add(CreateSelectedShipInfoPanel());
             return main;
+        }
+        private VisualElement CreateLaunchButton()
+        {
+            var btn = new Button { text = "Launch Fleet" };
+            btn.style.height = 48;
+            btn.style.marginTop = 4;
+            btn.style.marginBottom = 12;
+            btn.style.fontSize = 18;
+            btn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            btn.style.color = Color.white;
+            btn.style.backgroundColor = new Color(0.18f, 0.42f, 0.22f);
+            btn.style.borderTopLeftRadius = 8;
+            btn.style.borderTopRightRadius = 8;
+            btn.style.borderBottomLeftRadius = 8;
+            btn.style.borderBottomRightRadius = 8;
+            btn.clicked += LaunchFleet;
+            return btn;
+        }
+
+        private void LaunchFleet()
+        {
+            if (_slotShips[FlagShipIndex] == null)
+            {
+                Debug.LogWarning("[Dock] Put a ship in the Flag Ship slot first.");
+                return;
+            }
+
+            PendingLaunch.Capture(_slotShips, FlagShipIndex);
+
+            CloseDock();
+            GetComponent<HarbourHUD>()?.HideAllUI();
+
+            if (IMGUILoadingOverlay.Instance != null)
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+
+            if (SceneLoader.Instance != null)
+                _ = SceneLoader.Instance.BeginSceneTransition(worldSceneGroupIndex);
+            else
+                Debug.LogError("[Dock] SceneLoader missing.");
         }
         
         private VisualElement CreateSelectedShipInfoPanel()

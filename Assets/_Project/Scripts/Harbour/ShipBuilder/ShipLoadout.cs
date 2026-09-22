@@ -42,6 +42,14 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             slot.equippedModule = module;
             RecalculateStats();
         }
+        
+        public void UnequipSlot(ModuleSlot slot)
+        {
+            if (slot == null) return;
+            equippedSlots.RemoveAll(e => e != null && e.slotId == slot.slotId);
+            slot.equippedModule = null;
+            RecalculateStats();
+        }
 
         public float totalBuildTime;
 
@@ -87,6 +95,23 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 if (c == null || string.IsNullOrEmpty(c.id) || c.amount <= 0) continue;
                 map[c.id] = (map.TryGetValue(c.id, out int n) ? n : 0) + c.amount;
             }
+        }
+        
+        public bool AllSlotsFilled()
+        {
+            if (hull?.moduleSlots == null || hull.moduleSlots.Length == 0)
+                return true;
+
+            foreach (var slot in hull.moduleSlots)
+            {
+                if (slot == null) continue;
+
+                var eq = equippedSlots.Find(e => e != null && e.slotId == slot.slotId);
+                if (eq == null || eq.module == null)
+                    return false;
+            }
+
+            return true;
         }
     }
 

@@ -44,7 +44,7 @@ namespace _Project.Scripts.Harbour.UIControllers
             }
 
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            
         }
 
         public void OnHarbourEntered()
@@ -119,7 +119,8 @@ namespace _Project.Scripts.Harbour.UIControllers
                     if (baseBuilderHUD != null)
                         baseBuilderHUD.gameObject.SetActive(false);
 
-                    baseBuilderController?.SetBuilderActive(false);
+                    if (baseBuilderController != null)
+                        baseBuilderController.SetBuilderActive(false);
                     shipBuilderHUD?.CloseShipBuilder();
                     dockHUD?.CloseDock();
                     harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Idle);
@@ -158,7 +159,8 @@ namespace _Project.Scripts.Harbour.UIControllers
                     if (baseBuilderHUD != null)
                         baseBuilderHUD.gameObject.SetActive(false);
 
-                    baseBuilderController?.SetBuilderActive(false);
+                    if (baseBuilderController != null)
+                        baseBuilderController.SetBuilderActive(false);
                     SetTGSGrid(false);
                     dockHUD?.CloseDock();
                     harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.ShipBuilding);
@@ -174,7 +176,8 @@ namespace _Project.Scripts.Harbour.UIControllers
                     if (baseBuilderHUD != null)
                         baseBuilderHUD.gameObject.SetActive(false);
 
-                    baseBuilderController?.SetBuilderActive(false);
+                    if (baseBuilderController != null)
+                        baseBuilderController.SetBuilderActive(false);
                     shipBuilderHUD?.CloseShipBuilder();
                     harbourHUD?.RefreshUI(HarbourStateSO.HarbourMode.Dock);
                     break;
