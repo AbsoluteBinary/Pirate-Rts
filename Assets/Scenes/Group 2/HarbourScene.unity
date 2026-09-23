@@ -1071,6 +1071,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.Data.HUDData.DockHUD
   worldSceneGroupIndex: 1
+  fleetInventory: {fileID: 11400000, guid: 86035c816fd72adc693234852e31a034, type: 2}
   walletHolder: {fileID: 379729371}
   hexSlotSprite: {fileID: 21300000, guid: dc09e84f86a2552428e2a58d7ccd79d3, type: 3}
   coinSprite: {fileID: 21300000, guid: 911a526ffb4252a4992c21d7c8fab782, type: 3}

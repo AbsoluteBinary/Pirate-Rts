@@ -15,5 +15,4 @@ MonoBehaviour:
   hullCatalog:
   - {fileID: 11400000, guid: e653ab44b317360c7afdc07563ee785b, type: 2}
   moduleDatabase: {fileID: 11400000, guid: a2274927c2463c23ba23f9dd8e4f60b4, type: 2}
-  ships:
-  - {fileID: 0}
+  ships: []

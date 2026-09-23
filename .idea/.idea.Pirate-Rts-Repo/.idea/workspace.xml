@@ -14,12 +14,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/FleetInventory.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/FleetInventory.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/FleetSave.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/FleetSave.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ScriptableObjects/ShipBuilding/BuiltShips Inventory/Basic Modles/BuiltShipInventory.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ScriptableObjects/ShipBuilding/BuiltShips Inventory/Basic Modles/BuiltShipInventory.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/Data/BuiltShipInventory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/Data/BuiltShipInventory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/Data/ShipBlueprint.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/Data/ShipBlueprint.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/ShipBuilderHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/ShipBuilder/ShipBuilderHUD.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipSaveService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ShipSaveService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +70,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/EventBus/EventBus.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FleetData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/Data/FormationData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/FleetInventory.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/PendingLaunch.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/DockHud.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/ResourceHud.cs" root0="FORCE_HIGHLIGHTING" />
@@ -91,6 +95,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/LevelEditor/Data/CombatLayout.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/LevelEditor/Data/CombatlayoutDatabase.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/LevelEditor/Data/PlacedObjectData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/FleetSave.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/JsonResourceSaveStore.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/JsonShipSaveStore.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Persistence/TempSave/ResourceWalletSaveData.cs" root0="FORCE_HIGHLIGHTING" />
@@ -115,61 +120,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.0000000000011346" />
-      <entry key="M10" value="1.0000012135161345" />
-      <entry key="M15" value="1.000142494088911" />
-      <entry key="M30" value="1.0253169250802991" />
-      <entry key="H1" value="1.5997401449253954" />
-      <entry key="H2" value="5.402160726839976" />
-      <entry key="H4" value="21.030624172873683" />
-      <entry key="D1" value="248.92177128340157" />
-      <entry key="W1" value="583.1457093159909" />
+      <entry key="MS100" value="1.0595449388631595" />
+      <entry key="MS500" value="1.7375903848238856" />
+      <entry key="S2" value="3.450242296948602" />
+      <entry key="S5" value="4.95553768389199" />
+      <entry key="S10" value="6.049621871230182" />
+      <entry key="S30" value="7.208771257414525" />
+      <entry key="S60" value="7.582620932404047" />
+      <entry key="M2" value="7.785495119595986" />
+      <entry key="M5" value="7.912751269503372" />
+      <entry key="M10" value="7.956131299771268" />
+      <entry key="M15" value="7.970839459209307" />
+      <entry key="M30" value="8.010500950344657" />
+      <entry key="H1" value="8.590760872279866" />
+      <entry key="H2" value="12.392487822369512" />
+      <entry key="H4" value="28.015135362334707" />
+      <entry key="D1" value="255.89329686080563" />
+      <entry key="W1" value="590.1362163037059" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="0.0" />
-      <entry key="S30" value="4.135214436563763E-143" />
-      <entry key="S60" value="1.1119974998885604E-71" />
-      <entry key="M2" value="5.773461107613961E-36" />
-      <entry key="M5" value="1.5516901011338878E-14" />
-      <entry key="M10" value="2.1575939080188543E-7" />
-      <entry key="M15" value="5.191694789667493E-5" />
-      <entry key="M30" value="0.012672469962280768" />
-      <entry key="H1" value="0.21383205300022284" />
-      <entry key="H2" value="1.1881711430146515" />
-      <entry key="H4" value="4.62813639009753" />
-      <entry key="D1" value="40.549551351766766" />
-      <entry key="W1" value="92.31511435964146" />
+      <entry key="MS100" value="4.423522620438327E-39" />
+      <entry key="MS500" value="2.1337997037189337E-8" />
+      <entry key="S2" value="0.012086162041540489" />
+      <entry key="S5" value="0.17096821011832986" />
+      <entry key="S10" value="0.4134830227691699" />
+      <entry key="S30" value="0.7449936325261943" />
+      <entry key="S60" value="0.8631301364951831" />
+      <entry key="M2" value="0.9290479731936253" />
+      <entry key="M5" value="0.9709911153250538" />
+      <entry key="M10" value="0.9853890265464874" />
+      <entry key="M15" value="0.9902866871350953" />
+      <entry key="M30" value="1.0077092331111195" />
+      <entry key="H1" value="1.2107995797727154" />
+      <entry key="H2" value="2.185326371676592" />
+      <entry key="H4" value="5.624369180842865" />
+      <entry key="D1" value="41.54484203425933" />
+      <entry key="W1" value="93.31360132150706" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="3.623749730663066E-35" />
-      <entry key="MS500" value="1.2936942242167065E-7" />
-      <entry key="S2" value="0.018965221084791997" />
-      <entry key="S5" value="0.20473079078351444" />
-      <entry key="S10" value="0.45247186739455353" />
-      <entry key="S30" value="0.7677099935143802" />
-      <entry key="S60" value="0.8761906148289766" />
-      <entry key="M2" value="0.9360505407449838" />
-      <entry key="M5" value="0.9739120053784535" />
-      <entry key="M10" value="0.9868712284834046" />
-      <entry key="M15" value="0.9914213861549953" />
-      <entry key="M30" value="1.033562193368802" />
-      <entry key="H1" value="1.8110979240689968" />
-      <entry key="H2" value="6.5883885135377565" />
-      <entry key="H4" value="25.6564164552346" />
-      <entry key="D1" value="289.4681074366691" />
-      <entry key="W1" value="675.4597831138859" />
+      <entry key="MS100" value="0.8815169784757214" />
+      <entry key="MS500" value="1.6535196417540685" />
+      <entry key="S2" value="3.2416814284454265" />
+      <entry key="S5" value="4.74868053609847" />
+      <entry key="S10" value="6.035143933775918" />
+      <entry key="S30" value="7.6770767017048405" />
+      <entry key="S60" value="8.28017603760146" />
+      <entry key="M2" value="8.623791843269915" />
+      <entry key="M5" value="8.845361223621337" />
+      <entry key="M10" value="8.921967855673826" />
+      <entry key="M15" value="8.94800930341708" />
+      <entry key="M30" value="9.0115798221348" />
+      <entry key="H1" value="9.797977354722997" />
+      <entry key="H2" value="14.575315218696229" />
+      <entry key="H4" value="33.63688277784876" />
+      <entry key="D1" value="297.43487750244384" />
+      <entry key="W1" value="683.4487704285968" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">

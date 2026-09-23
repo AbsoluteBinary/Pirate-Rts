@@ -10,6 +10,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder.Data
     {
         [Header("Identity")]
         public string shipName = "Unnamed Ship";
+
+        public string saveId;
         public HullData hull;
 
         [Header("Equipped Modules")]

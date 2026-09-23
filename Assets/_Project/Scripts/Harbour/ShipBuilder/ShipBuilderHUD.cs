@@ -960,6 +960,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
                 var blueprint = ScriptableObject.CreateInstance<ShipBlueprint>();
                 blueprint.PopulateFromLoadout(_currentLoadout, shipName);
+                blueprint.saveId = record.id;
                 builtShipInventory.Register(blueprint);
 
                 Debug.Log($"<color=lime>[Build] '{shipName}' saved + in yard | count={builtShipInventory.ships.Count}</color>");

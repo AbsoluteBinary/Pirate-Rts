@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using _Project.Scripts.Fleet;
 using _Project.Scripts.Harbour.Economy;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
+using _Project.Scripts.Persistence.TempSave;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
 using UnityEngine;
@@ -13,6 +14,10 @@ namespace _Project.Scripts.Harbour.Data.HUDData
     public class DockHUD : MonoBehaviour
     {
         [SerializeField] private int worldSceneGroupIndex = 1;
+        [SerializeField] private FleetInventory fleetInventory;
+        
+        private TextField _fleetNameField;
+        private const string FleetNameHint = "Name this fleet";
         
         private const int FleetSize = 5;
         private const int FlagShipIndex = 2;
@@ -41,6 +46,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private Label _inspectWeight;
         private Label _inspectFuel;
         private Label _inspectCargo;
+        
         private readonly List<VisualElement> _shipListRows = new();
 
         
@@ -89,6 +95,20 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 if (lab != null)
                     lab.text = walletHolder.Wallet.Get(id).ToString();
             }
+        }
+        
+        private void OnEnable()
+        {
+            if (builtShipInventory != null)
+                builtShipInventory.EnsureHydrated();
+            if (fleetInventory != null)
+                fleetInventory.EnsureHydrated(builtShipInventory);
+        }
+
+        private void OnDisable()
+        {
+            if (fleetInventory != null)
+                fleetInventory.ClearRuntime();
         }
 
         public void OpenDock(VisualElement root)
@@ -156,6 +176,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private void OpenMyShipsPanel()
         {
             if (_dockRoot == null) return;
+            
 
             CloseMyShipsPanel();
             _highlightedShipIndex = -1;
@@ -751,6 +772,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             
 
             main.Add(CreateLaunchButton());
+            main.Add(CreateFleetNameField());
+            main.Add(CreateSaveFleetButton());
             main.Add(CreateFleetRow());
             main.Add(CreateCostsBlock());
             main.Add(CreateRepairBlock());
@@ -762,7 +785,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             var btn = new Button { text = "Launch Fleet" };
             btn.style.height = 48;
             btn.style.marginTop = 4;
-            btn.style.marginBottom = 12;
+            btn.style.marginBottom = 6;
             btn.style.fontSize = 18;
             btn.style.unityFontStyleAndWeight = FontStyle.Bold;
             btn.style.color = Color.white;
@@ -774,9 +797,100 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             btn.clicked += LaunchFleet;
             return btn;
         }
+        
+        private VisualElement CreateFleetNameField()
+        {
+            _fleetNameField = new TextField { value = FleetNameHint };
+            _fleetNameField.style.height = 36;
+            _fleetNameField.style.fontSize = 16;
+            _fleetNameField.style.color = Color.white;
+            _fleetNameField.style.marginTop = 0;
+            _fleetNameField.style.marginBottom = 12;
+            _fleetNameField.style.paddingLeft = 8;
+            _fleetNameField.style.paddingRight = 8;
+            _fleetNameField.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            _fleetNameField.style.borderTopWidth = 2;
+            _fleetNameField.style.borderRightWidth = 2;
+            _fleetNameField.style.borderBottomWidth = 2;
+            _fleetNameField.style.borderLeftWidth = 2;
+            _fleetNameField.style.borderTopColor = new Color(0.25f, 0.35f, 0.55f);
+            _fleetNameField.style.borderRightColor = new Color(0.25f, 0.35f, 0.55f);
+            _fleetNameField.style.borderBottomColor = new Color(0.25f, 0.35f, 0.55f);
+            _fleetNameField.style.borderLeftColor = new Color(0.25f, 0.35f, 0.55f);
+            _fleetNameField.style.borderTopLeftRadius = 6;
+            _fleetNameField.style.borderTopRightRadius = 6;
+            _fleetNameField.style.borderBottomLeftRadius = 6;
+            _fleetNameField.style.borderBottomRightRadius = 6;
+
+            _fleetNameField.RegisterCallback<FocusInEvent>(_ =>
+            {
+                if (_fleetNameField.value == FleetNameHint)
+                    _fleetNameField.value = "";
+            });
+
+            return _fleetNameField;
+        }
+        
+        private VisualElement CreateSaveFleetButton()
+        {
+            var btn = new Button { text = "Save Fleet" };
+            btn.style.height = 40;
+            btn.style.marginBottom = 12;
+            btn.style.fontSize = 16;
+            btn.style.color = Color.white;
+            btn.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
+            btn.style.borderTopLeftRadius = 8;
+            btn.style.borderTopRightRadius = 8;
+            btn.style.borderBottomLeftRadius = 8;
+            btn.style.borderBottomRightRadius = 8;
+            btn.clicked += () => TrySaveFleet();
+            return btn;
+        }
+
+        private bool TrySaveFleet()
+        {
+            string fleetName = _fleetNameField != null ? _fleetNameField.value.Trim() : "";
+            if (string.IsNullOrEmpty(fleetName) || fleetName == FleetNameHint)
+            {
+                Debug.LogWarning("[Fleet] Name the fleet first.");
+                return false;
+            }
+
+            if (_slotShips[FlagShipIndex] == null)
+            {
+                Debug.LogWarning("[Fleet] Put a ship in the Flag Ship slot first.");
+                return false;
+            }
+
+            var record = new FleetRecord
+            {
+                id = System.Guid.NewGuid().ToString("N"),
+                fleetName = fleetName,
+                flagIndex = FlagShipIndex
+            };
+
+            for (int i = 0; i < FleetSize; i++)
+            {
+                var ship = _slotShips[i];
+                record.shipIds.Add(ship != null ? ship.saveId : "");
+            }
+
+            var store = new JsonFleetSaveStore();
+            var data = store.TryRead(out var existing) && existing != null
+                ? existing
+                : new FleetInventorySaveData();
+            data.fleets.Add(record);
+            store.Write(data);
+
+            fleetInventory?.EnsureHydrated(builtShipInventory);
+            Debug.Log($"<color=lime>[Fleet] Saved '{fleetName}' | count={fleetInventory?.fleets.Count ?? 0}</color>");
+            return true;
+        }
 
         private void LaunchFleet()
         {
+            if (!TrySaveFleet()) return;
+            
             if (_slotShips[FlagShipIndex] == null)
             {
                 Debug.LogWarning("[Dock] Put a ship in the Flag Ship slot first.");

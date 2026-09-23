@@ -56,6 +56,7 @@ namespace _Project.Scripts.Persistence.TempSave
             var bp = ScriptableObject.CreateInstance<ShipBlueprint>();
             bp.name = record.shipName;
             bp.shipName = record.shipName;
+            bp.saveId = record.id;
             bp.totalWeight = record.totalWeight;
             bp.totalHealth = 100f;
 
