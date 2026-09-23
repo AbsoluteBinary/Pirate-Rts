@@ -20,6 +20,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         private bool _saveDropdownOpen;
         private VisualElement _blueprintListOverlay;
         
+        private TextField _shipNameField;
+        private const string ShipNameHint = "Name this ship";
+        
         [Header("References")]
         [SerializeField] private HullSelectionHUD hullSelectionHUD;
         [SerializeField] private BuiltShipInventory builtShipInventory;
@@ -92,6 +95,13 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (_currentLoadout?.hull == null)
             {
                 Debug.LogWarning("[Build] No hull selected.");
+                return;
+            }
+            
+            string shipName = _shipNameField != null ? _shipNameField.value.Trim() : "";
+            if (string.IsNullOrEmpty(shipName) || shipName == ShipNameHint)
+            {
+                Debug.LogWarning("[Build] Name the ship first.");
                 return;
             }
             
@@ -169,12 +179,20 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 panelRenderer = GetComponent<PanelRenderer>();
 
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
+            
+            
+
+            if (builtShipInventory != null)
+                builtShipInventory.EnsureHydrated();
         }
 
         private void OnDisable()
         {
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+            
+            if (builtShipInventory != null)
+                builtShipInventory.ClearRuntime();
         }
         
         private void RefreshBuildCostNumbers()
@@ -306,6 +324,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             
 
             main.Add(CreateHullPreviewArea());
+            
+            main.Add(CreateShipNameField());
+            
             main.Add(CreateBuildCostRow());
             
             RefreshBuildCostNumbers();
@@ -324,6 +345,35 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             side.style.height = Length.Percent(92f);
             _shipBuilderPanel.Add(side);
             root.Add(_shipBuilderPanel);
+        }
+        private VisualElement CreateShipNameField()
+        {
+            _shipNameField = new TextField { value = ShipNameHint };
+            _shipNameField.style.height = 36;
+            _shipNameField.style.fontSize = 16;
+            _shipNameField.style.color = Color.white;
+            _shipNameField.style.marginTop = 4;
+            _shipNameField.style.marginBottom = 2;
+            _shipNameField.style.paddingLeft = 8;
+            _shipNameField.style.paddingRight = 8;
+            _shipNameField.style.backgroundColor = new Color(0.05f, 0.08f, 0.18f, 0.92f);
+            _shipNameField.style.borderTopWidth = 2;
+            _shipNameField.style.borderRightWidth = 2;
+            _shipNameField.style.borderBottomWidth = 2;
+            _shipNameField.style.borderLeftWidth = 2;
+            _shipNameField.style.borderTopLeftRadius = 6;
+            _shipNameField.style.borderTopRightRadius = 6;
+            _shipNameField.style.borderBottomLeftRadius = 6;
+            _shipNameField.style.borderBottomRightRadius = 6;
+            ApplyNameFieldLook(false);
+
+            _shipNameField.RegisterCallback<FocusInEvent>(_ =>
+            {
+                if (_shipNameField.value == ShipNameHint)
+                    _shipNameField.value = "";
+            });
+
+            return _shipNameField;
         }
         
         private void ToggleClearMode()
@@ -362,7 +412,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 var frame = new VisualElement { name = "HullPreviewFrame" };
                 frame.style.flexGrow = 1;
                 frame.style.flexShrink = 1;
-                frame.style.minHeight = 180;
+                frame.style.minHeight = 0;
                 frame.style.alignItems = Align.Center;
                 frame.style.justifyContent = Justify.Center;
                 frame.style.marginBottom = 12;
@@ -383,6 +433,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 frame.style.borderTopRightRadius = 8;
                 frame.style.borderBottomLeftRadius = 8;
                 frame.style.borderBottomRightRadius = 8;
+                
 
                 _hullCanvas = new VisualElement { name = "HullCanvas" };
                 _hullCanvas.style.position = Position.Relative;
@@ -503,10 +554,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 side.Add(CreateSideActionButton("Instant Build", InstantBuild));
                 side.Add(CreateInstantTokenRow());
                 
-                // side.Add(CreateSideActionButton("Save Blueprint", SaveCurrentBuild));
-                //
-                // side.Add(CreateSideActionButton("Load Blueprint", LoadLatestBlueprint));
-                side.Add(CreateSaveBlueprintBlock());
+                side.Add(CreateSideActionButton("Save Blueprint", SaveBlueprintFromShipName));
                 side.Add(CreateSideActionButton("Load Blueprint", OpenBlueprintListPanel));
 
                 return side;
@@ -561,11 +609,46 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 _instantTokenCountLabel.text = have.ToString();
             }
             
+            private void SaveBlueprintFromShipName()
+            {
+                string name = _shipNameField != null ? _shipNameField.value.Trim() : "";
+                if (string.IsNullOrEmpty(name) || name == ShipNameHint)
+                {
+                    Debug.LogWarning("[ShipSave] Name the ship first.");
+                    return;
+                }
+
+                if (_currentLoadout?.hull == null)
+                {
+                    Debug.LogWarning("[ShipSave] No hull selected.");
+                    return;
+                }
+
+                _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
+                var record = _shipSave.Capture(_currentLoadout, name);
+                if (record == null)
+                {
+                    Debug.LogError("[ShipSave] Capture failed.");
+                    return;
+                }
+
+                _shipSave.AppendAndWrite(record);
+                Debug.Log($"<color=lime>[ShipSave] Saved '{record.shipName}'</color>");
+                OpenBlueprintListPanel();
+            }
+            
             private void InstantBuild()
             {
                 if (_currentLoadout?.hull == null)
                 {
                     Debug.LogWarning("[Build] No hull selected.");
+                    return;
+                }
+                
+                string shipName = _shipNameField != null ? _shipNameField.value.Trim() : "";
+                if (string.IsNullOrEmpty(shipName) || shipName == ShipNameHint)
+                {
+                    Debug.LogWarning("[Build] Name the ship first.");
                     return;
                 }
 
@@ -858,16 +941,28 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                     return;
                 }
 
+                string shipName = _shipNameField != null ? _shipNameField.value.Trim() : "";
+                if (string.IsNullOrEmpty(shipName) || shipName == ShipNameHint)
+                {
+                    Debug.LogWarning("[Build] Name the ship first.");
+                    return;
+                }
+
                 _shipSave ??= new ShipSaveService(new JsonShipSaveStore());
-                var record = _shipSave.Capture(_currentLoadout,
-                    _hullNameLabel != null ? _hullNameLabel.text : _currentLoadout.hull.hullName);
+                var record = _shipSave.Capture(_currentLoadout, shipName);
+                if (record == null)
+                {
+                    Debug.LogError("[Build] Capture failed.");
+                    return;
+                }
+
                 _shipSave.AppendAndWrite(record);
 
                 var blueprint = ScriptableObject.CreateInstance<ShipBlueprint>();
-                blueprint.PopulateFromLoadout(_currentLoadout, record.shipName);
+                blueprint.PopulateFromLoadout(_currentLoadout, shipName);
                 builtShipInventory.Register(blueprint);
 
-                Debug.Log($"<color=lime>[Build] '{blueprint.shipName}' saved + in yard</color>");
+                Debug.Log($"<color=lime>[Build] '{shipName}' saved + in yard | count={builtShipInventory.ships.Count}</color>");
             }
 
             private Button CreateSideActionButton(string text, Action onClick)
@@ -891,8 +986,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         {
             _currentHull = hull;
             _currentLoadout = new ShipLoadout { hull = hull };
-            
             _currentLoadout.RecalculateStats();
+
+            RefreshNameReadyLook();
 
             if (hull?.hullImage == null) return;
 
@@ -924,7 +1020,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             header.style.color = Color.cyan;
             header.style.unityFontStyleAndWeight = FontStyle.Bold;
             header.style.unityTextAlign = TextAnchor.MiddleCenter;
-            header.style.marginBottom = 8;
+            header.style.marginTop = 0;
+            header.style.marginBottom = 4;
+            header.style.paddingBottom = 4;
+            header.style.borderBottomWidth = 1;
+            header.style.borderBottomColor = new Color(0.4f, 0.7f, 1f);
             block.Add(header);
 
             string[] ids =
@@ -955,8 +1055,6 @@ namespace _Project.Scripts.Harbour.ShipBuilder
 
         private VisualElement CreateCostCell(string id)
         {
-            
-            
             var cell = new VisualElement { name = $"CostCell_{id}" };
             cell.style.flexDirection = FlexDirection.Row;
             cell.style.alignItems = Align.Center;
@@ -1039,6 +1137,34 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             }
 
             return cell;
+        }
+        
+        private void RefreshNameReadyLook()
+        {
+            bool ready = _currentLoadout != null
+                         && _currentHull != null
+                         && _currentLoadout.AllSlotsFilled()
+                         && _currentHull.moduleSlots != null
+                         && _currentHull.moduleSlots.Length > 0;
+
+            ApplyNameFieldLook(ready);
+
+            if (!ready) return;
+            if (_shipNameField == null) return;
+            if (string.IsNullOrWhiteSpace(_shipNameField.value) || _shipNameField.value == ShipNameHint)
+                _shipNameField.value = string.IsNullOrEmpty(_currentHull.hullName)
+                    ? "Ready"
+                    : _currentHull.hullName;
+        }
+
+        private void ApplyNameFieldLook(bool ready)
+        {
+            if (_shipNameField == null) return;
+            var edge = ready ? Color.cyan : new Color(0.25f, 0.35f, 0.55f);
+            _shipNameField.style.borderTopColor = edge;
+            _shipNameField.style.borderRightColor = edge;
+            _shipNameField.style.borderBottomColor = edge;
+            _shipNameField.style.borderLeftColor = edge;
         }
         
         private VisualElement CreateBuildActionRow()
@@ -1209,6 +1335,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                 DrawSlotVisuals();
                 UpdateStatsDisplay();
                 RefreshBuildCostNumbers();
+                RefreshNameReadyLook();
                 return;
             }
             
@@ -1255,6 +1382,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (_currentLoadout != null) _currentLoadout.EquipModule(slot, weapon);
             DrawSlotVisuals();   // Refresh visuals after equipping
             UpdateStatsDisplay();
+            RefreshNameReadyLook();
         }
 
         private void OnArmourEquipped(ArmourData armour, ModuleSlot slot)
@@ -1263,6 +1391,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (_currentLoadout != null) _currentLoadout.EquipModule(slot, armour);
             DrawSlotVisuals();   // Refresh visuals after equipping
             UpdateStatsDisplay();
+            RefreshNameReadyLook();
         }
 
         private void OnEngineEquipped(EngineData engine, ModuleSlot slot)
@@ -1271,6 +1400,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (_currentLoadout != null) _currentLoadout.EquipModule(slot, engine);
             DrawSlotVisuals();   // Refresh visuals after equipping
             UpdateStatsDisplay();
+            RefreshNameReadyLook();
         }
 
         private void OnComponentEquipped(ComponentData component, ModuleSlot slot)
@@ -1279,6 +1409,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (_currentLoadout != null) _currentLoadout.EquipModule(slot, component);
             DrawSlotVisuals();   // Refresh visuals after equipping
             UpdateStatsDisplay();
+            RefreshNameReadyLook();
         }
 
         public void UpdateStatsDisplay()

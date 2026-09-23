@@ -15,6 +15,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder.Data
 
         [Header("Runtime yard — filled from save in Play Mode")]
         public List<ShipBlueprint> ships = new List<ShipBlueprint>();
+        
 
         private bool _hydrated;
 
@@ -26,20 +27,24 @@ namespace _Project.Scripts.Harbour.ShipBuilder.Data
 
         private void OnDisable()
         {
-            if (!Application.isPlaying) return;
             ships.Clear();
             _hydrated = false;
         }
 
         public void EnsureHydrated()
         {
-            if (_hydrated) return;
             _hydrated = true;
+            ships.Clear();
 
             var save = new ShipSaveService(new JsonShipSaveStore());
-            ships.Clear();
             ships.AddRange(save.RebuildAll(hullCatalog, moduleDatabase));
             Debug.Log($"<color=cyan>[Yard] Hydrated {ships.Count} ship(s) from save</color>");
+        }
+
+        public void ClearRuntime()
+        {
+            ships.Clear();
+            _hydrated = false;
         }
 
         public void Register(ShipBlueprint ship)
