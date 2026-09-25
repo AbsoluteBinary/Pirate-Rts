@@ -76,7 +76,11 @@ namespace _Project.Scripts.PlayerShip_Movement
                 ship.SetActive(false);
             }
 
+            
             var spawned = Instantiate(prefab, position, rotation);
+            spawned.name = string.IsNullOrEmpty(shipName) ? prefab.name : shipName;
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(spawned, gameObject.scene);
+            ship = spawned;
             spawned.name = string.IsNullOrEmpty(shipName) ? prefab.name : shipName;
             ship = spawned;
 
