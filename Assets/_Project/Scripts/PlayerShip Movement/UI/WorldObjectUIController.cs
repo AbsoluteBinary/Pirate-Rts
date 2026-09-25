@@ -10,7 +10,7 @@ namespace _Project.Scripts.PlayerShip_Movement.UI
     public class WorldObjectUIController : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private Transform uiTransform;
 
         [Header("UI Element Names")]
@@ -36,22 +36,29 @@ namespace _Project.Scripts.PlayerShip_Movement.UI
         private void Awake()
         {
             DOTween.Init();
-            ValidateReferences();
             SetupInput();
         }
 
-        private void ValidateReferences()
+        private void OnEnable()
         {
-            if (uiDocument == null)
+            if (panelRenderer == null)
+                panelRenderer = GetComponent<PanelRenderer>();
+
+            if (panelRenderer == null)
             {
-                Debug.LogError("[WorldObjectUI] UIDocument is not assigned!", this);
+                Debug.LogError("[WorldObjectUI] PanelRenderer is not assigned!", this);
                 return;
             }
 
-            buttonElement = uiDocument.rootVisualElement.Q<VisualElement>(buttonElementName);
+            panelRenderer.RegisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement root)
+        {
+            buttonElement = root.Q<VisualElement>(buttonElementName);
             if (buttonElement == null)
             {
-                Debug.LogError($"[WorldObjectUI] Button element '{buttonElementName}' not found in UIDocument!", this);
+                Debug.LogError($"[WorldObjectUI] '{buttonElementName}' not found.", this);
                 return;
             }
 
@@ -61,7 +68,6 @@ namespace _Project.Scripts.PlayerShip_Movement.UI
                 return;
             }
 
-            // Initial state
             buttonElement.style.display = DisplayStyle.None;
             buttonElement.style.opacity = 0f;
         }
@@ -215,6 +221,9 @@ namespace _Project.Scripts.PlayerShip_Movement.UI
 
         private void Cleanup()
         {
+            if (panelRenderer != null)
+                panelRenderer.UnregisterUIReloadCallback(OnUIReady);
+            
             cts?.Cancel();
             cts?.Dispose();
             cts = null;

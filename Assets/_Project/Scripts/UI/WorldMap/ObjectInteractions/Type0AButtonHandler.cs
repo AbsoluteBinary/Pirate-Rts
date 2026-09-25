@@ -1,4 +1,5 @@
 using _Project.Scripts.Main_Screen;
+using _Project.Scripts.UI.WorldMap.HUDInteractions;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,29 +7,36 @@ namespace _Project.Scripts.UI.WorldMap.ObjectInteractions
 {
     public class Type0AButtonHandler : MonoBehaviour
     {
-        private void Awake()
+        private void OnEnable()
         {
-            //Debug.Log($"Type0AObjButtonHandler: Awake called on {gameObject.name}");
-
-            UIDocument uiDocument = GetComponent<UIDocument>();
-            if (uiDocument == null)
+            var panel = GetComponent<PanelRenderer>();
+            if (panel == null)
             {
-                Debug.LogError("Type0AObjButtonHandler: UIDocument not found");
+                Debug.LogError("Type0AObjButtonHandler: PanelRenderer not found");
                 return;
             }
 
-            VisualElement root = uiDocument.rootVisualElement;
-            Button button = root.Q<Button>("AttackButtonTypeOA");
-
-            if (button != null)
-            {
-                button.clicked += () =>
-                {
-                    LoginMenuManager.Instance?.StartLoadingTransition();
-                    //Debug.Log("Type0AObjButtonHandler: Enter Type0A Button Clicked!");
-                    WorldSpaceInteractionsEventBus.TriggerType0AObjButtonClick();
-                };
-            }
+            panel.RegisterUIReloadCallback(OnUIReady);
         }
+
+        private void OnDisable()
+        {
+            var panel = GetComponent<PanelRenderer>();
+            if (panel != null)
+                panel.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement root)
+        {
+            var button = root.Q<Button>("AttackButtonTypeOA");
+            if (button == null) return;
+
+            button.clicked += () =>
+            {
+                LoginMenuManager.Instance?.StartLoadingTransition();
+                WorldSpaceInteractionsEventBus.TriggerType0AObjButtonClick();
+            };
+        }
+        
     }
 }

@@ -7,6 +7,13 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
         public static event System.Action HUDEnterBaseClicked;
         public static event System.Action HUDEnterWorldClicked;
         
+        public static event System.Action HUDEnterBattleClicked;
+
+        public static void TriggerHUDEnterBattleClicked()
+        {
+            HUDEnterBattleClicked?.Invoke();
+        }
+        
         // Called by HudController
         public static void TriggerHUDEnterBaseClicked()
         {
@@ -18,8 +25,8 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
         //Called by IdleHudButtonController
         public static void TriggerHUDEnterWorldClicked()
         {
-            //Debug.Log("EventBus: Triggering HUDEnterHarbourClicked event.");
-            //Debug.Log("EventBus: Triggering HUDEnterWorldClicked event. Listeners: " + (HUDEnterWorldClicked?.GetInvocationList()?.Length ?? 0));
+            Debug.Log("EventBus: Triggering HUDEnterHarbourClicked event.");
+            Debug.Log("EventBus: Triggering HUDEnterWorldClicked event. Listeners: " + (HUDEnterWorldClicked?.GetInvocationList()?.Length ?? 0));
             HUDEnterWorldClicked?.Invoke();
         }
         

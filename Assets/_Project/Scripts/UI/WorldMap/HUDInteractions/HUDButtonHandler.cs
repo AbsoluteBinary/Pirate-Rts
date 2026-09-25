@@ -7,29 +7,35 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
     public class HUDButtonHandler : MonoBehaviour
     {
          
-        private void Awake()
+        private void OnEnable()
         {
-            //Debug.Log($"HUDButtonHandler: Awake called on {gameObject.name}");
-
-            UIDocument uiDocument = GetComponent<UIDocument>();
-            if (uiDocument == null)
+            var panel = GetComponent<PanelRenderer>();
+            if (panel == null)
             {
-                Debug.LogError("HUDButtonHandler: UIDocument not found");
+                Debug.LogError("HUDButtonHandler: PanelRenderer not found");
                 return;
             }
 
-            VisualElement root = uiDocument.rootVisualElement;
-            Button button = root.Q<Button>("EnterHarbourButton");
+            panel.RegisterUIReloadCallback(OnUIReady);
+        }
 
-            if (button != null)
+        private void OnDisable()
+        {
+            var panel = GetComponent<PanelRenderer>();
+            if (panel != null)
+                panel.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement root)
+        {
+            var button = root.Q<Button>("EnterHarbourButton");
+            if (button == null) return;
+
+            button.clicked += () =>
             {
-                button.clicked += () =>
-                {
-                    LoginMenuManager.Instance?.StartLoadingTransition();
-                    //Debug.Log("HUDButtonHandler: Enter Harbour Button Clicked!");
-                    HUDMenuButtonsEventBus.TriggerHUDEnterBaseClicked();
-                };
-            }
+                LoginMenuManager.Instance?.StartLoadingTransition();
+                HUDMenuButtonsEventBus.TriggerHUDEnterBaseClicked();
+            };
         }
     }
 }

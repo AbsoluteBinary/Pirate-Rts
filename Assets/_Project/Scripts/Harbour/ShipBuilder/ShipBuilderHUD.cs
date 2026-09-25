@@ -373,9 +373,27 @@ namespace _Project.Scripts.Harbour.ShipBuilder
                     _shipNameField.value = "";
             });
 
+            StyleTextField(_shipNameField);
             return _shipNameField;
         }
         
+        private static void StyleTextField(TextField field)
+        {
+            field.style.color = Color.white;
+            field.style.backgroundColor = new Color(0.08f, 0.12f, 0.22f, 1f);
+
+            field.RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                var input = field.Q<VisualElement>(className: "unity-base-text-field__input");
+                if (input == null)
+                    input = field.Q<VisualElement>(className: "unity-text-input");
+                if (input == null) return;
+
+                input.style.color = Color.white;
+                input.style.backgroundColor = new Color(0.08f, 0.12f, 0.22f, 1f);
+                input.style.unityFontStyleAndWeight = FontStyle.Bold;
+            });
+        }
         private void ToggleClearMode()
         {
             _clearMode = !_clearMode;

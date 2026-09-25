@@ -5,24 +5,35 @@ namespace _Project.Scripts.UI.WorldMap.ObjectInteractions
 {
     public class HarbourObjButtonHandler : MonoBehaviour
     {
-        private void Awake()
+        private void OnEnable()
         {
-            //Debug.Log($"HarbourObjButtonHandler: Awake called on {gameObject.name}");
-
-            UIDocument uiDocument = GetComponent<UIDocument>();
-            if (uiDocument == null)
+            var panel = GetComponent<PanelRenderer>();
+            if (panel == null)
             {
-                Debug.LogError("HarbourObjButtonHandler: UIDocument not found");
+                Debug.LogError("HarbourObjButtonHandler: PanelRenderer not found");
                 return;
             }
 
-            VisualElement root = uiDocument.rootVisualElement;
-            Button button = root.Q<Button>("PlayerHarbourButton");
+            panel.RegisterUIReloadCallback(OnUIReady);
+        }
 
-            if (button != null)
+        private void OnDisable()
+        {
+            var panel = GetComponent<PanelRenderer>();
+            if (panel != null)
+                panel.UnregisterUIReloadCallback(OnUIReady);
+        }
+
+        private void OnUIReady(PanelRenderer renderer, VisualElement root)
+        {
+            var button = root.Q<Button>("PlayerHarbourButton");
+            if (button == null) return;
+
+            button.clicked += () =>
             {
                 button.clicked += WorldSpaceInteractionsEventBus.TriggerBaseButtonClick;
-            }
+                
+            };
         }
     }
 }

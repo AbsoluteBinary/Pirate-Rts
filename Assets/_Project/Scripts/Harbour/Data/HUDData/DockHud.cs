@@ -151,8 +151,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             main.style.marginLeft = 8;
             main.style.marginRight = 8;
             _dockPanel.Add(main);
-
+            
             _dockPanel.Add(CreateFleetStoragePanel());
+            RefreshFleetStorageList();
 
             _dockRoot.Add(_dockPanel);
             _root.Add(_dockRoot);
@@ -590,6 +591,24 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             CloseDock();
             OnCloseRequested?.Invoke();
         }
+        
+        private static void StyleTextField(TextField field)
+        {
+            field.style.color = Color.white;
+            field.style.backgroundColor = new Color(0.08f, 0.12f, 0.22f, 1f);
+
+            field.RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                var input = field.Q<VisualElement>(className: "unity-base-text-field__input");
+                if (input == null)
+                    input = field.Q<VisualElement>(className: "unity-text-input");
+                if (input == null) return;
+
+                input.style.color = Color.white;
+                input.style.backgroundColor = new Color(0.08f, 0.12f, 0.22f, 1f);
+                input.style.unityFontStyleAndWeight = FontStyle.Bold;
+            });
+        }
 
         private VisualElement CreateOuterFrame(string name, Length height)
         {
@@ -714,6 +733,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             nameField.style.marginTop = 6;
             nameField.style.fontSize = 11;
             col.Add(nameField);
+            int slot = index;
+            frame.RegisterCallback<ClickEvent>(_ => LoadStoredFleet(slot));
 
             return col;
         }
@@ -827,6 +848,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 if (_fleetNameField.value == FleetNameHint)
                     _fleetNameField.value = "";
             });
+            StyleTextField(_fleetNameField);
 
             return _fleetNameField;
         }
@@ -862,27 +884,40 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 return false;
             }
 
-            var record = new FleetRecord
-            {
-                id = System.Guid.NewGuid().ToString("N"),
-                fleetName = fleetName,
-                flagIndex = FlagShipIndex
-            };
-
-            for (int i = 0; i < FleetSize; i++)
-            {
-                var ship = _slotShips[i];
-                record.shipIds.Add(ship != null ? ship.saveId : "");
-            }
-
             var store = new JsonFleetSaveStore();
             var data = store.TryRead(out var existing) && existing != null
                 ? existing
                 : new FleetInventorySaveData();
-            data.fleets.Add(record);
+
+            FleetRecord record = null;
+            foreach (var saved in data.fleets)
+            {
+                if (saved.fleetName == fleetName)
+                {
+                    record = saved;
+                    break;
+                }
+            }
+
+            if (record == null)
+            {
+                record = new FleetRecord
+                {
+                    id = System.Guid.NewGuid().ToString("N"),
+                    fleetName = fleetName
+                };
+                data.fleets.Add(record);
+            }
+
+            record.flagIndex = FlagShipIndex;
+            record.shipIds.Clear();
+            for (int i = 0; i < FleetSize; i++)
+                record.shipIds.Add(_slotShips[i] != null ? _slotShips[i].saveId : "");
+
             store.Write(data);
 
             fleetInventory?.EnsureHydrated(builtShipInventory);
+            RefreshFleetStorageList();
             Debug.Log($"<color=lime>[Fleet] Saved '{fleetName}' | count={fleetInventory?.fleets.Count ?? 0}</color>");
             return true;
         }
@@ -909,6 +944,62 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 _ = SceneLoader.Instance.BeginSceneTransition(worldSceneGroupIndex);
             else
                 Debug.LogError("[Dock] SceneLoader missing.");
+        }
+        
+        private void RefreshFleetStorageList()
+        {
+            if (_dockPanel == null) return;
+
+            int count = fleetInventory != null ? fleetInventory.fleets.Count : 0;
+
+            for (int i = 0; i < StorageSlotCount; i++)
+            {
+                var fleet = i < count ? fleetInventory.fleets[i] : null;
+                var nameField = _dockPanel.Q<TextField>($"StorageName_{i}");
+                var frame = _dockPanel.Q<VisualElement>($"StorageFrame_{i}");
+
+                if (nameField != null)
+                {
+                    nameField.value = fleet != null ? fleet.fleetName : "";
+                    nameField.style.color = Color.white;
+                }
+
+                if (frame == null) continue;
+
+                var flag = fleet != null && fleet.flagIndex >= 0 && fleet.flagIndex < fleet.ships.Length
+                    ? fleet.ships[fleet.flagIndex]
+                    : null;
+                var sprite = flag != null
+                    ? (flag.storageImage != null ? flag.storageImage : flag.hull?.hullImage)
+                    : null;
+
+                frame.style.backgroundImage = sprite != null
+                    ? new StyleBackground(sprite)
+                    : new StyleBackground(StyleKeyword.None);
+                frame.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+            }
+        }
+
+        private void LoadStoredFleet(int index)
+        {
+            if (fleetInventory == null || index < 0 || index >= fleetInventory.fleets.Count)
+                return;
+
+            var fleet = fleetInventory.fleets[index];
+
+            for (int i = 0; i < FleetSize; i++)
+            {
+                var ship = fleet.ships != null && i < fleet.ships.Length ? fleet.ships[i] : null;
+                _slotShips[i] = ship;
+                _slotOccupied[i] = ship != null;
+                RefreshSlotButton(i);
+                ApplyDockSlotPortrait(i);
+            }
+
+            if (_fleetNameField != null)
+                _fleetNameField.value = fleet.fleetName;
+
+            Debug.Log($"<color=lime>[Fleet] Loaded '{fleet.fleetName}'</color>");
         }
         
         private VisualElement CreateSelectedShipInfoPanel()

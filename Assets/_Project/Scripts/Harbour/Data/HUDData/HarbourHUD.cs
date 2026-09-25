@@ -232,6 +232,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             }
         }
         
+        
         private VisualElement CreateIdleResourcePanel()
         {
             var panel = new VisualElement { name = "IdleResourcePanel" };

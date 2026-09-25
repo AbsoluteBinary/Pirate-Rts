@@ -68,6 +68,7 @@ namespace _Project.Scripts.Persistence.TempSave
                     if (h.name != record.hullId && h.hullName != record.hullId) continue;
                     bp.hull = h;
                     bp.storageImage = h.hullImage;
+                    bp.shipPrefab = h.combatPrefab;
                     break;
                 }
             }

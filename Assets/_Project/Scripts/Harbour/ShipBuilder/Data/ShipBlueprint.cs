@@ -44,6 +44,8 @@ namespace _Project.Scripts.Harbour.ShipBuilder.Data
 
             shipName = string.IsNullOrWhiteSpace(builtName) ? loadout.hull.hullName : builtName;
             hull = loadout.hull;
+
+            shipPrefab = hull.combatPrefab;
             if (storageImage == null)
                 storageImage = hull.hullImage;
 

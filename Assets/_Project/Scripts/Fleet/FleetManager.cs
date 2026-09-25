@@ -29,6 +29,8 @@ namespace _Project.Scripts.Fleet
 
         private void Awake()
         {
+            LogPendingFleet();
+            
             SpawnFleetFromData();
             if (Instance != null && Instance != this)
             {
@@ -36,6 +38,19 @@ namespace _Project.Scripts.Fleet
                 return;
             }
             Instance = this;
+        }
+        
+        private void LogPendingFleet()
+        {
+            Debug.Log($"<color=cyan>[Fleet] Pending flagship slot {PendingLaunch.FlagShipIndex}</color>");
+
+            for (int i = 0; i < PendingLaunch.Size; i++)
+            {
+                var ship = PendingLaunch.Ships[i];
+                string name = ship != null ? ship.shipName : "(empty)";
+                string mark = i == PendingLaunch.FlagShipIndex ? "  FLAG" : "";
+                Debug.Log($"[Fleet] Slot {i}: {name}{mark}");
+            }
         }
 
         // Trigger this whenever fleet changes
@@ -57,35 +72,53 @@ namespace _Project.Scripts.Fleet
     
         public void SpawnFleetFromData()
         {
-            if (currentFleetData == null || fleetSpawnPoint == null) return;
+            if (fleetSpawnPoint == null)
+            {
+                Debug.LogWarning("[Fleet] No spawn point on FleetManager.");
+                return;
+            }
 
-            // Clear old ships
             foreach (var ship in activeShips)
                 if (ship != null) Destroy(ship.gameObject);
             activeShips.Clear();
 
-            for (int i = 0; i < currentFleetData.ships.Count; i++)
+            bool launched = PendingLaunch.Ships[PendingLaunch.FlagShipIndex] != null;
+            if (launched)
             {
-                ShipBlueprint bp = currentFleetData.ships[i];
-                if (bp?.shipPrefab == null) continue;
-
-                Vector3 spawnPos = fleetSpawnPoint.position + new Vector3(i * 15f, 0, -i * 10f);
-
-                GameObject shipObj = Instantiate(bp.shipPrefab, spawnPos, Quaternion.identity);
-                shipObj.name = bp.shipName;
-
-                // FORCE ALL REQUIRED COMPONENTS
-                var combatShip = shipObj.GetComponent<CombatShip>() ?? shipObj.AddComponent<CombatShip>();
-                var movement = shipObj.GetComponent<PlayerCombatMovementController>() ?? shipObj.AddComponent<PlayerCombatMovementController>();
-                var health = shipObj.GetComponent<Health>() ?? shipObj.AddComponent<Health>();
-                var shipVFX = shipObj.GetComponent<ShipVFX>() ?? shipObj.AddComponent<ShipVFX>();   // ← This line is key
-
-                combatShip.Initialize(bp);
-
-                RegisterShip(movement, i == 0);
-
-                Debug.Log($"[FleetManager] Spawned {bp.shipName} | ShipVFX attached: {shipVFX != null}");
+                for (int i = 0; i < PendingLaunch.Size; i++)
+                    SpawnOne(PendingLaunch.Ships[i], i, i == PendingLaunch.FlagShipIndex);
+                return;
             }
+
+            if (currentFleetData == null) return;
+
+            for (int i = 0; i < currentFleetData.ships.Count; i++)
+                SpawnOne(currentFleetData.ships[i], i, i == 0);
+        }
+
+        private void SpawnOne(ShipBlueprint bp, int index, bool isFlagship)
+        {
+            if (bp == null) return;
+
+            if (bp.shipPrefab == null)
+            {
+                Debug.LogWarning($"[Fleet] '{bp.shipName}' has no combat prefab. Assign it on the hull.");
+                return;
+            }
+
+            Vector3 spawnPos = fleetSpawnPoint.position + new Vector3(index * 15f, 0, -index * 10f);
+            GameObject shipObj = Instantiate(bp.shipPrefab, spawnPos, Quaternion.identity);
+            shipObj.name = bp.shipName;
+
+            var combatShip = shipObj.GetComponent<CombatShip>() ?? shipObj.AddComponent<CombatShip>();
+            var movement = shipObj.GetComponent<PlayerCombatMovementController>() ?? shipObj.AddComponent<PlayerCombatMovementController>();
+            var health = shipObj.GetComponent<Health>() ?? shipObj.AddComponent<Health>();
+            var shipVFX = shipObj.GetComponent<ShipVFX>() ?? shipObj.AddComponent<ShipVFX>();
+
+            combatShip.Initialize(bp);
+            RegisterShip(movement, isFlagship);
+
+            Debug.Log($"[FleetManager] Spawned {bp.shipName} | flagship={isFlagship} | VFX={shipVFX != null}");
         }
 
         public void MoveFleetToLocation(Vector3 worldPosition)

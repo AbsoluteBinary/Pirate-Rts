@@ -20,6 +20,7 @@ MonoBehaviour:
   hullName: GunBoat
   hullImage: {fileID: 21300000, guid: 4a35bc736c7e061688513eff9a6ba4f3, type: 3}
   description: First GunBoat
+  combatPrefab: {fileID: 1183078024404704, guid: 1b78331b52629c7479714da987b1a28b, type: 3}
   hullClass: 0
   moduleSlots:
   - slotId: Weapon_1

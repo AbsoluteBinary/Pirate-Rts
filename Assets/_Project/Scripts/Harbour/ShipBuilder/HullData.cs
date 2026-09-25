@@ -23,6 +23,9 @@ namespace _Project.Scripts.Harbour.ShipBuilder
         public Sprite hullImage;
         public string description;
         
+        [Header("Combat")]
+        public GameObject combatPrefab;
+        
         public enum HullClass
         {
             Generic,

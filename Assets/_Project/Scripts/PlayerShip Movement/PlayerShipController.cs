@@ -32,6 +32,11 @@ namespace _Project.Scripts.PlayerShip_Movement
         private void Awake()
         {
             //Debug.Log($"PlayerShipController: Awake called on {gameObject.name}. IsActive: {gameObject.activeInHierarchy}");
+            
+            WorldSpaceInteractionsEventBus.MarkerButtonClicked += OnMarkerButtonClicked;
+
+            if (ship == null)
+                Debug.LogWarning("PlayerShipController: Ship was empty. WorldFleetArrival will fill it.");
 
             if (!gameObject.activeSelf)
             {
@@ -51,6 +56,31 @@ namespace _Project.Scripts.PlayerShip_Movement
             }
 
             WorldSpaceInteractionsEventBus.MarkerButtonClicked += OnMarkerButtonClicked;
+        }
+        
+        public void ReplaceVisual(GameObject prefab, string shipName)
+        {
+            if (prefab == null)
+            {
+                Debug.LogWarning("[Fleet] No combat prefab to place on the map.");
+                return;
+            }
+
+            Vector3 position = transform.position;
+            Quaternion rotation = transform.rotation;
+
+            if (ship != null)
+            {
+                position = ship.transform.position;
+                rotation = ship.transform.rotation;
+                ship.SetActive(false);
+            }
+
+            var spawned = Instantiate(prefab, position, rotation);
+            spawned.name = string.IsNullOrEmpty(shipName) ? prefab.name : shipName;
+            ship = spawned;
+
+            Debug.Log($"<color=lime>[Fleet] Map model '{spawned.name}' at {position}</color>");
         }
 
         private void Start()
