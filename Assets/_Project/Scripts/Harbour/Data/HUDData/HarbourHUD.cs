@@ -2,6 +2,8 @@ using System;
 using _Project.Scripts.Harbour.Data.SO;
 using _Project.Scripts.Harbour.Economy;
 using _Project.Scripts.Harbour.ShipBuilder;
+using _Project.Scripts.SceneManagement;
+using _Project.Scripts.UI.IMGUI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,7 +16,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
         [SerializeField] private ResourceHUD resourceHUD;
         [SerializeField] private ResourceWalletHolder walletHolder;
-        
+        [SerializeField] private int worldSceneGroupIndex = 1;
         
         
         public event Action OnResourcesClicked;
@@ -190,6 +192,21 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                     ? new StyleColor(new Color(0.32f, 0.55f, 0.28f))
                     : new StyleColor(new Color(0.22f, 0.45f, 0.18f));
             };
+            
+            var enterWorld = new Button { text = "Enter World" };
+            enterWorld.style.minWidth = 140;
+            enterWorld.style.height = 44;
+            enterWorld.style.marginLeft = 16;
+            enterWorld.style.fontSize = 17;
+            enterWorld.style.unityFontStyleAndWeight = FontStyle.Bold;
+            enterWorld.style.backgroundColor = new StyleColor(new Color(0.12f, 0.28f, 0.48f));
+            enterWorld.style.color = Color.white;
+            enterWorld.style.borderTopLeftRadius = 8;
+            enterWorld.style.borderTopRightRadius = 8;
+            enterWorld.style.borderBottomLeftRadius = 8;
+            enterWorld.style.borderBottomRightRadius = 8;
+            enterWorld.clicked += EnterWorld;
+            topBar.Add(enterWorld);
 
             topBar.Add(buildTrigger);
             topBar.Add(buildDropdown);
@@ -200,6 +217,19 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             root.schedule.Execute(RefreshIdleResourceAmounts);
             
             Debug.Log("<color=lime>HarbourHUD: Idle HUD (PanelRenderer)</color>");
+        }
+        
+        private void EnterWorld()
+        {
+            HideAllUI();
+
+            if (IMGUILoadingOverlay.Instance != null)
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+
+            if (SceneLoader.Instance != null)
+                _ = SceneLoader.Instance.BeginSceneTransition(worldSceneGroupIndex);
+            else
+                Debug.LogError("[Harbour] SceneLoader missing.");
         }
         
         public void RefreshIdleResourceAmounts()

@@ -38,7 +38,7 @@ namespace _Project.Scripts.Fleet
                 return;
             }
 
-            player.ReplaceVisual(flag.shipPrefab, flag.shipName);
+            player.AttachFlagship(flag.shipPrefab, flag.shipName, transform);
             Debug.Log($"<color=lime>[Fleet] World ship is now '{flag.shipName}'</color>");
         }
     }

@@ -1,4 +1,6 @@
 using System.Collections;
+using _Project.Scripts.Fleet;
+using _Project.Scripts.PlayerShip_Movement.Combat;
 using _Project.Scripts.UI.WorldMap;
 using DG.Tweening;
 using UnityEngine;
@@ -57,6 +59,42 @@ namespace _Project.Scripts.PlayerShip_Movement
 
             WorldSpaceInteractionsEventBus.MarkerButtonClicked += OnMarkerButtonClicked;
         }
+        public void AttachFlagship(GameObject prefab, string shipName, Transform pawn)
+        {
+            if (prefab == null || pawn == null) return;
+
+            Vector3 position = pawn.position;
+            Quaternion rotation = pawn.rotation;
+
+            if (ship != null && ship.transform != pawn)
+            {
+                position = ship.transform.position;
+                rotation = ship.transform.rotation;
+
+                var oldHelm = ship.GetComponent<PlayerCombatMovementController>();
+                if (oldHelm != null)
+                    oldHelm.enabled = false;
+
+                ship.SetActive(false);
+            }
+
+            pawn.SetPositionAndRotation(position, rotation);
+
+            var visual = Instantiate(prefab, pawn);
+            visual.name = string.IsNullOrEmpty(shipName) ? prefab.name : shipName;
+            visual.transform.localPosition = Vector3.zero;
+            visual.transform.localRotation = Quaternion.identity;
+
+            ship = pawn.gameObject;
+            
+            if (PendingBattle.HasMapPosition)
+            {
+                pawn.position = PendingBattle.MapPosition;
+                Debug.Log($"<color=lime>[Battle] Returned to {pawn.position}</color>");
+                PendingBattle.Clear();
+            }
+            Debug.Log($"<color=lime>[Fleet] Controller ship is now '{ship.name}'</color>");
+        }
         
         public void ReplaceVisual(GameObject prefab, string shipName)
         {
@@ -73,19 +111,29 @@ namespace _Project.Scripts.PlayerShip_Movement
             {
                 position = ship.transform.position;
                 rotation = ship.transform.rotation;
+
+                var oldHelm = ship.GetComponent<PlayerCombatMovementController>();
+                if (oldHelm != null)
+                    oldHelm.enabled = false;
+
                 ship.SetActive(false);
             }
 
-            
             var spawned = Instantiate(prefab, position, rotation);
             spawned.name = string.IsNullOrEmpty(shipName) ? prefab.name : shipName;
             UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(spawned, gameObject.scene);
             ship = spawned;
-            spawned.name = string.IsNullOrEmpty(shipName) ? prefab.name : shipName;
-            ship = spawned;
 
-            Debug.Log($"<color=lime>[Fleet] Map model '{spawned.name}' at {position}</color>");
+            Debug.Log($"<color=lime>[Fleet] Controller ship is now '{ship.name}'</color>");
         }
+        
+        public void OrderMove(Vector3 worldPosition)
+        {
+            SailTo(worldPosition);
+        }
+
+        public PlayerCombatMovementController Helm =>
+            ship != null ? ship.GetComponent<PlayerCombatMovementController>() : null;
 
         private void Start()
         {
@@ -116,17 +164,7 @@ namespace _Project.Scripts.PlayerShip_Movement
 
         public void MoveToLocation(Vector3 location)
         {
-            if (ship == null) return;
-
-            FreeRoamTween?.Kill();
-
-            // Apply height offset so ship sails above water
-            Vector3 adjustedTarget = new Vector3(location.x, location.y + travelHeightOffset, location.z);
-
-            FreeRoamTween = ship.transform.DOLookAt(adjustedTarget, moveDuration * 0.4f);
-            FreeRoamTween = ship.transform.DOMove(adjustedTarget, moveDuration)
-                .SetEase(Ease.InOutSine)
-                .OnComplete(() => Debug.Log($"[Combat] Ship arrived at {adjustedTarget}"));
+            SailTo(location);
         }
 
         public void StartTween()
@@ -134,21 +172,27 @@ namespace _Project.Scripts.PlayerShip_Movement
             if (frButton == null) return;
 
             targetLocation = frButton.transform.position;
-            //Debug.Log($"PlayerShipController: StartTween called. Target location: {targetLocation}");
+            if (targetLocation == Vector3.zero)
+                targetLocation = transform.position;
 
-            if (doTweenType == DOTweenType.MovementOneWay)
+            SailTo(targetLocation);
+        }
+
+        private void SailTo(Vector3 location)
+        {
+            if (ship == null) return;
+
+            FreeRoamTween?.Kill();
+            ship.transform.DOKill();
+
+            var helm = ship.GetComponent<PlayerCombatMovementController>();
+            if (helm == null)
             {
-                if (coroutine != null) StopCoroutine(coroutine);
-                coroutine = StartCoroutine(PopUpCountdown());
-
-                if (targetLocation == Vector3.zero)
-                {
-                    targetLocation = transform.position;
-                }
-
-                FreeRoamTween = ship.transform.DOLookAt(targetLocation, moveDuration / 2);
-                FreeRoamTween = ship.transform.DOMove(targetLocation, moveDuration);
+                Debug.LogWarning($"[Move] '{ship.name}' has no PlayerCombatMovementController.");
+                return;
             }
+
+            helm.MoveToLocation(location);
         }
 
         private IEnumerator PopUpCountdown()
@@ -156,7 +200,11 @@ namespace _Project.Scripts.PlayerShip_Movement
             for (var e = timeRemaining; e > 0; e--)
             {
                 yield return new WaitForSeconds(1f);
-                //Debug.Log($"PlayerShipController: Countdown: {e} seconds remaining.");
+                
+                if (e == 1 && frButton != null)
+                {
+                    frButton.SetActive(false);
+                }
                 if (e == 1)
                 {
                     frButton.transform.position = new Vector3(0, -10, 0);

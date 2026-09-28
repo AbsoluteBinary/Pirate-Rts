@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TGS;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
@@ -16,7 +17,7 @@ namespace _Project.Scripts.PlayerShip_Movement
         [SerializeField, Range(1, 10)] private int timeRemaining = 2;
         [SerializeField] private PlayerShipController combatMovementController; // Reference to PlayerShipController
 
-        private GameObject activeMarker; // Instance of the prefab
+        public GameObject activeMarker; // Instance of the prefab
         private Tween moveTween;
         private CancellationTokenSource cts;
 
@@ -38,7 +39,54 @@ namespace _Project.Scripts.PlayerShip_Movement
         private void Start()
         {
             tgs = tgs ? tgs : TerrainGridSystem.instance;
-            tgs.OnCellClick += OnCellClick;
+        }
+
+        private void Update()
+        {
+            if (Mouse.current == null || !Mouse.current.rightButton.wasPressedThisFrame)
+                return;
+
+            Camera cam = tgs != null && tgs.cameraMain != null ? tgs.cameraMain : Camera.main;
+            if (cam == null)
+            {
+                Debug.LogWarning("PlayerFRBtnControl: no camera.");
+                return;
+            }
+
+            Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            if (!new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float distance))
+                return;
+
+            PlaceMarker(ray.GetPoint(distance));
+        }
+
+        private void PlaceMarker(Vector3 point)
+        {
+            cts?.Cancel();
+            cts?.Dispose();
+            cts = new CancellationTokenSource();
+
+            if (activeMarker != null)
+                Destroy(activeMarker);
+
+            activeMarker = Instantiate(markerPrefab, point + Vector3.up * 12f, Quaternion.identity);
+
+            if (combatMovementController != null)
+                combatMovementController.SetFrButton(activeMarker);
+
+            moveTween?.Kill();
+            moveTween = activeMarker.transform.DOMove(point + Vector3.up * 1f, 0.6f)
+                .SetEase(Ease.OutBounce)
+                .OnComplete(() =>
+                {
+                    if (combatMovementController != null)
+                        combatMovementController.StartTween();
+
+                    var pin = activeMarker;
+                    activeMarker = null;
+                    if (pin != null)
+                        Destroy(pin, 1.5f);
+                });
         }
 
         private void OnDestroy()
@@ -86,7 +134,12 @@ namespace _Project.Scripts.PlayerShip_Movement
             moveTween?.Kill();
             moveTween = activeMarker.transform.DOMove(cellPos + Vector3.up * 0.5f, 1f)
                 .SetEase(Ease.OutQuad)
-                .OnComplete(() => StartUniTaskCountdown().Forget());
+                .OnComplete(() =>
+                {
+                    if (combatMovementController != null)
+                        combatMovementController.StartTween();
+                    StartUniTaskCountdown().Forget();
+                });
         }
 
         private async UniTask StartUniTaskCountdown()

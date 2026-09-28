@@ -31,6 +31,7 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
         private void OnUIReady(PanelRenderer renderer, VisualElement root)
         {
             root.Clear();
+            root.pickingMode = PickingMode.Ignore;
 
             var bar = new VisualElement { name = "ButtonHUD" };
             bar.style.position = Position.Absolute;
@@ -40,6 +41,7 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             root.Add(bar);
 
             bar.Add(CreateButton("EnterHarbourButton", "Enter Harbour", new Color(0.18f, 0.22f, 0.38f), OnEnterHarbour));
+            root.pickingMode = PickingMode.Ignore;
             //bar.Add(CreateButton("EnterBattleButton", "Enter Battle", new Color(0.45f, 0.16f, 0.16f), OnEnterBattle));
         }
 

@@ -26,6 +26,11 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         [SerializeField] private float bobAmount = 0.4f;
         [SerializeField] private float bobSpeed = 1.4f;
 
+        
+        public event System.Action OnArrived;
+        //TODO : 
+        //public event System.Action OnArrivalCancelled;
+        
         private Vector3 targetPosition;
         private bool hasTarget = false;
         private float currentSpeed = 0f;
@@ -62,10 +67,12 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
         private void MoveAndSteer()
         {
             Vector3 toTarget = targetPosition - shipVisual.position;
+            toTarget.y = 0f;
             float distance = toTarget.magnitude;
 
             if (distance <= arrivalThreshold)
             {
+                currentSpeed = 0f;
                 ArriveAtDestination();
                 return;
             }
@@ -121,6 +128,7 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
                 finalRotationDuration)
                 .SetEase(Ease.OutSine);
 
+            OnArrived?.Invoke();
             Debug.Log("[Combat] Ship arrived with momentum.");
         }
 

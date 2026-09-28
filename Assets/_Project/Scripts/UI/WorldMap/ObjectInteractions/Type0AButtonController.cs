@@ -1,3 +1,4 @@
+using _Project.Scripts.Fleet;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
 using Crest;
@@ -23,14 +24,14 @@ namespace _Project.Scripts.UI.WorldMap.ObjectInteractions
 
         public void OnType0AButtonClicked()
         {
-            if (IMGUILoadingOverlay.Instance != null)
+            var target = FindAnyObjectByType<WorldBattleTarget>();
+            if (target == null)
             {
-                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+                Debug.LogWarning("[Battle] No WorldBattleTarget in the scene.");
+                return;
             }
-            
-            //Debug.Log(": Enter Type0AObj clicked - Loading Scene Group 3");
-            
-            _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
+
+            target.OrderAttack();
         }
 
         // private IEnumerator LoadSceneGroup3WithOceanTransition()

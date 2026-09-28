@@ -43,6 +43,9 @@ namespace _Project.Scripts.Fleet
         private void LogPendingFleet()
         {
             Debug.Log($"<color=cyan>[Fleet] Pending flagship slot {PendingLaunch.FlagShipIndex}</color>");
+            
+            if (PendingBattle.Active)
+                Debug.Log($"<color=orange>[Battle] Engaging {PendingBattle.TargetId}</color>");
 
             for (int i = 0; i < PendingLaunch.Size; i++)
             {
