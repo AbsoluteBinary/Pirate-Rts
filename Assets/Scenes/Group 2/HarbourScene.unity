@@ -209,6 +209,8 @@ MonoBehaviour:
   shipBuilderHUD: {fileID: 134604191}
   resourceHUD: {fileID: 134604198}
   walletHolder: {fileID: 379729371}
+  worldSceneGroupIndex: 1
+  loginSceneGroupIndex: 0
 --- !u!114 &134604190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1940,7 +1942,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!20 &2025360598
 Camera:
   m_ObjectHideFlags: 0
@@ -2043,7 +2045,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2025360597}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!4 &2025360601
 Transform:
   m_ObjectHideFlags: 0
@@ -2184,9 +2186,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1660501322156683908, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3312810107808764692, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3480319152777946760, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_Name
       value: HarbourComponentIOBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 5018398277974084743, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5749477011224683702, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5790576075787413002, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6590312123552549999, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2227,38 +2249,6 @@ PrefabInstance:
     - target: {fileID: 6590312123552549999, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_ClearFlags
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: orthographic
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: field of view
-      value: 60.000004
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: orthographic size
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_BackGroundColor.a
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_BackGroundColor.b
-      value: 0.4745098
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_BackGroundColor.g
-      value: 0.3019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 8210117438855298818, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_BackGroundColor.r
-      value: 0.19215687
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

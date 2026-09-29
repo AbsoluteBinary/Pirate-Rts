@@ -1,4 +1,3 @@
-using _Project.Scripts.Managers.Registry;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.Manager;
 using DG.Tweening;
@@ -59,10 +58,6 @@ namespace _Project.Scripts.UI.IMGUI
 
         public void TriggerLoadingScreen()
         {
-            HarbourObjectRegistry.DisableAllForLoading();  // ← disables everything registered
-            
-            //Debug.Log("Loading overlay triggered");
-            DisableOtherObjects();
             UIManager.Instance.HideBootLoginPanel();
             
             if (loadingSequence != null && loadingSequence.IsActive())
@@ -243,40 +238,6 @@ namespace _Project.Scripts.UI.IMGUI
         private void OnDestroy()
         {
             loadingSequence?.Kill();
-        }
-        
-        public void DisableOtherObjects()
-        {
-            foreach (var container in ContainerRegistry.GetAllContainers())
-            {
-                if (container == null) continue;
-
-                // Disable the whole container (most important)
-                container.SetActive(false);
-                //Debug.Log($"[Loading] Disabled container: {container.name}");
-
-                // Disable AudioListener
-                var listener = container.GetComponentInChildren<AudioListener>(true);
-                if (listener != null)
-                {
-                    listener.enabled = false;
-                }
-
-                // Disable EventSystem
-                var eventSystem = container.GetComponentInChildren<EventSystem>(true);
-                if (eventSystem != null)
-                {
-                    eventSystem.enabled = false;
-                }
-            }
-
-            // Optional: Disable BootCamera if tagged
-            var bootCamera = GameObject.FindWithTag("BootCamera");
-            if (bootCamera != null)
-            {
-                bootCamera.SetActive(false);
-                //Debug.Log("[Loading] Disabled BootCamera");
-            }
         }
     }
 }

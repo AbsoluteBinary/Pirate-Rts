@@ -14,22 +14,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/PersistentRig.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/PersistentRig.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/RigDirector.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/RigDirector.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldBattleTarget.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldBattleTarget.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldFleetArrival.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldFleetArrival.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/SceneToggle/HarbourComponentIOBox.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/SceneToggle/HarbourComponentIOBox.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Main Screen/LoginMenuManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Main Screen/LoginMenuManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/ContainerRegister.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/ContainerRegister.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/ContainerRegistry.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/ContainerRegistry.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/HarbourObjectRegistry.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/HarbourObjectRegistry.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/RegisterHarbourObject.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Managers/Registry/RegisterHarbourObject.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/AudioListenerChecker.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/AudioListenerChecker.cs.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/WorldMap/HUDInteractions/WorldHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/WorldMap/HUDInteractions/WorldHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/IMGUI/IMGUILoadingOverlay.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/IMGUI/IMGUILoadingOverlay.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,6 +130,8 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/Editor/SceneLoaderEditor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/PersistentRig.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/RigDirector.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Test Scripts/CombatSceneManager.cs" root0="FORCE_HIGHLIGHTING" />
@@ -141,57 +152,57 @@
       <entry key="MS500" value="1.0" />
       <entry key="S2" value="1.0" />
       <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0000000000663276" />
-      <entry key="S30" value="1.000404792428667" />
-      <entry key="S60" value="1.020162307961019" />
-      <entry key="M2" value="1.1516403224730003" />
-      <entry key="M5" value="1.8548814640365119" />
-      <entry key="M10" value="3.645687513554669" />
-      <entry key="M15" value="5.487039992445693" />
-      <entry key="M30" value="10.0530315950515" />
-      <entry key="H1" value="15.709706615799155" />
-      <entry key="H2" value="22.781616043864695" />
-      <entry key="H4" value="38.79624400103187" />
-      <entry key="D1" value="264.0882127561098" />
-      <entry key="W1" value="605.5814428920191" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.000000000719267" />
+      <entry key="M10" value="1.0000380178476533" />
+      <entry key="M15" value="1.0014720066224003" />
+      <entry key="M30" value="1.0836998019371133" />
+      <entry key="H1" value="2.190087682142821" />
+      <entry key="H2" value="7.149329160931935" />
+      <entry key="H4" value="21.056521688515666" />
+      <entry key="D1" value="236.87468424561595" />
+      <entry key="W1" value="598.1925749290739" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
-      <entry key="S2" value="6.368410283627585E-140" />
-      <entry key="S5" value="2.097067520820461E-56" />
-      <entry key="S10" value="1.4481255197048564E-28" />
-      <entry key="S30" value="5.251323144978632E-10" />
-      <entry key="S60" value="2.2922073661793555E-5" />
-      <entry key="M2" value="0.004959473796171295" />
-      <entry key="M5" value="0.1995058829025996" />
-      <entry key="M10" value="0.983468181664727" />
-      <entry key="M15" value="1.774903500824993" />
-      <entry key="M30" value="3.3525993810926313" />
-      <entry key="H1" value="4.828899683932317" />
-      <entry key="H2" value="6.451266930714915" />
-      <entry key="H4" value="9.925223309201597" />
-      <entry key="D1" value="45.77081160442882" />
-      <entry key="W1" value="98.74850061428963" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="1.44640472501905E-283" />
+      <entry key="S30" value="7.248514014607861E-95" />
+      <entry key="S60" value="1.1764382589765707E-47" />
+      <entry key="M2" value="4.8214267349528426E-24" />
+      <entry key="M5" value="7.132661013713103E-10" />
+      <entry key="M10" value="3.778733000592638E-5" />
+      <entry key="M15" value="0.0014342013840116872" />
+      <entry key="M30" value="0.06338205564953589" />
+      <entry key="H1" value="0.5917789889029897" />
+      <entry key="H2" value="2.320397362893695" />
+      <entry key="H4" value="6.076937104752202" />
+      <entry key="D1" value="42.414009778372815" />
+      <entry key="W1" value="99.03648330736709" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="2.009718347115233E-14" />
-      <entry key="MS500" value="0.0018223300615953272" />
-      <entry key="S2" value="0.20661257953855294" />
-      <entry key="S5" value="0.5321850912266799" />
-      <entry key="S10" value="0.7295101721716318" />
-      <entry key="S30" value="0.9005820570288762" />
-      <entry key="S60" value="0.9681490286929846" />
-      <entry key="M2" value="1.127481832148152" />
-      <entry key="M5" value="2.0366105616786836" />
-      <entry key="M10" value="4.612448618222191" />
-      <entry key="M15" value="7.2454519735414005" />
-      <entry key="M30" value="13.39094572433574" />
-      <entry key="H1" value="20.527473639551534" />
-      <entry key="H2" value="29.22532161206052" />
-      <entry key="H4" value="48.716038484368326" />
-      <entry key="D1" value="309.85527221905943" />
-      <entry key="W1" value="704.3288118175403" />
+      <entry key="MS100" value="2.522868890236724E-13" />
+      <entry key="MS500" value="0.0030225878780124806" />
+      <entry key="S2" value="0.23447402253800362" />
+      <entry key="S5" value="0.5598064443271198" />
+      <entry key="S10" value="0.7482021413542732" />
+      <entry key="S30" value="0.9078337319979031" />
+      <entry key="S60" value="0.9528030919334294" />
+      <entry key="M2" value="0.9761163311477937" />
+      <entry key="M5" value="0.9903771966173083" />
+      <entry key="M10" value="0.9952524694559374" />
+      <entry key="M15" value="0.9996805693493059" />
+      <entry key="M30" value="1.1452859492510032" />
+      <entry key="H1" value="2.7800169601944806" />
+      <entry key="H2" value="9.467016168534364" />
+      <entry key="H4" value="27.130208150034175" />
+      <entry key="D1" value="279.28523327570156" />
+      <entry key="W1" value="697.2279255439994" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">

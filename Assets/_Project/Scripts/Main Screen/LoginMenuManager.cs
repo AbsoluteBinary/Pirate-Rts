@@ -121,47 +121,9 @@ namespace _Project.Scripts.Main_Screen
             {
                 _ = SceneLoaderRef.ToggleNextSceneGroup();
             }
-
-            DisableOtherObjects();  // ← This is where we clean up Boot stuff
         }
 
-        public void DisableOtherObjects()
-        {
-            // 1. Disable the entire boot container
-            if (bootComponentIOBox != null)
-            {
-                bootComponentIOBox.SetActive(false);
-                Debug.Log("Disabled bootComponentIOBox GameObject.");
-            }
-            else
-            {
-                Debug.LogWarning("bootComponentIOBox not assigned in LoginMenuManager.", this);
-            }
-
-            // 2. Disable AudioListener (search in children or on self)
-            AudioListener listener = bootComponentIOBox?.GetComponentInChildren<AudioListener>(true);
-            if (listener != null)
-            {
-                listener.enabled = false;
-                Debug.Log("Disabled AudioListener on bootComponentIOBox.");
-            }
-
-            // 3. Disable EventSystem (search in children or on self)
-            EventSystem eventSystem = bootComponentIOBox?.GetComponentInChildren<EventSystem>(true);
-            if (eventSystem != null)
-            {
-                eventSystem.enabled = false;
-                Debug.Log("Disabled EventSystem on bootComponentIOBox.");
-            }
-
-            // 4. Optional: Disable Boot camera if tagged
-            GameObject bootCamera = GameObject.FindWithTag(bootCameraTag);
-            if (bootCamera != null)
-            {
-                bootCamera.SetActive(false);
-                Debug.Log($"Disabled Boot camera tagged '{bootCameraTag}'.");
-            }
-        }
+        
 
         private void OnDestroy()
         {

@@ -133,6 +133,7 @@ namespace _Project.Scripts.SceneManagement
             {
                 HideLoadingUI();
             }
+            FindAnyObjectByType<RigDirector>()?.Show(currentGroupIndex);
         }
 
         public void ShowLoadingUI()
@@ -281,11 +282,11 @@ namespace _Project.Scripts.SceneManagement
             }
 
             // Then unload old if exists and different
-            if (oldGroup != null && oldGroup != sceneGroups[index])
-            {
-                //Debug.Log("Unloading previous scene group after new activation...");
-                await manager.UnloadScenes();
-            }
+            if (oldGroup != null && oldGroup != sceneGroups[index] && oldGroup.GroupName != "Boot")
+                await manager.UnloadScenes(oldGroup);
+            
+            FindAnyObjectByType<RigDirector>()?.Show(index);
+            
             if (index == 0)
             {
                 var cameras = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -358,7 +359,7 @@ namespace _Project.Scripts.SceneManagement
             if (oldGroup != null && oldGroup != sceneGroups[currentGroupIndex])
             {
                 //Debug.Log("Testing unload: Unloading previous scene group...");
-                await manager.UnloadScenes();
+                await manager.UnloadScenes(oldGroup);
             }
         }
         
@@ -413,7 +414,7 @@ namespace _Project.Scripts.SceneManagement
             // Step 3: Unload Boot extras (UI/camera/audio/scene group)
             if (manager.ActiveSceneGroup != null)
             {
-                await manager.UnloadScenes(); // Unloads previous (Boot)
+                await manager.UnloadScenes(sceneGroups[0]); // Unloads previous (Boot)
                 //Debug.Log("Unloaded Boot scene group.");
             }
 

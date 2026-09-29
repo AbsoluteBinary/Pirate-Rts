@@ -100,60 +100,45 @@ namespace _Project.Scripts.SceneManagement
             OnSceneGroupLoaded.Invoke();
         }
 
-        public async Task UnloadScenes()
+        public async Task UnloadScenes(SceneGroup group)
         {
-            var scenes = new List<string>();
-            var activeScene = SceneManager.GetActiveScene().name;
+            
+            if (group == null || group.Scenes == null) return;
 
-            int sceneCount = SceneManager.sceneCount;
-            //Debug.Log($"UnloadScenes: Total loaded scenes: {sceneCount}. Active: {activeScene}");
-
-            for (var i = sceneCount - 1; i > 0; i--)
+            var keep = new HashSet<string>();
+            if (ActiveSceneGroup != null)
             {
-                var sceneAt = SceneManager.GetSceneAt(i);
-                //Debug.Log($"Checking scene: {sceneAt.name} (Loaded: {sceneAt.isLoaded}, Active: {sceneAt.name == activeScene})");
+                foreach (var scene in ActiveSceneGroup.Scenes)
+                    if (!string.IsNullOrEmpty(scene.Name))
+                        keep.Add(scene.Name);
+            }
 
-                if (!sceneAt.isLoaded) { continue; }
-                if (sceneAt.name.Equals(activeScene)) { continue; }
-                if (sceneAt.name == "Bootstrapper") { continue; }
-                if (handleGroup.Handles.Any(h => h.IsValid() && h.Result.Scene.name == sceneAt.name)) { continue; }
+            var scenes = new List<string>();
+            foreach (var sceneData in group.Scenes)
+            {
+                if (sceneData == null || string.IsNullOrEmpty(sceneData.Name)) continue;
+                if (keep.Contains(sceneData.Name)) continue;
+                if (sceneData.Name == "Bootstrapper") continue;
+                if (sceneData.Name == "Boot") continue;
 
-                scenes.Add(sceneAt.name);
-                //Debug.Log($"Queuing unload: {sceneAt.name}");
+                var scene = SceneManager.GetSceneByName(sceneData.Name);
+                if (!scene.IsValid() || !scene.isLoaded) continue;
+                scenes.Add(scene.name);
             }
 
             var operationGroup = new AsyncOperationGroup(scenes.Count);
-
             foreach (var scene in scenes)
             {
                 var operation = SceneManager.UnloadSceneAsync(scene);
-                if (operation == null)
-                {
-                    Debug.LogWarning($"<color=yellow>Unload failed: Operation null for {scene}. Is it loaded/valid?");
-                    continue;
-                }
+                if (operation == null) continue;
                 operationGroup.Operations.Add(operation);
                 OnSceneUnloaded.Invoke(scene);
-                //Debug.Log($"Started unloading: {scene}");
             }
 
-            // Addressables unload (if any—add your existing code here if needed)
-
-            float lastReportedProgress = 0f;
             while (!operationGroup.IsDone || !handleGroup.IsDone)
-            {
-                float totalProgress = (operationGroup.Progress + handleGroup.Progress) / 2f;
-                if (Mathf.Abs(totalProgress - lastReportedProgress) > 0.01f)
-                {
-                    //Debug.Log($"Unload progress: {totalProgress}");
-                    lastReportedProgress = totalProgress;
-                }
                 await Task.Delay(16);
-            }
 
-            await Resources.UnloadUnusedAssets(); // If in your original code
-
-            //Debug.Log("Unload complete. Remaining scenes: " + SceneManager.sceneCount);
+            await Resources.UnloadUnusedAssets();
         }
     }
 
