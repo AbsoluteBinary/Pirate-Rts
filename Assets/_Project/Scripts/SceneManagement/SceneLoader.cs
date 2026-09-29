@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus;
 using _Project.Scripts.Harbour.UIControllers;
+using _Project.Scripts.UI.Manager;
 
 // For EventBus
 
@@ -148,33 +149,38 @@ namespace _Project.Scripts.SceneManagement
             _ = LoadSpecificSceneGroup(index);
         }
 
+        // private void HideLoadingUI()
+        // {
+        //     Sequence seq = DOTween.Sequence();
+        //     if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
+        //    // if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
+        //
+        //     // Insert callback at end of fade (almost faded out) to show login UI if Boot group
+        //     seq.AppendCallback(() =>
+        //     {
+        //         if (currentGroupIndex == 0)
+        //         {
+        //             //ShowLoginUI();
+        //         }
+        //         else
+        //         {
+        //             //Debug.Log("Skipping ShowLoginUI() for non-Boot group: " + currentGroupIndex);
+        //         }
+        //     });
+        //
+        //     seq.OnComplete(() =>
+        //     {
+        //         if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
+        //        // if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
+        //         isPreparingNewGroup = false;
+        //         isLoading = false; // Reset isLoading to allow new loads
+        //         //Debug.Log("isLoading reset to false"); // Optional: For testing
+        //     });
+        // }
         private void HideLoadingUI()
         {
-            Sequence seq = DOTween.Sequence();
-            if (backgroundImage != null) seq.Append(backgroundImage.DOFade(0f, 0.5f));
-           // if (loadingUICanvasGroup != null) seq.Join(loadingUICanvasGroup.DOFade(0f, 0.5f));
-    
-            // Insert callback at end of fade (almost faded out) to show login UI if Boot group
-            seq.AppendCallback(() =>
-            {
-                if (currentGroupIndex == 0)
-                {
-                    //ShowLoginUI();
-                }
-                else
-                {
-                    //Debug.Log("Skipping ShowLoginUI() for non-Boot group: " + currentGroupIndex);
-                }
-            });
-
-            seq.OnComplete(() =>
-            {
-                if (backgroundImage != null) backgroundImage.gameObject.SetActive(false);
-               // if (loadingUICanvasGroup != null) loadingUICanvasGroup.gameObject.SetActive(false);
-                isPreparingNewGroup = false;
-                isLoading = false; // Reset isLoading to allow new loads
-                //Debug.Log("isLoading reset to false"); // Optional: For testing
-            });
+            isPreparingNewGroup = false;
+            isLoading = false;
         }
 
         // private void ShowLoginUI()
@@ -258,21 +264,7 @@ namespace _Project.Scripts.SceneManagement
 
             // Cache old group for unloading after new load
             SceneGroup oldGroup = manager.ActiveSceneGroup;
-
-            // New: Disable old container before loading new (prevents overlap/pause)
-            // var mainMenuManager = MainMenuDataIOManager.Instance;
-            // if (mainMenuManager != null && oldGroup != null)
-            // {
-            //     int oldIndex = Array.IndexOf(sceneGroups, oldGroup);
-            //     if (oldIndex == 0)
-            //     {
-            //         mainMenuManager.DisableBootComponentIOBox();
-            //     }
-            //     else
-            //     {
-            //         mainMenuManager.DisableComponentIOBox();
-            //     }
-            // }
+            
 
             currentGroupIndex = index;
             NewGroupPrep();
@@ -293,6 +285,20 @@ namespace _Project.Scripts.SceneManagement
             {
                 //Debug.Log("Unloading previous scene group after new activation...");
                 await manager.UnloadScenes();
+            }
+            if (index == 0)
+            {
+                var cameras = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var cam in cameras)
+                {
+                    if (!cam.CompareTag("BootCamera"))
+                        continue;
+
+                    cam.gameObject.SetActive(true);
+                    cam.enabled = true;
+                }
+
+                UIManager.Instance?.ShowBootLoginPanel();
             }
         }
         

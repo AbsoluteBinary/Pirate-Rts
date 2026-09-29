@@ -438,56 +438,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4528223579880324595, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
   m_PrefabInstance: {fileID: 492500257}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &597270313
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 597270315}
-  - component: {fileID: 597270314}
-  m_Layer: 0
-  m_Name: PlayerShipControllerOBJ
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &597270314
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 597270313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfad821843d3187a0a99feb288c17dab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.PlayerShipController
-  doTweenType: 0
-  ship: {fileID: 0}
-  moveDuration: 22
-  frButton: {fileID: 0}
-  ClickBehavior: 0
-  timeRemaining: 0
---- !u!4 &597270315
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 597270313}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.52693, y: -0.99992, z: 1.74204}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &647987590
 GameObject:
   m_ObjectHideFlags: 0
@@ -1851,14 +1801,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1725493540}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af7b59ecbf877fcd4ad545321b9e50ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 48a86bd634dd49d18522680f61a7a431, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  tgs: {fileID: 852191334}
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.PlayerShip_Movement.MapSailController
+  ship: {fileID: 0}
   markerPrefab: {fileID: 8353887626493877218, guid: 706fd6ca0eb8684d09e03d8c507a182e, type: 3}
-  timeRemaining: 10
-  combatMovementController: {fileID: 597270314}
-  activeMarker: {fileID: 0}
+  mapCamera: {fileID: 1278554384}
 --- !u!1 &1872217902
 GameObject:
   m_ObjectHideFlags: 0
@@ -2093,6 +2041,5 @@ SceneRoots:
   - {fileID: 1538954480}
   - {fileID: 1465588838}
   - {fileID: 698236010}
-  - {fileID: 597270315}
   - {fileID: 2078643339}
   - {fileID: 544303934600805721}

@@ -31,10 +31,10 @@ namespace _Project.Scripts.Fleet
                 return;
             }
 
-            var player = FindAnyObjectByType<PlayerShipController>();
+            var player = FindAnyObjectByType<MapSailController>();
             if (player == null)
             {
-                Debug.LogWarning("[Fleet] No PlayerShipController in this scene.");
+                Debug.LogWarning("[Fleet] No MapSailController in this scene.");
                 return;
             }
 

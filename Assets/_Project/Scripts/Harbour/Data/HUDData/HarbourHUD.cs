@@ -207,6 +207,21 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             enterWorld.style.borderBottomRightRadius = 8;
             enterWorld.clicked += EnterWorld;
             topBar.Add(enterWorld);
+            
+            var exitLogin = new Button { text = "Exit to Login" };
+            exitLogin.style.minWidth = 140;
+            exitLogin.style.height = 44;
+            exitLogin.style.marginLeft = 16;
+            exitLogin.style.fontSize = 17;
+            exitLogin.style.unityFontStyleAndWeight = FontStyle.Bold;
+            exitLogin.style.backgroundColor = new StyleColor(new Color(0.22f, 0.22f, 0.26f));
+            exitLogin.style.color = Color.white;
+            exitLogin.style.borderTopLeftRadius = 8;
+            exitLogin.style.borderTopRightRadius = 8;
+            exitLogin.style.borderBottomLeftRadius = 8;
+            exitLogin.style.borderBottomRightRadius = 8;
+            exitLogin.clicked += ExitToLogin;
+            topBar.Add(exitLogin);
 
             topBar.Add(buildTrigger);
             topBar.Add(buildDropdown);
@@ -231,7 +246,20 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             else
                 Debug.LogError("[Harbour] SceneLoader missing.");
         }
-        
+        [SerializeField] private int loginSceneGroupIndex = 0;
+
+        private void ExitToLogin()
+        {
+            HideAllUI();
+
+            if (IMGUILoadingOverlay.Instance != null)
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+
+            if (SceneLoader.Instance != null)
+                _ = SceneLoader.Instance.BeginSceneTransition(loginSceneGroupIndex);
+            else
+                Debug.LogError("[Harbour] SceneLoader missing.");
+        }
         public void RefreshIdleResourceAmounts()
         {
             if (root == null) return;

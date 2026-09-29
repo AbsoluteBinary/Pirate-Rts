@@ -1,4 +1,6 @@
 using _Project.Scripts.Main_Screen;
+using _Project.Scripts.SceneManagement;
+using _Project.Scripts.UI.IMGUI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -41,6 +43,7 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             root.Add(bar);
 
             bar.Add(CreateButton("EnterHarbourButton", "Enter Harbour", new Color(0.18f, 0.22f, 0.38f), OnEnterHarbour));
+            bar.Add(CreateButton("ExitToLoginButton", "Exit to Login", new Color(0.22f, 0.22f, 0.26f), OnExitToLogin));
             root.pickingMode = PickingMode.Ignore;
             //bar.Add(CreateButton("EnterBattleButton", "Enter Battle", new Color(0.45f, 0.16f, 0.16f), OnEnterBattle));
         }
@@ -60,6 +63,17 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             button.style.borderBottomRightRadius = 6;
             button.clicked += () => onClick?.Invoke();
             return button;
+        }
+        
+        private static void OnExitToLogin()
+        {
+            if (IMGUILoadingOverlay.Instance != null)
+                IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
+
+            if (SceneLoader.Instance != null)
+                _ = SceneLoader.Instance.BeginSceneTransition(0);
+            else
+                Debug.LogError("[World] SceneLoader missing.");
         }
 
         private static void OnEnterHarbour()

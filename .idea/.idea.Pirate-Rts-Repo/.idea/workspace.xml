@@ -14,26 +14,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/PendingBattle.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/PendingBattle.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldBattleTarget.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldBattleTarget.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/indexLayout.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ScriptableObjects/ShipBuilding/Hulls/GunBoat_Hull.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ScriptableObjects/ShipBuilding/Hulls/GunBoat_Hull.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/FleetManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/FleetManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldBattleTarget.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldBattleTarget.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldFleetArrival.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Fleet/WorldFleetArrival.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/Data/HUDData/HarbourHUD.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerFRBtnControl.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/WorldMap/HUDInteractions/WorldHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/WorldMap/HUDInteractions/WorldHUD.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/WorldMap/ObjectInteractions/Type0AButtonController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/WorldMap/ObjectInteractions/Type0AButtonController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Search.settings" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Search.settings" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,6 +118,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/ObjectPooling/ObjectPooler.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/Editor/SceneLoaderEditor.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" root0="FORCE_HIGHLIGHTING" />

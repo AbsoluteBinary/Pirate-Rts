@@ -47,6 +47,10 @@ namespace _Project.Scripts.SceneManagement
 
             if (scenesToProcess.Count == 0)
             {
+                Scene already = SceneManager.GetSceneByName(ActiveSceneGroup.FindSceneNameByType(SceneType.ActiveScene));
+                if (already.IsValid())
+                    SceneManager.SetActiveScene(already);
+
                 progress?.Report(1f);
                 OnSceneGroupLoaded.Invoke();
                 return;

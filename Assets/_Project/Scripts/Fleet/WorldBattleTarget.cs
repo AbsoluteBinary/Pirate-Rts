@@ -15,10 +15,10 @@ namespace _Project.Scripts.Fleet
 
         public void OrderAttack()
         {
-            var player = FindAnyObjectByType<PlayerShipController>();
+            var player = FindAnyObjectByType<MapSailController>();
             if (player == null)
             {
-                Debug.LogWarning("[Battle] No PlayerShipController.");
+                Debug.LogWarning("[Battle] No MapSailController in this scene.");
                 return;
             }
 
@@ -30,7 +30,7 @@ namespace _Project.Scripts.Fleet
 
             if (_helm == null)
             {
-                Debug.LogWarning("[Battle] Pawn has no helm.");
+                Debug.LogWarning("[Battle] MapSailController has no helm.");
                 return;
             }
 
@@ -43,7 +43,7 @@ namespace _Project.Scripts.Fleet
             if (_helm != null)
                 _helm.OnArrived -= BeginBattle;
 
-            var player = FindAnyObjectByType<PlayerShipController>();
+            var player = FindAnyObjectByType<MapSailController>();
             Vector3 here = player != null ? player.transform.position : transform.position;
             if (player != null && player.Helm != null)
                 here = player.Helm.transform.position;
