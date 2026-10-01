@@ -6,6 +6,16 @@ namespace _Project.Scripts.SceneManagement
     {
         private void OnEnable()
         {
+            FollowView();
+        }
+
+        private void Start()
+        {
+            FollowView();
+        }
+
+        private void FollowView()
+        {
             GameplayView.Instance?.Follow(transform);
         }
 

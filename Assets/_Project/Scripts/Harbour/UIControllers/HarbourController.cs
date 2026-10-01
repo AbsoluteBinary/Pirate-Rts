@@ -201,22 +201,19 @@ namespace _Project.Scripts.Harbour.UIControllers
 
        // [SerializeField] private CinemachineCamera harbourVcam;
 
-        private void SetCamera(Camera cam, bool active)
-        {
-            if (cam == null)
-                return;
+       private void SetCamera(Camera cam, bool active)
+       {
+           if (cam == null)
+               return;
 
-            cam.enabled = false;
+           cam.enabled = false;
 
-            var listener = cam.GetComponent<AudioListener>();
-            if (listener != null)
-                listener.enabled = false;
+           var listener = cam.GetComponent<AudioListener>();
+           if (listener != null)
+               listener.enabled = false;
 
-            cam.gameObject.SetActive(active);
-
-            if (active)
-                GameplayView.Instance?.Follow(cam.transform);
-        }
+           cam.gameObject.SetActive(active);
+       }
 
         private void SetTGSGrid(bool enabled)
         {
