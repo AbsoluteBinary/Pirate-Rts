@@ -213,6 +213,9 @@ namespace _Project.Scripts.Harbour.UIControllers
                listener.enabled = false;
 
            cam.gameObject.SetActive(active);
+
+           if (active)
+               cam.GetComponent<VcamDriver>()?.Claim();
        }
 
         private void SetTGSGrid(bool enabled)
