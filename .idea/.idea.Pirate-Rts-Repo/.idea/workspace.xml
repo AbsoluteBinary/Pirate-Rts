@@ -14,22 +14,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bb0a61a-6d6f-4129-aeda-3353e8aabbb8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/indexLayout.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/GameplayView.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/GameplayView.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/ViewDriver.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/ViewDriver.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Pirate-Rts-Repo/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTween/DOTween.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTween/DOTween.dll.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTween/Editor/DOTweenEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTween/Editor/DOTweenEditor.dll.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_Advanced.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_Advanced.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_AdvancedSettings.lighting" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_AdvancedSettings.lighting" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_Basics.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_Basics.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_BasicsSettings.lighting" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenAnimation_BasicsSettings.lighting" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenPath.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenPath.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenPathSettings.lighting" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro Examples/DOTweenPathSettings.lighting" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro/Editor/DOTweenProEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DOTweenPro/Editor/DOTweenProEditor.dll.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DemiLib/Core/DemiLib.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DemiLib/Core/DemiLib.dll.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Demigiant/DemiLib/Core/Editor/DemiEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Demigiant/DemiLib/Core/Editor/DemiEditor.dll.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 0/Boot.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 1/FreeRoamScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 2/HarbourScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Group 3/CombatScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/SceneToggle/HarbourComponentIOBox.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/SceneToggle/HarbourComponentIOBox.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Harbour/UIControllers/HarbourController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/RigDirector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/RigDirector.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Manager/BootIODataManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/UI/Manager/BootIODataManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
     </list>
@@ -44,7 +43,7 @@
     </persistenceIdMap>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="3412" />
+    <option name="cachedIndexableFilesCount" value="3390" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -121,12 +120,14 @@
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/PlayerCombatMovementController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/Combat/TurretController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/MapSailController.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/PlayerShip Movement/PlayerShipController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/CameraLink.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/Editor/SceneLoaderEditor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/GameplayView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/PersistentRig.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/RigDirector.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneGroupManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/SceneLoader.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/SceneManagement/ViewDriver.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Test Scripts/CombatSceneManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/CombatHUDGeneric.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/UI/Combat/ShipHUDController.cs" root0="FORCE_HIGHLIGHTING" />
@@ -148,54 +149,54 @@
       <entry key="S10" value="1.0" />
       <entry key="S30" value="1.0" />
       <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.000000000719267" />
-      <entry key="M10" value="1.0000380178476533" />
-      <entry key="M15" value="1.0014720066224003" />
-      <entry key="M30" value="1.0836998019371133" />
-      <entry key="H1" value="2.190087682142821" />
-      <entry key="H2" value="7.149329160931935" />
-      <entry key="H4" value="21.056521688515666" />
-      <entry key="D1" value="236.87468424561595" />
-      <entry key="W1" value="598.1925749290739" />
+      <entry key="M2" value="1.0000000000000058" />
+      <entry key="M5" value="1.0000020224610293" />
+      <entry key="M10" value="1.0014221866298012" />
+      <entry key="M15" value="1.0126648155226565" />
+      <entry key="M30" value="1.12186781396561" />
+      <entry key="H1" value="1.734431872735282" />
+      <entry key="H2" value="5.140094931668322" />
+      <entry key="H4" value="17.023564591341525" />
+      <entry key="D1" value="227.33274933020056" />
+      <entry key="W1" value="595.3148114572818" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
-      <entry key="S10" value="1.44640472501905E-283" />
-      <entry key="S30" value="7.248514014607861E-95" />
-      <entry key="S60" value="1.1764382589765707E-47" />
-      <entry key="M2" value="4.8214267349528426E-24" />
-      <entry key="M5" value="7.132661013713103E-10" />
-      <entry key="M10" value="3.778733000592638E-5" />
-      <entry key="M15" value="0.0014342013840116872" />
-      <entry key="M30" value="0.06338205564953589" />
-      <entry key="H1" value="0.5917789889029897" />
-      <entry key="H2" value="2.320397362893695" />
-      <entry key="H4" value="6.076937104752202" />
-      <entry key="D1" value="42.414009778372815" />
-      <entry key="W1" value="99.03648330736709" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="8.299474586593073E-152" />
+      <entry key="S60" value="3.9807962358999595E-76" />
+      <entry key="M2" value="2.8046325874289367E-38" />
+      <entry key="M5" value="1.4425528924970345E-15" />
+      <entry key="M10" value="5.3738592484694816E-8" />
+      <entry key="M15" value="1.8137197875462356E-5" />
+      <entry key="M30" value="0.007127649698605202" />
+      <entry key="H1" value="0.19844929251424906" />
+      <entry key="H2" value="1.3437156333588745" />
+      <entry key="H4" value="4.624419724014781" />
+      <entry key="D1" value="40.526405233339325" />
+      <entry key="W1" value="98.39448259816473" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="2.522868890236724E-13" />
-      <entry key="MS500" value="0.0030225878780124806" />
-      <entry key="S2" value="0.23447402253800362" />
-      <entry key="S5" value="0.5598064443271198" />
-      <entry key="S10" value="0.7482021413542732" />
-      <entry key="S30" value="0.9078337319979031" />
-      <entry key="S60" value="0.9528030919334294" />
-      <entry key="M2" value="0.9761163311477937" />
-      <entry key="M5" value="0.9903771966173083" />
-      <entry key="M10" value="0.9952524694559374" />
-      <entry key="M15" value="0.9996805693493059" />
-      <entry key="M30" value="1.1452859492510032" />
-      <entry key="H1" value="2.7800169601944806" />
-      <entry key="H2" value="9.467016168534364" />
-      <entry key="H4" value="27.130208150034175" />
-      <entry key="D1" value="279.28523327570156" />
-      <entry key="W1" value="697.2279255439994" />
+      <entry key="MS100" value="2.2174805083736526E-15" />
+      <entry key="MS500" value="0.0011726595971535243" />
+      <entry key="S2" value="0.18505166225000613" />
+      <entry key="S5" value="0.5092337698918259" />
+      <entry key="S10" value="0.713606172823516" />
+      <entry key="S30" value="0.8936199710467589" />
+      <entry key="S60" value="0.9453147470799125" />
+      <entry key="M2" value="0.9722729797129629" />
+      <entry key="M5" value="0.9888175510412235" />
+      <entry key="M10" value="0.9958074304119763" />
+      <entry key="M15" value="1.008900023875667" />
+      <entry key="M30" value="1.1269206820901636" />
+      <entry key="H1" value="1.931324026663606" />
+      <entry key="H2" value="6.4817724944938435" />
+      <entry key="H4" value="21.645276350276337" />
+      <entry key="D1" value="267.8558087803824" />
+      <entry key="W1" value="693.7081631265602" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -240,33 +241,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;mainbranch&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/baus/Downloads/Symfony_Plugin-2026.1.286.zip&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "mainbranch",
+    "last_opened_file_path": "/home/baus/Downloads/Symfony_Plugin-2026.1.286.zip",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.sync",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.0f1/Editor/Unity" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.3f1/Editor/Unity" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath $PROJECT_DIR$ -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -276,7 +277,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.0f1/Editor/Unity" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../../Unity-Editor/6000.6.3f1/Editor/Unity" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath $PROJECT_DIR$ -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -517,5 +518,9 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

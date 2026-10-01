@@ -237,6 +237,7 @@ MonoBehaviour:
   baseBuilderController: {fileID: 459897999}
   landGrid: {fileID: 1640162068}
   objectGrid: {fileID: 226015902}
+  harbourVcam: {fileID: 5705010333079632824}
 --- !u!114 &134604191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1682,7 +1683,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxCellsSqrt: 100
   _isDirty: 0
-  mouseIsOver: 1
+  mouseIsOver: 0
   newInHierarchy: 0
   territoryThicknessSettingMigrated: 1
   _numCells: 6084
@@ -1942,7 +1943,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!20 &2025360598
 Camera:
   m_ObjectHideFlags: 0
@@ -1950,7 +1951,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2025360597}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -2186,29 +2187,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1660501322156683908, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3312810107808764692, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3480319152777946760, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_Name
       value: HarbourComponentIOBox
-      objectReference: {fileID: 0}
-    - target: {fileID: 5018398277974084743, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5749477011224683702, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5790576075787413002, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      propertyPath: m_Enabled
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6590312123552549999, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2255,6 +2236,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+--- !u!114 &5705010333079632824 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3312810107808764692, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+  m_PrefabInstance: {fileID: 5705010333079632823}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

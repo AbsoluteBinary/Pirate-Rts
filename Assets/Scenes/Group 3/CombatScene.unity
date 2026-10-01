@@ -2054,8 +2054,9 @@ GameObject:
   - component: {fileID: 4214250531178733547}
   - component: {fileID: 8020190228101733208}
   - component: {fileID: 8020190228101733209}
+  - component: {fileID: 8020190228101733210}
   m_Layer: 0
-  m_Name: CameraRoot
+  m_Name: Combat - Camera Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2249,6 +2250,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Packages.ModularStrategyTopDownCameraController.Scripts.Components.ZoomComponent
   speed: 10
   isInverted: 0
+--- !u!114 &8020190228101733210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2882241516638155476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af7a6ec7413742f88c6a0e3cd0a8fca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.SceneManagement.ViewDriver
 --- !u!1 &8938229903604419577
 GameObject:
   m_ObjectHideFlags: 0

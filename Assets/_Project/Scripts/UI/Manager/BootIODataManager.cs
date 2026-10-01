@@ -40,10 +40,10 @@ namespace _Project.Scripts.UI.Manager
             savePath = Application.persistentDataPath + "/bootIOState.dat";
             LoadIOState();
 
-            bootComponentIOBox = GameObject.FindWithTag("BootComponentBoxIO");
+            bootComponentIOBox = GameObject.FindWithTag("MainRig");
             if (bootComponentIOBox == null)
             {
-                Debug.LogWarning("[BootIO] BootComponentBoxIO not found – add tag 'BootComponentBoxIO'");
+                Debug.LogWarning("[BootIO] MainRig not found – add tag 'MainRig'");
             }
 
             // Delay harbour lookup (additive scene may not be loaded yet)
@@ -82,10 +82,10 @@ namespace _Project.Scripts.UI.Manager
         {
             if (bootComponentIOBox == null)
             {
-                bootComponentIOBox = GameObject.FindWithTag("BootComponentBoxIO");
+                bootComponentIOBox = GameObject.FindWithTag("MainRig");
                 if (bootComponentIOBox == null)
                 {
-                    Debug.LogError("[BootIO] BootComponentBoxIO not found – check tag 'BootComponentBoxIO'");
+                    Debug.LogError("[BootIO] MainRig not found – check tag 'MainRig'");
                     return;
                 }
             }

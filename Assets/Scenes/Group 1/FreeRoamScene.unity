@@ -384,17 +384,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1643339209}
     m_Modifications:
-    - target: {fileID: 1218488053612471252, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2882241516187895797, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
       propertyPath: m_Name
       value: Player Controller - CameraRoot
-      objectReference: {fileID: 0}
-    - target: {fileID: 2882241516187895797, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4528223579880324595, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
       propertyPath: m_LocalPosition.x
@@ -434,10 +426,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4528223579880324595, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8938229903389064920, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
-      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

@@ -10,6 +10,7 @@ TagManager:
   - BootCamera
   - PlayerShip
   - HarbourIOBox
+  - MainRig
   layers:
   - Default
   - TransparentFX

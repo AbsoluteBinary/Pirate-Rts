@@ -4,7 +4,9 @@ using _Project.Scripts.Harbour.Data;
 using _Project.Scripts.Harbour.Data.HUDData;
 using _Project.Scripts.Harbour.Data.SO;
 using _Project.Scripts.Harbour.ShipBuilder;
+using _Project.Scripts.SceneManagement;
 using TGS;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace _Project.Scripts.Harbour.UIControllers
@@ -197,10 +199,23 @@ namespace _Project.Scripts.Harbour.UIControllers
             Debug.Log($"<color=lime>Harbour State Applied: {state.currentMode}</color>");
         }
 
+       // [SerializeField] private CinemachineCamera harbourVcam;
+
         private void SetCamera(Camera cam, bool active)
         {
-            if (cam != null)
-                cam.gameObject.SetActive(active);
+            if (cam == null)
+                return;
+
+            cam.enabled = false;
+
+            var listener = cam.GetComponent<AudioListener>();
+            if (listener != null)
+                listener.enabled = false;
+
+            cam.gameObject.SetActive(active);
+
+            if (active)
+                GameplayView.Instance?.Follow(cam.transform);
         }
 
         private void SetTGSGrid(bool enabled)
