@@ -17,6 +17,7 @@ namespace _Project.Scripts.SceneManagement
         [SerializeField] private GameObject harbourCam;
         [SerializeField] private GameObject combatCam;
 
+        
         public void Show(int groupIndex)
         {
             if (bootCam != null) bootCam.SetActive(groupIndex == 0);
@@ -32,7 +33,7 @@ namespace _Project.Scripts.SceneManagement
                 vcam.Follow = target;
         }
 
-        private CinemachineCamera CameraFor(VcamChannel channel)
+        public CinemachineCamera CameraFor(VcamChannel channel)
         {
             GameObject go = channel switch
             {

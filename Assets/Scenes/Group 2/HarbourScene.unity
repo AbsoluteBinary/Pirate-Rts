@@ -224,8 +224,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Harbour.UIControllers.HarbourController
   state: {fileID: 11400000, guid: bf5fb2e15d8fea196a8088717c34cffc, type: 2}
-  idleCamera: {fileID: 0}
-  harbourBuildCamera: {fileID: 0}
+  idleCamera: {fileID: 5705010333079632824}
+  harbourBuildCamera: {fileID: 467456835}
   playerBuildGO: {fileID: 892000890}
   tgsGridObject: {fileID: 1316261035}
   baseBuilderHUD: {fileID: 1440541968}
@@ -448,7 +448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9adf05fd1b4e7851983b589e29765b6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  harbourBuildCamera: {fileID: 0}
+  harbourBuildCamera: {fileID: 467456835}
   tgs: {fileID: 1640162068}
   testTilePrefab: {fileID: 0}
   previewHeight: 0.35
@@ -829,7 +829,7 @@ MonoBehaviour:
   wallInventory: {fileID: 11400000, guid: 61162d85b338d9bc59ff0b94a7203fcb, type: 2}
   buildingsInventory: {fileID: 11400000, guid: e6ca864f7e9c65bc9bdbcc99d323587b, type: 2}
   turretInventory: {fileID: 11400000, guid: 8468c159824c84b9ca988d4cc75891e6, type: 2}
-  buildCamera: {fileID: 0}
+  buildCamera: {fileID: 467456835}
   strategyCamera: {fileID: 892000899}
   selectedKind: 0
 --- !u!4 &459898000
@@ -865,7 +865,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!20 &467456835
 Camera:
   m_ObjectHideFlags: 0
@@ -873,7 +873,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 467456834}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -2186,9 +2186,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 851667704430043281, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3480319152777946760, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_Name
       value: HarbourComponentIOBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338303718031307489, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6590312123552549999, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2233,29 +2241,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 851667704430043281, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5705010333079632825}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
---- !u!1 &5705010333079632824 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 851667704430043281, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
+--- !u!20 &5705010333079632824 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6338303718031307489, guid: d6c2fce2aa76a5d638a94a14649165f5, type: 3}
   m_PrefabInstance: {fileID: 5705010333079632823}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5705010333079632825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5705010333079632824}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71ddbfca442c4e6bb2ea5a3cf0180e5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.SceneManagement.VcamDriver
-  channel: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
