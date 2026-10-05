@@ -5,9 +5,14 @@ namespace _Project.Scripts.Fleet
 {
     public class WorldFleetArrival : MonoBehaviour
     {
+        private MapSailController _mapSailController;
+        private Transform _thePawn;
         private void Start()
         {
-            Debug.Log($"<color=cyan>[Fleet] World arrived. Flagship slot {PendingLaunch.FlagShipIndex}</color>");
+            if (_mapSailController == null)
+            {
+                Transform _thePawn;
+            }
 
 
             for (int i = 0; i < PendingLaunch.Size; i++)
@@ -40,6 +45,19 @@ namespace _Project.Scripts.Fleet
 
             player.AttachFlagship(flag.shipPrefab, flag.shipName, transform);
             Debug.Log($"<color=lime>[Fleet] World ship is now '{flag.shipName}'</color>");
+            
+            float health01 = 1f;
+            var health = player.GetComponentInChildren<_Project.Scripts.Combat.Health>(true);
+            if (health != null && health.MaxHealth > 0f)
+                health01 = health.CurrentHealth / health.MaxHealth;
+
+            
+            
+            string fleetName = string.IsNullOrWhiteSpace(PendingLaunch.FleetName)
+                ? flag.shipName
+                : PendingLaunch.FleetName;
+
+            MapFleets.Register(fleetName, health01, _thePawn);
         }
     }
 }

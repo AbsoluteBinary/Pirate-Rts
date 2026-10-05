@@ -7,12 +7,14 @@ namespace _Project.Scripts.Fleet
         public const int Size = 5;
         public static readonly ShipBlueprint[] Ships = new ShipBlueprint[Size];
         public static int FlagShipIndex = 2;
+        public static string FleetName = "";
 
-        public static void Capture(ShipBlueprint[] slots, int flagIndex)
+        public static void Capture(ShipBlueprint[] slots, int flagIndex, string fleetName)
         {
             for (int i = 0; i < Size; i++)
                 Ships[i] = slots != null && i < slots.Length ? slots[i] : null;
             FlagShipIndex = flagIndex;
+            FleetName = fleetName ?? "";
         }
     }
 }

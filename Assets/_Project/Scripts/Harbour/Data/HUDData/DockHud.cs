@@ -932,7 +932,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 return;
             }
 
-            PendingLaunch.Capture(_slotShips, FlagShipIndex);
+            PendingLaunch.Capture(_slotShips, FlagShipIndex, _fleetNameField.value.Trim());
 
             CloseDock();
             GetComponent<HarbourHUD>()?.HideAllUI();
