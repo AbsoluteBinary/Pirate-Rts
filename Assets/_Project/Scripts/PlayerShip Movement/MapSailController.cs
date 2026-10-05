@@ -14,8 +14,7 @@ namespace _Project.Scripts.PlayerShip_Movement
 
         private GameObject _pin;
         private Tween _pinTween;
-
-        public Transform thePawn;
+        
         public PlayerCombatMovementController Helm =>
             ship != null ? ship.GetComponent<PlayerCombatMovementController>() : null;
 
@@ -49,7 +48,6 @@ namespace _Project.Scripts.PlayerShip_Movement
 
         public void AttachFlagship(GameObject prefab, string shipName, Transform pawn)
         {
-            thePawn = pawn;
 
             if (prefab == null || pawn == null)
                 return;

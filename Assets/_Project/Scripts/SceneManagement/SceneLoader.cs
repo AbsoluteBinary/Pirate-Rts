@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using _Project.Scripts.EventBus;
+using _Project.Scripts.Fleet;
 using _Project.Scripts.Harbour.UIControllers;
 using _Project.Scripts.UI.Manager;
 
@@ -134,6 +135,7 @@ namespace _Project.Scripts.SceneManagement
                 HideLoadingUI();
             }
             FindAnyObjectByType<RigDirector>()?.Show(currentGroupIndex);
+            ActiveFleets.Load();
         }
 
         public void ShowLoadingUI()

@@ -49,6 +49,8 @@ namespace _Project.Scripts.Fleet
                 here = player.Helm.transform.position;
 
             PendingBattle.Engage(targetId, here);
+            
+            ActiveFleets.SetScene(PendingLaunch.FleetName, ActiveFleets.CombatScene);
 
             if (IMGUILoadingOverlay.Instance != null)
                 IMGUILoadingOverlay.Instance.TriggerLoadingScreen();

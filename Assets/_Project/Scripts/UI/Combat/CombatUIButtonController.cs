@@ -1,3 +1,4 @@
+using _Project.Scripts.Fleet;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
 using _Project.Scripts.UI.WorldMap.HUDInteractions;
@@ -22,6 +23,8 @@ namespace _Project.Scripts.UI.Combat
 
         public void OnLaunchWorldButtonClicked()
         {
+            ActiveFleets.ReturnCombatToMap();
+            
             if (IMGUILoadingOverlay.Instance != null)
             {
                 IMGUILoadingOverlay.Instance.TriggerLoadingScreen();

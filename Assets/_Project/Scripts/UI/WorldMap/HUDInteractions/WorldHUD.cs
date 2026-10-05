@@ -34,14 +34,14 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             }
 
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
-            MapFleets.Changed += RefreshFleets;
+            ActiveFleets.Changed += RefreshFleets;
         }
 
         private void OnDisable()
         {
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
-            MapFleets.Changed -= RefreshFleets;
+            ActiveFleets.Changed -= RefreshFleets;
         }
 
         private void OnUIReady(PanelRenderer renderer, VisualElement root)
@@ -61,10 +61,10 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             bar.Add(CreateButton("ExitToLoginButton", "Exit to Login", new Color(0.22f, 0.22f, 0.26f), OnExitToLogin));
 
             root.Add(CreateFleetPanel());
-            SetFleetSlot(0, "Fleet", 0.75f);
-            SetFleetSlot(1, "Empty", 0f);
-            SetFleetSlot(2, "Empty", 0f);
-            SetFleetSlot(3, "Empty", 0f);
+            // SetFleetSlot(0, "Fleet", 0.75f);
+            // SetFleetSlot(1, "Empty", 0f);
+            // SetFleetSlot(2, "Empty", 0f);
+            // SetFleetSlot(3, "Empty", 0f);
             
             RefreshFleets();
         }
@@ -165,19 +165,19 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             if (_fleetNames[0] == null)
                 return;
 
-            MapFleets.Prune();
-            int count = MapFleets.Active.Count;
-
             for (int i = 0; i < FleetSlotCount; i++)
             {
-                bool show = i < count;
-                _fleetRows[i].style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
-                if (!show)
+                _fleetRows[i].style.display = DisplayStyle.Flex;
+                var fleet = ActiveFleets.AtSlot(i);
+                if (fleet == null)
+                {
+                    _fleetNames[i].text = "";
+                    _fleetFills[i].style.width = Length.Percent(0);
                     continue;
+                }
 
-                var fleet = MapFleets.Active[i];
-                _fleetNames[i].text = fleet.Name;
-                _fleetFills[i].style.width = Length.Percent(fleet.Health01 * 100f);
+                _fleetNames[i].text = fleet.fleetName;
+                _fleetFills[i].style.width = Length.Percent(ActiveFleets.Health01(fleet) * 100f);
             }
 
             ApplySelection();
@@ -185,19 +185,19 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
 
         private void SelectFleet(int index)
         {
-            if (index < 0 || index >= MapFleets.Active.Count)
+            if (ActiveFleets.AtSlot(index) == null)
                 return;
 
-            MapFleets.Selected = index;
+            _selectedFleet = index;
             ApplySelection();
-            Debug.Log($"<color=lime>[World] Selected '{MapFleets.Active[index].Name}'</color>");
+            Debug.Log($"<color=lime>[World] Selected '{ActiveFleets.AtSlot(index).fleetName}'</color>");
         }
 
         private void ApplySelection()
         {
             for (int i = 0; i < FleetSlotCount; i++)
             {
-                var border = i == MapFleets.Selected ? RowSelected : RowBorder;
+                var border = i == _selectedFleet ? RowSelected : RowBorder;
                 var row = _fleetRows[i];
                 row.style.borderTopColor = border;
                 row.style.borderRightColor = border;
