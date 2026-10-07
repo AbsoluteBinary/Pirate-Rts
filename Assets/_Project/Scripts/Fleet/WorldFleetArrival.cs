@@ -40,6 +40,13 @@ namespace _Project.Scripts.Fleet
 
             player.AttachFlagship(flag.shipPrefab, flag.shipName, transform);
             Debug.Log($"<color=lime>[Fleet] World ship is now '{flag.shipName}'</color>");
+
+            var governor = FleetGovernor.Instance;
+            if (governor != null)
+            {
+                governor.TakeLaunch(PendingLaunch.FleetName, PendingLaunch.Ships, PendingLaunch.FlagShipIndex);
+                governor.AttachMap(player);
+            }
             
             ActiveFleets.SetPosition(PendingLaunch.FleetName, transform.position);
 

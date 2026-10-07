@@ -3,6 +3,7 @@ using _Project.Scripts.Combat.Data;
 using _Project.Scripts.Combat.Managers;
 using _Project.Scripts.Combat.Projectiles;
 using _Project.Scripts.Fleet;
+using _Project.Scripts.PlayerShip_Movement.Combat;
 
 namespace _Project.Scripts.Combat.Turrets
 {
@@ -49,25 +50,22 @@ namespace _Project.Scripts.Combat.Turrets
 
         private void UpdateTarget()
         {
-            if (FleetManager.Instance == null || FleetManager.Instance.activeShips == null)
-                return;
+            var body = FleetGovernor.Instance != null ? FleetGovernor.Instance.FlagshipBody : null;
 
-            Transform bestTarget = null;
-            float bestDistance = float.MaxValue;
-
-            foreach (var ship in FleetManager.Instance.activeShips)
+            if (body == null || !body.gameObject.activeInHierarchy)
             {
-                if (ship == null) continue;
-
-                float dist = Vector3.Distance(transform.position, ship.transform.position);
-                if (dist < bestDistance)
+                var found = FindObjectsByType<PlayerCombatMovementController>(FindObjectsSortMode.None);
+                foreach (var ship in found)
                 {
-                    bestDistance = dist;
-                    bestTarget = ship.transform;
+                    if (ship == null || !ship.gameObject.activeInHierarchy)
+                        continue;
+
+                    body = ship;
+                    break;
                 }
             }
 
-            currentTarget = bestTarget;
+            currentTarget = body != null ? body.transform : null;
         }
 
         public void UpdateTurret(Transform target)

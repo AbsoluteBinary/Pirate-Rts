@@ -26,6 +26,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder.Data
 
         [Header("Calculated Stats")]
         public float totalHealth = 100f;
+        public float currentHealth = 100f;
         public float totalSpeed = 15f;
         public float totalWeight = 0f;
 

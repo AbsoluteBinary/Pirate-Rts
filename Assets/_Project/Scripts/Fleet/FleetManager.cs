@@ -3,6 +3,7 @@ using _Project.Scripts.Combat;
 using _Project.Scripts.Combat.Ship;
 using _Project.Scripts.Fleet.Data;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
+using _Project.Scripts.Persistence.TempSave;
 using _Project.Scripts.PlayerShip_Movement.Combat;
 using UnityEngine;
 
@@ -29,15 +30,58 @@ namespace _Project.Scripts.Fleet
 
         private void Awake()
         {
-            LogPendingFleet();
-            
-            SpawnFleetFromData();
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
+
             Instance = this;
+            flagship = null;
+            LogPendingFleet();
+            SpawnFleetFromData();
+            AssignFlagshipFromFile();
+        }
+        
+        private void AssignFlagshipFromFile()
+        {
+            ActiveFleets.Load();
+            ActiveFleetRecord fleet = null;
+            if (ActiveFleets.Current?.fleets != null)
+            {
+                foreach (var candidate in ActiveFleets.Current.fleets)
+                {
+                    if (candidate != null && candidate.sceneName == ActiveFleets.CombatScene)
+                        fleet = candidate;
+                }
+            }
+
+            if (fleet == null || string.IsNullOrEmpty(fleet.flagshipShipId))
+            {
+                Debug.LogWarning("[Fleet] No flagship id on the active fleet file.");
+                return;
+            }
+
+            foreach (var ship in activeShips)
+            {
+                if (ship == null) continue;
+                var combat = ship.GetComponent<CombatShip>();
+                if (combat?.Blueprint == null || combat.Blueprint.saveId != fleet.flagshipShipId)
+                    continue;
+
+                flagship = ship;
+                ship.enabled = true;
+                Debug.Log($"<color=lime>[Fleet] Flagship from file '{combat.Blueprint.shipName}'</color>");
+                return;
+            }
+
+            Debug.LogWarning("[Fleet] Flagship id was on file, but that ship was not spawned.");
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+                Instance = null;
         }
         
         private void LogPendingFleet()
@@ -110,16 +154,38 @@ namespace _Project.Scripts.Fleet
             }
 
             Vector3 spawnPos = fleetSpawnPoint.position + new Vector3(index * 15f, 0, -index * 10f);
+            
             GameObject shipObj = Instantiate(bp.shipPrefab, spawnPos, Quaternion.identity);
             shipObj.name = bp.shipName;
+            shipObj.SetActive(true);
 
             var combatShip = shipObj.GetComponent<CombatShip>() ?? shipObj.AddComponent<CombatShip>();
             var movement = shipObj.GetComponent<PlayerCombatMovementController>() ?? shipObj.AddComponent<PlayerCombatMovementController>();
             var health = shipObj.GetComponent<Health>() ?? shipObj.AddComponent<Health>();
             var shipVFX = shipObj.GetComponent<ShipVFX>() ?? shipObj.AddComponent<ShipVFX>();
+            
+            shipObj.SetActive(true);
+            movement.enabled = true;
+            health.enabled = true;
+            shipVFX.enabled = true;
 
+            health.enabled = true;
+            movement.enabled = true;
+            shipVFX.enabled = true;
+
+            var body = shipObj.GetComponent<Rigidbody>() ?? shipObj.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+
+            var hitBox = shipObj.GetComponent<Collider>() ?? shipObj.AddComponent<BoxCollider>();
+            hitBox.enabled = true;
+            hitBox.isTrigger = true;
+
+            movement.Claim(shipObj.transform);
             combatShip.Initialize(bp);
+            
             RegisterShip(movement, isFlagship);
+            FleetGovernor.Instance?.AttachCombatBody(movement, isFlagship);
 
             Debug.Log($"[FleetManager] Spawned {bp.shipName} | flagship={isFlagship} | VFX={shipVFX != null}");
         }
@@ -128,16 +194,24 @@ namespace _Project.Scripts.Fleet
         {
             var shipsToMove = selectedShips.Count > 0 ? selectedShips : activeShips;
 
+            if (shipsToMove.Count == 0)
+            {
+                Debug.LogWarning("[Fleet] Move called, but the ship list is empty.");
+                return;
+            }
+
             for (int i = 0; i < shipsToMove.Count; i++)
             {
                 var ship = shipsToMove[i];
-                if (ship == null) continue;
+                if (ship == null)
+                {
+                    Debug.LogWarning($"[Fleet] Slot {i} is empty.");
+                    continue;
+                }
 
-                Vector3 offset = Vector3.zero; // TODO: Formation later
-                ship.MoveToLocation(worldPosition + offset);
+                Debug.Log($"[Fleet] Moving '{ship.gameObject.name}' enabled={ship.enabled}");
+                ship.MoveToLocation(worldPosition);
             }
-
-            NotifyFleetChanged();
         }
 
         public void SelectSingle(PlayerCombatMovementController ship)

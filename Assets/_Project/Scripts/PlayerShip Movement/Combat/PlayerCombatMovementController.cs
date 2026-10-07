@@ -117,6 +117,12 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
             shipVisual.localEulerAngles = currentEuler;
         }
 
+        public void Claim(Transform visual)
+        {
+            shipVisual = visual != null ? visual : transform;
+            enabled = true;
+        }
+        
         private void ArriveAtDestination()
         {
             hasTarget = false;

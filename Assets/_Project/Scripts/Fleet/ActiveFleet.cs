@@ -98,6 +98,16 @@ namespace _Project.Scripts.Fleet
 
             record.sceneName = sceneName;
             record.ships = new List<ActiveFleetShipRecord>();
+            record.flagshipShipId = "";
+            if (ships != null)
+            {
+                for (int i = 0; i < ships.Length; i++)
+                {
+                    if (ships[i] != null && i == PendingLaunch.FlagShipIndex)
+                        record.flagshipShipId = ships[i].saveId;
+                }
+            }
+            
             if (ships != null)
             {
                 foreach (var ship in ships)

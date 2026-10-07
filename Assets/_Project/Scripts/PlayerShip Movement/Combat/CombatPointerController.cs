@@ -64,15 +64,10 @@ namespace _Project.Scripts.PlayerShip_Movement.Combat
                 .OnComplete(() =>
                 {
                     // === UPDATED: Use Fleet System instead of single ship ===
-                    if (FleetManager.Instance != null)
-                    {
-                        FleetManager.Instance.MoveFleetToLocation(targetPos);
-                        Debug.Log($"[CombatPointer] Fleet moving to: {targetPos}");
-                    }
+                    if (FleetGovernor.Instance != null)
+                        FleetGovernor.Instance.OrderMove(targetPos);
                     else
-                    {
-                        Debug.LogWarning("[CombatPointer] FleetManager not found!");
-                    }
+                        Debug.LogWarning("[CombatPointer] FleetGovernor not found.");
 
                     // Fade out and destroy pointer
                     var rend = currentPointer.GetComponentInChildren<Renderer>();

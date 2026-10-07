@@ -14,5 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Fleet.Data.FleetData
   fleetName: Player Fleet
   ships:
-  - {fileID: 11400000, guid: afae76afbf82fcf68b9c76a356720f05, type: 2}
-  - {fileID: 11400000, guid: 8f4afe9e7339223ae950b866c49d010f, type: 2}
+  - {fileID: 0}

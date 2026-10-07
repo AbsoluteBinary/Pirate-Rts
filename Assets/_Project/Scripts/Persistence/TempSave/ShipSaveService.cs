@@ -28,7 +28,11 @@ namespace _Project.Scripts.Persistence.TempSave
                 totalWeight = loadout.totalWeight,
                 totalCost = loadout.totalCost,
                 totalPowerDraw = loadout.totalPowerDraw,
-                totalDamageOutput = loadout.totalDamageOutput
+                totalDamageOutput = loadout.totalDamageOutput,
+                
+                maxHealth = 100f,
+                currentHealth = 100f,
+                
             };
 
             if (loadout.equippedSlots == null) return record;
@@ -43,6 +47,7 @@ namespace _Project.Scripts.Persistence.TempSave
                     moduleType = eq.module.type
                 });
             }
+            
 
             return record;
         }
@@ -58,7 +63,10 @@ namespace _Project.Scripts.Persistence.TempSave
             bp.shipName = record.shipName;
             bp.saveId = record.id;
             bp.totalWeight = record.totalWeight;
-            bp.totalHealth = 100f;
+            float max = record.maxHealth > 0f ? record.maxHealth : 100f;
+            float current = record.maxHealth > 0f ? record.currentHealth : max;
+            bp.totalHealth = max;
+            bp.currentHealth = Mathf.Min(current, max);
 
             if (hulls != null)
             {

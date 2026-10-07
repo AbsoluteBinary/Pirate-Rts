@@ -22,6 +22,8 @@ namespace _Project.Scripts.Persistence.TempSave
         public int totalCost;
         public float totalPowerDraw;
         public float totalDamageOutput;
+        public float maxHealth = 100f;
+        public float currentHealth = 100f;
     }
 
     [Serializable]
