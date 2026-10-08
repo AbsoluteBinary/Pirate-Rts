@@ -97,6 +97,10 @@ namespace _Project.Scripts.PlayerShip_Movement
                 .OnComplete(() =>
                 {
                     SailTo(point);
+                    if (FleetGovernor.Instance != null)
+                        FleetGovernor.Instance.OrderMove(point);
+                    else
+                        SailTo(point);
                     var pin = _pin;
                     _pin = null;
                     if (pin != null)

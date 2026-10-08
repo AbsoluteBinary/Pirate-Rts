@@ -32,7 +32,7 @@ namespace _Project.Scripts.UI.Combat
             
             // Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
             //StartCoroutine(LoadSceneGroupOneWithOceanTransition());
-            
+            FleetGovernor.Instance?.Commit();
             _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
         }
     }

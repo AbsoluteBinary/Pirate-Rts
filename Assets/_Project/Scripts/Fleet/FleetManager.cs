@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using _Project.Scripts.Combat;
 using _Project.Scripts.Combat.Ship;
-using _Project.Scripts.Fleet.Data;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
 using _Project.Scripts.Persistence.TempSave;
 using _Project.Scripts.PlayerShip_Movement.Combat;
@@ -12,9 +11,7 @@ namespace _Project.Scripts.Fleet
     public class FleetManager : MonoBehaviour
     {
         public static FleetManager Instance { get; private set; }
-
-        [Header("Fleet Data")]
-        public FleetData currentFleetData;
+        
 
         [Header("Spawn Settings")]
         public Transform fleetSpawnPoint;
@@ -40,7 +37,12 @@ namespace _Project.Scripts.Fleet
             flagship = null;
             LogPendingFleet();
             SpawnFleetFromData();
-            AssignFlagshipFromFile();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+                Instance = null;
         }
         
         private void AssignFlagshipFromFile()
@@ -77,12 +79,7 @@ namespace _Project.Scripts.Fleet
 
             Debug.LogWarning("[Fleet] Flagship id was on file, but that ship was not spawned.");
         }
-
-        private void OnDestroy()
-        {
-            if (Instance == this)
-                Instance = null;
-        }
+        
         
         private void LogPendingFleet()
         {
@@ -136,11 +133,6 @@ namespace _Project.Scripts.Fleet
                     SpawnOne(PendingLaunch.Ships[i], i, i == PendingLaunch.FlagShipIndex);
                 return;
             }
-
-            if (currentFleetData == null) return;
-
-            for (int i = 0; i < currentFleetData.ships.Count; i++)
-                SpawnOne(currentFleetData.ships[i], i, i == 0);
         }
 
         private void SpawnOne(ShipBlueprint bp, int index, bool isFlagship)
@@ -159,58 +151,49 @@ namespace _Project.Scripts.Fleet
             shipObj.name = bp.shipName;
             shipObj.SetActive(true);
 
-            var combatShip = shipObj.GetComponent<CombatShip>() ?? shipObj.AddComponent<CombatShip>();
-            var movement = shipObj.GetComponent<PlayerCombatMovementController>() ?? shipObj.AddComponent<PlayerCombatMovementController>();
-            var health = shipObj.GetComponent<Health>() ?? shipObj.AddComponent<Health>();
-            var shipVFX = shipObj.GetComponent<ShipVFX>() ?? shipObj.AddComponent<ShipVFX>();
-            
+            var combatShip = GetOrAdd<CombatShip>(shipObj);
+            var movement = GetOrAdd<PlayerCombatMovementController>(shipObj);
+            var health = GetOrAdd<Health>(shipObj);
+            var shipVFX = GetOrAdd<ShipVFX>(shipObj);
+
+            combatShip.Initialize(bp);
+
             shipObj.SetActive(true);
-            movement.enabled = true;
+            movement.Claim(shipObj.transform);
             health.enabled = true;
             shipVFX.enabled = true;
 
-            health.enabled = true;
-            movement.enabled = true;
-            shipVFX.enabled = true;
-
-            var body = shipObj.GetComponent<Rigidbody>() ?? shipObj.AddComponent<Rigidbody>();
+            var body = GetOrAdd<Rigidbody>(shipObj);
             body.isKinematic = true;
             body.useGravity = false;
 
-            var hitBox = shipObj.GetComponent<Collider>() ?? shipObj.AddComponent<BoxCollider>();
+            var hitBox = GetOrAdd<Collider, BoxCollider>(shipObj);
             hitBox.enabled = true;
             hitBox.isTrigger = true;
 
-            movement.Claim(shipObj.transform);
-            combatShip.Initialize(bp);
-            
-            RegisterShip(movement, isFlagship);
+            FleetGovernor.Instance?.ApplyHealth(health, bp);
             FleetGovernor.Instance?.AttachCombatBody(movement, isFlagship);
+            RegisterShip(movement, isFlagship);
 
             Debug.Log($"[FleetManager] Spawned {bp.shipName} | flagship={isFlagship} | VFX={shipVFX != null}");
         }
 
+        private static T GetOrAdd<T>(GameObject go) where T : Component
+        {
+            return go.TryGetComponent(out T found) ? found : go.AddComponent<T>();
+        }
+
+        private static T GetOrAdd<T, TAdd>(GameObject go) where T : Component where TAdd : T
+        {
+            return go.TryGetComponent(out T found) ? found : go.AddComponent<TAdd>();
+        }
+
         public void MoveFleetToLocation(Vector3 worldPosition)
         {
-            var shipsToMove = selectedShips.Count > 0 ? selectedShips : activeShips;
-
-            if (shipsToMove.Count == 0)
+            if (FleetGovernor.Instance != null)
             {
-                Debug.LogWarning("[Fleet] Move called, but the ship list is empty.");
+                FleetGovernor.Instance.OrderMove(worldPosition);
                 return;
-            }
-
-            for (int i = 0; i < shipsToMove.Count; i++)
-            {
-                var ship = shipsToMove[i];
-                if (ship == null)
-                {
-                    Debug.LogWarning($"[Fleet] Slot {i} is empty.");
-                    continue;
-                }
-
-                Debug.Log($"[Fleet] Moving '{ship.gameObject.name}' enabled={ship.enabled}");
-                ship.MoveToLocation(worldPosition);
             }
         }
 

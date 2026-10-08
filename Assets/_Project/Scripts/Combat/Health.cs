@@ -1,4 +1,5 @@
 using _Project.Scripts.Combat.Ship;
+using _Project.Scripts.Fleet;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -56,6 +57,7 @@ namespace _Project.Scripts.Combat
             {
                 shipVFX.PlayDamageHitVFX();   // ← Changed to damage hit only
             }
+            FleetGovernor.Instance?.NoteDamage(this);
 
             if (currentHealth <= 0f)
             {
@@ -82,6 +84,14 @@ namespace _Project.Scripts.Combat
             if (resetCurrentHealth || currentHealth > maxHealth)
                 currentHealth = maxHealth;
 
+            OnHealthChanged?.Invoke(currentHealth);
+        }
+        
+        public void Apply(float max, float current)
+        {
+            maxHealth = Mathf.Max(1f, max);
+            currentHealth = Mathf.Clamp(current, 0f, maxHealth);
+            isDead = currentHealth <= 0f;
             OnHealthChanged?.Invoke(currentHealth);
         }
 

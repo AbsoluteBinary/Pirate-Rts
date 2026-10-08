@@ -933,6 +933,10 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             }
 
             PendingLaunch.Capture(_slotShips, FlagShipIndex, _fleetNameField.value.Trim());
+            FleetGovernor.Instance?.TakeLaunch(
+                PendingLaunch.FleetName,
+                PendingLaunch.Ships,
+                PendingLaunch.FlagShipIndex);
             ActiveFleets.Launch(_fleetNameField.value.Trim(), _slotShips, ActiveFleets.FreeRoamScene);
 
             CloseDock();

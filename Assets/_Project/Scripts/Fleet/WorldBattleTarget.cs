@@ -55,6 +55,7 @@ namespace _Project.Scripts.Fleet
             if (IMGUILoadingOverlay.Instance != null)
                 IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
 
+            FleetGovernor.Instance?.Commit();
             _ = SceneLoader.Instance.BeginSceneTransition(combatSceneGroup);
         }
 

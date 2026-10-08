@@ -1597,10 +1597,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbb39394745d7c03eb3214cf7423a47f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Fleet.FleetManager
-  currentFleetData: {fileID: 11400000, guid: 21aa269df61a1f9db817312a4196fb1c, type: 2}
+  currentFleetData: {fileID: 0}
   fleetSpawnPoint: {fileID: 1312345624}
   activeShips: []
-  flagship: {fileID: 8059879818186134676, guid: 403e9f95ef1cb5dd8a9adaa3c52bd422, type: 3}
+  flagship: {fileID: 0}
 --- !u!1 &1725493540
 GameObject:
   m_ObjectHideFlags: 0

@@ -51,21 +51,9 @@ namespace _Project.Scripts.Combat.Turrets
         private void UpdateTarget()
         {
             var body = FleetGovernor.Instance != null ? FleetGovernor.Instance.FlagshipBody : null;
-
-            if (body == null || !body.gameObject.activeInHierarchy)
-            {
-                var found = FindObjectsByType<PlayerCombatMovementController>(FindObjectsSortMode.None);
-                foreach (var ship in found)
-                {
-                    if (ship == null || !ship.gameObject.activeInHierarchy)
-                        continue;
-
-                    body = ship;
-                    break;
-                }
-            }
-
-            currentTarget = body != null ? body.transform : null;
+            currentTarget = body != null && body.gameObject.activeInHierarchy
+                ? body.transform
+                : null;
         }
 
         public void UpdateTurret(Transform target)
