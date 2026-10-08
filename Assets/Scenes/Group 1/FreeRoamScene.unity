@@ -388,10 +388,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Controller - CameraRoot
       objectReference: {fileID: 0}
-    - target: {fileID: 3356221531082468501, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4528223579880324595, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -430,10 +426,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4528223579880324595, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7409344030637890536, guid: e565f6a6ccf04694da514512088e8d34, type: 3}
-      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1030,7 +1022,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 390de5656c7f612aabd711e148f90ff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShip_Movement.UI.UIBillboard
-  targetCamera: {fileID: 0}
+  targetCamera: {fileID: 492500259}
 --- !u!114 &1211652368
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1529,7 +1529,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             if (record == null) return;
 
             HullData hull = null;
-            var catalog = builtShipInventory.hullCatalog;
+            var catalog = HullLibrary.All;
             if (catalog != null)
             {
                 foreach (var h in catalog)

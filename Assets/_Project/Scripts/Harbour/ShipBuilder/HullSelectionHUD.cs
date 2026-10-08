@@ -9,7 +9,6 @@ namespace _Project.Scripts.Harbour.ShipBuilder
     {
         [SerializeField] private PanelRenderer panelRenderer;
         [SerializeField] private ShipBuilderHUD shipBuilderHUD;
-        [SerializeField] private HullData[] availableHulls;
         [SerializeField] private HullSlotMask mask;
 
         private VisualElement _hullPanel;
@@ -154,13 +153,11 @@ namespace _Project.Scripts.Harbour.ShipBuilder
             _gridHost.Clear();
 
             var list = new List<HullData>();
-            if (availableHulls != null)
+            foreach (var h in HullLibrary.All)
             {
-                foreach (var h in availableHulls)
-                {
-                    if (h == null) continue;
-                    if (h.hullClass == cls) list.Add(h);
-                }
+                if (h == null || h.hullClass != cls)
+                    continue;
+                list.Add(h);
             }
 
             if (list.Count == 0)

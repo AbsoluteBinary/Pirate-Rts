@@ -37,7 +37,7 @@ namespace _Project.Scripts.Harbour.ShipBuilder.Data
             ships.Clear();
 
             var save = new ShipSaveService(new JsonShipSaveStore());
-            ships.AddRange(save.RebuildAll(hullCatalog, moduleDatabase));
+            ships.AddRange(save.RebuildAll(HullLibrary.All, moduleDatabase));
             Debug.Log($"<color=cyan>[Yard] Hydrated {ships.Count} ship(s) from save</color>");
         }
 
