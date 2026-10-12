@@ -66,6 +66,10 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private Label _selectedWeight;
         private Label _selectedFuel;
         private Label _selectedCargo;
+        private Label _repairTimerLabel;
+        private float _repairSecondsRemaining;
+        private bool _repairReady;
+        private bool _repairRunning;
 
         private static readonly string[] MaterialNames =
         {
@@ -513,6 +517,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             Debug.Log($"My Ships: '{ship.shipName}' -> Dock slot {slot}");
             CloseMyShipsPanel();
+            RefreshFlagshipHealth();
         }
         
         private void ApplyDockSlotPortrait(int index)
@@ -1005,6 +1010,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 _fleetNameField.value = fleet.fleetName;
 
             Debug.Log($"<color=lime>[Fleet] Loaded '{fleet.fleetName}'</color>");
+            RefreshFlagshipHealth();
         }
         
         private VisualElement CreateSelectedShipInfoPanel()
@@ -1061,7 +1067,137 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             _selectedFuel = AddInfoLine(frame, "Fuel", "0");
             _selectedCargo = AddInfoLine(frame, "Cargo Hold", "0 / 0");
 
+            RefreshFlagshipHealth();
             return frame;
+        }
+
+        private void RefreshFlagshipHealth()
+        {
+            var ship = _slotShips[FlagShipIndex];
+
+            if (_selectedShipName != null)
+                _selectedShipName.text = ship != null ? ship.shipName : "No Ship Selected";
+
+            if (ship == null)
+            {
+                if (_selectedHealthValue != null)
+                    _selectedHealthValue.text = "— / —";
+                if (_selectedWeight != null)
+                    _selectedWeight.text = "Weight:  0 t";
+                if (_selectedFuel != null)
+                    _selectedFuel.text = "Fuel:  0";
+                if (_selectedCargo != null)
+                    _selectedCargo.text = "Cargo Hold:  0 / 0";
+                _repairReady = false;
+                _repairRunning = false;
+                return;
+            }
+
+            float max = ship.totalHealth > 0f ? ship.totalHealth : 100f;
+            float current = max;
+
+            var store = new JsonShipSaveStore();
+            if (store.TryRead(out var data) && data?.ships != null)
+            {
+                foreach (var record in data.ships)
+                {
+                    if (record.id != ship.saveId)
+                        continue;
+
+                    if (record.maxHealth > 0f)
+                        max = record.maxHealth;
+                    current = record.currentHealth;
+                    break;
+                }
+            }
+
+            if (_selectedHealthValue != null)
+                _selectedHealthValue.text = $"{current:0} / {max:0}";
+            if (_selectedWeight != null)
+                _selectedWeight.text = $"Weight:  {ship.totalWeight:0} t";
+            if (_selectedFuel != null)
+                _selectedFuel.text = "Fuel:  0";
+            if (_selectedCargo != null)
+                _selectedCargo.text = "Cargo Hold:  0 / 0";
+            UpdateRepairTimer(current, max);
+        }
+
+        private void UpdateRepairTimer(float current, float max)
+        {
+            if (current >= max)
+            {
+                _repairReady = false;
+                _repairRunning = false;
+                return;
+            }
+
+            _repairRunning = false;
+            _repairReady = true;
+            _repairSecondsRemaining = ((max - current) / 100f) * 5f;
+            SetRepairTimerText(_repairSecondsRemaining);
+        }
+
+        private void BeginRepairs()
+        {
+            if (_repairRunning || !_repairReady || _repairSecondsRemaining <= 0f)
+                return;
+
+            _repairRunning = true;
+        }
+
+        private void Update()
+        {
+            if (!_repairRunning)
+                return;
+
+            _repairSecondsRemaining -= Time.deltaTime;
+            if (_repairSecondsRemaining > 0f)
+            {
+                SetRepairTimerText(_repairSecondsRemaining);
+                return;
+            }
+
+            _repairSecondsRemaining = 0f;
+            _repairRunning = false;
+            SetRepairTimerText(0f);
+            CompleteRepair();
+        }
+
+        private void CompleteRepair()
+        {
+            var ship = _slotShips[FlagShipIndex];
+            if (ship == null)
+                return;
+
+            var store = new JsonShipSaveStore();
+            if (!store.TryRead(out var data) || data?.ships == null)
+                return;
+
+            foreach (var record in data.ships)
+            {
+                if (record.id != ship.saveId)
+                    continue;
+
+                float max = record.maxHealth > 0f
+                    ? record.maxHealth
+                    : (ship.totalHealth > 0f ? ship.totalHealth : 100f);
+                record.maxHealth = max;
+                record.currentHealth = max;
+                store.Write(data);
+                break;
+            }
+
+            _repairReady = false;
+            RefreshFlagshipHealth();
+        }
+
+        private void SetRepairTimerText(float seconds)
+        {
+            if (_repairTimerLabel == null)
+                return;
+
+            int total = Mathf.Max(0, Mathf.CeilToInt(seconds));
+            _repairTimerLabel.text = $"{total / 60:00}:{total % 60:00}";
         }
 
         private static Label AddInfoLine(VisualElement parent, string title, string value)
@@ -1166,8 +1302,11 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         {
             if (_slotOccupied[index])
             {
-                // _slotOccupied[index] = false;
-                // RefreshSlotButton(index);
+                _slotOccupied[index] = false;
+                _slotShips[index] = null;
+                ApplyDockSlotPortrait(index);
+                RefreshSlotButton(index);
+                RefreshFlagshipHealth();
                 Debug.Log($"DockHUD: slot {index} emptied");
                 return;
             }
@@ -1316,17 +1455,18 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             var btn = new Button { text = "Begin Repairs" };
             StyleRepairButton(btn);
+            btn.clicked += BeginRepairs;
             col.Add(btn);
 
             var timerBox = new VisualElement { name = "RepairTimerBox" };
             StyleValueBox(timerBox);
             timerBox.style.marginTop = 8;
 
-            var timerLabel = new Label("00:00");
-            timerLabel.style.fontSize = 16;
-            timerLabel.style.color = Color.white;
-            timerLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            timerBox.Add(timerLabel);
+            _repairTimerLabel = new Label("00:00");
+            _repairTimerLabel.style.fontSize = 16;
+            _repairTimerLabel.style.color = Color.white;
+            _repairTimerLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            timerBox.Add(_repairTimerLabel);
             col.Add(timerBox);
             return col;
         }

@@ -154,7 +154,16 @@ namespace _Project.Scripts.Fleet
         private void BindFreeRoam()
         {
             var player = FindAnyObjectByType<MapSailController>();
-            var helm = FindAnyObjectByType<PlayerCombatMovementController>();
+            PlayerCombatMovementController helm = null;
+            var found = FindObjectsByType<PlayerCombatMovementController>(FindObjectsSortMode.None);
+            foreach (var candidate in found)
+            {
+                if (candidate != null && candidate.gameObject.scene.name == "FreeRoamScene")
+                {
+                    helm = candidate;
+                    break;
+                }
+            }
             if (player == null || helm == null)
                 return;
 
