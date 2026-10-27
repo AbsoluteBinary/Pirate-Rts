@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using _Project.Scripts.Combat;
 using _Project.Scripts.Fleet;
 using _Project.Scripts.UI.WorldMap.HUDInteractions;
 using UnityEngine;
@@ -30,6 +32,9 @@ namespace _Project.Scripts.UI.Combat
 
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
             ActiveFleets.Changed += RefreshFleets;
+
+            if (FleetManager.Instance != null)
+                FleetManager.Instance.OnFleetChanged += BindFleetHealth;
         }
 
         private void OnDisable()
@@ -37,6 +42,11 @@ namespace _Project.Scripts.UI.Combat
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
             ActiveFleets.Changed -= RefreshFleets;
+
+            if (FleetManager.Instance != null)
+                FleetManager.Instance.OnFleetChanged -= BindFleetHealth;
+
+            UnbindFleetHealth();
         }
 
         private void OnUIReady(PanelRenderer renderer, VisualElement root)
@@ -67,6 +77,7 @@ namespace _Project.Scripts.UI.Combat
             root.Add(CreateFleetPanel());
             RefreshFleets();
             BindCombatMechanisms();
+            BindFleetHealth();
         }
 
         private VisualElement CreateFleetPanel()
@@ -161,6 +172,69 @@ namespace _Project.Scripts.UI.Combat
 
         private void BindCombatMechanisms()
         {
+        }
+
+        private readonly List<Health> _watched = new List<Health>();
+
+        private void BindFleetHealth()
+        {
+            UnbindFleetHealth();
+
+            var ships = FleetManager.Instance != null ? FleetManager.Instance.activeShips : null;
+            if (ships == null)
+                return;
+
+            for (int i = 0; i < ships.Count; i++)
+            {
+                var ship = ships[i];
+                if (ship == null)
+                    continue;
+
+                var health = ship.GetComponent<Health>();
+                if (health == null)
+                    continue;
+
+                health.OnHealthChanged.AddListener(OnShipHealthChanged);
+                _watched.Add(health);
+            }
+
+            PaintFleetHealth();
+        }
+
+        private void UnbindFleetHealth()
+        {
+            for (int i = 0; i < _watched.Count; i++)
+            {
+                if (_watched[i] != null)
+                    _watched[i].OnHealthChanged.RemoveListener(OnShipHealthChanged);
+            }
+
+            _watched.Clear();
+        }
+
+        private void OnShipHealthChanged(float _)
+        {
+            PaintFleetHealth();
+        }
+
+        private void PaintFleetHealth()
+        {
+            float current = 0f;
+            float max = 0f;
+
+            for (int i = 0; i < _watched.Count; i++)
+            {
+                var health = _watched[i];
+                if (health == null)
+                    continue;
+
+                current += health.CurrentHealth;
+                max += health.MaxHealth;
+            }
+
+            float ratio = max > 0f ? current / max : 0f;
+            if (_fleetFills[0] != null)
+                _fleetFills[0].style.width = Length.Percent(ratio * 100f);
         }
     }
 }

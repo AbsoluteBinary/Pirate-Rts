@@ -2,6 +2,7 @@ using UnityEngine;
 using _Project.Scripts.Combat;
 using _Project.Scripts.Combat.Ship;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
+using _Project.Scripts.Persistence.TempSave;
 using _Project.Scripts.PlayerShip_Movement.Combat;
 
 namespace _Project.Scripts.Fleet
@@ -40,10 +41,22 @@ namespace _Project.Scripts.Fleet
             Blueprint = blueprint;
             gameObject.name = blueprint.shipName;
 
-            // Apply health from blueprint
             if (Health != null)
             {
-                Health.SetMaxHealth(blueprint.totalHealth, true);
+                float max = blueprint.totalHealth > 0f ? blueprint.totalHealth : 100f;
+                float current = max;
+
+                if (ShipHealthFile.TryGet(blueprint.saveId, out float savedCurrent, out float savedMax))
+                {
+                    max = savedMax;
+                    current = savedCurrent;
+                }
+                else
+                {
+                    ShipHealthFile.Write(blueprint.saveId, current, max);
+                }
+
+                Health.LoadSaved(blueprint.saveId, max, current);
             }
 
             // Apply VFX profile

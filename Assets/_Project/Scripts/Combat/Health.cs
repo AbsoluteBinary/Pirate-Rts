@@ -1,5 +1,6 @@
 using _Project.Scripts.Combat.Ship;
 using _Project.Scripts.Fleet;
+using _Project.Scripts.Persistence.TempSave;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -40,6 +41,23 @@ namespace _Project.Scripts.Combat
             ResetHealth();
         }
 
+        private string _saveId;
+
+        public void LoadSaved(string saveId, float max, float current)
+        {
+            _saveId = saveId;
+            maxHealth = max;
+            currentHealth = Mathf.Clamp(current, 0f, maxHealth);
+            OnHealthChanged?.Invoke(currentHealth);
+        }
+
+        private void Commit()
+        {
+            if (string.IsNullOrEmpty(_saveId))
+                return;
+
+            ShipHealthFile.Write(_saveId, currentHealth, maxHealth);
+        }
         /// <summary>
         /// Applies damage and checks for death.
         /// </summary>
@@ -63,6 +81,8 @@ namespace _Project.Scripts.Combat
             {
                 Die();
             }
+
+            Commit();
         }
         
         /// <summary>
@@ -106,6 +126,8 @@ namespace _Project.Scripts.Combat
             currentHealth = Mathf.Min(currentHealth, maxHealth);
 
             OnHealthChanged?.Invoke(currentHealth);
+
+            Commit();
         }
 
         /// <summary>
@@ -117,6 +139,7 @@ namespace _Project.Scripts.Combat
             {
                 currentHealth = 0f;
                 Die();
+                Commit();
             }
         }
 
