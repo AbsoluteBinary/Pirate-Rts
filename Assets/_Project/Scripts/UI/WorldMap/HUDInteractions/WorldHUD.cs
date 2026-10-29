@@ -180,7 +180,34 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
                 _fleetFills[i].style.width = Length.Percent(ActiveFleets.Health01(fleet) * 100f);
             }
 
+            if (_selectedFleet < 0 || ActiveFleets.AtSlot(_selectedFleet) == null)
+                HighlightLaunchedFleet();
+
             ApplySelection();
+        }
+
+        private void HighlightLaunchedFleet()
+        {
+            string launched = FleetGovernor.Instance != null ? FleetGovernor.Instance.FleetName : "";
+            int fallback = -1;
+
+            for (int i = 0; i < FleetSlotCount; i++)
+            {
+                var fleet = ActiveFleets.AtSlot(i);
+                if (fleet == null)
+                    continue;
+
+                if (fallback < 0)
+                    fallback = i;
+
+                if (!string.IsNullOrEmpty(launched) && fleet.fleetName == launched)
+                {
+                    _selectedFleet = i;
+                    return;
+                }
+            }
+
+            _selectedFleet = fallback;
         }
 
         private void SelectFleet(int index)

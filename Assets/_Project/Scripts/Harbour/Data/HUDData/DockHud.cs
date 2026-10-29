@@ -930,6 +930,12 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private void LaunchFleet()
         {
             if (!TrySaveFleet()) return;
+
+            if (FleetIsAway())
+            {
+                Debug.Log("[Dock] That fleet is already at sea. Use Enter World.");
+                return;
+            }
             
             if (_slotShips[FlagShipIndex] == null)
             {
@@ -970,7 +976,8 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
                 if (nameField != null)
                 {
-                    nameField.value = fleet != null ? fleet.fleetName : "";
+                    bool away = fleet != null && FleetNameIsAway(fleet.fleetName);
+                    nameField.value = fleet == null ? "" : away ? fleet.fleetName + "  ·  Away" : fleet.fleetName;
                     nameField.style.color = Color.white;
                 }
 
@@ -997,6 +1004,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             var fleet = fleetInventory.fleets[index];
 
+            if (_fleetNameField != null)
+                _fleetNameField.value = fleet.fleetName;
+
             for (int i = 0; i < FleetSize; i++)
             {
                 var ship = fleet.ships != null && i < fleet.ships.Length ? fleet.ships[i] : null;
@@ -1005,9 +1015,6 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 RefreshSlotButton(i);
                 ApplyDockSlotPortrait(i);
             }
-
-            if (_fleetNameField != null)
-                _fleetNameField.value = fleet.fleetName;
 
             Debug.Log($"<color=lime>[Fleet] Loaded '{fleet.fleetName}'</color>");
             RefreshFlagshipHealth();
@@ -1300,6 +1307,12 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
         private void OnSlotButtonClicked(int index)
         {
+            if (FleetIsAway())
+            {
+                Debug.Log("[Dock] That fleet is out.");
+                return;
+            }
+
             if (_slotOccupied[index])
             {
                 _slotOccupied[index] = false;
@@ -1321,9 +1334,44 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                 RefreshSlotButton(i);
         }
 
+        private static bool FleetNameIsAway(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return false;
+
+            ActiveFleets.Load();
+            if (ActiveFleets.Current?.fleets == null)
+                return false;
+
+            foreach (var fleet in ActiveFleets.Current.fleets)
+            {
+                if (fleet == null || fleet.fleetName != name)
+                    continue;
+
+                return fleet.sceneName == ActiveFleets.FreeRoamScene
+                    || fleet.sceneName == ActiveFleets.CombatScene;
+            }
+
+            return false;
+        }
+
+        private bool FleetIsAway()
+        {
+            string name = _fleetNameField != null ? _fleetNameField.value.Trim() : "";
+            return FleetNameIsAway(name);
+        }
+
         private void RefreshSlotButton(int index)
         {
-            if (_slotButtons[index] == null) return;
+            if (_slotButtons[index] == null)
+                return;
+
+            if (FleetIsAway() && _slotOccupied[index])
+            {
+                _slotButtons[index].text = "Away";
+                return;
+            }
+
             _slotButtons[index].text = _slotOccupied[index] ? "Remove Ship" : "Add Ship";
         }
 

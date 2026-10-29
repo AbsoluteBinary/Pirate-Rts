@@ -52,11 +52,6 @@ namespace _Project.Scripts.Fleet
         //     
         //     ActiveFleets.SetPosition(PendingLaunch.FleetName, transform.position);
         //
-        //     float health01 = 1f;
-        //     var health = player.GetComponentInChildren<_Project.Scripts.Combat.Health>(true);
-        //     if (health != null && health.MaxHealth > 0f)
-        //         health01 = health.CurrentHealth / health.MaxHealth;
-        //
         //     string fleetName = string.IsNullOrWhiteSpace(PendingLaunch.FleetName)
         //         ? flag.shipName
         //         : PendingLaunch.FleetName;

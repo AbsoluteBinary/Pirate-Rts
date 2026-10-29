@@ -7,8 +7,8 @@ namespace _Project.Scripts.Fleet
     public class MapFleet
     {
         public string Name;
-        public float Health01;
         public Transform Pawn;
+        public string SaveId;
     }
 
     public static class MapFleets
@@ -25,7 +25,7 @@ namespace _Project.Scripts.Fleet
                 Selected = Active.Count - 1;
         }
 
-        public static void Register(string name, float health01, Transform pawn)
+        public static void Register(string name, float health01, Transform pawn, string saveId = null)
         {
             Prune();
             if (pawn == null)
@@ -39,7 +39,7 @@ namespace _Project.Scripts.Fleet
                 if (Active[i].Pawn == pawn)
                 {
                     Active[i].Name = name;
-                    Active[i].Health01 = Mathf.Clamp01(health01);
+                    Active[i].SaveId = saveId;
                     if (Selected < 0)
                         Selected = i;
                     Changed?.Invoke();
@@ -53,7 +53,7 @@ namespace _Project.Scripts.Fleet
             Active.Add(new MapFleet
             {
                 Name = name,
-                Health01 = Mathf.Clamp01(health01),
+                SaveId = saveId,
                 Pawn = pawn
             });
 

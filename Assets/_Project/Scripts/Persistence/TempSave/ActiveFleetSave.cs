@@ -22,6 +22,7 @@ namespace _Project.Scripts.Persistence.TempSave
         public Vector3 position;
         public List<ActiveFleetShipRecord> ships = new List<ActiveFleetShipRecord>();
         public string flagshipShipId;
+        public bool hasPosition;
     }
 
     [Serializable]

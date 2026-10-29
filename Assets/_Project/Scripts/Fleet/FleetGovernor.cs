@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using _Project.Scripts.Combat;
 using _Project.Scripts.Persistence.TempSave;
+using _Project.Scripts.Harbour.ShipBuilder;
 using _Project.Scripts.Harbour.ShipBuilder.Data;
 using _Project.Scripts.PlayerShip_Movement;
 using _Project.Scripts.PlayerShip_Movement.Combat;
@@ -176,16 +177,95 @@ namespace _Project.Scripts.Fleet
             }
 
             player.AttachFlagship(flag.shipPrefab, flag.shipName, helm.transform);
+            ActiveFleets.Load();
+            if (ActiveFleets.Current?.fleets != null)
+            {
+                foreach (var fleet in ActiveFleets.Current.fleets)
+                {
+                    if (fleet == null || fleet.fleetName != FleetName || !fleet.hasPosition)
+                        continue;
+
+                    helm.transform.position = fleet.position;
+                    break;
+                }
+            }
             helm.enabled = true;
             MapFleets.Register(
                 string.IsNullOrWhiteSpace(FleetName) ? flag.shipName : FleetName,
                 1f,
-                helm.transform);
+                helm.transform,
+                flag.saveId);
             Debug.Log($"<color=lime>[Governor] Map body is '{flag.shipName}'</color>");
+        }
+
+        private ShipBlueprint FlagshipFromFile()
+        {
+            ActiveFleets.Load();
+            string shipId = null;
+
+            if (ActiveFleets.Current?.fleets != null)
+            {
+                foreach (var fleet in ActiveFleets.Current.fleets)
+                {
+                    if (fleet == null || fleet.sceneName != ActiveFleets.FreeRoamScene)
+                        continue;
+                    if (string.IsNullOrEmpty(fleet.flagshipShipId))
+                        continue;
+
+                    shipId = fleet.flagshipShipId;
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(shipId))
+                return null;
+
+            var store = new JsonShipSaveStore();
+            if (!store.TryRead(out var data) || data?.ships == null)
+                return null;
+
+            ShipBuildRecord record = null;
+            foreach (var ship in data.ships)
+            {
+                if (ship != null && ship.id == shipId)
+                {
+                    record = ship;
+                    break;
+                }
+            }
+
+            if (record == null)
+                return null;
+
+            var blueprint = ScriptableObject.CreateInstance<ShipBlueprint>();
+            blueprint.shipName = record.shipName;
+            blueprint.saveId = record.id;
+
+            foreach (var hull in HullLibrary.All)
+            {
+                if (hull == null)
+                    continue;
+                if (hull.name != record.hullId && hull.hullName != record.hullId)
+                    continue;
+
+                blueprint.shipPrefab = hull.combatPrefab;
+                break;
+            }
+
+            return blueprint.shipPrefab != null ? blueprint : null;
         }
 
         private ShipBlueprint FlagshipBlueprint()
         {
+            var fromFile = FlagshipFromFile();
+            if (fromFile != null)
+            {
+                Debug.Log($"<color=lime>[Governor] Flagship from the file: {fromFile.shipName}</color>");
+                return fromFile;
+            }
+
+            Debug.LogWarning("[Governor] No flagship in ActiveFleets. Using the launch memory.");
+
             if (_ships.Count == 0 && PendingLaunch.Ships != null)
                 TakeLaunch(PendingLaunch.FleetName, PendingLaunch.Ships, PendingLaunch.FlagShipIndex);
 

@@ -143,6 +143,7 @@ namespace _Project.Scripts.Fleet
             if (record == null)
                 return;
             record.position = position;
+            record.hasPosition = true;
             Save();
         }
 
