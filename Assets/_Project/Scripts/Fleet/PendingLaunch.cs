@@ -16,5 +16,12 @@ namespace _Project.Scripts.Fleet
             FlagShipIndex = flagIndex;
             FleetName = fleetName ?? "";
         }
+
+        public static void Clear()
+        {
+            for (int i = 0; i < Size; i++)
+                Ships[i] = null;
+            FleetName = "";
+        }
     }
 }

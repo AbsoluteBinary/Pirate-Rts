@@ -139,6 +139,16 @@ namespace _Project.Scripts.Fleet
             WriteShipHealth();
         }
 
+        public void Release()
+        {
+            FleetName = "";
+            FlagshipBody = null;
+            MapBody = null;
+            _ships.Clear();
+            _current.Clear();
+            _max.Clear();
+        }
+
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Bind(scene);
@@ -165,37 +175,106 @@ namespace _Project.Scripts.Fleet
                     break;
                 }
             }
+
             if (player == null || helm == null)
                 return;
 
             MapBody = player;
-            var flag = FlagshipBlueprint();
-            if (flag == null || flag.shipPrefab == null)
-            {
-                Debug.LogWarning("[Governor] FreeRoam opened with no flagship.");
+            MapFleetBodies.Clear();
+            ActiveFleets.Load();
+
+            var scene = helm.gameObject.scene;
+            Vector3 spawn = helm.transform.position;
+            int placed = 0;
+            bool helmUsed = false;
+
+            if (ActiveFleets.Current?.fleets == null)
                 return;
+
+            foreach (var fleet in ActiveFleets.Current.fleets)
+            {
+                if (fleet == null || fleet.sceneName != ActiveFleets.FreeRoamScene)
+                    continue;
+
+                var blueprint = BlueprintFor(fleet.flagshipShipId);
+                if (blueprint == null || blueprint.shipPrefab == null)
+                    continue;
+
+                bool drives = fleet.fleetName == FleetName;
+                if (!helmUsed && string.IsNullOrEmpty(FleetName))
+                {
+                    drives = true;
+                    FleetName = fleet.fleetName;
+                }
+
+                Vector3 position = fleet.hasPosition ? fleet.position : spawn;
+
+                if (drives && !helmUsed)
+                {
+                    player.AttachFlagship(blueprint.shipPrefab, blueprint.shipName, helm.transform);
+                    if (fleet.hasPosition)
+                        helm.transform.position = position;
+                    helm.enabled = true;
+                    MapFleetBodies.Remember(fleet.fleetName, helm.transform);
+                    helmUsed = true;
+                }
+                else
+                {
+                    var visual = Instantiate(blueprint.shipPrefab, position, Quaternion.identity);
+                    visual.name = string.IsNullOrEmpty(blueprint.shipName) ? fleet.fleetName : blueprint.shipName;
+                    SceneManager.MoveGameObjectToScene(visual, scene);
+
+                    var extraHelm = visual.GetComponent<PlayerCombatMovementController>();
+                    if (extraHelm != null)
+                        extraHelm.enabled = false;
+
+                    MapFleetBodies.Remember(fleet.fleetName, visual.transform);
+                }
+
+                placed++;
             }
 
-            player.AttachFlagship(flag.shipPrefab, flag.shipName, helm.transform);
-            ActiveFleets.Load();
-            if (ActiveFleets.Current?.fleets != null)
-            {
-                foreach (var fleet in ActiveFleets.Current.fleets)
-                {
-                    if (fleet == null || fleet.fleetName != FleetName || !fleet.hasPosition)
-                        continue;
+            Debug.Log($"<color=lime>[Governor] {placed} ship(s) on the water</color>");
+        }
 
-                    helm.transform.position = fleet.position;
+        private ShipBlueprint BlueprintFor(string saveId)
+        {
+            if (string.IsNullOrEmpty(saveId))
+                return null;
+
+            var store = new JsonShipSaveStore();
+            if (!store.TryRead(out var data) || data?.ships == null)
+                return null;
+
+            ShipBuildRecord record = null;
+            foreach (var ship in data.ships)
+            {
+                if (ship != null && ship.id == saveId)
+                {
+                    record = ship;
                     break;
                 }
             }
-            helm.enabled = true;
-            MapFleets.Register(
-                string.IsNullOrWhiteSpace(FleetName) ? flag.shipName : FleetName,
-                1f,
-                helm.transform,
-                flag.saveId);
-            Debug.Log($"<color=lime>[Governor] Map body is '{flag.shipName}'</color>");
+
+            if (record == null)
+                return null;
+
+            var blueprint = ScriptableObject.CreateInstance<ShipBlueprint>();
+            blueprint.shipName = record.shipName;
+            blueprint.saveId = record.id;
+
+            foreach (var hull in HullLibrary.All)
+            {
+                if (hull == null)
+                    continue;
+                if (hull.name != record.hullId && hull.hullName != record.hullId)
+                    continue;
+
+                blueprint.shipPrefab = hull.combatPrefab;
+                break;
+            }
+
+            return blueprint.shipPrefab != null ? blueprint : null;
         }
 
         private ShipBlueprint FlagshipFromFile()
@@ -292,18 +371,52 @@ namespace _Project.Scripts.Fleet
 
         private void WriteActiveFleet()
         {
-            var data = new ActiveFleetSaveData();
-            var record = new ActiveFleetRecord
+            if (string.IsNullOrEmpty(FleetName))
+                return;
+
+            ActiveFleets.Load();
+            var data = ActiveFleets.Current;
+            if (data.fleets == null)
+                data.fleets = new List<ActiveFleetRecord>();
+
+            ActiveFleetRecord record = null;
+            for (int i = 0; i < data.fleets.Count; i++)
             {
-                id = string.IsNullOrEmpty(FleetName) ? "fleet" : FleetName,
-                fleetName = FleetName,
-                sceneName = _scene,
-                position = MapBody != null ? MapBody.transform.position : Vector3.zero
-            };
+                if (data.fleets[i] != null && data.fleets[i].fleetName == FleetName)
+                {
+                    record = data.fleets[i];
+                    break;
+                }
+            }
+
+            if (record == null)
+            {
+                record = new ActiveFleetRecord
+                {
+                    id = FleetName,
+                    fleetName = FleetName,
+                    slotIndex = data.fleets.Count
+                };
+                data.fleets.Add(record);
+            }
+
+            record.sceneName = _scene;
+            // PENDING: MapSailController has no thePawn, so this block is held back.
+            // if (MapBody != null && MapBody.thePawn != null)
+            // {
+            //     record.position = MapBody.thePawn.position;
+            //     record.hasPosition = true;
+            // }
+
+            record.ships = new List<ActiveFleetShipRecord>();
+            record.flagshipShipId = "";
 
             for (int i = 0; i < _ships.Count; i++)
             {
                 var ship = _ships[i];
+                if (ship == null)
+                    continue;
+
                 record.ships.Add(new ActiveFleetShipRecord
                 {
                     shipId = ship.saveId,
@@ -312,12 +425,12 @@ namespace _Project.Scripts.Fleet
                     maxHealth = _max[i],
                     alive = _current[i] > 0f
                 });
-                if (ship == FlagshipBlueprint())
+
+                if (i == FlagIndex)
                     record.flagshipShipId = ship.saveId;
             }
 
-            data.fleets.Add(record);
-            new JsonActiveFleetSaveStore().Write(data);
+            ActiveFleets.Save();
         }
 
         private void WriteShipHealth()

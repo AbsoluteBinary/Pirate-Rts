@@ -33,6 +33,15 @@ namespace _Project.Scripts.Fleet
             Changed?.Invoke();
         }
 
+        public static void Recall(string fleetName)
+        {
+            if (Current?.fleets == null || string.IsNullOrWhiteSpace(fleetName))
+                return;
+
+            Current.fleets.RemoveAll(fleet => fleet != null && fleet.fleetName == fleetName);
+            Save();
+        }
+
         public static ActiveFleetRecord AtSlot(int slot)
         {
             if (Current?.fleets == null)

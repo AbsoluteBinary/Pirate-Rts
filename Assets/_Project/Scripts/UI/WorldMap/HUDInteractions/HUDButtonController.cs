@@ -1,3 +1,4 @@
+using _Project.Scripts.Fleet;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
 using UnityEngine;
@@ -36,6 +37,7 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
 
         public void OnMarkerButtonClicked()
         {
+            MapFleetBodies.SavePositions();
             if (IMGUILoadingOverlay.Instance != null)
             {
                 IMGUILoadingOverlay.Instance.TriggerLoadingScreen();

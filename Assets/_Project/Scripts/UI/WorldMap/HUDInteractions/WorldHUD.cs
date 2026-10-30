@@ -58,6 +58,7 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
             root.Add(bar);
 
             bar.Add(CreateButton("EnterHarbourButton", "Enter Harbour", new Color(0.18f, 0.22f, 0.38f), OnEnterHarbour));
+            bar.Add(CreateButton("ReturnToDockButton", "Return to Dock", new Color(0.15f, 0.34f, 0.30f), OnReturnToDock));
             bar.Add(CreateButton("ExitToLoginButton", "Exit to Login", new Color(0.22f, 0.22f, 0.26f), OnExitToLogin));
 
             root.Add(CreateFleetPanel());
@@ -248,6 +249,31 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
         {
             LoginMenuManager.Instance?.StartLoadingTransition();
             HUDMenuButtonsEventBus.TriggerHUDEnterBaseClicked();
+        }
+
+        private void OnReturnToDock()
+        {
+            string name = null;
+            if (_selectedFleet >= 0)
+            {
+                var fleet = ActiveFleets.AtSlot(_selectedFleet);
+                if (fleet != null)
+                    name = fleet.fleetName;
+            }
+
+            if (string.IsNullOrEmpty(name) && FleetGovernor.Instance != null)
+                name = FleetGovernor.Instance.FleetName;
+
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.LogWarning("[World] No fleet selected to bring home.");
+                return;
+            }
+
+            ActiveFleets.Recall(name);
+            PendingLaunch.Clear();
+            FleetGovernor.Instance?.Release();
+            OnEnterHarbour();
         }
 
         private static void OnEnterBattle()
