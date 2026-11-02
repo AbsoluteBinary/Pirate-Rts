@@ -34,6 +34,24 @@ namespace _Project.Scripts.Fleet
 
             All.Add(new Body { FleetName = fleetName, Transform = body });
         }
+        
+        public static Transform Forget(string fleetName)
+        {
+            if (string.IsNullOrEmpty(fleetName))
+                return null;
+
+            for (int i = 0; i < All.Count; i++)
+            {
+                if (All[i].FleetName != fleetName)
+                    continue;
+
+                var body = All[i].Transform;
+                All.RemoveAt(i);
+                return body;
+            }
+
+            return null;
+        }
 
         public static void SavePositions()
         {

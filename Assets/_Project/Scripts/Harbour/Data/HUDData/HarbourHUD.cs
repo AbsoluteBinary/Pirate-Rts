@@ -222,6 +222,21 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             exitLogin.style.borderBottomRightRadius = 8;
             exitLogin.clicked += ExitToLogin;
             topBar.Add(exitLogin);
+            
+            var dock = new Button { text = "Dock" };
+            dock.style.minWidth = 140;
+            dock.style.height = 44;
+            dock.style.marginLeft = 16;
+            dock.style.fontSize = 17;
+            dock.style.unityFontStyleAndWeight = FontStyle.Bold;
+            dock.style.backgroundColor = new StyleColor(new Color(0.15f, 0.34f, 0.30f));
+            dock.style.color = Color.white;
+            dock.style.borderTopLeftRadius = 8;
+            dock.style.borderTopRightRadius = 8;
+            dock.style.borderBottomLeftRadius = 8;
+            dock.style.borderBottomRightRadius = 8;
+            dock.clicked += () => OnDockClicked?.Invoke();
+            topBar.Add(dock);
 
             topBar.Add(buildTrigger);
             topBar.Add(buildDropdown);

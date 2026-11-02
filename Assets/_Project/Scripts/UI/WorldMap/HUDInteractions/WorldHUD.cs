@@ -1,7 +1,10 @@
 using _Project.Scripts.Fleet;
 using _Project.Scripts.Main_Screen;
+using _Project.Scripts.PlayerShip_Movement.Combat;
+using _Project.Scripts.PlayerShip_Movement.UI;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -17,6 +20,8 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
         private readonly Label[] _fleetNames = new Label[FleetSlotCount];
         private readonly VisualElement[] _fleetFills = new VisualElement[FleetSlotCount];
         private int _selectedFleet = -1;
+        
+        private bool _sendingHome;
 
         private static readonly Color RowBorder = new Color(0.25f, 0.35f, 0.55f);
         private static readonly Color RowSelected = new Color(0.85f, 0.72f, 0.35f);
@@ -253,27 +258,98 @@ namespace _Project.Scripts.UI.WorldMap.HUDInteractions
 
         private void OnReturnToDock()
         {
-            string name = null;
-            if (_selectedFleet >= 0)
-            {
-                var fleet = ActiveFleets.AtSlot(_selectedFleet);
-                if (fleet != null)
-                    name = fleet.fleetName;
-            }
+            if (_sendingHome)
+                return;
 
-            if (string.IsNullOrEmpty(name) && FleetGovernor.Instance != null)
-                name = FleetGovernor.Instance.FleetName;
-
-            if (string.IsNullOrEmpty(name))
+            if (_selectedFleet < 0)
             {
-                Debug.LogWarning("[World] No fleet selected to bring home.");
+                Debug.LogWarning("[World] Select a fleet to bring home.");
                 return;
             }
 
+            var fleet = ActiveFleets.AtSlot(_selectedFleet);
+            if (fleet == null || string.IsNullOrEmpty(fleet.fleetName))
+            {
+                Debug.LogWarning("[World] That slot is empty.");
+                return;
+            }
+
+            var harbour = GameObject.Find("Harbour");
+            if (harbour == null)
+            {
+                Debug.LogWarning("[World] No harbour on the map.");
+                return;
+            }
+
+            string name = fleet.fleetName;
+            var body = MapFleetBodies.Forget(name);
+            if (body == null)
+            {
+                SendHome(name, null);
+                return;
+            }
+
+            
+            _sendingHome = true;
+            float distance = Vector3.Distance(body.position, harbour.transform.position);
+            float seconds = Mathf.Max(0.6f, distance / 12f);
+
+            var mover = body.GetComponent<PlayerCombatMovementController>();
+            if (mover == null)
+                mover = body.GetComponentInChildren<PlayerCombatMovementController>(true);
+
+            if (mover == null)
+            {
+                Debug.LogWarning("[World] That ship has no helm. Sending it home where it stands.");
+                SendHome(name, body);
+                return;
+            }
+
+            mover.enabled = true;
+            _sendingHome = true;
+
+            System.Action arrived = null;
+            arrived = () =>
+            {
+                mover.OnArrived -= arrived;
+                SendHome(name, body);
+            };
+
+            mover.OnArrived += arrived;
+            mover.MoveToLocation(harbour.transform.position);
+        }
+
+        private void SendHome(string name, Transform body)
+        {
+            var governor = FleetGovernor.Instance;
+            bool isPawn = governor != null
+                          && governor.MapBody != null
+                          && governor.MapBody.Helm != null
+                          && body == governor.MapBody.Helm.transform;
+
+            if (body != null)
+            {
+                if (isPawn)
+                {
+                    for (int i = body.childCount - 1; i >= 0; i--)
+                        Destroy(body.GetChild(i).gameObject);
+                }
+                else
+                {
+                    Destroy(body.gameObject);
+                }
+            }
+
             ActiveFleets.Recall(name);
-            PendingLaunch.Clear();
-            FleetGovernor.Instance?.Release();
-            OnEnterHarbour();
+
+            if (governor != null && governor.FleetName == name)
+            {
+                PendingLaunch.Clear();
+                governor.Release();
+            }
+
+            _sendingHome = false;
+            Debug.Log($"<color=lime>[World] '{name}' sent home</color>");
         }
 
         private static void OnEnterBattle()
