@@ -40,6 +40,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         private VisualElement _dockRoot;
         private VisualElement _dockPanel;
         private VisualElement _recallPopup;
+        private VisualElement _noticePopup;
         private VisualElement _fleetStoragePanel;
         private Tween _fleetTween;
         private float _fleetShown;
@@ -623,6 +624,14 @@ namespace _Project.Scripts.Harbour.Data.HUDData
                     input = field.Q<VisualElement>(className: "unity-text-input");
                 if (input == null) return;
 
+                input.style.height = Length.Percent(100);
+                input.style.marginTop = 0;
+                input.style.marginBottom = 0;
+                input.style.paddingTop = 6;
+                input.style.paddingBottom = 6;
+                input.style.paddingLeft = 6;
+                input.style.paddingRight = 6;
+
                 input.style.color = Color.white;
                 input.style.backgroundColor = new Color(0.08f, 0.12f, 0.22f, 1f);
                 input.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -746,17 +755,20 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             frame.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
             col.Add(frame);
 
-            var nameField = new TextField { name = $"StorageName_{index}", value = "" };
-            nameField.SetEnabled(false);
-            nameField.style.width = 88;
-            nameField.style.marginTop = 6;
-            nameField.style.fontSize = 11;
-            col.Add(nameField);
+            var nameLabel = new Label { name = $"StorageName_{index}", text = "" };
+            nameLabel.style.width = 100;
+            nameLabel.style.marginTop = 6;
+            nameLabel.style.fontSize = 15;
+            nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            nameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            nameLabel.style.whiteSpace = WhiteSpace.Normal;
+            nameLabel.style.color = Color.white;
+            col.Add(nameLabel);
 
             var status = new Label { name = $"StorageStatus_{index}", text = "" };
             status.style.width = 88;
             status.style.marginTop = 2;
-            status.style.fontSize = 10;
+            status.style.fontSize = 13;
             status.style.color = new Color(0.7f, 0.85f, 0.95f);
             status.style.unityTextAlign = TextAnchor.MiddleCenter;
             col.Add(status);
@@ -782,7 +794,9 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         {
             HideRecallPopup();
 
-            if (fleetInventory == null || index < 0 || index >= fleetInventory.fleets.Count)
+            if (fleetInventory == null || _dockPanel == null || _fleetStoragePanel == null)
+                return;
+            if (index < 0 || index >= fleetInventory.fleets.Count)
                 return;
 
             var fleet = fleetInventory.fleets[index];
@@ -791,9 +805,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
 
             var popup = new VisualElement { name = "RecallPopup" };
             popup.style.position = Position.Absolute;
-            popup.style.top = Length.Percent(100);
-            popup.style.left = 0;
-            popup.style.marginTop = 4;
+            popup.style.width = 148;
             popup.style.paddingTop = 6;
             popup.style.paddingBottom = 6;
             popup.style.paddingLeft = 6;
@@ -832,8 +844,41 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             };
 
             popup.Add(recall);
-            slot.Add(popup);
-            _recallPopup = popup;
+
+            const float popupWidth = 148f;
+            const float popupHeight = 44f;
+
+            Vector2 slotInDock = slot.ChangeCoordinatesTo(_dockPanel, Vector2.zero);
+            Vector2 storageInDock = _fleetStoragePanel.ChangeCoordinatesTo(_dockPanel, Vector2.zero);
+
+            float x = storageInDock.x - popupWidth - 10f;
+            float y = slotInDock.y;
+            float maxY = _dockPanel.resolvedStyle.height - popupHeight - 8f;
+            if (maxY > 8f)
+                y = Mathf.Clamp(y, 8f, maxY);
+
+            popup.style.left = x;
+            popup.style.top = y;
+
+            var catcher = new VisualElement { name = "RecallCatcher" };
+            catcher.style.position = Position.Absolute;
+            catcher.style.left = 0;
+            catcher.style.top = 0;
+            catcher.style.right = 0;
+            catcher.style.bottom = 0;
+            catcher.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (popup.worldBound.Contains(evt.position))
+                    return;
+
+                HideRecallPopup();
+                evt.StopPropagation();
+            });
+
+            catcher.Add(popup);
+            _dockPanel.Add(catcher);
+            catcher.BringToFront();
+            _recallPopup = catcher;
         }
 
         private void HideRecallPopup()
@@ -901,6 +946,7 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             main.Add(CreateLaunchButton());
             main.Add(CreateFleetNameField());
             main.Add(CreateSaveFleetRow());
+            main.Add(CreateFleetToolsRow());
             main.Add(CreateFleetRow());
             main.Add(CreateCostsBlock());
             main.Add(CreateRepairBlock());
@@ -909,26 +955,50 @@ namespace _Project.Scripts.Harbour.Data.HUDData
         }
         private VisualElement CreateLaunchButton()
         {
-            var btn = new Button { text = "Launch Fleet" };
-            btn.style.height = 48;
-            btn.style.marginTop = 4;
-            btn.style.marginBottom = 6;
-            btn.style.fontSize = 18;
-            btn.style.unityFontStyleAndWeight = FontStyle.Bold;
-            btn.style.color = Color.white;
-            btn.style.backgroundColor = new Color(0.18f, 0.42f, 0.22f);
-            btn.style.borderTopLeftRadius = 8;
-            btn.style.borderTopRightRadius = 8;
-            btn.style.borderBottomLeftRadius = 8;
-            btn.style.borderBottomRightRadius = 8;
-            btn.clicked += LaunchFleet;
-            return btn;
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.height = 48;
+            row.style.marginTop = 4;
+            row.style.marginBottom = 6;
+
+            var launch = new Button { text = "Launch Fleet" };
+            launch.style.flexGrow = 1;
+            launch.style.height = 48;
+            launch.style.marginRight = 6;
+            launch.style.fontSize = 16;
+            launch.style.unityFontStyleAndWeight = FontStyle.Bold;
+            launch.style.color = Color.white;
+            launch.style.backgroundColor = new Color(0.18f, 0.42f, 0.22f);
+            launch.style.borderTopLeftRadius = 8;
+            launch.style.borderTopRightRadius = 8;
+            launch.style.borderBottomLeftRadius = 8;
+            launch.style.borderBottomRightRadius = 8;
+            launch.clicked += LaunchFleet;
+
+            var stay = new Button { text = "Launch & Stay" };
+            stay.style.flexGrow = 1;
+            stay.style.height = 48;
+            stay.style.marginLeft = 6;
+            stay.style.fontSize = 16;
+            stay.style.unityFontStyleAndWeight = FontStyle.Bold;
+            stay.style.color = Color.white;
+            stay.style.backgroundColor = new Color(0.15f, 0.34f, 0.30f);
+            stay.style.borderTopLeftRadius = 8;
+            stay.style.borderTopRightRadius = 8;
+            stay.style.borderBottomLeftRadius = 8;
+            stay.style.borderBottomRightRadius = 8;
+            stay.clicked += LaunchFleetAndStay;
+
+            row.Add(launch);
+            row.Add(stay);
+            return row;
         }
         
         private VisualElement CreateFleetNameField()
         {
             _fleetNameField = new TextField { value = FleetNameHint };
-            _fleetNameField.style.height = 36;
+            _fleetNameField.style.height = 48;
+            _fleetNameField.style.minHeight = 48;
             _fleetNameField.style.fontSize = 16;
             _fleetNameField.style.color = Color.white;
             _fleetNameField.style.marginTop = 0;
@@ -959,6 +1029,69 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             return _fleetNameField;
         }
         
+        private VisualElement CreateFleetToolsRow()
+        {
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.height = 40;
+            row.style.marginBottom = 12;
+
+            var construct = new Button { text = "Construct a Fleet" };
+            construct.style.flexGrow = 1;
+            construct.style.height = 40;
+            construct.style.marginRight = 6;
+            construct.style.fontSize = 15;
+            construct.style.color = Color.white;
+            construct.style.backgroundColor = new Color(0.18f, 0.22f, 0.38f);
+            construct.style.borderTopLeftRadius = 8;
+            construct.style.borderTopRightRadius = 8;
+            construct.style.borderBottomLeftRadius = 8;
+            construct.style.borderBottomRightRadius = 8;
+            construct.clicked += ConstructFleet;
+
+            var clear = new Button { text = "Clear Fleet" };
+            clear.style.flexGrow = 1;
+            clear.style.height = 40;
+            clear.style.marginLeft = 6;
+            clear.style.fontSize = 15;
+            clear.style.color = Color.white;
+            clear.style.backgroundColor = new Color(0.28f, 0.22f, 0.22f);
+            clear.style.borderTopLeftRadius = 8;
+            clear.style.borderTopRightRadius = 8;
+            clear.style.borderBottomLeftRadius = 8;
+            clear.style.borderBottomRightRadius = 8;
+            clear.clicked += ClearFleet;
+
+            row.Add(construct);
+            row.Add(clear);
+            return row;
+        }
+
+        private void ConstructFleet()
+        {
+            if (_fleetStoragePanel == null || !_fleetsOpen)
+                return;
+
+            ToggleFleets();
+        }
+
+        private void ClearFleet()
+        {
+            if (_fleetNameField != null)
+                _fleetNameField.value = FleetNameHint;
+
+            for (int i = 0; i < FleetSize; i++)
+            {
+                _slotShips[i] = null;
+                _slotOccupied[i] = false;
+                ApplyDockSlotPortrait(i);
+                RefreshSlotButton(i);
+            }
+
+            HideRecallPopup();
+            RefreshFlagshipHealth();
+        }
+
         private VisualElement CreateSaveFleetRow()
         {
             var row = new VisualElement();
@@ -1099,28 +1232,139 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             return true;
         }
 
-        private void LaunchFleet()
+        private void ShowDockNotice(string message)
         {
-            if (!TrySaveFleet()) return;
+            HideDockNotice();
+            if (_dockPanel == null)
+                return;
+
+            var popup = new VisualElement { name = "DockNotice" };
+            popup.style.position = Position.Absolute;
+            popup.style.left = Length.Percent(50);
+            popup.style.top = Length.Percent(38);
+            popup.style.translate = new Translate(Length.Percent(-50), 0);
+            popup.style.width = 340;
+            popup.style.paddingTop = 16;
+            popup.style.paddingBottom = 14;
+            popup.style.paddingLeft = 16;
+            popup.style.paddingRight = 16;
+            popup.style.backgroundColor = new Color(0.08f, 0.12f, 0.22f, 0.98f);
+            popup.style.borderTopWidth = 1;
+            popup.style.borderRightWidth = 1;
+            popup.style.borderBottomWidth = 1;
+            popup.style.borderLeftWidth = 1;
+            popup.style.borderTopColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            popup.style.borderRightColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            popup.style.borderBottomColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            popup.style.borderLeftColor = new Color(0.4f, 0.8f, 1f, 0.9f);
+            popup.style.borderTopLeftRadius = 8;
+            popup.style.borderTopRightRadius = 8;
+            popup.style.borderBottomLeftRadius = 8;
+            popup.style.borderBottomRightRadius = 8;
+
+            var label = new Label(message);
+            label.style.color = Color.white;
+            label.style.fontSize = 16;
+            label.style.whiteSpace = WhiteSpace.Normal;
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            label.style.marginBottom = 12;
+            popup.Add(label);
+
+            var ok = new Button { text = "OK" };
+            ok.style.height = 36;
+            ok.style.fontSize = 15;
+            ok.style.color = Color.white;
+            ok.style.backgroundColor = new Color(0.15f, 0.34f, 0.30f);
+            ok.style.borderTopLeftRadius = 6;
+            ok.style.borderTopRightRadius = 6;
+            ok.style.borderBottomLeftRadius = 6;
+            ok.style.borderBottomRightRadius = 6;
+            ok.clicked += HideDockNotice;
+            popup.Add(ok);
+
+            var catcher = new VisualElement { name = "NoticeCatcher" };
+            catcher.style.position = Position.Absolute;
+            catcher.style.left = 0;
+            catcher.style.top = 0;
+            catcher.style.right = 0;
+            catcher.style.bottom = 0;
+            catcher.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (popup.worldBound.Contains(evt.position))
+                    return;
+
+                HideDockNotice();
+                evt.StopPropagation();
+            });
+
+            catcher.Add(popup);
+            _dockPanel.Add(catcher);
+            catcher.BringToFront();
+            _noticePopup = catcher;
+        }
+
+        private void HideDockNotice()
+        {
+            if (_noticePopup == null)
+                return;
+
+            _noticePopup.RemoveFromHierarchy();
+            _noticePopup = null;
+        }
+
+        private bool PrepareLaunch()
+        {
+            string fleetName = _fleetNameField != null ? _fleetNameField.value.Trim() : "";
+            if (string.IsNullOrEmpty(fleetName) || fleetName == FleetNameHint)
+            {
+                ShowDockNotice("Name the fleet before launching.");
+                return false;
+            }
+
+            bool anyShip = false;
+            for (int i = 0; i < FleetSize; i++)
+            {
+                if (_slotShips[i] != null)
+                {
+                    anyShip = true;
+                    break;
+                }
+            }
+
+            if (!anyShip)
+            {
+                ShowDockNotice("Assign a ship, or choose a fleet from storage.");
+                return false;
+            }
+
+            if (_slotShips[FlagShipIndex] == null)
+            {
+                ShowDockNotice("Put a ship in the Flag Ship slot.");
+                return false;
+            }
 
             if (FleetIsAway())
             {
-                Debug.Log("[Dock] That fleet is already at sea. Use Enter World.");
-                return;
-            }
-            
-            if (_slotShips[FlagShipIndex] == null)
-            {
-                Debug.LogWarning("[Dock] Put a ship in the Flag Ship slot first.");
-                return;
+                ShowDockNotice("That fleet is already at sea.");
+                return false;
             }
 
-            PendingLaunch.Capture(_slotShips, FlagShipIndex, _fleetNameField.value.Trim());
+            if (!TrySaveFleet())
+                return false;
+
+            PendingLaunch.Capture(_slotShips, FlagShipIndex, fleetName);
             FleetGovernor.Instance?.TakeLaunch(
                 PendingLaunch.FleetName,
                 PendingLaunch.Ships,
                 PendingLaunch.FlagShipIndex);
-            ActiveFleets.Launch(_fleetNameField.value.Trim(), _slotShips, ActiveFleets.FreeRoamScene);
+            ActiveFleets.Launch(fleetName, _slotShips, ActiveFleets.FreeRoamScene);
+            return true;
+        }
+
+        private void LaunchFleet()
+        {
+            if (!PrepareLaunch())
+                return;
 
             CloseDock();
             GetComponent<HarbourHUD>()?.HideAllUI();
@@ -1133,7 +1377,57 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             else
                 Debug.LogError("[Dock] SceneLoader missing.");
         }
+
+        private void LaunchFleetAndStay()
+        {
+            if (!PrepareLaunch())
+                return;
+
+            RefreshFleetStorageList();
+            RefreshAllSlotButtons();
+            ShowDockNotice("Fleet sent to sea. You are still in the Dock.");
+        }
         
+        private Color FleetTextColor(FleetBlueprint fleet)
+        {
+            bool away = FleetNameIsAway(fleet.fleetName);
+            int ships = 0;
+            int dead = 0;
+            bool hurt = false;
+
+            if (fleet.ships != null)
+            {
+                foreach (var ship in fleet.ships)
+                {
+                    if (ship == null)
+                        continue;
+
+                    float current = ship.currentHealth;
+                    float max = ship.totalHealth > 0f ? ship.totalHealth : 100f;
+                    if (!string.IsNullOrEmpty(ship.saveId)
+                        && ShipHealthFile.TryGet(ship.saveId, out float savedCurrent, out float savedMax))
+                    {
+                        current = savedCurrent;
+                        max = savedMax;
+                    }
+
+                    ships++;
+                    if (current <= 0f)
+                        dead++;
+                    else if (current < max)
+                        hurt = true;
+                }
+            }
+
+            if (ships > 0 && dead == ships)
+                return new Color(0.95f, 0.28f, 0.24f);
+            if (hurt || dead > 0)
+                return new Color(1f, 0.55f, 0.12f);
+            if (away)
+                return Color.cyan;
+            return Color.white;
+        }
+
         private void RefreshFleetStorageList()
         {
             if (_dockPanel == null) return;
@@ -1143,18 +1437,25 @@ namespace _Project.Scripts.Harbour.Data.HUDData
             for (int i = 0; i < StorageSlotCount; i++)
             {
                 var fleet = i < count ? fleetInventory.fleets[i] : null;
-                var nameField = _dockPanel.Q<TextField>($"StorageName_{i}");
                 var frame = _dockPanel.Q<VisualElement>($"StorageFrame_{i}");
 
-                if (nameField != null)
+                var nameLabel = _dockPanel.Q<Label>($"StorageName_{i}");
+                var status = _dockPanel.Q<Label>($"StorageStatus_{i}");
+                Color tone = fleet != null ? FleetTextColor(fleet) : Color.white;
+
+                if (nameLabel != null)
+                {
+                    nameLabel.text = fleet != null ? fleet.fleetName : "";
+                    nameLabel.style.color = tone;
+                    nameLabel.style.fontSize = 15;
+                }
+
+                if (status != null)
                 {
                     bool away = fleet != null && FleetNameIsAway(fleet.fleetName);
-                    nameField.value = fleet != null ? fleet.fleetName : "";
-                    nameField.style.color = Color.white;
-
-                    var status = _dockPanel.Q<Label>($"StorageStatus_{i}");
-                    if (status != null)
-                        status.text = fleet == null ? "" : away ? "At sea" : "In dock";
+                    status.text = fleet == null ? "" : away ? "At sea" : "In dock";
+                    status.style.color = tone;
+                    status.style.fontSize = 13;
                 }
 
                 if (frame == null) continue;

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using _Project.Scripts.Combat;
 using _Project.Scripts.Fleet;
+using _Project.Scripts.Persistence.TempSave;
 using _Project.Scripts.UI.WorldMap.HUDInteractions;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,14 +10,18 @@ namespace _Project.Scripts.UI.Combat
 {
     public class CombatHUDGeneric : MonoBehaviour
     {
-        private const int FleetSlotCount = 4;
+        private const int ShipSlotCount = 5;
 
         [SerializeField] private PanelRenderer panelRenderer;
 
-        private readonly Label[] _fleetNames = new Label[FleetSlotCount];
-        private readonly VisualElement[] _fleetFills = new VisualElement[FleetSlotCount];
+        private readonly Label[] _shipNames = new Label[ShipSlotCount];
+        private readonly VisualElement[] _shipFills = new VisualElement[ShipSlotCount];
+        private readonly VisualElement[] _shipRows = new VisualElement[ShipSlotCount];
+        private readonly string[] _shipIds = new string[ShipSlotCount];
+        private readonly bool[] _selected = new bool[ShipSlotCount];
 
         private static readonly Color RowBorder = new Color(0.25f, 0.35f, 0.55f);
+        private static readonly Color RowSelected = new Color(0.85f, 0.72f, 0.35f);
         private static readonly Color RowBackground = new Color(0.06f, 0.08f, 0.14f, 0.92f);
 
         private void OnEnable()
@@ -31,7 +36,7 @@ namespace _Project.Scripts.UI.Combat
             }
 
             panelRenderer.RegisterUIReloadCallback(OnUIReady);
-            ActiveFleets.Changed += RefreshFleets;
+            ActiveFleets.Changed += RefreshShips;
 
             if (FleetManager.Instance != null)
                 FleetManager.Instance.OnFleetChanged += BindFleetHealth;
@@ -41,7 +46,7 @@ namespace _Project.Scripts.UI.Combat
         {
             if (panelRenderer != null)
                 panelRenderer.UnregisterUIReloadCallback(OnUIReady);
-            ActiveFleets.Changed -= RefreshFleets;
+            ActiveFleets.Changed -= RefreshShips;
 
             if (FleetManager.Instance != null)
                 FleetManager.Instance.OnFleetChanged -= BindFleetHealth;
@@ -74,30 +79,30 @@ namespace _Project.Scripts.UI.Combat
             endBattle.clicked += OnEndBattleClicked;
             bar.Add(endBattle);
 
-            root.Add(CreateFleetPanel());
-            RefreshFleets();
+            root.Add(CreateShipPanel());
+            RefreshShips();
             BindCombatMechanisms();
             BindFleetHealth();
         }
 
-        private VisualElement CreateFleetPanel()
+        private VisualElement CreateShipPanel()
         {
             var panel = new VisualElement { name = "FleetInfoPanel" };
             panel.style.position = Position.Absolute;
             panel.style.right = 16;
             panel.style.bottom = 16;
-            panel.style.width = 168;
+            panel.style.width = 188;
             panel.pickingMode = PickingMode.Ignore;
 
-            for (int i = 0; i < FleetSlotCount; i++)
-                panel.Add(CreateFleetRow(i));
+            for (int i = 0; i < ShipSlotCount; i++)
+                panel.Add(CreateShipRow(i));
 
             return panel;
         }
 
-        private VisualElement CreateFleetRow(int index)
+        private VisualElement CreateShipRow(int index)
         {
-            var row = new VisualElement { name = "FleetRow_" + index };
+            var row = new VisualElement { name = "ShipRow_" + index };
             row.style.marginTop = 4;
             row.style.paddingLeft = 6;
             row.style.paddingRight = 6;
@@ -120,7 +125,7 @@ namespace _Project.Scripts.UI.Combat
 
             var name = new Label("");
             name.style.unityTextAlign = TextAnchor.MiddleLeft;
-            name.style.fontSize = 16;
+            name.style.fontSize = 15;
             name.style.color = Color.white;
             name.style.height = 22;
             name.pickingMode = PickingMode.Ignore;
@@ -140,28 +145,105 @@ namespace _Project.Scripts.UI.Combat
             track.Add(fill);
             row.Add(track);
 
-            _fleetNames[index] = name;
-            _fleetFills[index] = fill;
+            _shipRows[index] = row;
+            _shipNames[index] = name;
+            _shipFills[index] = fill;
             return row;
         }
 
-        private void RefreshFleets()
+        private void RefreshShips()
         {
-            if (_fleetNames[0] == null)
+            if (_shipNames[0] == null)
                 return;
 
-            for (int i = 0; i < FleetSlotCount; i++)
+            for (int i = 0; i < ShipSlotCount; i++)
             {
-                var fleet = ActiveFleets.AtSlot(i);
-                if (fleet == null)
-                {
-                    _fleetNames[i].text = "";
-                    _fleetFills[i].style.width = Length.Percent(0);
-                    continue;
-                }
+                _shipIds[i] = "";
+                _selected[i] = false;
+                _shipNames[i].text = "";
+                _shipFills[i].style.width = Length.Percent(0);
+            }
 
-                _fleetNames[i].text = fleet.fleetName;
-                _fleetFills[i].style.width = Length.Percent(ActiveFleets.Health01(fleet) * 100f);
+            var fleet = FleetInBattle();
+            if (fleet == null)
+            {
+                ApplySelection();
+                return;
+            }
+
+            var ships = ShipsInOrder(fleet);
+            int count = Mathf.Min(ShipSlotCount, ships.Count);
+            for (int i = 0; i < count; i++)
+            {
+                var ship = ships[i];
+                _shipIds[i] = ship.shipId;
+                _selected[i] = true;
+                _shipNames[i].text = string.IsNullOrEmpty(ship.shipName) ? ship.shipId : ship.shipName;
+            }
+
+            ApplySelection();
+            PaintShipHealth();
+        }
+
+        private static ActiveFleetRecord FleetInBattle()
+        {
+            var data = ActiveFleets.Current;
+            if (data?.fleets == null)
+                return null;
+
+            string preferred = FleetGovernor.Instance != null ? FleetGovernor.Instance.FleetName : "";
+            ActiveFleetRecord combat = null;
+            ActiveFleetRecord named = null;
+
+            foreach (var fleet in data.fleets)
+            {
+                if (fleet == null)
+                    continue;
+
+                if (!string.IsNullOrEmpty(preferred) && fleet.fleetName == preferred)
+                    named = fleet;
+
+                if (fleet.sceneName == ActiveFleets.CombatScene && combat == null)
+                    combat = fleet;
+            }
+
+            return combat ?? named;
+        }
+
+        private static List<ActiveFleetShipRecord> ShipsInOrder(ActiveFleetRecord fleet)
+        {
+            var ordered = new List<ActiveFleetShipRecord>();
+            if (fleet?.ships == null)
+                return ordered;
+
+            ActiveFleetShipRecord flagship = null;
+            foreach (var ship in fleet.ships)
+            {
+                if (ship == null || string.IsNullOrEmpty(ship.shipId))
+                    continue;
+
+                if (!string.IsNullOrEmpty(fleet.flagshipShipId) && ship.shipId == fleet.flagshipShipId)
+                    flagship = ship;
+                else
+                    ordered.Add(ship);
+            }
+
+            if (flagship != null)
+                ordered.Insert(0, flagship);
+
+            return ordered;
+        }
+
+        private void ApplySelection()
+        {
+            for (int i = 0; i < ShipSlotCount; i++)
+            {
+                var border = _selected[i] ? RowSelected : RowBorder;
+                var row = _shipRows[i];
+                row.style.borderTopColor = border;
+                row.style.borderRightColor = border;
+                row.style.borderBottomColor = border;
+                row.style.borderLeftColor = border;
             }
         }
 
@@ -198,7 +280,7 @@ namespace _Project.Scripts.UI.Combat
                 _watched.Add(health);
             }
 
-            PaintFleetHealth();
+            PaintShipHealth();
         }
 
         private void UnbindFleetHealth()
@@ -214,27 +296,27 @@ namespace _Project.Scripts.UI.Combat
 
         private void OnShipHealthChanged(float _)
         {
-            PaintFleetHealth();
+            PaintShipHealth();
         }
 
-        private void PaintFleetHealth()
+        private void PaintShipHealth()
         {
-            float current = 0f;
-            float max = 0f;
-
-            for (int i = 0; i < _watched.Count; i++)
+            for (int i = 0; i < ShipSlotCount; i++)
             {
-                var health = _watched[i];
-                if (health == null)
+                if (_shipFills[i] == null || string.IsNullOrEmpty(_shipIds[i]))
                     continue;
 
-                current += health.CurrentHealth;
-                max += health.MaxHealth;
-            }
+                float current = 0f;
+                float max = 0f;
+                if (!ShipHealthFile.TryGet(_shipIds[i], out current, out max) || max <= 0f)
+                {
+                    _shipFills[i].style.width = Length.Percent(0);
+                    continue;
+                }
 
-            float ratio = max > 0f ? current / max : 0f;
-            if (_fleetFills[0] != null)
-                _fleetFills[0].style.width = Length.Percent(ratio * 100f);
+                _shipFills[i].style.width = Length.Percent(current / max * 100f);
+            }
         }
     }
 }
+
