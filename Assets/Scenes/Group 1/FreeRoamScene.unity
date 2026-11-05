@@ -1331,8 +1331,9 @@ GameObject:
   - component: {fileID: 1465588835}
   - component: {fileID: 1465588839}
   - component: {fileID: 1465588841}
+  - component: {fileID: 1465588842}
   m_Layer: 0
-  m_Name: Target 0A
+  m_Name: TargetIron
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1465,8 +1466,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6da77572ccf14e2ab3e53f9f130f2cbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Fleet.WorldBattleTarget
-  targetId: Target0A
+  targetId: TargetIron
+  catalog: {fileID: 11400000, guid: 8487008d81bd7bedf85bb5bd6b435691, type: 2}
   combatSceneGroup: 3
+--- !u!114 &1465588842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465588833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecf1a8b5dfd94ecb9ba5a12d3d2701e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetsFileSeed
 --- !u!1 &1538954476
 GameObject:
   m_ObjectHideFlags: 0

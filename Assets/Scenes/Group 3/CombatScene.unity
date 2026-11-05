@@ -1499,6 +1499,7 @@ GameObject:
   - component: {fileID: 1703750328}
   - component: {fileID: 1703750331}
   - component: {fileID: 1703750330}
+  - component: {fileID: 1703750332}
   m_Layer: 0
   m_Name: Combat Manager
   m_TagString: Untagged
@@ -1597,10 +1598,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbb39394745d7c03eb3214cf7423a47f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Fleet.FleetManager
-  currentFleetData: {fileID: 0}
   fleetSpawnPoint: {fileID: 1312345624}
   activeShips: []
   flagship: {fileID: 0}
+--- !u!114 &1703750332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1703750324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15e977509940439383de76a2a430ee2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Combat.CombatTargetContext
+  catalog: {fileID: 11400000, guid: 8487008d81bd7bedf85bb5bd6b435691, type: 2}
 --- !u!1 &1725493540
 GameObject:
   m_ObjectHideFlags: 0
