@@ -1,3 +1,4 @@
+using _Project.Scripts.Combat;
 using _Project.Scripts.Fleet;
 using _Project.Scripts.SceneManagement;
 using _Project.Scripts.UI.IMGUI;
@@ -23,15 +24,14 @@ namespace _Project.Scripts.UI.Combat
 
         public void OnLaunchWorldButtonClicked()
         {
+            var context = FindAnyObjectByType<CombatTargetContext>();
+            context?.Write();
+
             ActiveFleets.ReturnCombatToMap();
-            
+
             if (IMGUILoadingOverlay.Instance != null)
-            {
                 IMGUILoadingOverlay.Instance.TriggerLoadingScreen();
-            } 
-            
-            // Debug.Log("HUDController: Enter Harbour clicked - Loading Scene Group 2");
-            //StartCoroutine(LoadSceneGroupOneWithOceanTransition());
+
             FleetGovernor.Instance?.Commit();
             _ = SceneLoader.Instance.BeginSceneTransition(targetSceneGroupIndex);
         }

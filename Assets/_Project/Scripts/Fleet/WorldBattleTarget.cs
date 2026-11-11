@@ -17,6 +17,15 @@ namespace _Project.Scripts.Fleet
 
         public void OrderAttack()
         {
+            if (TargetsFile.TryGet(targetId, out var record))
+            {
+                if (record.condition == TargetCondition.Depleted || record.condition == TargetCondition.Destroyed)
+                {
+                    Debug.LogWarning($"[Battle] {targetId} is {record.condition}. Sail refused.");
+                    return;
+                }
+            }
+
             var player = FindAnyObjectByType<MapSailController>();
             if (player == null)
             {

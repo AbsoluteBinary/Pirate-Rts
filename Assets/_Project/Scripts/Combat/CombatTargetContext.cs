@@ -47,5 +47,39 @@ namespace _Project.Scripts.Combat
                 Debug.LogWarning($"[CombatTarget] No condition record for {id}");
             }
         }
+        
+        public void Harvest(float amount)
+        {
+            if (Condition == null || Definition == null || amount <= 0f)
+                return;
+
+            Condition.current = Mathf.Max(0f, Condition.current - amount);
+
+            if (Definition.category == TargetCategory.ResourceNode)
+                Condition.condition = Condition.current <= 0f ? TargetCondition.Depleted : TargetCondition.Intact;
+            else
+                Condition.condition = Condition.current <= 0f ? TargetCondition.Destroyed : TargetCondition.Intact;
+
+            Debug.Log($"<color=cyan>[CombatTarget] Harvested {amount} | current={Condition.current} | condition={Condition.condition}</color>");
+        }
+        // TEMP: right-click the component in Play Mode to drain 100. Remove when a real harvest system drives Harvest().
+        [ContextMenu("Harvest 100")]
+        private void HarvestTest() => Harvest(100f);
+        
+        public void Write()
+        {
+            
+            if (Condition == null || Definition == null) return;
+
+            Condition.current = Mathf.Clamp(Condition.current, 0f, Definition.maxCondition);
+
+            if (Definition.category == TargetCategory.ResourceNode)
+                Condition.condition = Condition.current <= 0f ? TargetCondition.Depleted : TargetCondition.Intact;
+            else
+                Condition.condition = Condition.current <= 0f ? TargetCondition.Destroyed : TargetCondition.Intact;
+
+            TargetsFile.WriteRecord(Condition);
+            Debug.Log($"<color=cyan>[CombatTarget] Wrote {Condition.targetId} | current={Condition.current} | condition={Condition.condition}</color>");
+        }
     }
 }

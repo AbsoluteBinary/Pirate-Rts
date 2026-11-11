@@ -177,7 +177,10 @@ namespace _Project.Scripts.Fleet
             }
 
             if (player == null || helm == null)
+            {
+                Debug.LogWarning($"[Governor] BindFreeRoam early out. player={player != null} helm={helm != null}");
                 return;
+            }
 
             MapBody = player;
             MapFleetBodies.Clear();
@@ -189,16 +192,46 @@ namespace _Project.Scripts.Fleet
             bool helmUsed = false;
 
             if (ActiveFleets.Current?.fleets == null)
+            {
+                Debug.LogWarning("[Governor] BindFreeRoam: no ActiveFleets file.");
                 return;
+            }
+
+            Debug.Log($"[Governor] FleetName='{FleetName}' fleets={ActiveFleets.Current.fleets.Count}");
+            foreach (var fleet in ActiveFleets.Current.fleets)
+            {
+                if (fleet == null) continue;
+                Debug.Log($"[Governor] File: name='{fleet.fleetName}' id='{fleet.flagshipShipId}' scene='{fleet.sceneName}'");
+            }
 
             foreach (var fleet in ActiveFleets.Current.fleets)
             {
-                if (fleet == null || fleet.sceneName != ActiveFleets.FreeRoamScene)
+                if (fleet == null)
+                    continue;
+                if (fleet.sceneName != ActiveFleets.FreeRoamScene && fleet.sceneName != ActiveFleets.CombatScene)
                     continue;
 
-                var blueprint = BlueprintFor(fleet.flagshipShipId);
-                if (blueprint == null || blueprint.shipPrefab == null)
+                string shipId = fleet.flagshipShipId;
+                if (string.IsNullOrEmpty(shipId) && fleet.ships != null)
+                {
+                    foreach (var s in fleet.ships)
+                    {
+                        if (s != null && !string.IsNullOrEmpty(s.shipId))
+                        {
+                            shipId = s.shipId;
+                            break;
+                        }
+                    }
+                }
+                if (string.IsNullOrEmpty(shipId))
                     continue;
+
+                var blueprint = BlueprintFor(shipId);
+                if (blueprint == null || blueprint.shipPrefab == null)
+                {
+                    Debug.LogWarning($"[Governor] No prefab for '{fleet.fleetName}' (id={shipId})");
+                    continue;
+                }
 
                 bool drives = fleet.fleetName == FleetName;
                 if (!helmUsed && string.IsNullOrEmpty(FleetName))
@@ -217,6 +250,7 @@ namespace _Project.Scripts.Fleet
                     helm.enabled = true;
                     MapFleetBodies.Remember(fleet.fleetName, helm.transform);
                     helmUsed = true;
+                    Debug.Log($"<color=lime>[Governor] Drove helm with '{blueprint.shipName}'</color>");
                 }
                 else
                 {
@@ -233,6 +267,47 @@ namespace _Project.Scripts.Fleet
 
                 placed++;
             }
+
+            if (!helmUsed && !string.IsNullOrEmpty(FleetName))
+            {
+                foreach (var fleet in ActiveFleets.Current.fleets)
+                {
+                    if (fleet == null || fleet.fleetName != FleetName)
+                        continue;
+
+                    string shipId = fleet.flagshipShipId;
+                    if (string.IsNullOrEmpty(shipId) && fleet.ships != null)
+                    {
+                        foreach (var s in fleet.ships)
+                        {
+                            if (s != null && !string.IsNullOrEmpty(s.shipId))
+                            {
+                                shipId = s.shipId;
+                                break;
+                            }
+                        }
+                    }
+                    if (string.IsNullOrEmpty(shipId))
+                        continue;
+
+                    var blueprint = BlueprintFor(shipId);
+                    if (blueprint == null || blueprint.shipPrefab == null)
+                        continue;
+
+                    player.AttachFlagship(blueprint.shipPrefab, blueprint.shipName, helm.transform);
+                    if (fleet.hasPosition)
+                        helm.transform.position = fleet.position;
+                    helm.enabled = true;
+                    MapFleetBodies.Remember(fleet.fleetName, helm.transform);
+                    helmUsed = true;
+                    placed++;
+                    Debug.Log($"<color=lime>[Governor] Fallback drove helm with '{blueprint.shipName}' (scene was {fleet.sceneName})</color>");
+                    break;
+                }
+            }
+
+            if (!helmUsed)
+                Debug.LogWarning("[Governor] Helm has no visual. No usable fleet drove it.");
 
             Debug.Log($"<color=lime>[Governor] {placed} ship(s) on the water</color>");
         }
@@ -426,7 +501,7 @@ namespace _Project.Scripts.Fleet
                     alive = _current[i] > 0f
                 });
 
-                if (i == FlagIndex)
+                if (i == FlagIndex || string.IsNullOrEmpty(record.flagshipShipId))
                     record.flagshipShipId = ship.saveId;
             }
 

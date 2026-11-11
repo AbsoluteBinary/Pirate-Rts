@@ -26,15 +26,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         private Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
         #endregion
         
-        #region Minimap
-        private bool showMinimap = true;
-        private float minimapSize = 220f;          // width & height of the minimap
-        private Color landCellColor = new Color(0.2f, 0.7f, 0.3f, 0.85f);
-        private Color objectCellColor = new Color(0.3f, 0.55f, 0.95f, 0.9f);
-        private Color emptyCellColor = new Color(0.15f, 0.15f, 0.18f, 0.6f);
-        private Color borderColor = new Color(0.4f, 0.4f, 0.45f, 1f);
-        #endregion
-
         #region Modes
 
         private bool isSelectMode = false;
@@ -137,6 +128,8 @@ namespace _Project.Scripts.LevelEditor.Editor
         private void OnDisable()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
+            ApplyWaterCamera(false);
+            ApplyLandOrtho(false);
             DestroyPreview();
         }
         
@@ -148,6 +141,14 @@ namespace _Project.Scripts.LevelEditor.Editor
         }
 
         private BuilderMode currentMode = BuilderMode.Select;
+
+        private bool _waterCamActive;
+        private bool _landOrthoActive;
+        private bool _landSavedOrtho;
+        private bool _savedOrtho;
+        private Quaternion _savedRot;
+        private Vector3 _savedPivot;
+        private float _savedSize;
         
         private enum SelectFilter
         {
@@ -162,14 +163,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         #region GUI
         private void OnGUI()
         {
-            // ===== Minimap =====
-            showMinimap = EditorGUILayout.Foldout(showMinimap, "Minimap", true);
-            if (showMinimap)
-            {
-                Rect minimapRect = GUILayoutUtility.GetRect(minimapSize, minimapSize, GUILayout.ExpandWidth(false));
-                DrawMinimap(minimapRect);
-                EditorGUILayout.Space(6);
-            }
             
             // ===== Tools =====
             GUILayout.Label("Tools", EditorStyles.boldLabel);
@@ -413,6 +406,12 @@ namespace _Project.Scripts.LevelEditor.Editor
             GUILayout.Label("Slot:", GUILayout.Width(40));
             selectedSlot = EditorGUILayout.IntSlider(selectedSlot, 0, CombatLayoutDatabase.MaxSlots - 1, GUILayout.Width(150));
             GUILayout.Label($"Slot {selectedSlot + 1}", GUILayout.Width(60));
+            CombatLayout nameLayout = layoutDatabase != null ? layoutDatabase.GetLayout(selectedSlot) : null;
+            GUI.enabled = nameLayout != null;
+            string shownName = nameLayout != null ? nameLayout.LayoutName : "";
+            string editedName = EditorGUILayout.TextField(shownName);
+            if (nameLayout != null) nameLayout.LayoutName = editedName;
+            GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
@@ -473,6 +472,8 @@ namespace _Project.Scripts.LevelEditor.Editor
         private void OnSceneGUI(SceneView sceneView)
         {
             Event e = Event.current;
+            if (currentMode == BuilderMode.BuildOnWater)
+                ApplyWaterCamera(true);
 
             // Always update hover highlight
             UpdateLandTileHoverHighlight();
@@ -562,14 +563,12 @@ namespace _Project.Scripts.LevelEditor.Editor
                 if (!isDragging && !isPainting && !isDrawingRect)
                     UpdatePreviewPosition();
 
-                DrawLandTileHighlight(true); // darker cyan while placing
-
                 bool ctrlHeld = e.control;
 
                 // Mouse Down
                 if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
                 {
-                    Cell cell = GetCellUnderMouse();
+                    Cell cell = PlacementOrigin(GetCellUnderMouse(), GetSelectedObjectSize());
                     if (cell != null)
                     {
                         if (ctrlHeld)
@@ -736,14 +735,18 @@ namespace _Project.Scripts.LevelEditor.Editor
             switch (newMode)
             {
                 case BuilderMode.Select:
+                    ApplyWaterCamera(false);
+                    ApplyLandOrtho(false);
                     // No grid forced
                     Debug.Log("<color=cyan>Mode → Select</color>");
                     break;
 
                 case BuilderMode.BuildOnWater:
+                    ApplyLandOrtho(false);
                     currentGridType = GridType.Land;
                     activeGrid = landGrid;
                     UpdateGridVisibility();
+                    ApplyWaterCamera(true);
                     Debug.Log("<color=cyan>Mode → Build on Water (Land Grid)</color>");
                     break;
 
@@ -751,9 +754,66 @@ namespace _Project.Scripts.LevelEditor.Editor
                     currentGridType = GridType.Objects;
                     activeGrid = objectGrid;
                     UpdateGridVisibility();
+                    ApplyWaterCamera(false);
+                    ApplyLandOrtho(true);
                     Debug.Log("<color=cyan>Mode → Build on Land (Object Grid)</color>");
                     break;
             }
+        }
+
+        private void ApplyWaterCamera(bool enter)
+        {
+            var view = SceneView.lastActiveSceneView;
+            if (view == null) return;
+
+            if (enter)
+            {
+                if (!_waterCamActive)
+                {
+                    _savedOrtho = view.orthographic;
+                    _savedRot = view.rotation;
+                    _savedPivot = view.pivot;
+                    _savedSize = view.size;
+                    _waterCamActive = true;
+                }
+
+                view.orthographic = true;
+                view.rotation = Quaternion.Euler(90f, 0f, 0f);
+                view.Repaint();
+                return;
+            }
+
+            if (!_waterCamActive) return;
+            view.orthographic = _savedOrtho;
+            view.rotation = _savedRot;
+            view.pivot = _savedPivot;
+            view.size = _savedSize;
+            view.Repaint();
+            _waterCamActive = false;
+        }
+
+        private void ApplyLandOrtho(bool enter)
+        {
+            var view = SceneView.lastActiveSceneView;
+            if (view == null) return;
+
+            if (enter)
+            {
+                if (!_landOrthoActive)
+                {
+                    _landSavedOrtho = view.orthographic;
+                    _landOrthoActive = true;
+                }
+
+                view.orthographic = true;
+                view.Repaint();
+                return;
+            }
+
+            if (!_landOrthoActive) return;
+            view.orthographic = _landSavedOrtho;
+            view.Repaint();
+            _landOrthoActive = false;
         }
 
         #endregion
@@ -912,6 +972,55 @@ namespace _Project.Scripts.LevelEditor.Editor
             center.z += (size.y - 1) * cellSize * 0.5f;
             return center;
         }
+
+        private Vector3 PlacementPosition(Cell cell, Vector2Int size)
+        {
+            Vector3 pos = activeGrid.CellGetPosition(cell.index);
+            if (size.x > 1 || size.y > 1)
+            {
+                float cellSize = activeGrid.cellSize.x;
+                pos.x += (size.x - 1) * cellSize * 0.5f;
+                pos.z += (size.y - 1) * cellSize * 0.5f;
+            }
+            return pos;
+        }
+
+        private Cell PlacementOrigin(Cell underMouse, Vector2Int size)
+        {
+            if (underMouse == null || activeGrid == null) return null;
+            if (size == Vector2Int.one || currentGridType != GridType.Objects || landGrid == null)
+                return underMouse;
+
+            Vector3 landPoint = activeGrid.CellGetPosition(underMouse.index);
+            landPoint.y = landGrid.transform.position.y + 0.1f;
+            Cell landCell = landGrid.CellGetAtWorldPosition(landPoint, 0);
+            if (landCell == null) return underMouse;
+
+            Vector3 landCenter = landGrid.CellGetPosition(landCell.index);
+            float landSize = landGrid.cellSize.x;
+            float objectSize = activeGrid.cellSize.x;
+
+            Vector3 corner = landCenter;
+            corner.x += (-landSize * 0.5f) + (objectSize * 0.5f);
+            corner.z += (-landSize * 0.5f) + (objectSize * 0.5f);
+            corner.y = activeGrid.transform.position.y;
+
+            Cell origin = activeGrid.CellGetAtWorldPosition(corner, 0);
+            return origin != null ? origin : underMouse;
+        }
+
+        private void SetPreviewHighlight(bool isValid)
+        {
+            if (currentPreview == null) return;
+
+            foreach (Transform t in currentPreview.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name == "CorrectHighlight")
+                    t.gameObject.SetActive(isValid);
+                else if (t.name == "WrongHighlight")
+                    t.gameObject.SetActive(!isValid);
+            }
+        }
         
         private bool IsWall(GameObject obj)
         {
@@ -1044,9 +1153,18 @@ namespace _Project.Scripts.LevelEditor.Editor
 
         private Cell GetCellUnderMouse()
         {
+            if (activeGrid == null) return null;
+
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, GetCurrentLayerMask()))
+
+            int mask = LayerMask.GetMask("LandGrid", "ObjectGrid", "Default");
+            if (Physics.Raycast(ray, out RaycastHit hit, 5000f, mask))
                 return activeGrid.CellGetAtWorldPosition(hit.point, 0);
+
+            var plane = new Plane(Vector3.up, activeGrid.transform.position);
+            if (plane.Raycast(ray, out float enter))
+                return activeGrid.CellGetAtWorldPosition(ray.GetPoint(enter), 0);
+
             return null;
         }
 
@@ -1593,20 +1711,22 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (lastPaintedCell != null && lastPaintedCell.index == cell.index)
                 return;
 
-            if (!IsFootprintValid(cell, size)) return;
+            Cell origin = PlacementOrigin(cell, size);
+            if (!IsFootprintValid(origin, size)) return;
 
-            Vector3 pos = GetFootprintCenter(cell, size);
+            Vector3 pos = PlacementPosition(cell, size);
 
             GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
             placed.transform.position = pos;
             placed.name = selectedPrefab.name;
+            placed.transform.SetParent(GetOrCreateCategoryParent(selectedPrefab), true);
 
             int placedLayer = LayerMask.NameToLayer("PlacedObjects");
             if (placedLayer != -1)
                 SetLayerRecursively(placed, placedLayer);
 
             placedObjects.Add(placed);
-            MarkFootprintOccupied(cell, size);
+            MarkFootprintOccupied(origin, size);
             Undo.RegisterCreatedObjectUndo(placed, "Paint Object");
 
             lastPaintedCell = cell;
@@ -1675,20 +1795,23 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             foreach (Cell cell in cells)
             {
-                if (cell == null || !IsFootprintValid(cell, size)) continue;
+                if (cell == null) continue;
+                Cell origin = PlacementOrigin(cell, size);
+                if (!IsFootprintValid(origin, size)) continue;
 
-                Vector3 pos = GetFootprintCenter(cell, size);
+                Vector3 pos = PlacementPosition(cell, size);
 
                 GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
                 placed.transform.position = pos;
                 placed.name = selectedPrefab.name;
+                placed.transform.SetParent(GetOrCreateCategoryParent(selectedPrefab), true);
 
                 int placedLayer = LayerMask.NameToLayer("PlacedObjects");
                 if (placedLayer != -1)
                     SetLayerRecursively(placed, placedLayer);
 
                 placedObjects.Add(placed);
-                MarkFootprintOccupied(cell, size);
+                MarkFootprintOccupied(origin, size);
                 Undo.RegisterCreatedObjectUndo(placed, "Fill Rectangle");
                 placedCount++;
             }
@@ -1748,20 +1871,23 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             foreach (Cell cell in dragPreviewCells)
             {
-                if (cell == null || !IsFootprintValid(cell, size)) continue;
+                if (cell == null) continue;
+                Cell origin = PlacementOrigin(cell, size);
+                if (!IsFootprintValid(origin, size)) continue;
 
-                Vector3 pos = GetFootprintCenter(cell, size);
+                Vector3 pos = PlacementPosition(cell, size);
 
                 GameObject placed = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
                 placed.transform.position = pos;
                 placed.name = selectedPrefab.name;
+                placed.transform.SetParent(GetOrCreateCategoryParent(selectedPrefab), true);
 
                 int placedLayer = LayerMask.NameToLayer("PlacedObjects");
                 if (placedLayer != -1)
                     SetLayerRecursively(placed, placedLayer);
 
                 placedObjects.Add(placed);
-                MarkFootprintOccupied(cell, size);
+                MarkFootprintOccupied(origin, size);
                 Undo.RegisterCreatedObjectUndo(placed, "Place Wall Line");
                 placedCount++;
             }
@@ -1935,6 +2061,7 @@ namespace _Project.Scripts.LevelEditor.Editor
                 instance.name = prefab.name + "_Pasted";
                 instance.transform.position = copiedPositions[i];
                 instance.transform.rotation = copiedRotations[i];
+                instance.transform.SetParent(GetOrCreateCategoryParent(prefab), true);
 
                 int placedLayer = LayerMask.NameToLayer("PlacedObjects");
                 if (placedLayer != -1)
@@ -1978,32 +2105,22 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (selectedPrefab == null || activeGrid == null || !isPreviewActive || currentPreview == null)
                 return;
 
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            int mask = LayerMask.GetMask("LandGrid", "ObjectGrid", "Default");
-            if (!Physics.Raycast(ray, out RaycastHit hit, 5000f, mask))
-                return;
-
-            Cell originCell = activeGrid.CellGetAtWorldPosition(hit.point, 0);
+            Cell originCell = GetCellUnderMouse();
             if (originCell == null) return;
+            Vector3 pos = PlacementPosition(originCell, GetSelectedObjectSize());
+            pos.y += 0.1f;
+            currentPreview.transform.position = pos;
+            bool isValid = IsFootprintValid(originCell, GetSelectedObjectSize());
+            SetPlacementHighlight(isValid);
+        }
 
-            Vector2Int size = GetSelectedObjectSize();
-            float cellSize = activeGrid.cellSize.x;
-
-            // Bottom-left (origin) cell position
-            Vector3 originPos = activeGrid.CellGetPosition(originCell.index);
-
-            // Correct center of the whole footprint
-            Vector3 footprintCenter = originPos;
-            footprintCenter.x += (size.x - 1) * cellSize * 0.5f;
-            footprintCenter.z += (size.y - 1) * cellSize * 0.5f;
-            footprintCenter.y = originPos.y + 0.1f;
-
-            currentPreview.transform.position = footprintCenter;
-
-            bool isValid = IsFootprintValid(originCell, size);
-            Color targetColor = isValid ? GetPreviewColorForPrefab(selectedPrefab) : new Color(1f, 0.15f, 0.15f);
-            targetColor.a = 0.55f;
-            SetPreviewColor(targetColor);
+        private void SetPlacementHighlight(bool valid)
+        {
+            if (currentPreview == null) return;
+            var correct = currentPreview.transform.Find("CorrectHighlight");
+            var wrong = currentPreview.transform.Find("WrongHighlight");
+            if (correct != null) correct.gameObject.SetActive(valid);
+            if (wrong != null) wrong.gameObject.SetActive(!valid);
         }
 
         private void CreatePreview(Vector3 pos)
@@ -2015,6 +2132,13 @@ namespace _Project.Scripts.LevelEditor.Editor
             currentPreview.name = "Preview_" + selectedPrefab.name;
             currentPreview.transform.position = pos;
 
+            int ignore = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignore != -1)
+                SetLayerRecursively(currentPreview, ignore);
+
+            foreach (var col in currentPreview.GetComponentsInChildren<Collider>())
+                col.enabled = false;
+
             Color c = GetPreviewColorForPrefab(selectedPrefab);
             c.a = 0.55f;
             SetPreviewColor(c);
@@ -2025,12 +2149,15 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (currentPreview == null) return;
             foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
             {
-                if (rend.sharedMaterial != null)
+                var mat = rend.sharedMaterial;
+                if (mat == null) continue;
+                if (!mat.name.EndsWith(" (Preview)"))
                 {
-                    Material mat = new Material(rend.sharedMaterial);
-                    mat.color = color;
-                    rend.material = mat;
+                    mat = new Material(mat);
+                    mat.name = mat.name + " (Preview)";
+                    rend.sharedMaterial = mat;
                 }
+                mat.color = color;
             }
         }
 
@@ -2062,119 +2189,17 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (currentPreview != null)
             {
                 foreach (var rend in currentPreview.GetComponentsInChildren<Renderer>())
-                    if (rend.material != null) DestroyImmediate(rend.material);
+                {
+                    var mat = rend.sharedMaterial;
+                    if (mat != null && mat.name.EndsWith(" (Preview)"))
+                        DestroyImmediate(mat);
+                }
 
                 DestroyImmediate(currentPreview);
                 currentPreview = null;
             }
             isPreviewActive = false;
         }
-        #endregion
-
-        #region MiniMap
-
-        private void DrawMinimap(Rect rect)
-        {
-            if (landGrid == null && objectGrid == null) return;
-
-            EditorGUI.DrawRect(rect, new Color(0.12f, 0.12f, 0.14f, 1f));
-
-            List<Vector3> landWorld = new List<Vector3>();
-            List<Vector3> objectWorld = new List<Vector3>();
-
-            if (landGrid != null)
-            {
-                foreach (int index in occupiedLandCells)
-                    landWorld.Add(landGrid.CellGetPosition(index));
-            }
-
-            if (objectGrid != null)
-            {
-                foreach (int index in occupiedObjectCells)
-                    objectWorld.Add(objectGrid.CellGetPosition(index));
-            }
-
-            if (landWorld.Count == 0 && objectWorld.Count == 0)
-            {
-                GUI.Label(rect, "No objects placed", EditorStyles.centeredGreyMiniLabel);
-                return;
-            }
-
-            // World bounds
-            float minX = float.MaxValue, maxX = float.MinValue;
-            float minZ = float.MaxValue, maxZ = float.MinValue;
-
-            void Encapsulate(Vector3 p)
-            {
-                minX = Mathf.Min(minX, p.x);
-                maxX = Mathf.Max(maxX, p.x);
-                minZ = Mathf.Min(minZ, p.z);
-                maxZ = Mathf.Max(maxZ, p.z);
-            }
-
-            foreach (var p in landWorld) Encapsulate(p);
-            foreach (var p in objectWorld) Encapsulate(p);
-
-            // Padding so content isn’t stuck to the edge
-            float pad = 1.2f;
-            minX -= pad; maxX += pad;
-            minZ -= pad; maxZ += pad;
-
-            float worldW = Mathf.Max(0.01f, maxX - minX);
-            float worldH = Mathf.Max(0.01f, maxZ - minZ);
-
-            float cellPixelSize = Mathf.Min(rect.width / worldW, rect.height / worldH);
-            cellPixelSize = Mathf.Clamp(cellPixelSize * 1.05f, 5f, 20f);
-
-// Helper
-            Vector2 WorldToMinimap(Vector3 p)
-            {
-                float nx = (p.x - minX) / worldW;          // X stays X
-                float ny = (p.z - minZ) / worldH;          // Z becomes Y
-
-                float x = rect.x + (1f - nx) * rect.width;
-                float y = rect.y + ny * rect.height;        // no flip    // keep your current Y flip
-
-                return new Vector2(x, y);
-            }
-
-// Draw land (slightly larger so gaps are smaller)
-            float landSize = cellPixelSize * 1.05f;
-            foreach (var p in landWorld)
-            {
-                Vector2 mp = WorldToMinimap(p);
-                EditorGUI.DrawRect(new Rect(mp.x - landSize * 0.5f, mp.y - landSize * 0.5f, landSize, landSize), landCellColor);
-            }
-
-// Draw objects
-            float objSize = cellPixelSize * 0.82f;
-            foreach (var p in objectWorld)
-            {
-                Vector2 mp = WorldToMinimap(p);
-                EditorGUI.DrawRect(new Rect(mp.x - objSize * 0.5f, mp.y - objSize * 0.5f, objSize, objSize), objectCellColor);
-            }
-
-// Thin grid overlay
-            Handles.BeginGUI();
-            Handles.color = new Color(1f, 1f, 1f, 0.08f);
-            int gridLines = 12;
-            for (int i = 0; i <= gridLines; i++)
-            {
-                float t = i / (float)gridLines;
-                // vertical
-                float x = rect.x + t * rect.width;
-                Handles.DrawLine(new Vector3(x, rect.y), new Vector3(x, rect.yMax));
-                // horizontal
-                float y = rect.y + t * rect.height;
-                Handles.DrawLine(new Vector3(rect.x, y), new Vector3(rect.xMax, y));
-            }
-
-// Border
-            Handles.color = borderColor;
-            Handles.DrawSolidRectangleWithOutline(rect, Color.clear, borderColor);
-            Handles.EndGUI();
-        }
-
         #endregion
 
         #region Delete
@@ -2237,6 +2262,7 @@ namespace _Project.Scripts.LevelEditor.Editor
             if (layoutDatabase == null) return;
 
             CombatLayout layout = layoutDatabase.GetLayout(selectedSlot);
+            layout.LayoutName = layout.LayoutName;
             layout.PlacedObjects.Clear();
 
             foreach (GameObject obj in placedObjects)
@@ -2257,7 +2283,7 @@ namespace _Project.Scripts.LevelEditor.Editor
 
             EditorUtility.SetDirty(layoutDatabase);
             AssetDatabase.SaveAssets();
-            Debug.Log($"<color=green>Layout saved to Slot {selectedSlot + 1}</color>");
+            Debug.Log($"<color=green>Layout '{layout.LayoutName}' saved to Slot {selectedSlot + 1}</color>");
         }
 
         private void LoadLayout()
@@ -2278,6 +2304,7 @@ namespace _Project.Scripts.LevelEditor.Editor
                 placed.transform.rotation = data.Rotation;
                 placed.transform.localScale = data.Scale;
                 placed.name = data.Prefab.name;
+                placed.transform.SetParent(GetOrCreateCategoryParent(data.Prefab), true);
 
                 int placedLayer = LayerMask.NameToLayer("PlacedObjects");
                 if (placedLayer != -1)
@@ -2314,12 +2341,49 @@ namespace _Project.Scripts.LevelEditor.Editor
             }
         }
 
+        private const string LayoutRootName = "Combat Layout";
+
+        private Transform GetOrCreateCategoryParent(GameObject prefab)
+        {
+            string category = "Other";
+            if (prefab != null)
+            {
+                if (landTiles.Contains(prefab)) category = "Land Tiles";
+                else if (turrets.Contains(prefab)) category = "Turrets";
+                else if (walls.Contains(prefab)) category = "Walls";
+                else if (buildings.Contains(prefab)) category = "Buildings";
+                else if (combatShips.Contains(prefab)) category = "Combat Ships";
+            }
+
+            GameObject root = GameObject.Find(LayoutRootName);
+            if (root == null)
+            {
+                root = new GameObject(LayoutRootName);
+                Undo.RegisterCreatedObjectUndo(root, "Create Combat Layout Root");
+            }
+
+            Transform child = root.transform.Find(category);
+            if (child == null)
+            {
+                GameObject folder = new GameObject(category);
+                Undo.RegisterCreatedObjectUndo(folder, "Create Category Folder");
+                folder.transform.SetParent(root.transform, false);
+                child = folder.transform;
+            }
+
+            return child;
+        }
+
         private void ClearAllPlacedObjects()
         {
             foreach (GameObject obj in placedObjects)
                 if (obj != null) Undo.DestroyObjectImmediate(obj);
 
             placedObjects.Clear();
+
+            GameObject layoutRoot = GameObject.Find(LayoutRootName);
+            if (layoutRoot != null) Undo.DestroyObjectImmediate(layoutRoot);
+
             selectedObjects.Clear();
             occupiedLandCells.Clear();
             occupiedObjectCells.Clear();

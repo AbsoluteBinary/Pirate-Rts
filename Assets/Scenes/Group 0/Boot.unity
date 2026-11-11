@@ -617,7 +617,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2419992204741256499, guid: 572beb5f203e326bb83d593925b3cc25, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.94
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2419992204741256499, guid: 572beb5f203e326bb83d593925b3cc25, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1991,7 +1991,7 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 53a353a0e2954b5edb16b0d395238f9b, type: 3}
---- !u!84 &1753072759
+--- !u!84 &1823788404
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
