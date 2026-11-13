@@ -856,7 +856,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e289130af0cb5104a93203a0f69bde0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Project.Scripts.Combat.Health
-  destructionVFX: {fileID: 3070518327953465789, guid: 433b6e2242d295e46998fa898ff277a4, type: 3}
+  destructionVFX: {fileID: 0}
   destructionSound: {fileID: 8300000, guid: af170894b342a604997fd0d03beefc62, type: 3}
   destructionDelay: 0.8
   maxHealth: 100

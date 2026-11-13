@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7578251453193206532}
   - component: {fileID: 2267131922492053722}
   - component: {fileID: 1989028942752191473}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: SelectionHighlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 4535096071955114987}
   - component: {fileID: 5990056324254345270}
   - component: {fileID: 5291890574278032829}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: WrongHighlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -161,7 +161,7 @@ GameObject:
   - component: {fileID: 1396962869254727666}
   - component: {fileID: 3237146903498085256}
   - component: {fileID: 6021366299380718226}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -289,7 +289,7 @@ GameObject:
   - component: {fileID: 7652546696827080577}
   - component: {fileID: 5705548514356915829}
   - component: {fileID: 5576688223654229998}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CorrectHighlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
