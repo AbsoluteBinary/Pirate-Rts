@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using _Project.Scripts.Combat;
+using _Project.Scripts.PlayerShip_Movement.Combat;
 using _Project.Scripts.Fleet;
 using _Project.Scripts.Persistence.TempSave;
 using _Project.Scripts.UI.WorldMap.HUDInteractions;
@@ -39,7 +40,10 @@ namespace _Project.Scripts.UI.Combat
             ActiveFleets.Changed += RefreshShips;
 
             if (FleetManager.Instance != null)
+            {
                 FleetManager.Instance.OnFleetChanged += BindFleetHealth;
+                FleetManager.Instance.OnFleetChanged += RefreshShips;
+            }
         }
 
         private void OnDisable()
@@ -49,7 +53,10 @@ namespace _Project.Scripts.UI.Combat
             ActiveFleets.Changed -= RefreshShips;
 
             if (FleetManager.Instance != null)
+            {
                 FleetManager.Instance.OnFleetChanged -= BindFleetHealth;
+                FleetManager.Instance.OnFleetChanged -= RefreshShips;
+            }
 
             UnbindFleetHealth();
         }
@@ -89,7 +96,8 @@ namespace _Project.Scripts.UI.Combat
         {
             var panel = new VisualElement { name = "FleetInfoPanel" };
             panel.style.position = Position.Absolute;
-            panel.style.right = 16;
+            panel.style.left = 16;
+            panel.style.right = StyleKeyword.Auto;
             panel.style.bottom = 16;
             panel.style.width = 188;
             panel.pickingMode = PickingMode.Ignore;
@@ -164,6 +172,13 @@ namespace _Project.Scripts.UI.Combat
                 _shipFills[i].style.width = Length.Percent(0);
             }
 
+            if (FillFromLiveShips())
+            {
+                ApplySelection();
+                PaintShipHealth();
+                return;
+            }
+
             var fleet = FleetInBattle();
             if (fleet == null)
             {
@@ -183,6 +198,44 @@ namespace _Project.Scripts.UI.Combat
 
             ApplySelection();
             PaintShipHealth();
+        }
+
+        // Prefer the ships actually spawned in combat. Flagship first, then the rest.
+        private bool FillFromLiveShips()
+        {
+            var manager = FleetManager.Instance;
+            if (manager == null || manager.activeShips == null || manager.activeShips.Count == 0)
+                return false;
+
+            var ordered = new List<PlayerCombatMovementController>();
+            if (manager.flagship != null)
+                ordered.Add(manager.flagship);
+
+            foreach (var ship in manager.activeShips)
+            {
+                if (ship == null || ship == manager.flagship)
+                    continue;
+                ordered.Add(ship);
+            }
+
+            if (ordered.Count == 0)
+                return false;
+
+            int count = Mathf.Min(ShipSlotCount, ordered.Count);
+            for (int i = 0; i < count; i++)
+            {
+                var ship = ordered[i];
+                var combat = ship.GetComponent<CombatShip>();
+                var bp = combat != null ? combat.Blueprint : null;
+
+                _shipIds[i] = bp != null ? bp.saveId : "";
+                _selected[i] = true;
+                _shipNames[i].text = bp != null && !string.IsNullOrEmpty(bp.shipName)
+                    ? bp.shipName
+                    : ship.gameObject.name;
+            }
+
+            return true;
         }
 
         private static ActiveFleetRecord FleetInBattle()

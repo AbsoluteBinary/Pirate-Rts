@@ -118,6 +118,12 @@ namespace _Project.Scripts.Fleet
         {
             if (fleetSpawnPoint == null)
             {
+                var spawnObj = GameObject.Find("Fleet Spawn Point");
+                if (spawnObj != null) fleetSpawnPoint = spawnObj.transform;
+            }
+
+            if (fleetSpawnPoint == null)
+            {
                 Debug.LogWarning("[Fleet] No spawn point on FleetManager.");
                 return;
             }
@@ -130,12 +136,12 @@ namespace _Project.Scripts.Fleet
             if (launched)
             {
                 for (int i = 0; i < PendingLaunch.Size; i++)
-                    SpawnOne(PendingLaunch.Ships[i], i, i == PendingLaunch.FlagShipIndex);
+                    SpawnOne(PendingLaunch.Ships[i], i, i == PendingLaunch.FlagShipIndex, PendingLaunch.FlagShipIndex);
                 return;
             }
         }
 
-        private void SpawnOne(ShipBlueprint bp, int index, bool isFlagship)
+        private void SpawnOne(ShipBlueprint bp, int index, bool isFlagship, int flagshipIndex)
         {
             if (bp == null) return;
 
@@ -145,9 +151,11 @@ namespace _Project.Scripts.Fleet
                 return;
             }
 
-            Vector3 spawnPos = fleetSpawnPoint.position + new Vector3(index * 15f, 0, -index * 10f);
-            
-            GameObject shipObj = Instantiate(bp.shipPrefab, spawnPos, Quaternion.identity);
+            // Ships face -X, so "behind" the flagship is +X. Flagship sits exactly on the spawn point.
+            Vector3 spawnPos = fleetSpawnPoint.position + FormationOffset(index, flagshipIndex, PendingLaunch.Size);
+            Quaternion spawnRot = Quaternion.LookRotation(Vector3.left);
+
+            GameObject shipObj = Instantiate(bp.shipPrefab, spawnPos, spawnRot);
             shipObj.name = bp.shipName;
             shipObj.SetActive(true);
 
@@ -176,6 +184,43 @@ namespace _Project.Scripts.Fleet
             RegisterShip(movement, isFlagship);
 
             Debug.Log($"[FleetManager] Spawned {bp.shipName} | flagship={isFlagship} | VFX={shipVFX != null}");
+        }
+
+        // Inverted V behind the flagship. Forward is -X, behind is +X, sides are +/-Z.
+        private Vector3 FormationOffset(int slot, int flagshipIndex, int count)
+        {
+            if (slot == flagshipIndex) return Vector3.zero;
+
+            const float spacing = 6f;
+
+            // Wing index = place among the non-flagship slots, in ascending slot order.
+            int wing = 0;
+            for (int i = 0; i < slot; i++)
+                if (i != flagshipIndex) wing++;
+
+            switch (count)
+            {
+                case 2:
+                    if (wing == 0) return new Vector3(spacing, 0f, spacing);
+                    break;
+                case 3:
+                    if (wing == 0) return new Vector3(spacing, 0f, -spacing);
+                    if (wing == 1) return new Vector3(spacing, 0f, spacing);
+                    break;
+                case 4:
+                    if (wing == 0) return new Vector3(spacing, 0f, -spacing);
+                    if (wing == 1) return new Vector3(spacing, 0f, spacing);
+                    if (wing == 2) return new Vector3(spacing * 2f, 0f, spacing);
+                    break;
+                case 5:
+                    if (wing == 0) return new Vector3(spacing, 0f, -spacing);
+                    if (wing == 1) return new Vector3(spacing, 0f, spacing);
+                    if (wing == 2) return new Vector3(spacing * 2f, 0f, -spacing * 2f);
+                    if (wing == 3) return new Vector3(spacing * 2f, 0f, spacing * 2f);
+                    break;
+            }
+
+            return Vector3.zero;
         }
 
         private static T GetOrAdd<T>(GameObject go) where T : Component

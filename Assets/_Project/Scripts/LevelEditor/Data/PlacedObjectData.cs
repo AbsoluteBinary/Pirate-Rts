@@ -10,6 +10,7 @@ namespace _Project.Scripts.LevelEditor.Data
         public Vector3 Position;
         public Quaternion Rotation = Quaternion.identity;
         public Vector3 Scale = Vector3.one;
+        public bool isLandTile;
 
         // Future expansion example:
         // public float Health;

@@ -129,7 +129,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         {
             SceneView.duringSceneGui -= OnSceneGUI;
             ApplyWaterCamera(false);
-            ApplyLandOrtho(false);
             DestroyPreview();
         }
         
@@ -143,8 +142,6 @@ namespace _Project.Scripts.LevelEditor.Editor
         private BuilderMode currentMode = BuilderMode.Select;
 
         private bool _waterCamActive;
-        private bool _landOrthoActive;
-        private bool _landSavedOrtho;
         private bool _savedOrtho;
         private Quaternion _savedRot;
         private Vector3 _savedPivot;
@@ -472,7 +469,9 @@ namespace _Project.Scripts.LevelEditor.Editor
         private void OnSceneGUI(SceneView sceneView)
         {
             Event e = Event.current;
-            if (currentMode == BuilderMode.BuildOnWater)
+            if (currentMode == BuilderMode.Select ||
+                currentMode == BuilderMode.BuildOnWater ||
+                currentMode == BuilderMode.BuildOnLand)
                 ApplyWaterCamera(true);
 
             // Always update hover highlight
@@ -735,14 +734,12 @@ namespace _Project.Scripts.LevelEditor.Editor
             switch (newMode)
             {
                 case BuilderMode.Select:
-                    ApplyWaterCamera(false);
-                    ApplyLandOrtho(false);
+                    ApplyWaterCamera(true);
                     // No grid forced
                     Debug.Log("<color=cyan>Mode → Select</color>");
                     break;
 
                 case BuilderMode.BuildOnWater:
-                    ApplyLandOrtho(false);
                     currentGridType = GridType.Land;
                     activeGrid = landGrid;
                     UpdateGridVisibility();
@@ -754,8 +751,7 @@ namespace _Project.Scripts.LevelEditor.Editor
                     currentGridType = GridType.Objects;
                     activeGrid = objectGrid;
                     UpdateGridVisibility();
-                    ApplyWaterCamera(false);
-                    ApplyLandOrtho(true);
+                    ApplyWaterCamera(true);
                     Debug.Log("<color=cyan>Mode → Build on Land (Object Grid)</color>");
                     break;
             }
@@ -790,30 +786,6 @@ namespace _Project.Scripts.LevelEditor.Editor
             view.size = _savedSize;
             view.Repaint();
             _waterCamActive = false;
-        }
-
-        private void ApplyLandOrtho(bool enter)
-        {
-            var view = SceneView.lastActiveSceneView;
-            if (view == null) return;
-
-            if (enter)
-            {
-                if (!_landOrthoActive)
-                {
-                    _landSavedOrtho = view.orthographic;
-                    _landOrthoActive = true;
-                }
-
-                view.orthographic = true;
-                view.Repaint();
-                return;
-            }
-
-            if (!_landOrthoActive) return;
-            view.orthographic = _landSavedOrtho;
-            view.Repaint();
-            _landOrthoActive = false;
         }
 
         #endregion
@@ -2269,12 +2241,17 @@ namespace _Project.Scripts.LevelEditor.Editor
             {
                 if (obj == null) continue;
 
+                GameObject sourcePrefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject;
+                bool savedIsLandTile = (obj.transform.parent != null && obj.transform.parent.name == "Land Tiles")
+                                       || (sourcePrefab != null && landTiles.Contains(sourcePrefab));
+
                 PlacedObjectData data = new PlacedObjectData
                 {
-                    Prefab = PrefabUtility.GetCorrespondingObjectFromSource(obj) as GameObject,
+                    Prefab = sourcePrefab,
                     Position = obj.transform.position,
                     Rotation = obj.transform.rotation,
-                    Scale = obj.transform.localScale
+                    Scale = obj.transform.localScale,
+                    isLandTile = savedIsLandTile
                 };
 
                 if (data.Prefab != null)
@@ -2312,19 +2289,29 @@ namespace _Project.Scripts.LevelEditor.Editor
 
                 placedObjects.Add(placed);
 
-                bool isLandTile = landTiles.Contains(data.Prefab);
-                TerrainGridSystem targetGrid = isLandTile ? landGrid : objectGrid;
-
-                if (targetGrid != null)
+                if (data.isLandTile)
                 {
-                    Cell cell = targetGrid.CellGetAtWorldPosition(data.Position, 0);
-                    if (cell != null)
+                    if (landGrid != null)
                     {
-                        if (isLandTile) occupiedLandCells.Add(cell.index);
-                        else occupiedObjectCells.Add(cell.index);
+                        Vector3 landPos = data.Position;
+                        landPos.y = landGrid.transform.position.y + 0.1f;
+                        Cell landCell = landGrid.CellGetAtWorldPosition(landPos, 0);
+                        if (landCell == null)
+                        {
+                            landPos.y += 0.5f;
+                            landCell = landGrid.CellGetAtWorldPosition(landPos, 0);
+                        }
+                        if (landCell != null) occupiedLandCells.Add(landCell.index);
                     }
                 }
+                else if (objectGrid != null)
+                {
+                    Cell cell = objectGrid.CellGetAtWorldPosition(data.Position, 0);
+                    if (cell != null) occupiedObjectCells.Add(cell.index);
+                }
             }
+
+            Debug.Log($"[Builder] LoadLayout: landTiles={landTiles.Count}, occupiedLand={occupiedLandCells.Count}, occupiedObject={occupiedObjectCells.Count}, landGrid null={landGrid == null}, objectGrid null={objectGrid == null}");
         }
 
         private void DeleteCurrentSlot()
